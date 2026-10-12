@@ -1,0 +1,37 @@
+name: Private course verification
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: course-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Require private repository visibility
+        env:
+          REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+        run: test "$REPOSITORY_PRIVATE" = true
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '26'
+          package-manager-cache: false
+      - name: Install locked SDK artifact without lifecycle scripts
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify authoring boundaries and failure cases
+        run: npm test
+      - name: Independently verify arithmetic, gradients and intentional broken variants
+        run: npm run verify:math
+      - name: Validate explicit partial development preview
+        run: npm run build:preview
+      # Complete-course readiness changes this gate to npm run build after all56episodes
+      # and their practical evaluators are delivered. No private bundles are uploaded.

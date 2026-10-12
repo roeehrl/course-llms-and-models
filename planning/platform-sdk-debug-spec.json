@@ -1,0 +1,71 @@
+{
+  "revision": "0.6",
+  "status": "Architecture and acceptance contract; native applications and services are not implemented",
+  "permanent_requirements": [
+    "Phone, tablet and widescreen support is a release requirement, not a later adaptation.",
+    "The learner app must continuously build for iOS/iPadOS, Android and web from M1.",
+    "No required course objective may silently degrade on another supported platform.",
+    "Core has no course-specific branches or imports; domain behavior comes through SDK contracts.",
+    "Authorized debug GUI explains agent dispatch, evaluation and committed learning decisions.",
+    "Placement is enabled by an administrator and optional for the learner."
+  ],
+  "recommended_stack": {
+    "learner": "Expo + React Native + React Native Web; MIT",
+    "admin": "Responsive React web application; shared headless contracts",
+    "durability": "Temporal server + TypeScript SDK; MIT",
+    "model_tool_gateway": "AI SDK; Apache-2.0; direct provider adapters allowed",
+    "policy": "Versioned deterministic typed functions; optional OPA adapter",
+    "python_plugins": "Optional Pydantic AI/Evals; MIT",
+    "graph_alternative": "LangGraph MIT; not a second default durable authority",
+    "observability": "OpenTelemetry Apache-2.0 + core domain inspector; optional Langfuse MIT-core adapter",
+    "eval_regression": "Promptfoo MIT + deterministic/property tests + independent rubric fixtures",
+    "mobile_tests": "Maestro Apache-2.0 + platform/device accessibility checks",
+    "license_rule": "Pin release versions and inspect transitive/bundled licenses. No mandatory paid enterprise modules. API/hosting/store costs are separate."
+  },
+  "platform_contract": {
+    "targets": ["web_desktop", "web_mobile", "ios_phone", "ipados_tablet", "android_phone", "android_tablet"],
+    "layout_classes_proposed": {"compact": "under 600 logical px", "medium": "600–839", "expanded": "840+"},
+    "layout_inputs": ["effective_window_bounds", "safe_areas", "font_scale", "input_mode", "keyboard_visibility", "orientation", "split_view"],
+    "required_activity_fields": ["supportedTargets", "rendererRefs", "executionAdapter", "capabilityRequirements", "equivalentFallbacks", "offlineBehavior", "resourceBudget", "accessibleSemantics", "stateMigration"],
+    "build_evidence": ["web bundle", "Android debug build", "iOS simulator build", "native boot/journey tests", "protected release archives", "real phone/tablet smoke tests"],
+    "not_build_evidence": ["browser screenshots", "responsive CSS alone", "Expo Go alone", "a claim that native packaging can be added later"]
+  },
+  "placement_contract": {
+    "enabledBy": "authorized course admin",
+    "learnerMayDecline": true,
+    "inputs": ["eligibleObjectives", "protectedUnits", "itemBlueprint", "rubricVersions", "evidenceThresholds", "prerequisiteGraph", "itemAndEffortLimits", "retestPolicy", "assistancePolicy", "capPolicy"],
+    "outputs": ["PlacementEvidence", "PathExemption", "remainingGaps", "proposedStartingPoint", "explanation", "reviewOptions"],
+    "invariants": ["No global score skips an untested critical prerequisite", "Assisted or incomplete evidence does not become independent mastery", "Exemptions do not fabricate lesson completion or retention", "Learner can revisit or start earlier", "Provider failure is not a wrong answer"]
+  },
+  "sdk_extension_levels": [
+    {"level": "declarative", "purpose": "portable content, policies and shipped activity types"},
+    {"level": "sandboxed_plugin", "purpose": "custom activities/tools with isolated execution and validated events"},
+    {"level": "trusted_adapter", "purpose": "administrator-installed evaluators, integrations and agent strategies"},
+    {"level": "native_module", "purpose": "compile-time app extensions; requires rebuild/review, no dynamic privilege escalation"}
+  ],
+  "debug_record": {
+    "correlation": ["traceId", "parentSpanId", "enrollmentId", "activityId", "attemptId", "eventCursor", "workflowId", "jobId", "artifactHash"],
+    "provenance": ["courseVersion", "sdkVersion", "appPlatformVersion", "profileRevision", "policyRevision", "gateRubricVersion", "modelConfig", "toolGrant"],
+    "views": ["context", "dispatch_graph", "tool_model_calls", "rubric_evidence", "gate_placement_decision", "budgets_caps", "artifact_changes", "client_sync", "safe_replay"],
+    "privacy": "Scoped server authorization; redacted by default; explicit payload access and audit; no credential logging or invented hidden model reasoning",
+    "replay": "Frozen inputs, isolated side effects, new trace ID, no real progress writes"
+  },
+  "acceptance_cases": [
+    {"id":"U01","case":"Native-target build breaks while web passes","expected":"Release blocked; native readiness is mandatory."},
+    {"id":"U02","case":"Tablet enters split view during an answer","expected":"Layout adapts without losing draft, focus, objective or companion context."},
+    {"id":"U03","case":"Software keyboard or large text obscures primary action","expected":"Layout/scroll/focus corrected; no inaccessible required step."},
+    {"id":"U04","case":"App killed after submission before acknowledgement","expected":"Resume/reconcile once; no duplicate assessment or false completion."},
+    {"id":"U05","case":"Offline placement finishes locally","expected":"Result visibly pending authoritative evaluation; no unsupported skips."},
+    {"id":"U06","case":"Required custom activity lacks native support","expected":"Fail declared-target validation unless an objective-equivalent fallback is supplied."},
+    {"id":"U07","case":"Course attempts to load new native capabilities dynamically","expected":"Denied; requires declared compiled module/release process."},
+    {"id":"U08","case":"Learner declines disabled/optional placement","expected":"Normal starting path remains available without penalty."},
+    {"id":"U09","case":"High placement average but missing prerequisite evidence","expected":"Dependent units remain required or get a diagnostic; no blanket skip."},
+    {"id":"U10","case":"Learner rejects recommended placement","expected":"Earlier start available; original evidence retained accurately."},
+    {"id":"U11","case":"Public demo requires private-course code in core","expected":"Dependency/architecture gate fails."},
+    {"id":"U12","case":"External author adds activity/evaluator/admin panel","expected":"Documented SDK extension works without core edits."},
+    {"id":"U13","case":"Debug viewer lacks payload scope","expected":"Server redacts/denies despite direct API request or UI flag."},
+    {"id":"U14","case":"Observability backend is unavailable","expected":"Critical domain receipts remain durable; missing traces are explicit and buffers bounded."},
+    {"id":"U15","case":"Debug replay attempts real learner mutation or external tool effect","expected":"Sandbox denies; production change requires separate authorized command."},
+    {"id":"U16","case":"Placement or gate decision cannot be linked to evidence/version","expected":"Decision invalid; no progression grant."}
+  ]
+}

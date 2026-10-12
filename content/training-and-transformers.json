@@ -1,0 +1,1936 @@
+{
+  "objectives": [
+    {
+      "id": "ttf-o05-01",
+      "description": "Trace an MLP forward and backward and explain why nonlinear composition expands its function class.",
+      "prerequisites": [
+        "fnd-o02-03",
+        "fnd-o04-04"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "ttf-o05-02",
+      "description": "Reason about symmetry breaking, initialization scale, normalization axes and residual sensitivities.",
+      "prerequisites": [
+        "ttf-o05-01"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "ttf-o05-03",
+      "description": "Calculate SGD, momentum and AdamW updates and account for optimizer state and memory.",
+      "prerequisites": [
+        "ttf-o05-01",
+        "fnd-o03-03"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "ttf-o05-04",
+      "description": "Audit training-loop ordering and test checkpoint continuation with deliberate state and update faults.",
+      "prerequisites": [
+        "ttf-o05-03",
+        "fnd-o04-03"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "ttf-o06-01",
+      "description": "Trace token-to-embedding lookup, shared-row gradients and positional conventions.",
+      "prerequisites": [
+        "fnd-o01-03",
+        "ttf-o05-01"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "ttf-o06-02",
+      "description": "Compute stable softmax cross-entropy and its logit gradients while preserving the intended loss interface.",
+      "prerequisites": [
+        "ttf-o06-01",
+        "fnd-o03-02"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "ttf-o06-03",
+      "description": "Construct shifted targets, causal and padding masks, and correctly normalized sequence losses.",
+      "prerequisites": [
+        "ttf-o06-02",
+        "fnd-o02-02"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "ttf-o06-04",
+      "description": "Trace sampling decisions, calculate KV-cache storage and identify cache identity and inference-cost constraints.",
+      "prerequisites": [
+        "ttf-o06-03",
+        "fnd-o02-04"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "ttf-o07-01",
+      "description": "Derive Q/K/V projection shapes, values and shared-input gradient paths.",
+      "prerequisites": [
+        "ttf-o06-03",
+        "ttf-o05-01"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "ttf-o07-02",
+      "description": "Compute masked scaled attention and derive independently testable Q/K/V gradients.",
+      "prerequisites": [
+        "ttf-o07-01",
+        "ttf-o06-02"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "ttf-o07-03",
+      "description": "Trace head sharing, rotary positions and RMSNorm while preserving projection and cache conventions.",
+      "prerequisites": [
+        "ttf-o07-02",
+        "ttf-o06-04",
+        "ttf-o05-02"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "ttf-o07-04",
+      "description": "Assemble a tiny causal decoder, specify its training objective and design independent gradient and causality checks.",
+      "prerequisites": [
+        "ttf-o07-03",
+        "ttf-o05-04"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "ttf-o08-01",
+      "description": "Map tensors, registered module state, autograd and optimizer behavior to an explicit CPU training step.",
+      "prerequisites": [
+        "ttf-o05-04",
+        "ttf-o07-04"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "ttf-o08-02",
+      "description": "Trace dispatch and asynchronous execution boundaries and design numerical and timing checks for an operator.",
+      "prerequisites": [
+        "ttf-o08-01",
+        "fnd-o02-04"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "ttf-o08-03",
+      "description": "Explain MLX lazy evaluation and differentiation transforms and define a qualified cross-framework comparison.",
+      "prerequisites": [
+        "ttf-o08-02",
+        "fnd-o04-03"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "ttf-o08-04",
+      "description": "Distinguish training objectives and derive LoRA updates, state compatibility and evaluation requirements.",
+      "prerequisites": [
+        "ttf-o08-03",
+        "ttf-o06-02",
+        "fnd-o03-04"
+      ],
+      "critical": true,
+      "placeable": false
+    }
+  ],
+  "chapters": [
+    {
+      "id": "chapter05",
+      "title": "From neurons to a training loop",
+      "summary": "Train and debug a small network with the same conceptual pieces as a large one.",
+      "episodes": [
+        {
+          "id": "ttf-e05-01",
+          "title": "Linear layers, nonlinearity and composition",
+          "objectiveIds": [
+            "ttf-o05-01"
+          ],
+          "blocks": [
+            {
+              "id": "ttf-05-01-text-1",
+              "type": "text",
+              "markdown": "A linear layer is a collection of dot products sharing the same input. With a column-vector convention, write `z=W*x+b`: input width d, output width h, weight shape `(h,d)`, bias shape `(h,)`. Each row of W computes one output feature. A batch adds another axis; it does not allocate a separate set of weights per example. In a systems interface, the dimensions and axis meanings belong beside the buffer pointers.\n\nThe word linear is conventional here: a nonzero bias technically makes this an affine map. Two affine layers without an intervening nonlinearity collapse into one: `W2*(W1*x+b1)+b2=(W2*W1)*x+(W2*b1+b2)`. Adding more such layers changes parameterization but cannot express a new class of input-output functions. A nonlinearity prevents that collapse and lets different input regions follow different sensitivities.\n\nUse two inputs, two hidden units and one output. Let `x=[1,-2]`, hidden weight rows `[2,1]` and `[-1,2]`, and hidden bias `[1,0]`. Hidden preactivations are `[1,-5]`. Apply ReLU, `max(0,z)`, to obtain `[1,0]`. With output weights `[3,-1]` and bias `0.5`, prediction is `3.5`. There are `2*2+2+2*1+1=9` learned scalars.\n\n```python\nx = [1, -2]\nW = [[2, 1], [-1, 2]]\nb = [1, 0]\nz = [sum(wi*xi for wi, xi in zip(row, x)) + bi\n     for row, bi in zip(W, b)]\nh = [max(0, value) for value in z]\nprediction = sum(v*hi for v, hi in zip([3, -1], h)) + 0.5\nassert z == [1, -5] and h == [1, 0]\nassert prediction == 3.5\n```",
+              "sourceRefs": [
+                "ttf-src-linear",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-05-01-text-2",
+              "type": "text",
+              "markdown": "Predict the gradient entering each hidden preactivation for target `1` and half squared error. The output residual is `2.5`; loss is `3.125`. Multiplying by output weights gives hidden sensitivities `[7.5,-2.5]`. ReLU transmits the first and blocks the second, so preactivation sensitivities are `[7.5,0]`. The first weight row's gradient is `7.5*x=[7.5,-15]`; its bias gradient is `7.5`. Output-weight gradients are residual times hidden activation: `[2.5,0]`.\n\nThis is the same chain rule as the scalar engine, now applied to reusable vector operations. At exactly zero, ReLU has no unique derivative; an implementation chooses a convention. Gradient tests should avoid that boundary unless the test specifically checks the documented convention. A negative preactivation receiving zero gradient on one example is expected behavior, not automatically a broken training loop.\n\nFor a representational counterexample, take binary inputs and compute `ReLU(x1-x2)+ReLU(x2-x1)`. Its outputs are `0,1,1,0` for inputs `00,01,10,11`: XOR. A single affine output cannot match all four values, since the first three fix coefficients that force the fourth to be two. The hidden nonlinear computation can express a function the affine alternative cannot.\n\nThe chapter lab starts with a tiny MLP, an explicit loss and a plain CPU reference. Trace a complete forward and gradient table before running updates. Independent checks use fresh weights and a changed architecture. Getting one prediction right does not establish that gradients, batch reduction or trainable parameter registration are correct.\n\nTrack each branch independently before adding shared-input contributions; that makes a missing path visible during review.",
+              "sourceRefs": [
+                "ttf-src-linear",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-05-01-check-trace",
+              "type": "assessment",
+              "assessmentId": "ttf-a05-01-trace"
+            },
+            {
+              "id": "ttf-05-01-check-transfer",
+              "type": "assessment",
+              "assessmentId": "ttf-a05-01-transfer"
+            }
+          ],
+          "gateId": "ttf-g05-01"
+        },
+        {
+          "id": "ttf-e05-02",
+          "title": "Initialization, normalization and residual paths",
+          "objectiveIds": [
+            "ttf-o05-02"
+          ],
+          "blocks": [
+            {
+              "id": "ttf-05-02-text-1",
+              "type": "text",
+              "markdown": "Initialization chooses the first numerical regime in which learning operates. It is not merely filling allocated memory. If two hidden units start with identical incoming weights, biases and outgoing weights, then a deterministic symmetric computation gives them identical gradients. They remain duplicates after the same update. Small independent weight differences break that symmetry; setting every hidden parameter to zero is not a generally sound initialization strategy.\n\nScale matters as well. Under an illustrative assumption of independent zero-mean inputs with variance one and independent zero-mean weights with variance s squared, a dot product of d terms has variance `d*s^2`. With four inputs and weight variance `1/4`, the preactivation variance is one. Weight variance one would give variance four. This calculation motivates fan-in scaling, but its assumptions can fail with correlated features, biases or nonlinear transformations. A particular initialization rule must match the layer and activation.\n\nNormalization changes the values passed between operations. For a two-feature vector `[1,3]`, mean is two and population variance is one. Subtracting the mean and dividing by `sqrt(variance+epsilon)` gives `[-1,1]` when epsilon is temporarily set to zero. Learned per-feature scale gamma and offset beta can then modify the result. Real implementations use a positive epsilon to avoid division by zero on constant vectors.\n\n```python\nimport math\nx = [1.0, 3.0]\nmean = sum(x) / len(x)\nvariance = sum((v-mean)**2 for v in x) / len(x)\neps = 1e-5\nnormalized = [(v-mean)/math.sqrt(variance+eps) for v in x]\nassert abs(sum(normalized)) < 1e-12\nassert abs(normalized[1] - 0.9999950000374997) < 1e-12\n```",
+              "sourceRefs": [
+                "ttf-src-initialization",
+                "ttf-src-layernorm",
+                "ttf-src-residual",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-05-02-text-2",
+              "type": "text",
+              "markdown": "Predict the bug if a layer intended to normalize each token's features instead computes one mean across an entire batch. One example can then affect another's output, and changing batch composition changes the result. A shape-preserving output does not reveal the mistake. Test one example alone and embedded in two differently composed batches; under the intended per-token feature normalization, its result should remain the same.\n\nResidual connections add a second route: `y=x+F(x)`, provided both terms have matching semantics and dimensions. The local derivative is `1+F'(x)` in the scalar case. With `F(x)=0.1*x`, a stack of ten plain F operations has derivative `0.1^10`, whereas ten residual operations have derivative `1.1^10`, approximately `2.59374246`. The example illustrates a direct sensitivity path. It does not prove gradients always remain healthy: if `F'(x)=-1`, the paths cancel.\n\nPre-normalization and post-normalization arrange these mechanisms differently. `x+F(norm(x))` and `norm(x+F(x))` are distinct functions with distinct gradients. Copying a normalization module into the wrong location can preserve dimensions while changing the model. Treat the order as part of the algorithm, much as moving a stateful transformation across a transaction boundary needs justification.\n\nIn the lab, inspect activation scale and gradient scale at several layers, then deliberately duplicate hidden-unit initialization and normalize over the wrong axes. Use asymmetric inputs that distinguish the variants. The independent checks ask for a residual sensitivity and an axis-sensitive counterexample. None of these stabilization techniques removes the need to verify the loss, labels, gradient flow and update boundary.",
+              "sourceRefs": [
+                "ttf-src-initialization",
+                "ttf-src-layernorm",
+                "ttf-src-residual",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-05-02-check-trace",
+              "type": "assessment",
+              "assessmentId": "ttf-a05-02-trace"
+            },
+            {
+              "id": "ttf-05-02-check-transfer",
+              "type": "assessment",
+              "assessmentId": "ttf-a05-02-transfer"
+            }
+          ],
+          "gateId": "ttf-g05-02"
+        },
+        {
+          "id": "ttf-e05-03",
+          "title": "SGD, momentum, AdamW and optimizer state",
+          "objectiveIds": [
+            "ttf-o05-03"
+          ],
+          "blocks": [
+            {
+              "id": "ttf-05-03-text-1",
+              "type": "text",
+              "markdown": "An optimizer turns gradients into a sequence of parameter states. Plain stochastic gradient descent uses `w_next=w-eta*g`; momentum also remembers previous gradients. Define the exact momentum convention here as `m_next=mu*m+g`, followed by `w_next=w-eta*m_next`, with no dampening or Nesterov term. Different library options can change these details, so state the convention before comparing traces.\n\nWith `w=1,m=0,mu=0.9,eta=0.1`, a first gradient of two gives momentum two and weight `0.8`. A second gradient of minus one gives momentum `0.8` and weight `0.72`. If you incorrectly reset momentum before that second update, the result is `0.9`. The current weight and current gradient therefore do not determine the next state of a stateful optimizer by themselves.\n\n```python\nw, momentum = 1.0, 0.0\nfor gradient in [2.0, -1.0]:\n    momentum = 0.9 * momentum + gradient\n    w -= 0.1 * momentum\nassert abs(momentum - 0.8) < 1e-12\nassert abs(w - 0.72) < 1e-12\n```\n\nAdam keeps two moving averages: `m=beta1*m+(1-beta1)*g` and `v=beta2*v+(1-beta2)*g^2`. Starting both at zero biases early estimates toward zero, so step t uses `mhat=m/(1-beta1^t)` and `vhat=v/(1-beta2^t)`. Its normalized update uses `mhat/(sqrt(vhat)+epsilon)`. The step counter affects the correction; it is meaningful state, not decorative logging.",
+              "sourceRefs": [
+                "ttf-src-adamw",
+                "ttf-src-adamw-paper",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-05-03-text-2",
+              "type": "text",
+              "markdown": "AdamW additionally applies decoupled weight decay. For one scalar under the convention in the cited implementation, `w_next=(1-eta*lambda)*w-eta*mhat/(sqrt(vhat)+epsilon)`. For a first gradient `2`, beta values `0.9` and `0.99` yield `m=0.2`, `v=0.04`, corrected values `2` and `4`. With old weight `1`, eta `0.1`, decay `0.1` and epsilon temporarily zero, the next weight is `0.89`. A positive epsilon makes a tiny numerical difference; production calculations must use the configured value.\n\nPredict why adding `lambda*w` to the gradient is not generally the same algorithm. In Adam, that added term enters the moment estimates and adaptive denominator. Decoupled decay acts on the parameter separately. Identical names such as “weight decay” do not ensure two optimizer configurations implement the same recurrence. Nor does optimizer state become portable simply because two arrays have equal shapes; state must correspond to the same parameters and conventions.\n\nA memory ledger helps expose hidden cost. Six FP32 parameters consume 24 payload bytes. Add their gradients and two FP32 Adam moment buffers, and the four arrays occupy 96 bytes before counters, activations, metadata, temporary workspaces or optional master copies. Changing stored weight precision does not automatically halve every other allocation.\n\nFor the chapter lab, log old parameters, gradients, moment values, step count and updated parameters for two steps. Restore the first-step state and check that the second step is reproduced. The independent checks use new gradients and compare resumed runs. They test arithmetic and state ownership, not a claim that AdamW is the best optimizer for every task or that any training service has been qualified.",
+              "sourceRefs": [
+                "ttf-src-adamw",
+                "ttf-src-adamw-paper",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-05-03-check-trace",
+              "type": "assessment",
+              "assessmentId": "ttf-a05-03-trace"
+            },
+            {
+              "id": "ttf-05-03-check-transfer",
+              "type": "assessment",
+              "assessmentId": "ttf-a05-03-transfer"
+            }
+          ],
+          "gateId": "ttf-g05-03"
+        },
+        {
+          "id": "ttf-e05-04",
+          "title": "Checkpoints, reproducibility and broken training loops",
+          "objectiveIds": [
+            "ttf-o05-04"
+          ],
+          "blocks": [
+            {
+              "id": "ttf-05-04-text-1",
+              "type": "text",
+              "markdown": "A training loop is a state machine with explicit ordering. For each logical batch, clear gradients as required, compute predictions and a reduced loss, run backward, and update parameters once. Evaluation runs the chosen model without a training update. A checkpoint intended for faithful continuation must represent enough state to determine the next transition, not merely enough to produce one inference output.\n\nA concrete CPU loop exposes ordering bugs without any framework. Let `prediction=w*x`, input two, target four, half squared error and learning rate `0.1`. Start with weight one. The first gradient is minus four, so the next weight is `1.4`. At that new weight the second gradient is minus `2.4`, so a second step reaches `1.64`. The loss falls from two to `0.72` and then `0.2592`.\n\n```python\nw = 1.0\nhistory = []\nfor _ in range(2):\n    residual = w * 2 - 4\n    gradient = residual * 2\n    w -= 0.1 * gradient\n    history.append(w)\nassert all(abs(a-b) < 1e-12 for a,b in zip(history,[1.4,1.64]))\n```\n\nPredict two broken variants. Adding instead of subtracting the first gradient sends w to `0.6`, where loss becomes `3.92`. Retaining the first gradient in an accumulation buffer and adding the second produces `-6.4`; that second update sends w from `1.4` to `2.04`. Its loss happens to be small here, but the state transition is still wrong. Loss improvement alone cannot validate the algorithm.",
+              "sourceRefs": [
+                "ttf-src-reproducibility",
+                "ttf-src-checkpoint",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-05-04-text-2",
+              "type": "text",
+              "markdown": "For a stateful optimizer, save parameter values, optimizer buffers and step count. Depending on the training procedure, continuation also needs scheduler position, mixed-precision scaling state, random-generator state, data-shuffle or sampler position, and an identity for code, configuration, tokenizer and dataset. This is analogous to checkpointing a process with an external input stream: restoring heap data while replaying the wrong messages does not reproduce execution.\n\nNot every checkpoint promises exact replay. An inference export may intentionally contain only weights and necessary configuration. A training checkpoint can target same-environment continuation, while cross-device bitwise identity may be unavailable. The cited reproducibility guidance explicitly limits what a seed alone guarantees across software releases and platforms. Name the contract you are testing rather than saying “reproducible” without a scope.\n\nA useful resume test compares two paths: train k+n steps uninterrupted, and train k steps, serialize, restore into fresh objects, then train n more steps. Compare parameters, relevant optimizer buffers, counters and data indices. Compare predictions as well, but remember that one matching output can conceal a mismatched state that diverges later. Save a consistent snapshot at an update boundary, not a mixture of new weights and old moment buffers.\n\nThe tiny-MLP lab should include deliberately wrong signs, stale gradients and missing momentum state as negative controls. Require the test to reject each variant, even if one briefly lowers loss. Independent checks ask you to calculate a clean transition and select a convincing resume experiment. These checks support debugging knowledge; they do not implement a secure checkpoint loader, a practical-code grader or a deployed recovery service.",
+              "sourceRefs": [
+                "ttf-src-reproducibility",
+                "ttf-src-checkpoint",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-05-04-check-trace",
+              "type": "assessment",
+              "assessmentId": "ttf-a05-04-trace"
+            },
+            {
+              "id": "ttf-05-04-check-transfer",
+              "type": "assessment",
+              "assessmentId": "ttf-a05-04-transfer"
+            }
+          ],
+          "gateId": "ttf-g05-04"
+        }
+      ]
+    },
+    {
+      "id": "chapter06",
+      "title": "How language models work",
+      "summary": "Explain next-token training and construct the data/loss path.",
+      "episodes": [
+        {
+          "id": "ttf-e06-01",
+          "title": "Tokenization, embeddings and positional information",
+          "objectiveIds": [
+            "ttf-o06-01"
+          ],
+          "blocks": [
+            {
+              "id": "ttf-06-01-text-1",
+              "type": "text",
+              "markdown": "Tokenization and embedding solve different problems. Tokenization maps text to discrete vocabulary IDs using a fixed encoding convention. An embedding table maps each ID to a trainable vector. If vocabulary size is V and feature width is D, the table has shape `(V,D)`. An input of shape `(batch,time)` indexes rows and produces `(batch,time,D)`. Numeric distance between IDs has no linguistic meaning; their selected vectors participate in later arithmetic.\n\nTake four vocabulary entries and two features. Define embedding rows `[1,0]`, `[0,1]`, `[1,1]` and `[-1,0]`. IDs `[2,0,2]` produce vectors `[[1,1],[1,0],[1,1]]`. The two occurrences of ID two select the same parameter row, not two independent learned copies. The table has eight parameters even if a batch contains thousands of token positions.\n\n```python\nE = [[1,0], [0,1], [1,1], [-1,0]]\nids = [2,0,2]\npositions = [[0,0], [0.1,-0.1], [0.2,-0.2]]\nembedded = [E[token][:] for token in ids]\nx = [[a+b for a,b in zip(row,pos)]\n     for row,pos in zip(embedded,positions)]\nassert embedded == [[1,1],[1,0],[1,1]]\nassert x[0] == [1,1]\nassert abs(x[2][0]-1.2) < 1e-12\n```\n\nPredict what backward must do if the two occurrences of ID two receive vector gradients `[1,2]` and `[-0.5,3]`. Their contributions accumulate into the shared embedding row as `[0.5,5]`. Rows not looked up have zero contribution from this lookup operation. That does not imply they can never change: another use of tied weights, weight decay or existing optimizer state may affect them.",
+              "sourceRefs": [
+                "ttf-src-embedding",
+                "ttf-src-subword",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-06-01-text-2",
+              "type": "text",
+              "markdown": "Positional information distinguishes where tokens occur. In the example, adding position vectors turns the repeated token into `[1,1]` at position zero and `[1.2,0.8]` at position two. Learned absolute positions, fixed functions and rotary transformations are different design choices. Do not assume a checkpoint using one scheme is compatible with another simply because both produce width-D representations.\n\nThe systems analogy is a symbol table followed by a numerical representation, with an additional coordinate convention. Tokenizer IDs identify symbols; embedding rows are learned data; position indices describe sequence locations. Swapping the tokenizer mapping resembles changing enum assignments without migrating serialized records. Resetting positions incorrectly during cached decoding resembles addressing the right data through the wrong coordinate system.\n\nA token need not be a word or a visible character. Spaces, byte sequences, subword pieces and special control tokens may have their own rules. Measure sequence length after the actual tokenizer, and keep its identity with the checkpoint. Do not infer a context budget from a character count or assume two tokenizers partition the same string identically.\n\nFor the lab, manually gather rows for a repeated-token sequence, add the supplied position vectors and derive the scatter-add gradient. Then replace the repeated ID with a new one and predict which row receives each contribution. Independent checks change the occurrence pattern and expose a tokenizer/embedding mismatch. These exercises establish the lookup and sharing mechanism; they do not claim that individual embedding coordinates have a simple human-readable interpretation.",
+              "sourceRefs": [
+                "ttf-src-embedding",
+                "ttf-src-subword",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-06-01-check-trace",
+              "type": "assessment",
+              "assessmentId": "ttf-a06-01-trace"
+            },
+            {
+              "id": "ttf-06-01-check-transfer",
+              "type": "assessment",
+              "assessmentId": "ttf-a06-01-transfer"
+            }
+          ],
+          "gateId": "ttf-g06-01"
+        },
+        {
+          "id": "ttf-e06-02",
+          "title": "Logits, softmax and cross-entropy",
+          "objectiveIds": [
+            "ttf-o06-02"
+          ],
+          "blocks": [
+            {
+              "id": "ttf-06-02-text-1",
+              "type": "text",
+              "markdown": "A language model normally emits logits: unconstrained real scores, one per vocabulary entry. Softmax converts a finite logit vector z into probabilities `p_i=exp(z_i)/sum_j exp(z_j)`. Only relative scores matter; adding the same constant to every logit leaves the probabilities unchanged. A logit is not a probability and can be negative or larger than one without violating the interface.\n\nFor logits `[log(2),0,0]`, the exponentials are `[2,1,1]`, giving probabilities `[0.5,0.25,0.25]`. If the target is ID one, cross-entropy for this single hard target is `-log(p_1)=log(4)`, approximately `1.38629436` natural-log units, called nats. Greedy accuracy is zero because ID zero has the largest probability. A model can improve the target probability without changing its top choice, so loss and accuracy measure different things.\n\nCompute the loss stably with log-sum-exp. Let m be the maximum logit. Then `loss=m+log(sum(exp(z_i-m)))-z_target`. Subtracting m prevents large positive exponentials in the sum. It also avoids forming a tiny target probability and then taking its logarithm separately.\n\n```python\nimport math\nz = [math.log(2), 0.0, 0.0]\ndef cross_entropy(logits, target):\n    m = max(logits)\n    return m + math.log(sum(math.exp(v-m) for v in logits)) - logits[target]\nassert abs(cross_entropy(z,1)-math.log(4)) < 1e-12\nassert abs(cross_entropy([v+1000 for v in z],1)-math.log(4)) < 1e-10\n```\n\nPredict what a naive `exp(1000)` implementation would do in ordinary double precision. It overflows, even though the desired probabilities are well-defined. Stable arithmetic is part of implementing the mathematical function correctly, not an optional optimization after it works.",
+              "sourceRefs": [
+                "ttf-src-crossentropy",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-06-02-text-2",
+              "type": "text",
+              "markdown": "For a hard target y, the derivative with respect to each logit is `p_i-1[i=y]`. In this example it is `[0.5,-0.75,0.25]`. The entries sum to zero, matching the fact that a common logit shift cannot change the loss. A descent step lowers competing logits and raises the target logit locally. This simple vector then propagates through the vocabulary projection and every earlier trainable stage.\n\nFor a batch, specify which positions count and which reduction is used. Averaging over valid target tokens weights each valid token equally. Averaging sequence means instead weights each sequence equally, which is different when lengths differ. Neither is universally forbidden, but comparisons require the same declared objective. An ignored target must be omitted from both numerator and denominator under a valid-token mean.\n\nPyTorch's class-index cross-entropy interface expects unnormalized logits. Applying softmax first and passing those probabilities as though they were logits computes another softmax inside the loss and changes the objective. A finite number and a decreasing training curve do not make that accidental objective equivalent.\n\nIn the lab, use a three-entry vocabulary, derive probabilities and target loss, then compare the analytic logit gradients to independent finite differences. Test a large common shift and a sharply unfavorable target. The independent checks use a new score vector and ask you to diagnose the double-softmax bug. These are exact objective and numerical-interface questions, not a claim that lower loss alone establishes factual accuracy, helpfulness or safe deployment.",
+              "sourceRefs": [
+                "ttf-src-crossentropy",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-06-02-check-trace",
+              "type": "assessment",
+              "assessmentId": "ttf-a06-02-trace"
+            },
+            {
+              "id": "ttf-06-02-check-transfer",
+              "type": "assessment",
+              "assessmentId": "ttf-a06-02-transfer"
+            }
+          ],
+          "gateId": "ttf-g06-02"
+        },
+        {
+          "id": "ttf-e06-03",
+          "title": "Teacher forcing, causal masking and sequence batches",
+          "objectiveIds": [
+            "ttf-o06-03"
+          ],
+          "blocks": [
+            {
+              "id": "ttf-06-03-text-1",
+              "type": "text",
+              "markdown": "Next-token training can evaluate many positions at once because the target sequence is already known. Teacher forcing supplies the true preceding tokens as inputs during training. It does not authorize using a token that would be unavailable at the corresponding inference step. The indexing convention, target shift and attention mask jointly define that boundary.\n\nTake a token sequence `[4,2,7,1]`. Inputs are `[4,2,7]` and targets are `[2,7,1]`. At input position zero, the model receives token four and predicts token two. At position one it receives the prefix `[4,2]` and predicts seven. The current input token is allowed; the next target token is not. Under this convention a causal attention mask permits key position j when `j<=i` for query position i.\n\n```python\nsequence = [4,2,7,1]\ninputs, targets = sequence[:-1], sequence[1:]\nallowed = [[j <= i for j in range(len(inputs))]\n           for i in range(len(inputs))]\nassert inputs == [4,2,7] and targets == [2,7,1]\nassert allowed == [[True,False,False],\n                   [True,True,False],\n                   [True,True,True]]\n```\n\nPredict how a missing causal mask leaks a target. Input position one contains token two, which is exactly the target for position zero. If query zero may read that future position, training can exploit information absent during generation. Correctly shifting labels does not fix an incorrect mask. Likewise, a correct mask does not fix labels accidentally aligned to the same input token.",
+              "sourceRefs": [
+                "ttf-src-sdpa",
+                "ttf-src-transformer",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-06-03-text-2",
+              "type": "text",
+              "markdown": "Padding and document boundaries introduce additional constraints. Suppose one sequence contributes three valid targets with losses `[1,2,3]`, and another contributes one valid target with loss `[4]` plus two padding slots. The valid-token mean is `10/4=2.5`. Dividing by six returns approximately `1.6667` and understates the intended loss. Averaging the two sequence means returns three, a different weighting policy.\n\nAn attention padding mask and an ignored loss target solve different problems. The first controls which stored positions can influence representations; the second controls which predictions contribute to the objective. Neither substitutes for the other. If independent documents are packed together, a plain triangular mask may allow later documents to see earlier ones. Use the intended document-boundary rule rather than assuming every earlier token is permissible context.\n\nFramework mask conventions require particular care. The cited PyTorch scaled-dot-product-attention interface treats a true Boolean mask entry as allowed participation. Other interfaces may use true to mean blocked. Prefer writing a tiny truth table and converting it explicitly at the boundary. A transposed triangular matrix can remain square, finite and completely wrong.\n\nA strong negative test changes only a future token while preserving a prefix. In a deterministic causal decoder with unchanged parameters and positions, logits at earlier positions must not change. Run the test with an intentionally unmasked variant to prove the harness detects leakage. Also vary padding content and verify valid-token results under the intended mask.\n\nThe lab builds shifted targets, a mask and a loss denominator independently before combining them. The fresh graded checks ask for a masked mean and a target-leakage diagnosis. They test the data contract; they do not certify a complete training pipeline merely because it accepts tensors of the expected shapes.",
+              "sourceRefs": [
+                "ttf-src-sdpa",
+                "ttf-src-transformer",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-06-03-check-trace",
+              "type": "assessment",
+              "assessmentId": "ttf-a06-03-trace"
+            },
+            {
+              "id": "ttf-06-03-check-transfer",
+              "type": "assessment",
+              "assessmentId": "ttf-a06-03-transfer"
+            }
+          ],
+          "gateId": "ttf-g06-03"
+        },
+        {
+          "id": "ttf-e06-04",
+          "title": "Sampling, context, KV caches and inference costs",
+          "objectiveIds": [
+            "ttf-o06-04"
+          ],
+          "blocks": [
+            {
+              "id": "ttf-06-04-text-1",
+              "type": "text",
+              "markdown": "Generation alternates prediction and a choice of the next token. Greedy decoding chooses the largest logit. Sampling draws from a specified probability distribution. Temperature T greater than zero transforms logits as `z/T` before softmax; smaller T sharpens relative differences. It does not train the model or guarantee that the most confident answer is correct. A zero-temperature option in an application usually selects a special greedy path rather than literally dividing by zero.\n\nFor logits `[log(4),0]`, T equal to one gives probabilities `[0.8,0.2]`. At T equal to two, probabilities become `[2/3,1/3]`; at T equal to one half, they become `[16/17,1/17]`. Greedy selection is unchanged for these positive temperatures. Sampling outcomes can differ because the distribution changed. If a nucleus rule keeps the smallest descending-probability prefix reaching threshold `0.75`, distribution `[0.6,0.3,0.1]` keeps the first two entries and renormalizes them to `[2/3,1/3]`.\n\n```python\nimport math\ndef probabilities(logits, temperature):\n    scaled = [v/temperature for v in logits]\n    m = max(scaled)\n    weights = [math.exp(v-m) for v in scaled]\n    return [v/sum(weights) for v in weights]\nassert abs(probabilities([math.log(4),0],2)[0]-2/3) < 1e-12\n```\n\nPredict whether adding another sampled token changes learned parameters. It changes the context used for the next forward pass, while ordinary inference leaves the weights fixed. Random-generator state may change as well. Distinguish those state changes from optimizer state, just as the foundations chapter separated request buffers from model parameters.",
+              "sourceRefs": [
+                "ttf-src-cache",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-06-04-text-2",
+              "type": "text",
+              "markdown": "A key/value cache stores selected intermediate representations from previous positions at each attention layer. The next query can reuse those keys and values instead of recomputing their projections and earlier prefix states. Cache identity must include compatible model parameters, token prefix, positions and relevant configuration. Reusing a cache for another model revision or an incompatible prefix can return plausible but wrong outputs.\n\nFor a dense cache, payload bytes are `2*layers*batch*cached_tokens*kv_heads*head_dim*bytes_per_element`, where the factor two counts keys and values. With three layers, batch two, five cached tokens, two KV heads, head width four and two-byte storage, the total is `960` bytes. This excludes allocation overhead, temporary attention workspaces and model weights. Query-head count does not replace KV-head count when those differ.\n\nPrefill processes the prompt; decode processes subsequent tokens. In ordinary dense attention, one new query compares against an increasing prefix, so caching does not make all per-token work constant. Computing all prompt pair scores scales quadratically with prompt length, while one decode step's attention comparisons scale linearly with the cached length. Specialized attention and cache schemes alter these details; measure the actual implementation.\n\nFor the lab, compare cached and uncached next-token logits for the same prefix under deterministic settings. Keep position indices aligned, and test more than one prefix length. The independent questions ask for a new cache budget and a reuse decision. A cache is inference execution state, not a database of training examples, a set of updated weights or proof that an arbitrary longer context is supported by the model.",
+              "sourceRefs": [
+                "ttf-src-cache",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-06-04-check-trace",
+              "type": "assessment",
+              "assessmentId": "ttf-a06-04-trace"
+            },
+            {
+              "id": "ttf-06-04-check-transfer",
+              "type": "assessment",
+              "assessmentId": "ttf-a06-04-transfer"
+            }
+          ],
+          "gateId": "ttf-g06-04"
+        }
+      ]
+    },
+    {
+      "id": "chapter07",
+      "title": "Inside a transformer",
+      "summary": "Trace shapes and gradients through a transformer block.",
+      "episodes": [
+        {
+          "id": "ttf-e07-01",
+          "title": "Queries, keys and values as learned projections",
+          "objectiveIds": [
+            "ttf-o07-01"
+          ],
+          "blocks": [
+            {
+              "id": "ttf-07-01-text-1",
+              "type": "text",
+              "markdown": "Queries, keys and values are three learned projections of numerical representations. They are not tokens, database records or fixed semantic categories. In self-attention, the same sequence supplies all three inputs, but distinct weight matrices can transform it differently. Queries and keys determine mixing weights; values supply the vectors that are mixed. Training changes the projections through the loss gradient.\n\nUse row-vector notation in this episode: X has shape `(T,D)`, and `Q=X@Wq`, `K=X@Wk`, `V=X@Wv`. Wq and Wk have shape `(D,d)`, while Wv has shape `(D,dv)`. The notation differs from the earlier column-vector layer only by orientation. A library may store linear weights transposed; the index equation, not the letter W, determines correctness.\n\nLet X have rows `[1,0]` and `[0,2]`. Choose Wq rows `[1,1]`, `[0,1]`; Wk rows `[1,0]`, `[1,1]`; and Wv rows `[2,0]`, `[0,3]`. Then Q is `[[1,1],[0,2]]`, K is `[[1,0],[2,2]]`, and V is `[[2,0],[0,6]]`. Three two-by-two matrices contribute twelve learned parameters without biases.\n\n```python\ndef matmul(a,b):\n    return [[sum(x*y for x,y in zip(row,col))\n             for col in zip(*b)] for row in a]\nX = [[1,0],[0,2]]\nQ = matmul(X,[[1,1],[0,1]])\nK = matmul(X,[[1,0],[1,1]])\nV = matmul(X,[[2,0],[0,3]])\nassert Q == [[1,1],[0,2]]\nassert K == [[1,0],[2,2]] and V == [[2,0],[0,6]]\n```",
+              "sourceRefs": [
+                "ttf-src-transformer",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-07-01-text-2",
+              "type": "text",
+              "markdown": "Predict the unscaled query-key score matrix. `Q@K.T` is `[[1,4],[0,4]]`: row i identifies the querying position and column j identifies a candidate source position. Swapping Q and K yields the transpose here, which is still a valid two-by-two matrix but answers different matching questions. Asymmetric values expose this mistake; a symmetric or all-ones fixture may hide it.\n\nA useful analogy is a content-addressed read with learned comparison features and learned payload features. The analogy stops before implying exact-match lookup: attention can blend several sources continuously. A large weight is not a literal statement that a token “caused” a decision, because values, output projection, residual paths and later computation all influence the final result.\n\nProjection gradients have ordinary matrix shapes. If Q is `X@Wq`, then its upstream gradient dQ produces `dWq=X.T@dQ` and an input contribution `dXq=dQ@Wq.T`. Self-attention adds corresponding input contributions from the K and V branches. Omitting one branch can leave an apparently reasonable output while corrupting earlier parameters' updates.\n\nFor a batch of B sequences, include B as a leading axis. The projection parameters remain shared; gradients accumulate across positions and batch members according to the loss reduction. A head axis introduced later is another within-model dimension, not a separate machine or distributed pipeline assignment.\n\nThe lab asks you to write the shapes beside each projection, calculate one score and trace the three routes back to X. Independent checks use a fresh shape/count problem and a gradient-branch bug. Correct matrix dimensions are necessary but insufficient: verify orientation, position identity and all shared-input contributions against a reference.",
+              "sourceRefs": [
+                "ttf-src-transformer",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-07-01-check-trace",
+              "type": "assessment",
+              "assessmentId": "ttf-a07-01-trace"
+            },
+            {
+              "id": "ttf-07-01-check-transfer",
+              "type": "assessment",
+              "assessmentId": "ttf-a07-01-transfer"
+            }
+          ],
+          "gateId": "ttf-g07-01"
+        },
+        {
+          "id": "ttf-e07-02",
+          "title": "Attention scores, masking, softmax and weighted values",
+          "objectiveIds": [
+            "ttf-o07-02"
+          ],
+          "blocks": [
+            {
+              "id": "ttf-07-02-text-1",
+              "type": "text",
+              "markdown": "Scaled dot-product attention computes scores `S=Q@K.T/sqrt(d)`, applies an allowed-position mask, normalizes each query row with softmax, then forms `O=P@V`. Rows of P sum to one over allowed keys. Softmax runs over source positions, not over the feature dimension or across all queries together. The output for each query is a weighted sum of value vectors.\n\nWork one query completely. Let head width be one, query `q=1`, keys `[0,log(3)]`, and scalar values `[2,6]`. Both keys are allowed. Scores are `[0,log(3)]`, weights are `[0.25,0.75]`, and output is `0.25*2+0.75*6=5`. If only the first key is allowed, its weight becomes one and output becomes two. Masking changes normalization, not just which output entries you inspect afterward.\n\n```python\nimport math\nscores = [0.0, math.log(3)]\nm = max(scores)\nw = [math.exp(s-m) for s in scores]\np = [v/sum(w) for v in w]\nout = sum(a*b for a,b in zip(p,[2,6]))\nassert abs(out-5) < 1e-12\n```\n\nPredict the result of replacing the blocked second score with zero instead of excluding it. With first score also zero, softmax returns `[0.5,0.5]`, leaking the blocked value and producing four. An additive mask convention usually uses negative infinity for blocked logits; a reference implementation can avoid the issue by summing only allowed indices. Define behavior for an all-blocked row explicitly rather than normalizing an empty set.",
+              "sourceRefs": [
+                "ttf-src-transformer",
+                "ttf-src-sdpa",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-07-02-text-2",
+              "type": "text",
+              "markdown": "Backward has a useful chain of matrix operations. Given output sensitivity G, `dV=P.T@G` and `dP=G@V.T`. Within row i, the softmax derivative gives `dS_ij=P_ij*(dP_ij-sum_k(P_ik*dP_ik))`. Blocked positions have zero contribution. Finally `dQ=dS@K/sqrt(d)` and `dK=dS.T@Q/sqrt(d)`. The same scale factor belongs in both forward and backward.\n\nFor target one and half squared loss on the worked output five, G is four. Value gradients are `[1,3]`. The sensitivities to probabilities are `[8,24]`; their P-weighted mean is twenty. Score gradients are therefore `[-3,3]`. Since d is one, the query gradient is `3*log(3)` and the key gradients are `[-3,3]`. Independent central differences can check every one of these claims without using the backward formula.\n\nA corrupted forward output can also change G, so checking dQ, dK or dV against a gradient built from that same wrong output may conceal a shared mistake. Use a separately implemented forward reference and a loss with nontrivial targets. Avoid testing only the sum of probabilities: it is always one, with zero score gradient, and cannot expose many derivative bugs.\n\nIn the lab, inspect probabilities, output and all three input gradients before testing a fused implementation. Include unequal values, nonuniform scores, width greater than one and a causal row. The independent checks calculate a new mixture and select a discriminating gradient test. Finiteness, deterministic execution and row sums alone do not establish numerical correctness.",
+              "sourceRefs": [
+                "ttf-src-transformer",
+                "ttf-src-sdpa",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-07-02-check-trace",
+              "type": "assessment",
+              "assessmentId": "ttf-a07-02-trace"
+            },
+            {
+              "id": "ttf-07-02-check-transfer",
+              "type": "assessment",
+              "assessmentId": "ttf-a07-02-transfer"
+            }
+          ],
+          "gateId": "ttf-g07-02"
+        },
+        {
+          "id": "ttf-e07-03",
+          "title": "Heads, grouped-query attention, RoPE and RMSNorm",
+          "objectiveIds": [
+            "ttf-o07-03"
+          ],
+          "blocks": [
+            {
+              "id": "ttf-07-03-text-1",
+              "type": "text",
+              "markdown": "Multiple attention heads provide several learned mixing operations within one layer. A common arrangement divides projection width D into H query heads of width d, with `D=H*d`. Each head computes its own attention output; the outputs are concatenated and passed through an output projection. Reshaping buffers does not create independent weights automatically: the learned projection layout and head-index convention specify which features belong together.\n\nGrouped-query attention, or GQA, uses fewer key/value heads than query heads. For D equal to eight, four query heads of width two can share two KV heads, each serving a group of two query heads. The Q projection has `8*8=64` parameters, while K and V each have `8*4=32`, ignoring biases. An eight-by-eight output projection adds 64, making 192 parameters across these four projections. Conventional four-head K and V would instead bring the total to 256.\n\nThe cache also stores two KV heads rather than four. For this example's fixed width, token count, layer count and dtype, its K/V payload is halved. Sharing does not mean all queries become identical: their separate Q vectors still produce different score distributions. The head grouping is part of model semantics; an arbitrary reshape or repeat pattern can connect queries to the wrong KV head.",
+              "sourceRefs": [
+                "ttf-src-gqa",
+                "ttf-src-rope",
+                "ttf-src-rmsnorm",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-07-03-text-2",
+              "type": "text",
+              "markdown": "Rotary position embedding, or RoPE, rotates pairs of query and key coordinates according to position. For one pair, `R(theta)*(a,b)=(a*cos(theta)-b*sin(theta),a*sin(theta)+b*cos(theta))`. Rotating `[1,0]` by ninety degrees gives `[0,1]`. The Euclidean norm is preserved. In larger heads, different pairs use different angular frequencies; the exact pairing and frequency convention must match the checkpoint.\n\n```python\nimport math\ndef rotate(pair, angle):\n    a,b = pair\n    c,s = math.cos(angle),math.sin(angle)\n    return [a*c-b*s,a*s+b*c]\nr = rotate([1,0], math.pi/2)\nassert abs(r[0]) < 1e-12 and abs(r[1]-1) < 1e-12\n```\n\nPredict the dot product when both q and k are rotated by the same angle. Their dot product is preserved. More generally, `dot(R(m*theta)q,R(n*theta)k)=dot(q,R((n-m)*theta)k)`, making relative position appear in their comparison. This identity does not guarantee good extrapolation to every longer context. Incorrect cache positions or mismatched coordinate pairing break the intended computation despite unchanged shapes.\n\nRMSNorm rescales a feature vector by its root mean square, typically with a learned per-feature gain: `y_i=gamma_i*x_i/sqrt(mean(x^2)+epsilon)`. Unlike LayerNorm, it does not subtract the mean. For `[3,4]`, unit gain and epsilon temporarily zero, the denominator is `sqrt(12.5)` and output is approximately `[0.84852814,1.13137085]`. Its mean is not zero. A constant nonzero vector therefore need not normalize to zeros.\n\nThese mechanisms solve different problems: heads and GQA organize attention, RoPE supplies positional structure, and RMSNorm controls scale. None is a synonym for a distributed layer or a universal explanation of a model's decisions. The lab checks projection counts, a head mapping, rotation invariants and an RMSNorm reference. The fresh assessments require both a storage/shape calculation and a convention-sensitive diagnosis; passing a reshape check alone is insufficient.",
+              "sourceRefs": [
+                "ttf-src-gqa",
+                "ttf-src-rope",
+                "ttf-src-rmsnorm",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-07-03-check-trace",
+              "type": "assessment",
+              "assessmentId": "ttf-a07-03-trace"
+            },
+            {
+              "id": "ttf-07-03-check-transfer",
+              "type": "assessment",
+              "assessmentId": "ttf-a07-03-transfer"
+            }
+          ],
+          "gateId": "ttf-g07-03"
+        },
+        {
+          "id": "ttf-e07-04",
+          "title": "Assemble and train a tiny decoder",
+          "objectiveIds": [
+            "ttf-o07-04"
+          ],
+          "blocks": [
+            {
+              "id": "ttf-07-04-text-1",
+              "type": "text",
+              "markdown": "Assemble a decoder by connecting interfaces already understood. A small causal decoder can use token embeddings plus learned absolute positions, a pre-normalized self-attention block, a residual addition, a pre-normalized feed-forward block, another residual addition and a vocabulary projection. It predicts the next token at every supplied input position. This is a deliberately small architecture, not a claim to reproduce any named production model.\n\nFor Capstone B, choose vocabulary three, context two, model width two, one head and feed-forward width three. Use RMS normalization with epsilon `1e-5` and unit fixed gains, tanh in the feed-forward block, no dropout and no biases. Store matrices in row-vector convention. The trainable counts are six embedding values, four positions, twelve Q/K/V weights, four attention-output weights, six expansion weights, six contraction weights and six vocabulary weights: 44 total.\n\nThe shape path is precise: token IDs `(2,)` become X `(2,2)`; Q, K and V remain `(2,2)`; attention probabilities have shape `(2,2)`; concatenation is trivial for one head; feed-forward hidden values have shape `(2,3)`; final logits have shape `(2,3)`. Both residual additions require `(2,2)`. A square attention matrix does not excuse mixing up query and key axes.\n\nA zero vocabulary projection yields uniform probabilities and loss `log(3)=1.0986122886681098`. The complete CPU reference below uses nonzero weights so gradients can reach every stage.",
+              "sourceRefs": [
+                "ttf-src-transformer",
+                "ttf-src-rmsnorm",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-07-04-text-2",
+              "type": "text",
+              "markdown": "Train on the invented repeating pattern `0,1,2,0,1,2`. Three training windows are `[0,1]->[1,2]`, `[1,2]->[2,0]` and `[2,0]->[0,1]`. Average cross-entropy across their six targets. A low loss on this tiny corpus demonstrates only that the loop can fit a simple pattern.\n\nBuild in stages. First implement a plain-number forward function that accepts a flat parameter vector and returns logits and mean loss. Initialize asymmetrically with small deterministic values; zeroing every matrix would create symmetry and gradient problems. Next compute gradients by central differences as a slow independent oracle. With 44 parameters, one central-difference gradient takes 88 perturbed forward evaluations. That is feasible for this tiny CPU test and inappropriate as a large-model training method.\n\nThen implement reverse mode using the chain rules from the preceding episodes and compare selected parameter and activation gradients to the oracle. Start with nonzero vocabulary weights so gradients reach upstream blocks. Check Q, K and V separately, and vary more than one coordinate. Only after those checks should you test several update steps and a decrease in the explicitly defined training objective.\n\nPredict the negative controls that must fail: future-token leakage when removing the mask, lost scale in an attention derivative, a transposed value mapping and an update with the wrong sign. Also compare a saved-and-restored run with an uninterrupted run. The verification record checks the CPU reference with attention pullbacks and decoder gradients.\n\nSubmit your own decoder and explain its tensor shapes, masks, reduction and gradient checks during practical review. Passing the fresh numeric and diagnostic items or running the reference does not complete that practical review.",
+              "sourceRefs": [
+                "ttf-src-transformer",
+                "ttf-src-rmsnorm",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-07-04-reference",
+              "type": "text",
+              "markdown": "Worked CPU reference: read it after drafting your own shape and mask plan. This uses finite differences for the short training demonstration; it does not implement reverse-mode training or establish independent code authorship. All dependencies are in the Python standard library.\n\n```python\nimport math\n\ndef dot(a,b):\n    return sum(x*y for x,y in zip(a,b))\ndef mm(a,b):\n    return [[dot(row,col) for col in zip(*b)] for row in a]\ndef add(a,b):\n    return [[x+y for x,y in zip(r,s)] for r,s in zip(a,b)]\ndef rms(rows):\n    return [[x/math.sqrt(dot(row,row)/len(row)+1e-5)\n             for x in row] for row in rows]\ndef softmax(row):\n    m=max(row)\n    e=[math.exp(x-m) for x in row]\n    return [x/sum(e) for x in e]\n\ndef decoder(theta,ids,causal=True):\n    it=iter(theta)\n    def matrix(n,m):\n        return [[next(it) for _ in range(m)] for _ in range(n)]\n    E,P=matrix(3,2),matrix(2,2)\n    Wq,Wk,Wv,Wo=[matrix(2,2) for _ in range(4)]\n    Wu,Wd,Wh=matrix(2,3),matrix(3,2),matrix(2,3)\n    x=add([E[t] for t in ids],P[:len(ids)])\n    norm=rms(x)\n    q,k,v=[mm(norm,w) for w in [Wq,Wk,Wv]]\n    mixed=[]\n    for i,query in enumerate(q):\n        allowed=list(range(i+1 if causal else len(ids)))\n        scores=[dot(query,k[j])/math.sqrt(2) for j in allowed]\n        prob=softmax(scores)\n        mixed.append([sum(a*v[j][d] for a,j in zip(prob,allowed))\n                      for d in range(2)])\n    r=add(x,mm(mixed,Wo))\n    hidden=[[math.tanh(z) for z in row] for row in mm(rms(r),Wu)]\n    return mm(add(r,mm(hidden,Wd)),Wh)\n\nwindows=[([0,1],[1,2]),([1,2],[2,0]),([2,0],[0,1])]\ndef objective(theta):\n    total=0.0\n    for ids,targets in windows:\n        for row,target in zip(decoder(theta,ids),targets):\n            m=max(row)\n            total+=m+math.log(sum(math.exp(z-m) for z in row))-row[target]\n    return total/6\n\ndef numerical_gradient(theta,h=1e-5):\n    result=[]\n    for i in range(len(theta)):\n        plus,minus=theta[:],theta[:]\n        plus[i]+=h\n        minus[i]-=h\n        result.append((objective(plus)-objective(minus))/(2*h))\n    return result\n\ntheta=[0.2*math.sin(i+1) for i in range(44)]\ninitial=objective(theta)\nfor _ in range(12):\n    gradient=numerical_gradient(theta)\n    theta=[w-0.1*g for w,g in zip(theta,gradient)]\nfinal=objective(theta)\nassert final < initial\n```",
+              "sourceRefs": [
+                "ttf-src-transformer",
+                "ttf-src-rmsnorm",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-07-04-check-trace",
+              "type": "assessment",
+              "assessmentId": "ttf-a07-04-trace"
+            },
+            {
+              "id": "ttf-07-04-check-transfer",
+              "type": "assessment",
+              "assessmentId": "ttf-a07-04-transfer"
+            }
+          ],
+          "gateId": "ttf-g07-04"
+        }
+      ]
+    },
+    {
+      "id": "chapter08",
+      "title": "The software stack under Python",
+      "summary": "Read a framework operation down to its device implementation.",
+      "episodes": [
+        {
+          "id": "ttf-e08-01",
+          "title": "PyTorch tensors, modules, autograd and optimizers",
+          "objectiveIds": [
+            "ttf-o08-01"
+          ],
+          "blocks": [
+            {
+              "id": "ttf-08-01-text-1",
+              "type": "text",
+              "markdown": "PyTorch exposes separate abstractions for values, composition, differentiation and updates. A tensor carries shape, dtype, device and storage information; autograd can also track its producing operations. An `nn.Module` organizes a computation and registered state. Parameters identify trainable state for discovery, while buffers can hold persistent non-parameter state. An optimizer owns update rules and any associated history for the parameters it was given.\n\nRegistration is an ownership contract. Assigning an `nn.Parameter` attribute registers it with a module. Putting child layers in a `ModuleList` lets the framework discover them recursively; hiding them in an ordinary Python list does not provide the same registration behavior. A tensor can participate in arithmetic without appearing in `model.parameters()`, so a correct forward result alone does not prove that the intended values will be trained or serialized.\n\nThe current Linear documentation stores weights as `(out_features,in_features)` and evaluates the final input dimension against those rows. For input `[3,4]`, weight row `[2,-1]` and bias `0.5`, prediction is `2.5`. With target `1.5` and half squared loss, gradient is `[3,4]` for the weights and one for the bias. A descent step of `0.01` gives weights `[1.97,-1.04]`, bias `0.49`, and a new prediction of `2.24`.\n\nThis optional framework example requires a compatible PyTorch installation and explicitly uses the CPU. The same arithmetic is verified independently in plain Python; importing the documentation does not establish local package execution.\n\n```python\nimport torch\nlayer = torch.nn.Linear(2,1,device='cpu',dtype=torch.float64)\nwith torch.no_grad():\n    layer.weight.copy_(torch.tensor([[2.,-1.]],dtype=torch.float64))\n    layer.bias.fill_(0.5)\nx = torch.tensor([[3.,4.]],device='cpu',dtype=torch.float64)\noptimizer = torch.optim.SGD(layer.parameters(),lr=0.01)\noptimizer.zero_grad(set_to_none=True)\nloss = 0.5*(layer(x)-1.5).square().mean()\nloss.backward()\nassert torch.allclose(layer.weight.grad,torch.tensor([[3.,4.]],dtype=torch.float64))\noptimizer.step()\nassert abs(layer(x).item()-2.24) < 1e-12\n```",
+              "sourceRefs": [
+                "ttf-src-modules",
+                "ttf-src-linear",
+                "ttf-src-autograd",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-08-01-text-2",
+              "type": "text",
+              "markdown": "Predict what `layer.eval()` would change here. Linear itself has no training-dependent behavior, so this example's arithmetic is unchanged. More generally, evaluation mode changes modules such as dropout or batch normalization; it does not globally disable autograd. Conversely, a no-grad context disables recording for differentiation but does not itself select evaluation behavior. Set both behaviors deliberately when the inference contract needs them.\n\nAutograd accumulates parameter gradients across backward calls unless the caller clears them appropriately. This differs from the foundations toy engine, whose backward resets reachable gradients each time. The optimizer does not infer the desired batch boundary. If accumulating microbatches, apply the correct normalization, then update once after all intended contributions arrive.\n\nFor the lab, reproduce the affine example in plain Python and compare forward, gradients and one update with the framework path when available. Inventory registered parameter names and shapes before constructing the optimizer. Then introduce an unregistered layer and an accidental `detach()` to see which assertions fail. The independent checks use a fresh gradient and a state-registration diagnosis. They establish the abstraction boundaries, not a claim that every backend or custom operator implements them correctly.",
+              "sourceRefs": [
+                "ttf-src-modules",
+                "ttf-src-linear",
+                "ttf-src-autograd",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-08-01-check-trace",
+              "type": "assessment",
+              "assessmentId": "ttf-a08-01-trace"
+            },
+            {
+              "id": "ttf-08-01-check-transfer",
+              "type": "assessment",
+              "assessmentId": "ttf-a08-01-transfer"
+            }
+          ],
+          "gateId": "ttf-g08-01"
+        },
+        {
+          "id": "ttf-e08-02",
+          "title": "Dispatch, operator implementations and asynchronous devices",
+          "objectiveIds": [
+            "ttf-o08-02"
+          ],
+          "blocks": [
+            {
+              "id": "ttf-08-02-text-1",
+              "type": "text",
+              "markdown": "A Python expression is an entry point, not a description of every instruction that executes. A framework operator has a semantic contract, and dispatch selects an implementation using information such as device, dtype and other dispatch keys. The implementation may call native code, a library routine, a composite of operations or an optimized kernel. Autograd may add another layer of behavior around the numerical operation.\n\nFor a concrete invariant, let A have rows `[1,2]` and `[3,4]`, and B have rows `[2,0]` and `[1,2]`. Their product is `[[4,4],[10,8]]`. Whether a framework evaluates this with simple loops or a tiled kernel, that index mapping is the intended operation. Floating-point differences need a justified tolerance, but changing the second output row to `[8,10]` is a semantic permutation bug, not harmless rounding.\n\n```python\nA = [[1,2],[3,4]]\nB = [[2,0],[1,2]]\nC = [[sum(A[i][k]*B[k][j] for k in range(2))\n      for j in range(2)] for i in range(2)]\nassert C == [[4,4],[10,8]]\n```\n\nPredict why timing only the Python call can mislead on an asynchronous device. The call may enqueue work and return before completion. In an invented timeline, a host begins at zero milliseconds, finishes submitting at `0.2`, and the result becomes ready at `5.2`. The submission duration is `0.2` milliseconds; the elapsed completion latency is `5.2`. Neither number is a measured claim about any real device in this course.",
+              "sourceRefs": [
+                "ttf-src-dispatcher",
+                "ttf-src-mps",
+                "ttf-src-mps-sync",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-08-02-text-2",
+              "type": "text",
+              "markdown": "A valid device benchmark defines the boundary it measures. For completion latency, wait for preceding work before starting, submit the measured work and wait for its completion before stopping. Use the relevant backend's documented synchronization mechanism. For throughput, allow the intended overlap and synchronize at a suitable aggregate boundary instead of serializing every operation. Warm-up, compilation, allocation and data preparation also need explicit inclusion or exclusion.\n\nPyTorch's MPS backend is a route for supported tensor work on Apple's GPU through the Metal ecosystem; it is not the separate Apple Neural Engine. Its synchronization API waits for outstanding MPS kernels. This documentation-level description does not establish which exact kernel a particular model call selects, whether it falls back, or its speed on a specific machine. Those require versioned implementation inspection and measurements.\n\nA systems analogy is a syscall that submits an I/O request: returning from submission and completing the operation are different events. Device queues also impose dependencies and buffer lifetimes. Reading a result on the CPU or extracting a scalar can introduce synchronization, so adding a debug print may alter the timing profile you are trying to understand.\n\nFor the lab, trace one operation from its Python signature to its documented dispatch and backend boundary without running a device workload. Specify a small CPU reference, a forward comparison, gradient comparisons and a timing plan. Include noncontiguous inputs and asymmetric values when supported, since a fast implementation can still mishandle layout. The independent checks ask for a completion-time calculation and a valid benchmark boundary. Passing an isolated operation test is evidence about that tested operation, not qualification of a whole framework replacement or deployment.",
+              "sourceRefs": [
+                "ttf-src-dispatcher",
+                "ttf-src-mps",
+                "ttf-src-mps-sync",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-08-02-check-trace",
+              "type": "assessment",
+              "assessmentId": "ttf-a08-02-trace"
+            },
+            {
+              "id": "ttf-08-02-check-transfer",
+              "type": "assessment",
+              "assessmentId": "ttf-a08-02-transfer"
+            }
+          ],
+          "gateId": "ttf-g08-02"
+        },
+        {
+          "id": "ttf-e08-03",
+          "title": "MLX: arrays, lazy evaluation, transforms and memory",
+          "objectiveIds": [
+            "ttf-o08-03"
+          ],
+          "blocks": [
+            {
+              "id": "ttf-08-03-text-1",
+              "type": "text",
+              "markdown": "MLX is a separate array and machine-learning framework. Its arrays, transformations and execution model must be understood on their own terms; it is not a switch that turns a PyTorch program into another backend. The official documentation reviewed for this lesson describes lazy evaluation: array operations can build a graph whose numerical work is evaluated when requested or when a value is needed by the host.\n\nDistinguish declaring a value from materializing it. If `c=a+b` constructs a pending computation, shape information can already be known even though the addition has not completed. `mx.eval(c)` requests evaluation. Printing an array, converting it to a host representation or extracting a scalar can also trigger evaluation. A benchmark that stops after graph construction may measure only a portion of the desired computation.\n\nFunction transforms provide another way to express differentiation. `mx.value_and_grad(loss_fn)` produces a callable returning the scalar loss and its gradient, by default with respect to the first argument. Consider `L=mean((w*x-y)^2)/2`, x `[1,2]`, y `[2,4]`, and w one. Loss is `1.25`; gradient is `-2.5`. A step of `0.1` gives w `1.25`, whose newly evaluated loss is `0.703125`.\n\nThis optional example requires MLX. It sets the default device to CPU before creating arrays and deliberately evaluates the updated weight as well as the old loss.\n\n```python\nimport mlx.core as mx\nmx.set_default_device(mx.cpu)\ndef loss_fn(w,x,y):\n    return 0.5*mx.mean(mx.square(w*x-y))\nx,y = mx.array([1.,2.]),mx.array([2.,4.])\nw = mx.array(1.)\nloss,gradient = mx.value_and_grad(loss_fn)(w,x,y)\nw_new = w-0.1*gradient\nmx.eval(loss,gradient,w_new)\nassert abs(loss.item()-1.25) < 1e-6\nassert abs(gradient.item()+2.5) < 1e-6\nassert abs(w_new.item()-1.25) < 1e-6\n```",
+              "sourceRefs": [
+                "ttf-src-mlx-lazy",
+                "ttf-src-mlx-transforms",
+                "ttf-src-mlx-memory",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-08-03-text-2",
+              "type": "text",
+              "markdown": "Predict why evaluating only the old loss is insufficient evidence that the update finished. That loss depends on old parameters; the new weight belongs to a later part of the graph. Choose evaluation boundaries around the state that the next iteration actually needs. With a stateful optimizer, this includes the appropriate optimizer state. Letting graph construction grow without intended evaluation boundaries can also change memory and scheduling behavior.\n\nOn Apple silicon, MLX is designed around CPU and GPU access to unified memory. Shared addressability removes some explicit transfer requirements; it does not make arithmetic, synchronization, capacity or memory bandwidth free. Execution still has a device and stream context, and dependencies still govern when results can be consumed. A retained graph or array can keep storage alive after a Python expression looks finished.\n\nThe migration lab compares the same small operation in plain Python, PyTorch and optionally MLX under explicit dtype and reduction conventions. Compare outputs, input gradients, parameter gradients and an update before considering performance. Also check parameter orientation, epsilon placement, serialization and optimizer state semantics. An API with a familiar name need not have the same defaults or mutation behavior.\n\nThe independent checks use new numbers and a lazy-evaluation timing failure. They assess the execution model and verification plan. No MLX device benchmark, GPU job or claim of backend equivalence is implied by these CPU arithmetic exercises or by the presence of an optional framework example.",
+              "sourceRefs": [
+                "ttf-src-mlx-lazy",
+                "ttf-src-mlx-transforms",
+                "ttf-src-mlx-memory",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-08-03-check-trace",
+              "type": "assessment",
+              "assessmentId": "ttf-a08-03-trace"
+            },
+            {
+              "id": "ttf-08-03-check-transfer",
+              "type": "assessment",
+              "assessmentId": "ttf-a08-03-transfer"
+            }
+          ],
+          "gateId": "ttf-g08-03"
+        },
+        {
+          "id": "ttf-e08-04",
+          "title": "Training, fine-tuning, LoRA, evaluation and alignment",
+          "objectiveIds": [
+            "ttf-o08-04"
+          ],
+          "blocks": [
+            {
+              "id": "ttf-08-04-text-1",
+              "type": "text",
+              "markdown": "Pretraining, fine-tuning and alignment describe different objectives and stages, while inference describes using the resulting model. Next-token pretraining fits patterns in a text distribution. Supervised fine-tuning can use curated input-response examples to encourage a desired task behavior. Further preference-based optimization can favor responses under a specified feedback process. None of these labels alone establishes factual reliability, fairness or suitability for a particular deployment.\n\nFine-tuning need not update every base parameter. Low-rank adaptation, or LoRA, keeps a base matrix W fixed and learns an update `DeltaW=s*B@A`. For a column-vector layer, W has shape `(out,in)`, B `(out,r)` and A `(r,in)`. The scalar s may encode a chosen scaling convention such as alpha divided by r. Treat that convention as checkpoint metadata rather than assume all implementations use the same value.\n\nWith `out=3,in=4,r=1`, full W has twelve parameters, while B and A together have seven trainable parameters. Choose A row `[1,0,-1,2]`, B column `[2,-1,0.5]`, input `[1,2,3,4]` and s one. First `A*x=6`; then the output update is `[12,-6,3]`. The base output `W*x` is added separately. The seven trainable values do not eliminate the need to store or access the base weights.\n\n```python\nA = [1,0,-1,2]\nB = [2,-1,0.5]\nx = [1,2,3,4]\ninner = sum(a*b for a,b in zip(A,x))\ndelta = [b*inner for b in B]\nassert inner == 6 and delta == [12,-6,3]\nassert 3*1 + 1*4 == 7\n```",
+              "sourceRefs": [
+                "ttf-src-lora",
+                "ttf-src-alignment",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-08-04-text-2",
+              "type": "text",
+              "markdown": "Predict a gradient trap if both A and B start at zero. The local gradients to each factor depend on the other factor, so both data gradients are zero. A common design starts one factor at zero and the other nonzero, making the initial update zero while allowing one factor to learn immediately. Once it changes, gradients can reach the other. This is another instance of initialization affecting the reachable learning dynamics.\n\nAn adapter belongs with a specific base-model identity, target-module mapping and scaling convention. Merging `s*B@A` into W is algebraically equivalent under compatible arithmetic and an unchanged base, but quantization or rounding can introduce differences. Test the merged and unmerged outputs on representative inputs. Do not assume an adapter trained against one base revision can be attached to another without changing behavior.\n\nEvaluation must match the intended claim. Use held-out task examples for task quality, appropriate checks for factual correctness, and separate probes for robustness or undesirable behavior. Keep prompts, decoding settings, tokenizer and model revisions fixed for comparisons. Avoid tuning repeatedly on the supposed final test set. Preference wins can reflect the selected raters and rubric; they do not make the model's statements automatically true.\n\nThe instruction-following paper in the sources describes one historical training and feedback procedure, not a universal definition of alignment or proof for every current model. In the lab, compute a low-rank update, compare it with the explicit dense matrix and design a held-out comparison against the original model. Independent checks ask for a new parameter budget and a zero-factor initialization diagnosis. Practical training, external evaluation and release authorization remain separate work; this lesson supplies concepts and verified small examples.",
+              "sourceRefs": [
+                "ttf-src-lora",
+                "ttf-src-alignment",
+                "ttf-src-original"
+              ]
+            },
+            {
+              "id": "ttf-08-04-check-trace",
+              "type": "assessment",
+              "assessmentId": "ttf-a08-04-trace"
+            },
+            {
+              "id": "ttf-08-04-check-transfer",
+              "type": "assessment",
+              "assessmentId": "ttf-a08-04-transfer"
+            }
+          ],
+          "gateId": "ttf-g08-04"
+        }
+      ]
+    }
+  ],
+  "assessments": [
+    {
+      "id": "ttf-a05-01-trace",
+      "objectiveIds": [
+        "ttf-o05-01"
+      ],
+      "familyId": "ttf-family-mlp-chain",
+      "prompt": "Independent check. A two-hidden-unit MLP uses x=[2,-1], hidden weight rows [1,2] and [-1,1], hidden biases [1,4], ReLU, output weights [2,-3], output bias 0.5 and target 0.5. Loss is half squared error. What is the gradient of hidden weight W[0,1] (first hidden unit, second input)?",
+      "type": "numeric",
+      "grading": {
+        "expected": 2,
+        "absoluteTolerance": 0,
+        "explanation": "Hidden preactivations are [1,1], prediction is -0.5 and residual is -1. The first hidden sensitivity is -1*2=-2. Multiplying by the second input -1 gives gradient 2; both ReLUs are away from zero."
+      }
+    },
+    {
+      "id": "ttf-a05-01-transfer",
+      "objectiveIds": [
+        "ttf-o05-01"
+      ],
+      "familyId": "ttf-family-composition-transfer",
+      "prompt": "Independent transfer check. A network replaces a two-layer affine-ReLU-affine path with two affine layers of the same widths, removing only ReLU. Which capability claim is justified?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "The path can now represent arbitrary XOR mappings because it is deeper."
+        },
+        {
+          "id": "b",
+          "text": "The two affine layers compose into one affine map, so some formerly representable nonlinear mappings are lost."
+        },
+        {
+          "id": "c",
+          "text": "The number of parameters guarantees the same function class."
+        },
+        {
+          "id": "d",
+          "text": "The second affine layer now receives no gradients for any input."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "Affine maps compose into an affine map. A hidden nonlinearity can represent functions such as XOR on binary inputs that a single affine map cannot match. Gradient flow need not disappear merely because the nonlinearity was removed."
+      }
+    },
+    {
+      "id": "ttf-a05-02-trace",
+      "objectiveIds": [
+        "ttf-o05-02"
+      ],
+      "familyId": "ttf-family-residual-sensitivity",
+      "prompt": "Independent check. Two scalar blocks each compute y=x+F(x), with F(x)=-0.2*x. What is the derivative of their composition with respect to the original input?",
+      "type": "numeric",
+      "grading": {
+        "expected": 0.64,
+        "absoluteTolerance": 1e-09,
+        "explanation": "Each block derivative is 1-0.2=0.8. The chain rule gives 0.8*0.8=0.64. Summing the two derivatives or multiplying only branch derivatives ignores the composition or residual paths."
+      }
+    },
+    {
+      "id": "ttf-a05-02-transfer",
+      "objectiveIds": [
+        "ttf-o05-02"
+      ],
+      "familyId": "ttf-family-normalization-isolation",
+      "prompt": "Independent transfer check. A layer should normalize each token across its four features independently. Which test specifically detects accidentally normalizing across the batch as well?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Check only that its output has the same shape as its input."
+        },
+        {
+          "id": "b",
+          "text": "Change both the token and the batch, then accept any changed result."
+        },
+        {
+          "id": "c",
+          "text": "Check only that a batch filled with one constant returns finite numbers."
+        },
+        {
+          "id": "d",
+          "text": "Compare one fixed token alone and with very different other examples; its result should remain unchanged under the intended feature-only operation."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "d",
+        "explanation": "Keeping the token fixed while changing unrelated examples isolates unwanted cross-example dependence. Shapes, finiteness and simultaneous changes cannot discriminate the axis mistake."
+      }
+    },
+    {
+      "id": "ttf-a05-03-trace",
+      "objectiveIds": [
+        "ttf-o05-03"
+      ],
+      "familyId": "ttf-family-momentum-transition",
+      "prompt": "Independent check. Use m_next=0.8*m+g, w_next=w-0.1*m_next. With current w=2, m=0.5 and gradient g=-1, what is the next weight?",
+      "type": "numeric",
+      "grading": {
+        "expected": 2.06,
+        "absoluteTolerance": 1e-09,
+        "explanation": "Momentum becomes 0.4-1=-0.6. The weight becomes 2-0.1*(-0.6)=2.06. Resetting momentum would incorrectly yield 2.1."
+      }
+    },
+    {
+      "id": "ttf-a05-03-transfer",
+      "objectiveIds": [
+        "ttf-o05-03"
+      ],
+      "familyId": "ttf-family-optimizer-state-transfer",
+      "prompt": "Independent transfer check. Two resumed AdamW runs have the same current weights and current gradients but different first/second moment buffers and step counters. Which statement is correct?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "The next weights can differ; compatible per-parameter buffers, counters and hyperparameters are part of the update state."
+        },
+        {
+          "id": "b",
+          "text": "The run with the smaller buffers is necessarily better trained."
+        },
+        {
+          "id": "c",
+          "text": "The next weights must match because gradients are the only optimizer input."
+        },
+        {
+          "id": "d",
+          "text": "Equal-shaped buffers can be freely reassigned among parameters."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "AdamW uses moment estimates and step-dependent bias correction in addition to weights and gradients. Equal array shapes do not establish that stored state belongs to the same parameter or optimizer convention."
+      }
+    },
+    {
+      "id": "ttf-a05-04-trace",
+      "objectiveIds": [
+        "ttf-o05-04"
+      ],
+      "familyId": "ttf-family-clean-loop-trace",
+      "prompt": "Independent check. A scalar model predicts w*x with x=1 and target=2, using half squared error and plain descent rate 0.25. Start w=0. Recompute and clear gradients for each of two updates. What is w after the second update?",
+      "type": "numeric",
+      "grading": {
+        "expected": 0.875,
+        "absoluteTolerance": 1e-09,
+        "explanation": "First gradient is -2, so w becomes 0.5. The fresh second gradient is -1.5, giving 0.5+0.375=0.875. Accumulating the first gradient into the second changes the algorithm."
+      }
+    },
+    {
+      "id": "ttf-a05-04-transfer",
+      "objectiveIds": [
+        "ttf-o05-04"
+      ],
+      "familyId": "ttf-family-resume-counterexample",
+      "prompt": "Independent transfer check. Which experiment most directly checks that a training checkpoint can continue a specified stateful run?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Load only weights and compare a single prediction on one input."
+        },
+        {
+          "id": "b",
+          "text": "Compare an uninterrupted k+n-step run with a fresh-process restore at step k followed by the same n data steps, checking parameters, optimizer state, counters and data position."
+        },
+        {
+          "id": "c",
+          "text": "Compare two runs with different data orders and declare any difference a serialization fault."
+        },
+        {
+          "id": "d",
+          "text": "Check that the checkpoint file is nonempty and has a recent timestamp."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "A controlled continuation comparison exercises the next transitions and their required state. File existence or one matching prediction is weaker evidence; uncontrolled data changes confound the diagnosis."
+      }
+    },
+    {
+      "id": "ttf-a06-01-trace",
+      "objectiveIds": [
+        "ttf-o06-01"
+      ],
+      "familyId": "ttf-family-embedding-scatter",
+      "prompt": "Independent check. Token IDs [1,0,1] look up a two-feature embedding table. Upstream gradients at the three occurrences are [2,1], [3,-1] and [-1,4]. Considering only this lookup operation, what is the second coordinate of embedding row 1's gradient?",
+      "type": "numeric",
+      "grading": {
+        "expected": 5,
+        "absoluteTolerance": 0,
+        "explanation": "Row 1 appears at occurrences zero and two. Its gradient is [2,1]+[-1,4]=[1,5], so the second coordinate is 5. The middle occurrence contributes to row 0."
+      }
+    },
+    {
+      "id": "ttf-a06-01-transfer",
+      "objectiveIds": [
+        "ttf-o06-01"
+      ],
+      "familyId": "ttf-family-embedding-identity",
+      "prompt": "Independent transfer check. A tokenizer changes IDs for two tokens, but a deployed embedding table is left in the old row order. Every index remains in bounds. What check addresses the likely semantic failure?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Increase positional-vector magnitude until generated text looks plausible."
+        },
+        {
+          "id": "b",
+          "text": "Check only that the embedding tensor dtype is floating point."
+        },
+        {
+          "id": "c",
+          "text": "Average all embedding rows; a matching average proves token identity."
+        },
+        {
+          "id": "d",
+          "text": "Compare known text-to-ID-to-row traces against the tokenizer identity expected by the checkpoint."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "d",
+        "explanation": "The token identity-to-row mapping is the contract. An unchanged row average or valid index cannot reveal that different symbols are now selecting those rows."
+      }
+    },
+    {
+      "id": "ttf-a06-02-trace",
+      "objectiveIds": [
+        "ttf-o06-02"
+      ],
+      "familyId": "ttf-family-stable-token-loss",
+      "prompt": "Independent check. For logits [log(2),log(3),log(5)] and hard target ID 1 (zero-based), what is single-token cross-entropy in nats? Use natural logs; answer within 1e-6.",
+      "type": "numeric",
+      "grading": {
+        "expected": 1.2039728043259361,
+        "absoluteTolerance": 1e-06,
+        "explanation": "Exponentials sum to 10, and target probability is 3/10. Loss is -log(3/10)=log(10/3), approximately 1.2039728043."
+      }
+    },
+    {
+      "id": "ttf-a06-02-transfer",
+      "objectiveIds": [
+        "ttf-o06-02"
+      ],
+      "familyId": "ttf-family-loss-interface",
+      "prompt": "Independent transfer check. An implementation passes softmax(logits) into a loss API documented to expect unnormalized logits and internally apply log-softmax. What should the review conclude?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "It is guaranteed to improve accuracy because probabilities are bounded."
+        },
+        {
+          "id": "b",
+          "text": "The operation is equivalent because softmax is idempotent."
+        },
+        {
+          "id": "c",
+          "text": "The objective is changed by the second normalization; compare against direct log-sum-exp of the original logits."
+        },
+        {
+          "id": "d",
+          "text": "It is correct whenever the returned scalar is finite."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "Softmax is not idempotent. Treating probabilities as logits computes a different distribution and gradient. A direct stable reference on the original scores discriminates the bug."
+      }
+    },
+    {
+      "id": "ttf-a06-03-trace",
+      "objectiveIds": [
+        "ttf-o06-03"
+      ],
+      "familyId": "ttf-family-valid-token-mean",
+      "prompt": "Independent check. Per-position losses are [0.2,1.4,99,0.8]; a validity mask is [1,1,0,1]. For a mean over valid target tokens, what loss should be reported?",
+      "type": "numeric",
+      "grading": {
+        "expected": 0.8,
+        "absoluteTolerance": 1e-09,
+        "explanation": "Only 0.2,1.4 and 0.8 count. Their sum is 2.4 across three valid targets, giving 0.8. Ignored slots belong in neither numerator nor denominator."
+      }
+    },
+    {
+      "id": "ttf-a06-03-transfer",
+      "objectiveIds": [
+        "ttf-o06-03"
+      ],
+      "familyId": "ttf-family-future-leakage",
+      "prompt": "Independent transfer check. Inputs are [8,3,5] and next-token targets are [3,5,1]. A mask mistakenly lets position 0 attend to input position 1. Which diagnosis is correct?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "This is harmless because targets were shifted correctly."
+        },
+        {
+          "id": "b",
+          "text": "Position 0 can read its target token 3 from a future input, creating unavailable-at-generation information."
+        },
+        {
+          "id": "c",
+          "text": "The mask is correct because both positions belong to the same sequence."
+        },
+        {
+          "id": "d",
+          "text": "The problem can be fixed by dividing the loss by sequence length."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "The shifted target at position 0 is present as the next input token. A causal mask must prevent that query from seeing the future position. Loss normalization does not repair information leakage."
+      }
+    },
+    {
+      "id": "ttf-a06-04-trace",
+      "objectiveIds": [
+        "ttf-o06-04"
+      ],
+      "familyId": "ttf-family-cache-budget",
+      "prompt": "Independent check. A dense KV cache has 4 layers, batch 1, 7 cached tokens, 2 KV heads, head width 3 and two-byte elements. Count K and V, but exclude metadata and all other buffers. How many payload bytes are stored?",
+      "type": "numeric",
+      "grading": {
+        "expected": 672,
+        "absoluteTolerance": 0,
+        "explanation": "2*4*1*7*2*3*2=672 bytes. The first factor counts K and V; KV heads, rather than query heads, determine these stored representations."
+      }
+    },
+    {
+      "id": "ttf-a06-04-transfer",
+      "objectiveIds": [
+        "ttf-o06-04"
+      ],
+      "familyId": "ttf-family-cache-reuse-contract",
+      "prompt": "Independent transfer check. A server changes model weights but keeps token IDs, positions and all tensor shapes identical. Can it reuse a previous request's KV cache for the same prefix?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Not without establishing compatibility: cached representations depend on the model state, so recompute for the changed model."
+        },
+        {
+          "id": "b",
+          "text": "Yes, because a KV cache is optimizer state and tracks weight changes automatically."
+        },
+        {
+          "id": "c",
+          "text": "Yes, because equal token IDs imply equal intermediate representations under all weights."
+        },
+        {
+          "id": "d",
+          "text": "Yes, if the cache contains only finite values."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "Same shapes and inputs do not imply the same computed K/V values after parameters change. Cache invalidation must account for the compatible model state and relevant configuration."
+      }
+    },
+    {
+      "id": "ttf-a07-01-trace",
+      "objectiveIds": [
+        "ttf-o07-01"
+      ],
+      "familyId": "ttf-family-projection-budget",
+      "prompt": "Independent check. A batch has 2 sequences of 3 positions, input feature width 4. Q and K each project to width 6, V projects to width 2. With separate shared dense projections and no biases, how many learned scalar projection weights are there in total?",
+      "type": "numeric",
+      "grading": {
+        "expected": 56,
+        "absoluteTolerance": 0,
+        "explanation": "Q and K each have 4*6=24 weights; V has 4*2=8. The total is 56. Batch and sequence positions reuse these parameters rather than multiplying the count."
+      }
+    },
+    {
+      "id": "ttf-a07-01-transfer",
+      "objectiveIds": [
+        "ttf-o07-01"
+      ],
+      "familyId": "ttf-family-projection-gradient-path",
+      "prompt": "Independent transfer check. Self-attention forms Q=X@Wq, K=X@Wk and V=X@Wv. Backward computes correct gradients for those three outputs but returns only dV@Wv.T as dX. What is missing?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "The Q and K branch contributions dQ@Wq.T and dK@Wk.T must also accumulate into dX."
+        },
+        {
+          "id": "b",
+          "text": "Nothing: values alone determine all input gradients."
+        },
+        {
+          "id": "c",
+          "text": "The entire output projection must be removed."
+        },
+        {
+          "id": "d",
+          "text": "Only a transpose of the final dX buffer is required."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "X influences the result through all three learned projections. Their input-gradient contributions add. Correct forward output and individual projection gradients do not repair a missing shared-input branch."
+      }
+    },
+    {
+      "id": "ttf-a07-02-trace",
+      "objectiveIds": [
+        "ttf-o07-02"
+      ],
+      "familyId": "ttf-family-attention-mixture",
+      "prompt": "Independent check. One attention query has already-scaled scores [log(2),0], both keys allowed, and scalar values [-1,5]. What scalar output does softmax attention produce?",
+      "type": "numeric",
+      "grading": {
+        "expected": 1,
+        "absoluteTolerance": 1e-09,
+        "explanation": "The probabilities are [2/3,1/3]. Their weighted value is (-1)*(2/3)+5*(1/3)=1. Scores weight value entries after normalization."
+      }
+    },
+    {
+      "id": "ttf-a07-02-transfer",
+      "objectiveIds": [
+        "ttf-o07-02"
+      ],
+      "familyId": "ttf-family-attention-gradient-oracle",
+      "prompt": "Independent transfer check. Which test most strongly checks a custom attention backward implementation rather than merely a probability invariant?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Use zero value vectors and check only that outputs are zero."
+        },
+        {
+          "id": "b",
+          "text": "Differentiate the sum of all probabilities in one row and accept only zero."
+        },
+        {
+          "id": "c",
+          "text": "Use unequal values, nonuniform scores, head width greater than one and a nontrivial loss; compare each Q/K/V gradient with central differences of a separate masked forward reference."
+        },
+        {
+          "id": "d",
+          "text": "Compare a gradient to itself after making a copy."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "The proposed reference and inputs exercise scale, masks and all derivative paths. A probability-row sum has zero score gradient and zero values hide many faults; self-comparison is not an independent oracle."
+      }
+    },
+    {
+      "id": "ttf-a07-03-trace",
+      "objectiveIds": [
+        "ttf-o07-03"
+      ],
+      "familyId": "ttf-family-gqa-projection-budget",
+      "prompt": "Independent check. A block has model width 12, 3 query heads of width 4 and 1 shared KV head of width 4. Count dense Q, K, V and output projection parameters, excluding all biases and normalization gains. What is the total?",
+      "type": "numeric",
+      "grading": {
+        "expected": 384,
+        "absoluteTolerance": 0,
+        "explanation": "Q is 12*12=144; K and V are each 12*4=48; concatenated query-head output width is 12, so its projection is 12*12=144. Total: 144+48+48+144=384."
+      }
+    },
+    {
+      "id": "ttf-a07-03-transfer",
+      "objectiveIds": [
+        "ttf-o07-03"
+      ],
+      "familyId": "ttf-family-norm-position-conventions",
+      "prompt": "Independent transfer check. Which pair of statements correctly distinguishes RMSNorm and rotary position encoding?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "RMSNorm always centers to zero mean; RoPE may arbitrarily permute coordinate pairs without changing a checkpoint."
+        },
+        {
+          "id": "b",
+          "text": "RMSNorm removes the need for a learned gain; RoPE guarantees arbitrary-length extrapolation."
+        },
+        {
+          "id": "c",
+          "text": "RMSNorm changes the token ID vocabulary; RoPE updates the optimizer moments."
+        },
+        {
+          "id": "d",
+          "text": "RMSNorm rescales by root mean square without mean subtraction; applying the same pair rotation to Q and K preserves their dot product."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "d",
+        "explanation": "RMSNorm does not subtract the mean. An orthogonal common rotation preserves a dot product, while differing positions introduce relative rotation. Coordinate pairing and frequencies must still match the model convention."
+      }
+    },
+    {
+      "id": "ttf-a07-04-trace",
+      "objectiveIds": [
+        "ttf-o07-04"
+      ],
+      "familyId": "ttf-family-decoder-ledger",
+      "prompt": "Independent check. A one-head toy decoder uses vocabulary 4, context 3, width 2 and feed-forward width 4. Count embeddings, learned positions, three width-2 Q/K/V projections, one width-2 attention-output projection, feed-forward up/down projections and vocabulary projection. There are no biases or trainable norm gains. How many parameters?",
+      "type": "numeric",
+      "grading": {
+        "expected": 54,
+        "absoluteTolerance": 0,
+        "explanation": "Counts are 4*2=8, 3*2=6, 3*2*2=12, 2*2=4, 2*4+4*2=16 and 2*4=8. Their sum is 54."
+      }
+    },
+    {
+      "id": "ttf-a07-04-transfer",
+      "objectiveIds": [
+        "ttf-o07-04"
+      ],
+      "familyId": "ttf-family-decoder-causality",
+      "prompt": "Independent transfer check. Which assertion should a deterministic causal decoder satisfy, and which bug variant should violate it?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Training and held-out losses must always match; change the random seed to violate it."
+        },
+        {
+          "id": "b",
+          "text": "All logits must sum to one; remove weight decay to violate it."
+        },
+        {
+          "id": "c",
+          "text": "Changing only a future input token leaves earlier logits unchanged; removing the causal mask should violate this on a discriminating fixture."
+        },
+        {
+          "id": "d",
+          "text": "Every parameter must have a nonzero gradient; use any repeated token to violate it."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "Causality constrains dependence, not probability normalization of logits or guaranteed nonzero gradients. An asymmetric nondegenerate fixture should expose future leakage when the mask is removed."
+      }
+    },
+    {
+      "id": "ttf-a08-01-trace",
+      "objectiveIds": [
+        "ttf-o08-01"
+      ],
+      "familyId": "ttf-family-framework-accumulation",
+      "prompt": "Independent check. A PyTorch scalar parameter w=2 receives two fresh forward/backward calls with no optimizer step and no gradient clearing between them. Each loss is (w*x-y)^2/2. First example is x=2,y=1; second is x=1,y=3. Starting from an empty gradient buffer, what accumulated w.grad results?",
+      "type": "numeric",
+      "grading": {
+        "expected": 5,
+        "absoluteTolerance": 0,
+        "explanation": "The first contribution is (4-1)*2=6. The second is (2-3)*1=-1. PyTorch accumulates them into 5 while w remains 2. The foundations toy engine used a different reset contract."
+      }
+    },
+    {
+      "id": "ttf-a08-01-transfer",
+      "objectiveIds": [
+        "ttf-o08-01"
+      ],
+      "familyId": "ttf-family-registration-boundary",
+      "prompt": "Independent transfer check. A module stores several Linear layers only inside an ordinary Python list. Forward iterates that list successfully, but model.parameters() omits their weights. Which repair addresses the ownership problem?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Increase the learning rate for parameters that were already discovered."
+        },
+        {
+          "id": "b",
+          "text": "Use registered child modules, for example a ModuleList, and verify parameter names before constructing the optimizer."
+        },
+        {
+          "id": "c",
+          "text": "Call backward twice so the layers become discoverable."
+        },
+        {
+          "id": "d",
+          "text": "Call eval() before building the optimizer."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "A normal container does not provide recursive module registration. Registering children fixes parameter/state discovery; evaluation mode, extra backward calls and learning-rate changes do not establish ownership."
+      }
+    },
+    {
+      "id": "ttf-a08-02-trace",
+      "objectiveIds": [
+        "ttf-o08-02"
+      ],
+      "familyId": "ttf-family-async-timing",
+      "prompt": "Independent check. In an invented timeline, timing starts at 10 ms, host submission returns at 12 ms, and the requested result completes at 27 ms. There was no preceding queued work. What is elapsed completion latency in milliseconds?",
+      "type": "numeric",
+      "grading": {
+        "expected": 17,
+        "absoluteTolerance": 0,
+        "explanation": "Completion latency is 27-10=17 ms. The 2 ms interval measures host submission, not completion of the requested work."
+      }
+    },
+    {
+      "id": "ttf-a08-02-transfer",
+      "objectiveIds": [
+        "ttf-o08-02"
+      ],
+      "familyId": "ttf-family-benchmark-contract",
+      "prompt": "Independent transfer check. You want completion latency for one asynchronous operation, excluding previously queued work. Which timing plan matches that intent?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Synchronize before the start timestamp, submit the operation, wait for its completion, then stop; define warm-up and allocation inclusion."
+        },
+        {
+          "id": "b",
+          "text": "Time only the Python call and label it complete device latency."
+        },
+        {
+          "id": "c",
+          "text": "Run a debug print only in the faster candidate and compare host times."
+        },
+        {
+          "id": "d",
+          "text": "Include an unknown amount of preceding work only for the reference."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "The chosen boundaries isolate completion of the specified operation. Other plans mix submission, synchronization or unrelated queued work into an unequal comparison. This is a plan, not a measured device result."
+      }
+    },
+    {
+      "id": "ttf-a08-03-trace",
+      "objectiveIds": [
+        "ttf-o08-03"
+      ],
+      "familyId": "ttf-family-lazy-update-arithmetic",
+      "prompt": "Independent check. For L=mean((w*x-y)^2)/2, use w=2, x=[1,3], y=[0,4]. A value-and-gradient transform differentiates with respect to w. After a descent step of 0.05 and evaluation of the new weight, what is its value?",
+      "type": "numeric",
+      "grading": {
+        "expected": 1.8,
+        "absoluteTolerance": 1e-09,
+        "explanation": "Residuals are [2,2]. Mean gradient is (2*1+2*3)/2=4, so w_new=2-0.05*4=1.8. Requesting the old loss alone does not establish evaluation of this updated state."
+      }
+    },
+    {
+      "id": "ttf-a08-03-transfer",
+      "objectiveIds": [
+        "ttf-o08-03"
+      ],
+      "familyId": "ttf-family-lazy-evaluation-contract",
+      "prompt": "Independent transfer check. An MLX benchmark constructs a lazy loss and updated parameters, then stops its timer without demanding any resulting values. What is the defensible interpretation?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "It necessarily measured the entire forward, backward and update computation."
+        },
+        {
+          "id": "b",
+          "text": "Unified memory makes any missing synchronization irrelevant."
+        },
+        {
+          "id": "c",
+          "text": "It may primarily measure graph construction; demand the relevant result and updated state within the timing boundary before claiming completed-work latency."
+        },
+        {
+          "id": "d",
+          "text": "It proves the new framework computes identical gradients to PyTorch."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "Lazy graph construction and executing/materializing the needed values are separate boundaries. Shared memory does not eliminate computation or dependencies, and timing alone does not prove numerical equivalence."
+      }
+    },
+    {
+      "id": "ttf-a08-04-trace",
+      "objectiveIds": [
+        "ttf-o08-04"
+      ],
+      "familyId": "ttf-family-adapter-budget",
+      "prompt": "Independent check. A frozen base matrix has shape (out=6,in=8). LoRA adds B with shape (6,2) and A with shape (2,8), with no other trainable values. How many trainable scalar adapter parameters are there?",
+      "type": "numeric",
+      "grading": {
+        "expected": 28,
+        "absoluteTolerance": 0,
+        "explanation": "B contributes 6*2=12 and A contributes 2*8=16, totaling 28. The 48 frozen base weights still exist but are not trainable adapter parameters."
+      }
+    },
+    {
+      "id": "ttf-a08-04-transfer",
+      "objectiveIds": [
+        "ttf-o08-04"
+      ],
+      "familyId": "ttf-family-adapter-initialization",
+      "prompt": "Independent transfer check. For DeltaW=B@A with a frozen base, both adapter factors are initialized to zero. Assume the loss depends on them only through this product. What happens to their initial data gradients?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "The rank automatically grows until the factors become nonzero."
+        },
+        {
+          "id": "b",
+          "text": "Both are generally nonzero because the base model output is nonzero."
+        },
+        {
+          "id": "c",
+          "text": "Only A can ever receive gradients, regardless of initialization."
+        },
+        {
+          "id": "d",
+          "text": "Both vanish; initialize one factor nonzero while the other is zero if you need a zero initial update with a learnable first step."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "d",
+        "explanation": "The derivative with respect to each factor contains the other factor. At A=B=0 both data gradients vanish. One zero and one nonzero factor permits a gradient to the zero factor while keeping the initial product zero."
+      }
+    }
+  ],
+  "gates": [
+    {
+      "id": "ttf-g05-01",
+      "objectiveIds": [
+        "ttf-o05-01"
+      ],
+      "assessmentIds": [
+        "ttf-a05-01-trace",
+        "ttf-a05-01-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "ttf-g05-02",
+      "objectiveIds": [
+        "ttf-o05-02"
+      ],
+      "assessmentIds": [
+        "ttf-a05-02-trace",
+        "ttf-a05-02-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "ttf-g05-03",
+      "objectiveIds": [
+        "ttf-o05-03"
+      ],
+      "assessmentIds": [
+        "ttf-a05-03-trace",
+        "ttf-a05-03-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "ttf-g05-04",
+      "objectiveIds": [
+        "ttf-o05-04"
+      ],
+      "assessmentIds": [
+        "ttf-a05-04-trace",
+        "ttf-a05-04-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "ttf-g06-01",
+      "objectiveIds": [
+        "ttf-o06-01"
+      ],
+      "assessmentIds": [
+        "ttf-a06-01-trace",
+        "ttf-a06-01-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "ttf-g06-02",
+      "objectiveIds": [
+        "ttf-o06-02"
+      ],
+      "assessmentIds": [
+        "ttf-a06-02-trace",
+        "ttf-a06-02-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "ttf-g06-03",
+      "objectiveIds": [
+        "ttf-o06-03"
+      ],
+      "assessmentIds": [
+        "ttf-a06-03-trace",
+        "ttf-a06-03-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "ttf-g06-04",
+      "objectiveIds": [
+        "ttf-o06-04"
+      ],
+      "assessmentIds": [
+        "ttf-a06-04-trace",
+        "ttf-a06-04-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "ttf-g07-01",
+      "objectiveIds": [
+        "ttf-o07-01"
+      ],
+      "assessmentIds": [
+        "ttf-a07-01-trace",
+        "ttf-a07-01-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "ttf-g07-02",
+      "objectiveIds": [
+        "ttf-o07-02"
+      ],
+      "assessmentIds": [
+        "ttf-a07-02-trace",
+        "ttf-a07-02-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "ttf-g07-03",
+      "objectiveIds": [
+        "ttf-o07-03"
+      ],
+      "assessmentIds": [
+        "ttf-a07-03-trace",
+        "ttf-a07-03-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "ttf-g07-04",
+      "objectiveIds": [
+        "ttf-o07-04"
+      ],
+      "assessmentIds": [
+        "ttf-a07-04-trace",
+        "ttf-a07-04-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "ttf-g08-01",
+      "objectiveIds": [
+        "ttf-o08-01"
+      ],
+      "assessmentIds": [
+        "ttf-a08-01-trace",
+        "ttf-a08-01-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "ttf-g08-02",
+      "objectiveIds": [
+        "ttf-o08-02"
+      ],
+      "assessmentIds": [
+        "ttf-a08-02-trace",
+        "ttf-a08-02-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "ttf-g08-03",
+      "objectiveIds": [
+        "ttf-o08-03"
+      ],
+      "assessmentIds": [
+        "ttf-a08-03-trace",
+        "ttf-a08-03-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "ttf-g08-04",
+      "objectiveIds": [
+        "ttf-o08-04"
+      ],
+      "assessmentIds": [
+        "ttf-a08-04-trace",
+        "ttf-a08-04-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    }
+  ],
+  "sources": [
+    {
+      "id": "ttf-src-linear",
+      "title": "PyTorch 2.14: Linear",
+      "url": "https://docs.pytorch.org/docs/2.14/generated/torch.nn.Linear.html",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-initialization",
+      "title": "PyTorch 2.14: Neural-network initialization",
+      "url": "https://docs.pytorch.org/docs/2.14/nn.init.html",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-layernorm",
+      "title": "PyTorch 2.14: LayerNorm",
+      "url": "https://docs.pytorch.org/docs/2.14/generated/torch.nn.LayerNorm.html",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-residual",
+      "title": "He et al.: Deep Residual Learning for Image Recognition",
+      "url": "https://arxiv.org/abs/1512.03385",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-adamw",
+      "title": "PyTorch 2.14: AdamW recurrence",
+      "url": "https://docs.pytorch.org/docs/2.14/generated/torch.optim.AdamW.html",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-adamw-paper",
+      "title": "Loshchilov and Hutter: Decoupled Weight Decay Regularization",
+      "url": "https://arxiv.org/abs/1711.05101",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-reproducibility",
+      "title": "PyTorch 2.14: Reproducibility limitations",
+      "url": "https://docs.pytorch.org/docs/2.14/notes/randomness.html",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-checkpoint",
+      "title": "PyTorch: Saving and Loading Models",
+      "url": "https://docs.pytorch.org/tutorials/beginner/saving_loading_models.html",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-embedding",
+      "title": "PyTorch 2.14: Embedding",
+      "url": "https://docs.pytorch.org/docs/2.14/generated/torch.nn.Embedding.html",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-subword",
+      "title": "Sennrich et al.: Neural Machine Translation of Rare Words with Subword Units",
+      "url": "https://arxiv.org/abs/1508.07909",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-crossentropy",
+      "title": "PyTorch 2.14: CrossEntropyLoss input and reduction contract",
+      "url": "https://docs.pytorch.org/docs/2.14/generated/torch.nn.CrossEntropyLoss.html",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-sdpa",
+      "title": "PyTorch 2.14: Scaled dot-product attention and mask semantics",
+      "url": "https://docs.pytorch.org/docs/2.14/generated/torch.nn.functional.scaled_dot_product_attention.html",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-transformer",
+      "title": "Vaswani et al.: Attention Is All You Need, architecture sections",
+      "url": "https://arxiv.org/html/1706.03762v7",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-cache",
+      "title": "Hugging Face Transformers: How caching works",
+      "url": "https://huggingface.co/docs/transformers/cache_explanation",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-gqa",
+      "title": "Ainslie et al.: Grouped-query attention",
+      "url": "https://arxiv.org/html/2305.13245v3",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-rope",
+      "title": "Su et al.: RoFormer and rotary position embeddings",
+      "url": "https://arxiv.org/html/2104.09864v5",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-rmsnorm",
+      "title": "Zhang and Sennrich: Root Mean Square Layer Normalization",
+      "url": "https://arxiv.org/html/1910.07467v1",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-modules",
+      "title": "PyTorch 2.14: Module registration and training modes",
+      "url": "https://docs.pytorch.org/docs/2.14/notes/modules.html",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-autograd",
+      "title": "PyTorch 2.14: Autograd mechanics",
+      "url": "https://docs.pytorch.org/docs/2.14/notes/autograd.html",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-dispatcher",
+      "title": "PyTorch: Registering a Dispatched Operator in C++",
+      "url": "https://docs.pytorch.org/tutorials/advanced/dispatcher.html",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-mps",
+      "title": "PyTorch 2.14: MPS backend",
+      "url": "https://docs.pytorch.org/docs/2.14/notes/mps.html",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-mps-sync",
+      "title": "PyTorch 2.14: MPS synchronization API",
+      "url": "https://docs.pytorch.org/docs/2.14/mps.html",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-mlx-lazy",
+      "title": "MLX 0.32.3 documentation: Lazy Evaluation",
+      "url": "https://ml-explore.github.io/mlx/build/html/usage/lazy_evaluation.html",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-mlx-transforms",
+      "title": "MLX 0.32.3 documentation: Function Transforms",
+      "url": "https://ml-explore.github.io/mlx/build/html/usage/function_transforms.html",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-mlx-memory",
+      "title": "MLX 0.32.3 documentation: Unified Memory",
+      "url": "https://ml-explore.github.io/mlx/build/html/usage/unified_memory.html",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-lora",
+      "title": "Hu et al.: Low-Rank Adaptation of Large Language Models",
+      "url": "https://arxiv.org/html/2106.09685v2",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-alignment",
+      "title": "Ouyang et al.: Training language models to follow instructions with human feedback",
+      "url": "https://arxiv.org/html/2203.02155v1",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    },
+    {
+      "id": "ttf-src-original",
+      "title": "Original CPU calculations and instructor verification record",
+      "url": "urn:private:course-llms-and-models:training-and-transformers-review:2026-10-12",
+      "reviewedAt": "2026-10-12T15:38:44Z"
+    }
+  ],
+  "visuals": [],
+  "media": [],
+  "extensions": []
+}

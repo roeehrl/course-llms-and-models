@@ -1,0 +1,65 @@
+{
+  "status": "Design contract and acceptance examples; not an implemented resolver",
+  "revision": "0.4",
+  "principles": [
+    "Bounded progression is the default; open-ended adaptation is explicit and subject to ancestor policies.",
+    "Target pacing, hard cutoff, required-work budget, submission eligibility, access and mastery are independent controls.",
+    "Effective hard deadline is the earliest applicable adjusted deadline; every applicable quota must permit an action.",
+    "Ordinary child policies cannot weaken ancestor caps; exceptions identify an authorized policy-level change.",
+    "Server-side authorization and current policy gate all admissions and commits; prompting alone is insufficient.",
+    "No grant without explicit learner acceptance and any additional required authority.",
+    "Allowance debit, extension grant, policy revision and audit event are atomic and idempotent.",
+    "Closure below mastery threshold reports gaps; it does not claim passing or silently continue required expansion."
+  ],
+  "illustrative_course_policy": {
+    "schemaVersion": 1,
+    "policyId": "sample-course-policy",
+    "revision": 1,
+    "mode": "bounded",
+    "target": {"days": 21, "anchor": "enrollment_started", "kind": "suggested"},
+    "hardWindow": {"calendarDays": 30, "anchor": "enrollment_started", "timeZone": "Asia/Jerusalem", "pauseRule": "approved_pause_only"},
+    "requiredWork": {"maxAdditionalPlannedMinutes": 120, "maxAdditionalEpisodes": 6, "maxRemediationCyclesPerConcept": 2},
+    "extensions": {
+      "enabled": true,
+      "learnerAcceptanceRequired": true,
+      "pools": [
+        {"id": "course-days", "appliesTo": "course", "unit": "calendar_day", "total": 5, "maxPerGrant": 3, "maxGrants": 2},
+        {"id": "shared-chapter-days", "appliesTo": "chapters", "unit": "scope_calendar_day", "total": 5, "maxPerGrant": 2, "maxGrants": 3}
+      ],
+      "chargesAncestorPool": false,
+      "parentDeadlineMayMoveImplicitly": false,
+      "offerCooldownHours": 48,
+      "maxOutstandingOffersPerScope": 1,
+      "ultimateCeiling": "must be separately configured if applicable"
+    },
+    "onCap": {"requiredAdaptation": "stop", "outcome": "close_with_evidence_report", "existingMaterial": "read_only", "newSubmissions": "closed_except_predeclared_grace", "onTimeGrading": "may_finish", "continuation": "explicit_opt_in_only"},
+    "note": "All numeric values are examples, not an assigned policy for the private course. Hosted compute quotas remain separately enforced."
+  },
+  "extension_offer_contract": {
+    "requiredFields": ["offerId", "scopeId", "enrollmentId", "expectedPolicyRevision", "rationaleEvidenceRefs", "proposedActivities", "currentEffectiveDeadline", "proposedEffectiveDeadline", "addedWork", "poolDebits", "balanceBefore", "balanceAfter", "bindingAncestorCaps", "planImpact", "alternatives", "expiresAt", "requiredApprovals"],
+    "states": ["proposed", "accepted_pending_admin", "granted", "declined", "expired", "rejected", "superseded"],
+    "grantFields": ["grantId", "offerId", "acceptedTermsDigest", "learnerAcceptanceReceipt", "authorityReceipt", "idempotencyKey", "atomicLedgerTransactionId", "newPolicyRevision"]
+  },
+  "acceptance_cases": [
+    {"id":"P01","scenario":"Chapter requests +2 days but parent course ends in +1 day","expected":"No hidden override; disclose binding parent and request revised terms or separately authorized parent change."},
+    {"id":"P02","scenario":"Two offers compete for the last 2 allowance days","expected":"At most one grant consumes them; second acceptance is revalidated and cannot overdraw."},
+    {"id":"P03","scenario":"Retry the same accepted offer after server timeout","expected":"Return the same grant and balance; no second debit."},
+    {"id":"P04","scenario":"Learner declines, ignores or lets an offer expire","expected":"No extension/debit; no repeated coercive prompt."},
+    {"id":"P05","scenario":"Template changes after an enrollment has spent its allowance","expected":"No automatic refill or anchor reset; explicit migration/exception required."},
+    {"id":"P06","scenario":"Agent renames or recreates a remedial episode","expected":"Inherited budget and concept cycle accounting still apply."},
+    {"id":"P07","scenario":"A generation job starts before but publishes after the cap","expected":"Current policy fence blocks publication; bounded cancellation preserves drafts."},
+    {"id":"P08","scenario":"On-time submitted assessment finishes grading after deadline","expected":"Record eligible evidence without reopening the course."},
+    {"id":"P09","scenario":"Course ends with three unproven concepts","expected":"Close with gaps in the evidence report; no automatic mastery or endless required practice."},
+    {"id":"P10","scenario":"Daylight-saving change crosses a calendar-day duration","expected":"Use explicit calendar rule and stored resolved instant; not days times 86400 seconds."},
+    {"id":"P11","scenario":"Learner changes device time zone or reloads the episode","expected":"Persisted anchor and deadline remain unchanged."},
+    {"id":"P12","scenario":"Approved accommodation adds time","expected":"Audited override; discretionary allowance is not consumed."},
+    {"id":"P13","scenario":"Chapter selects open-ended mode under a finite course cap","expected":"Parent cap still binds."},
+    {"id":"P14","scenario":"Course explicitly enables open-ended pedagogy","expected":"Permitted unlimited teaching scope, while per-job/time/spend/security quotas remain finite."},
+    {"id":"P15","scenario":"Author calls admin grant endpoint or service reads a private chat without scope","expected":"Server denies; hiding a UI button is not the check."},
+    {"id":"P16","scenario":"Admin publishes deadline shortening to existing learners","expected":"Impact preview and explicit migration; grants/attempts/jobs handled under documented policy."},
+    {"id":"P17","scenario":"Timer handler wakes late after outage","expected":"Commit-time server checks enforce the cap regardless of timer delay."},
+    {"id":"P18","scenario":"Plan cannot fit required core work and assessment in remaining envelope","expected":"Disclose infeasibility and alternatives, never silently weaken mastery criteria."},
+    {"id":"P19","scenario":"A new SDK course is imported without custom admin code","expected":"Core supplies usable scoped administration, policy defaults and learner preview."},
+    {"id":"P20","scenario":"Learner reads archived content after closure","expected":"No mandatory work or new mastery credit is created; separately configured access and help budget apply."}
+  ]
+}

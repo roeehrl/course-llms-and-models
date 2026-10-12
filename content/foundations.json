@@ -1,0 +1,1800 @@
+{
+  "objectives": [
+    {
+      "id": "fnd-o01-01",
+      "description": "Separate model code, parameters, inputs and activations, and trace a parameterized prediction.",
+      "prerequisites": [],
+      "critical": true,
+      "placeable": true
+    },
+    {
+      "id": "fnd-o01-02",
+      "description": "Distinguish inference, backward, parameter updates and fine-tuning by their state transitions.",
+      "prerequisites": [
+        "fnd-o01-01"
+      ],
+      "critical": true,
+      "placeable": true
+    },
+    {
+      "id": "fnd-o01-03",
+      "description": "Trace encoding, categorical token IDs, next-token prediction and decoding without confusing generation with learning.",
+      "prerequisites": [
+        "fnd-o01-01",
+        "fnd-o01-02"
+      ],
+      "critical": true,
+      "placeable": true
+    },
+    {
+      "id": "fnd-o01-04",
+      "description": "Map application, training system, numerical stages and evidence states without inferring live fleet or accounting outcomes.",
+      "prerequisites": [
+        "fnd-o01-02",
+        "fnd-o01-03"
+      ],
+      "critical": true,
+      "placeable": true
+    },
+    {
+      "id": "fnd-o02-01",
+      "description": "Derive tensor element counts, dense payload sizes and row-major indices while preserving axis meaning.",
+      "prerequisites": [
+        "fnd-o01-01"
+      ],
+      "critical": true,
+      "placeable": true
+    },
+    {
+      "id": "fnd-o02-02",
+      "description": "Calculate strided-view addresses, predict aliasing and broadcasting, and expose an in-bounds transpose error.",
+      "prerequisites": [
+        "fnd-o02-01"
+      ],
+      "critical": true,
+      "placeable": true
+    },
+    {
+      "id": "fnd-o02-03",
+      "description": "Compute dot products, matrix products and axis-specific reductions, including shapes and normalization.",
+      "prerequisites": [
+        "fnd-o02-01",
+        "fnd-o02-02"
+      ],
+      "critical": true,
+      "placeable": true
+    },
+    {
+      "id": "fnd-o02-04",
+      "description": "Distinguish floating-point range, precision and accumulation order, and choose a correctness check beyond finiteness.",
+      "prerequisites": [
+        "fnd-o02-03"
+      ],
+      "critical": true,
+      "placeable": true
+    },
+    {
+      "id": "fnd-o03-01",
+      "description": "Calculate per-example and mean losses and distinguish the optimized objective from broader task success.",
+      "prerequisites": [
+        "fnd-o01-02",
+        "fnd-o02-03"
+      ],
+      "critical": true,
+      "placeable": true
+    },
+    {
+      "id": "fnd-o03-02",
+      "description": "Apply local sensitivity and the chain rule, including partial derivatives and an independent finite-difference check.",
+      "prerequisites": [
+        "fnd-o03-01"
+      ],
+      "critical": true,
+      "placeable": true
+    },
+    {
+      "id": "fnd-o03-03",
+      "description": "Compute gradient-descent updates, diagnose learning-rate failures and relate loss scaling to update size.",
+      "prerequisites": [
+        "fnd-o03-02"
+      ],
+      "critical": true,
+      "placeable": true
+    },
+    {
+      "id": "fnd-o03-04",
+      "description": "Aggregate batch losses and gradients correctly and design held-out evaluation that resists leakage.",
+      "prerequisites": [
+        "fnd-o03-03"
+      ],
+      "critical": true,
+      "placeable": true
+    },
+    {
+      "id": "fnd-o04-01",
+      "description": "Build and schedule a computation graph while preserving shared-node identity and the forward state needed for derivatives.",
+      "prerequisites": [
+        "fnd-o03-02",
+        "fnd-o03-03"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "fnd-o04-02",
+      "description": "Propagate reverse-mode sensitivities with path accumulation and keep gradient computation separate from parameter mutation.",
+      "prerequisites": [
+        "fnd-o04-01"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "fnd-o04-03",
+      "description": "Account for saved-activation memory and derive correct recomputation and microbatch accumulation boundaries.",
+      "prerequisites": [
+        "fnd-o02-04",
+        "fnd-o03-04",
+        "fnd-o04-02"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "fnd-o04-04",
+      "description": "Implement and test a scalar reverse-mode engine with shared nodes, accumulation and independent gradient checks.",
+      "prerequisites": [
+        "fnd-o04-01",
+        "fnd-o04-02",
+        "fnd-o04-03"
+      ],
+      "critical": true,
+      "placeable": false
+    }
+  ],
+  "chapters": [
+    {
+      "id": "chapter01",
+      "title": "A map of learned software",
+      "summary": "Locate data, code, parameters, inference and training in one system.",
+      "episodes": [
+        {
+          "id": "fnd-e01-01",
+          "title": "A model is a parameterized program",
+          "objectiveIds": [
+            "fnd-o01-01"
+          ],
+          "blocks": [
+            {
+              "id": "fnd-01-01-text-1",
+              "type": "text",
+              "markdown": "A model is an ordinary computation with a particular source of configuration. Write it as `prediction = f(input, parameters)`. The code specifies the operations; the parameters supply numbers those operations use. Training chooses parameter values using examples and a rule for measuring error. Inference evaluates the resulting program. Neither word implies consciousness or a hidden interpreter that rewrites your source.\n\nFor a systems analogy, imagine a packet scheduler whose scoring function is fixed but whose coefficients are tuned from measurements. Changing the coefficient buffer changes scheduling decisions without replacing the executable. A learned model separates code and coefficients in a similar way. The analogy has a boundary: training does not guarantee that the resulting decisions satisfy your correctness specification. The objective may be an imperfect proxy for what users need.\n\nHere is a complete prediction program. Treat `x` as a measured input and the result as a score, not a probability:\n\n```python\ndef predict(x, parameters):\n    w, b = parameters\n    return w * x + b\n\nparameters = (1.5, -0.5)\nassert predict(4, parameters) == 5.5\nassert predict(6, parameters) == 8.5\n```\n\nAt `x=4`, multiplication produces `6`, and the bias subtracts `0.5`. At `x=6`, the same two parameters produce another answer. The temporary products are activations: values produced while evaluating the model. They are not new learned weights. A dataset might contain pairs such as input `4`, target `7`; the target is supplied by the task, not generated by `predict`.",
+              "sourceRefs": [
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-01-01-text-2",
+              "type": "text",
+              "markdown": "Before evaluating anything else, predict what changes if `w` becomes `2` while `b` stays fixed. The answer for `x=4` becomes `7.5`. The algorithm and input are unchanged; its parameter state changed. Conversely, changing `x` to `5` with the original parameters yields `7`. This distinction lets you debug a changed output by asking separately about code, input, parameter version and execution settings.\n\nParameters are not necessarily a table of training records. Our two-number model cannot directly address an arbitrary collection of input-output pairs. Nevertheless, large learned systems can memorize examples, so “not a record database” is not a privacy guarantee. Retrieval is another mechanism: an application can query a document store and feed retrieved text into a model. That store, the prompt and the weights have separate ownership and update paths.\n\nFor the chapter lab, keep a four-column notebook: input, parameter values, intermediate values and output. Add an explicit target column only when discussing training. Trace both calls above without running them, then use the CPU program to check. Translate it into a C++ function taking a `const` parameter struct or a Rust function taking a shared reference. The useful question is which state could be mutated through the interface, not which language looks most like machine learning.\n\nYour independent checks use fresh coefficients and a changed application boundary. Complete them before opening their grading explanations. A correct worked-example replay is useful practice; it is not independent evidence that you can trace a new model.",
+              "sourceRefs": [
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-01-01-check-trace",
+              "type": "assessment",
+              "assessmentId": "fnd-a01-01-trace"
+            },
+            {
+              "id": "fnd-01-01-check-transfer",
+              "type": "assessment",
+              "assessmentId": "fnd-a01-01-transfer"
+            }
+          ],
+          "gateId": "fnd-g01-01"
+        },
+        {
+          "id": "fnd-e01-02",
+          "title": "Training versus inference versus fine-tuning",
+          "objectiveIds": [
+            "fnd-o01-02"
+          ],
+          "blocks": [
+            {
+              "id": "fnd-01-02-text-1",
+              "type": "text",
+              "markdown": "Inference, training and fine-tuning describe work performed with a model, not different species of software. Inference evaluates a model for an input. Training additionally compares a prediction with a target, computes sensitivities of a loss, and uses those sensitivities to choose parameter updates. Fine-tuning starts from previously learned parameters and trains further for a chosen purpose. It can update all parameters or a selected subset.\n\nUse an explicit state ledger. Let `prediction = w*x`, with `w=2`, input `x=3`, target `y=8`, and loss `L=(prediction-y)^2/2`. Forward computes prediction `6`, residual `-2`, and loss `2`. Backward computes the gradient `dL/dw=(prediction-y)*x=-6`. A plain gradient-descent update with learning rate `0.1` gives `w_new=2-0.1*(-6)=2.6`. A fresh forward then predicts `7.8` and has loss `0.02`.\n\n| Boundary | Weight | Values just produced |\n| --- | --- | --- |\n| Before forward | 2 | Input 3, target 8 |\n| After forward | 2 | Prediction 6, loss 2 |\n| After backward | 2 | Weight gradient -6 |\n| After update | 2.6 | New parameter value |\n\nThe gradient is a proposed direction signal, not the new weight. Backward does not itself perform the optimizer update in this explicit loop. A compiler can fuse work physically, but the conceptual state transitions remain distinct. Some optimizers also maintain momentum or other history; that state belongs in the update ledger.",
+              "sourceRefs": [
+                "fnd-src-autograd-quick",
+                "fnd-src-transfer",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-01-02-text-2",
+              "type": "text",
+              "markdown": "Predict which lines would occur in a serving request: `load_parameters`, `forward`, `choose_output`, `append_request_log`. All four can occur without training. A growing log is application state. A growing text context or an inference cache is request state. Neither proves a changed parameter. Evidence of training would include a target-dependent objective and an actual update to trainable parameters, with the chosen training process identified.\n\nLikewise, an inference process can be stateful while its weights remain fixed. Do not define inference as “nothing in memory changes.” Temporary tensors, random-generator state and caches can change. Ordinary inference here means no training update; systems that deliberately adapt during use must expose that additional behavior rather than assume every prompt causes learning.\n\nTo reason about fine-tuning, imagine loading checkpoint A into the same function and running updates on task-specific examples. The starting coefficients differ from random initialization, but forward, backward and update retain their meanings. Freezing a coefficient means excluding it from updates; it does not mean its value cannot affect a prediction. A frozen stage can also transmit sensitivities to trainable stages elsewhere in a larger graph.\n\nAs a transfer exercise, inspect this invented trace: `request_received`, `tokens_created`, `forward_done`, `response_saved`. State exactly which facts it supports. It supports execution and saved output, not a weight update. Add `gradient_ready` and you can infer gradient computation, still not an optimizer step. The independent questions ask you to maintain this distinction with different numbers and a partially frozen model.",
+              "sourceRefs": [
+                "fnd-src-autograd-quick",
+                "fnd-src-transfer",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-01-02-check-trace",
+              "type": "assessment",
+              "assessmentId": "fnd-a01-02-trace"
+            },
+            {
+              "id": "fnd-01-02-check-transfer",
+              "type": "assessment",
+              "assessmentId": "fnd-a01-02-transfer"
+            }
+          ],
+          "gateId": "fnd-g01-02"
+        },
+        {
+          "id": "fnd-e01-03",
+          "title": "From text to token IDs and predictions",
+          "objectiveIds": [
+            "fnd-o01-03"
+          ],
+          "blocks": [
+            {
+              "id": "fnd-01-03-text-1",
+              "type": "text",
+              "markdown": "A language model consumes numbers. Tokenization is the boundary that converts text into a sequence of vocabulary IDs. An ID is a categorical label, like an opcode number: ID 4 is not intrinsically twice as meaningful as ID 2. The tokenizer's vocabulary and encoding rules must match the model's expectations. Swapping that mapping while keeping the same weight file can produce valid array accesses with wrong meanings.\n\nFor a completely inspectable lab, use a character tokenizer with vocabulary `['a', 'b', ' ']`, assigned IDs `0, 1, 2`. Encode `ab a` as `[0,1,2,0]`. This is deliberately small; real tokenizers may use bytes, characters or subword pieces, and a word can occupy several tokens. The subword paper in the sources explains one motivation: representing rare words with reusable pieces rather than a separate entry for every possible word.\n\nNow define a next-token predictor as a table indexed by the last token. These entries are invented learned-parameter stand-ins; no training has been performed:\n\n```python\nvocab = ['a', 'b', ' ']\nids = [vocab.index(ch) for ch in 'ab a']\nnext_prob = [\n    [0.1, 0.7, 0.2],  # after a\n    [0.2, 0.2, 0.6],  # after b\n    [0.8, 0.1, 0.1],  # after space\n]\nlast = ids[-1]\nchosen = max(range(3), key=lambda i: next_prob[last][i])\nassert chosen == 1\nassert vocab[chosen] == 'b'\n```\n\nEach row sums to one. For final token `a`, greedy choice selects ID `1`, whose probability is `0.7`. If instead you sampled from that row repeatedly, `b` would be the most frequent outcome in expectation, not a guaranteed answer each time. Decoding converts the selected ID back to text.",
+              "sourceRefs": [
+                "fnd-src-subword",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-01-03-text-2",
+              "type": "text",
+              "markdown": "Predict the next greedy token after appending that `b`. The new last ID is `1`, so the next choice is a space, with probability `0.6`. The table has not changed. Generation changed the input context and created outputs; it did not train the model. This toy only consults the last token. Later models use longer contexts, but the encode, predict, select, append and decode boundaries still help you locate bugs.\n\nNext-token training examples can be built by shifting the same sequence. For `[0,1,2,0]`, inputs `[0,1,2]` pair with targets `[1,2,0]`. At each position the target is the following token, not the current token copied back. A system that accidentally exposes the target as an input may look excellent during training and fail when asked to generate it.\n\nWrite down the entire trace for `b a`: characters, IDs, selected probability row, greedy ID and decoded character. Then consider a deployment that exchanges IDs for `a` and `b` only in the tokenizer. The Python code still runs, but its lookup now selects a different row. This resembles an ABI mismatch between an enum and a serialized table. Trace boundaries and versions before assuming a low-level arithmetic failure.\n\nThe independent checks use another vocabulary and selection rule. They assess mapping and prediction mechanics; they do not ask you to memorize the toy table or claim that a three-row predictor understands language.",
+              "sourceRefs": [
+                "fnd-src-subword",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-01-03-check-trace",
+              "type": "assessment",
+              "assessmentId": "fnd-a01-03-trace"
+            },
+            {
+              "id": "fnd-01-03-check-transfer",
+              "type": "assessment",
+              "assessmentId": "fnd-a01-03-transfer"
+            }
+          ],
+          "gateId": "fnd-g01-03"
+        },
+        {
+          "id": "fnd-e01-04",
+          "title": "TAH, IOTA, SN9 and our four Macs: the map",
+          "objectiveIds": [
+            "fnd-o01-04"
+          ],
+          "blocks": [
+            {
+              "id": "fnd-01-04-text-1",
+              "type": "text",
+              "markdown": "Place the familiar private names on a conceptual map before reading operational logs. The approved course design, reviewed on 12 October 2026, uses TAH for the Train at Home application, IOTA for the distributed training system it connects to, and SN9 for the Bittensor subnet context. These are different layers of description. A model is the parameterized numerical computation; an application and distributed protocol arrange when and where that computation happens.\n\nThe phrase “our four Macs” names the private course's motivating case. It supplies no current claim about which host is connected, its assigned partition, its chip, or its throughput. The design describes shared peers, not a permanently wired private pipeline. For this episode, use imaginary workers A, B and C. A single device could execute all their computations sequentially for a small model; distribution changes placement and communication, not the mathematical function being taught.\n\nBuild a two-stage scalar example. Stage A computes `h=w*x`; stage B computes `prediction=v*h`. Choose `x=2`, `w=3`, `v=4`, and target `20`. Forward sends activation `h=6` to B, which produces `24`. For half squared error, the loss is `8`. Backward begins with output sensitivity `24-20=4`. B computes its parameter gradient `4*h=24` and sends activation gradient `4*v=16` to A. A computes its parameter gradient `16*x=32`.\n\nNotice the payload distinction. Forward sent a value, `6`; backward sent sensitivity to that value, `16`. Neither payload is automatically a replacement parameter. If both parameters use plain gradient descent with rate `0.01`, the new values are `w=2.68` and `v=3.76`. Both gradients came from the same old forward state.",
+              "sourceRefs": [
+                "fnd-src-design",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-01-04-text-2",
+              "type": "text",
+              "markdown": "Predict what happens if B merely sends the number `24` and labels it “backward complete.” That number could be B's parameter gradient or its prediction. A needs the gradient with respect to its output, which is `16` in this example. A typed message needs semantic identity, shape and model/sample version, not just a floating-point payload. This is a distributed-systems contract problem attached to numerical computation.\n\nUse a second ledger for evidence. “Computed” means local arithmetic finished. “Submitted” means a result was sent. “Accepted” means a receiving authority acknowledged that result under its rules. “Credited” and “paid” concern separate accounting outcomes. Do not promote one state into the next without its own evidence. A successful local backward or network upload is not proof of downstream accounting.\n\nAs the chapter lab's closing exercise, trace a text example through tokenization and a prediction function, then draw boxes around data, code, parameters and temporary activations. Add arrows for hypothetical forward values and returning sensitivities. Label every trace line as invented teaching data. You can understand the responsibilities without querying a fleet or exercising controls.\n\nThe chapter's four episode gates collectively check four capabilities: identifying model state, separating training phases, tracing token boundaries, and interpreting distributed evidence. If you can perform the scalar calculation but confuse submission with acceptance, that is a specific remaining objective. Neither a finished animation nor a confident explanation of unrelated infrastructure fills that gap.",
+              "sourceRefs": [
+                "fnd-src-design",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-01-04-check-trace",
+              "type": "assessment",
+              "assessmentId": "fnd-a01-04-trace"
+            },
+            {
+              "id": "fnd-01-04-check-transfer",
+              "type": "assessment",
+              "assessmentId": "fnd-a01-04-transfer"
+            }
+          ],
+          "gateId": "fnd-g01-04"
+        }
+      ]
+    },
+    {
+      "id": "chapter02",
+      "title": "Tensors are structured buffers",
+      "summary": "Reason about shape, dtype, layout and memory before using a framework.",
+      "episodes": [
+        {
+          "id": "fnd-e02-01",
+          "title": "Scalars, vectors, matrices and tensor shapes",
+          "objectiveIds": [
+            "fnd-o02-01"
+          ],
+          "blocks": [
+            {
+              "id": "fnd-02-01-text-1",
+              "type": "text",
+              "markdown": "A tensor is an indexed collection of values with metadata describing how to interpret them. Start with a flat buffer, a shape and an element type. A scalar has shape `()` and one value; a vector of five elements has shape `(5,)`; a matrix with two rows and three columns has shape `(2,3)`. In this course, tensor rank means number of axes, not the linear-algebra rank of a matrix.\n\nNames assigned to axes carry meaning that shape alone cannot enforce. A language batch might use shape `(B,T,D)` for batch, time and feature axes. With `(2,3,4)`, the buffer contains `2*3*4=24` elements. A dense FP32 allocation needs `24*4=96` payload bytes. This excludes object headers, allocator rounding and other tensors. The same logical values stored in a two-byte format need 48 payload bytes, but changing representation can change which values are representable.\n\nFor a contiguous row-major buffer, the final index moves fastest. Element `(b,t,d)` has element offset `b*(T*D)+t*D+d`. Thus `(1,2,3)` has offset `1*12+2*4+3=23`, the final element. Multiplying by four gives byte offset 92 from the buffer's start. The element occupies bytes 92 through 95; offset and allocation size are different quantities.\n\n```python\nshape = (2, 3, 4)\nb, t, d = 1, 2, 3\ncount = shape[0] * shape[1] * shape[2]\noffset = b * 12 + t * 4 + d\nassert (count, offset, offset * 4) == (24, 23, 92)\n```\n\nPredict the offset of `(0,2,1)` before calculating it: two rows of four features plus one feature gives `9`. This is the same index arithmetic you would write behind a C++ span or Rust slice wrapper.",
+              "sourceRefs": [
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-02-01-text-2",
+              "type": "text",
+              "markdown": "Now distinguish `(4,)`, `(1,4)` and `(4,1)`. They contain the same number of elements but expose different axes. A row vector and a column vector participate differently in matrix multiplication and broadcasting. Even `(2,3)` and `(3,2)` have equal element counts without agreeing on the meanings of their indices. “The allocation is large enough” is a memory-safety observation, not a shape-correctness proof.\n\nAn axis of length one remains an axis. A tensor of shape `(0,4)` has zero elements, while shape `()` has one. Empty batches therefore need deliberate reduction behavior; a mean over no observations is not an ordinary zero-valued training example. Production libraries may reject some empty operations or define special results, so inspect the exact operation's contract.\n\nFor the lab, draw 24 numbered boxes as a flat buffer and annotate the two batch regions and three time steps in each. Pick an index, derive its offset and only then inspect the box. Reverse the exercise by taking offset `17`: it belongs to batch `1`, time `1`, feature `1`. This written memory viewer is sufficient to learn the indexing mechanism before an interactive renderer exists.\n\nThe independent checks ask for payload size and diagnose swapped semantic axes. Keep units explicit: bytes, elements and axes are different answers. A correct size calculation cannot excuse a wrong interpretation of which example or feature each value belongs to.",
+              "sourceRefs": [
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-02-01-check-trace",
+              "type": "assessment",
+              "assessmentId": "fnd-a02-01-trace"
+            },
+            {
+              "id": "fnd-02-01-check-transfer",
+              "type": "assessment",
+              "assessmentId": "fnd-a02-01-transfer"
+            }
+          ],
+          "gateId": "fnd-g02-01"
+        },
+        {
+          "id": "fnd-e02-02",
+          "title": "Strides, views, broadcasting and aliasing",
+          "objectiveIds": [
+            "fnd-o02-02"
+          ],
+          "blocks": [
+            {
+              "id": "fnd-02-02-text-1",
+              "type": "text",
+              "markdown": "Shape says which indices exist. Strides say how those indices advance through storage. In this episode, strides are measured in elements unless explicitly labeled bytes. With base offset `o`, an index `(i,j)` addresses `o+i*s0+j*s1`. NumPy's exposed strides are measured in bytes, so translating between the two conventions requires the element size. Unit confusion can turn a correct formula into an incorrect address.\n\nTake flat storage `[10,20,30,40,50,60]`, viewed as a `(2,3)` matrix with element strides `(3,1)`. Its rows are `[10,20,30]` and `[40,50,60]`. A transpose view has shape `(3,2)` and strides `(1,3)`. No element needs to move. Transposed index `(2,1)` addresses `2*1+1*3=5`, containing `60`. Transposed index `(0,1)` addresses `3`, containing `40`.\n\n```python\nstorage = [10, 20, 30, 40, 50, 60]\ndef read(i, j, strides):\n    return storage[i * strides[0] + j * strides[1]]\nassert read(0, 1, (1, 3)) == 40\nassert read(0, 1, (2, 1)) == 20\n```\n\nThe second assertion exposes a bug: a kernel assumed the transposed `(3,2)` view was contiguous. It read a finite, in-bounds value from the wrong logical position. Shape checking, finiteness checks and memory sanitizers could all pass. A layout-sensitive reference check catches the error because it verifies the intended mapping.",
+              "sourceRefs": [
+                "fnd-src-strides",
+                "fnd-src-broadcast",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-02-02-text-2",
+              "type": "text",
+              "markdown": "Predict what happens when you write `99` through transposed index `(0,1)`. Under this mutable shared-storage model, original matrix index `(1,0)` becomes `99`, since both identify storage offset `3`. A view behaves like a borrowed window, not an independent allocation. Making a copy creates separate storage. Reshaping may return a view or require a copy depending on layout and library rules; never derive ownership solely from a method name.\n\nBroadcasting is another indexing rule. Align shapes from the right; corresponding dimensions must be equal or one must be one. Combining `(2,1,3)` and `(1,4,1)` yields `(2,4,3)`. At output `(b,t,d)`, read the first input at `(b,0,d)` and the second at `(0,t,0)`. The repeated reads do not require materializing repeated input values. The resulting output may still require a larger allocation.\n\nA broadcast view can be represented with a zero stride on a repeated axis. That creates aliasing: several logical indices identify the same stored element. Libraries may restrict writes to such views. Do not treat a zero-stride view like independent writable slots; in Rust terms, constructing unrestricted mutable references to all those slots would violate the intended uniqueness contract.\n\nFor the lab, retain the six-element storage diagram, derive the transposed grid and mark the two aliases before simulating a write. Then diagnose a kernel that uses `(2,1)` instead of `(1,3)`. Choose an asymmetric position such as `(0,1)`; checking only the first and final elements would miss this defect. Your transfer question asks you to select the comparison that actually discriminates correct indexing from a plausible wrong implementation.",
+              "sourceRefs": [
+                "fnd-src-strides",
+                "fnd-src-broadcast",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-02-02-check-trace",
+              "type": "assessment",
+              "assessmentId": "fnd-a02-02-trace"
+            },
+            {
+              "id": "fnd-02-02-check-transfer",
+              "type": "assessment",
+              "assessmentId": "fnd-a02-02-transfer"
+            }
+          ],
+          "gateId": "fnd-g02-02"
+        },
+        {
+          "id": "fnd-e02-03",
+          "title": "Dot products, matrix multiplication and reductions",
+          "objectiveIds": [
+            "fnd-o02-03"
+          ],
+          "blocks": [
+            {
+              "id": "fnd-02-03-text-1",
+              "type": "text",
+              "markdown": "A dot product multiplies corresponding elements and reduces the products to one number. For `a=[1,2,3]` and `b=[4,-1,2]`, the products are `[4,-2,6]` and their sum is `8`. This is a loop with an accumulator. It is not elementwise multiplication alone, which would return all three products. Naming the output shape is a useful first check before evaluating a formula.\n\nMatrix multiplication repeats that operation across pairs of rows and columns. If A has shape `(m,k)` and B has shape `(k,n)`, C has shape `(m,n)`, with `C[i,j]=sum(A[i,r]*B[r,j] for r in range(k))`. The shared dimension is reduced away. For this example, use A rows `[1,2,3]`, `[4,5,6]` and B rows `[1,0]`, `[0,1]`, `[1,1]`.\n\n```python\nA = [[1, 2, 3], [4, 5, 6]]\nB = [[1, 0], [0, 1], [1, 1]]\nC = [[sum(A[i][r] * B[r][j] for r in range(3))\n      for j in range(2)] for i in range(2)]\nassert C == [[4, 5], [10, 11]]\n```\n\nFor example, `C[1,0]=4*1+5*0+6*1=10`. Predict `C[0,1]` before running the loop: `1*0+2*1+3*1=5`. Each output combines three products. Across four outputs there are twelve multiplications. With the accumulator initialized from the first product, there are eight additions; a zero-initialized literal loop executes twelve additions. Operation-count conventions need to be stated when comparing implementations.",
+              "sourceRefs": [
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-02-03-text-2",
+              "type": "text",
+              "markdown": "Reductions also remove axes without multiplying two inputs. Summing A over columns, called axis 1 in zero-based indexing, yields `[6,15]` with shape `(2,)`. Keeping the reduced dimension yields shape `(2,1)`, useful for later broadcasting. Summing over rows yields `[5,7,9]` with shape `(3,)`. An unlabeled instruction to “sum the matrix” is ambiguous if the downstream consumer expects an axis-specific result.\n\nA mean includes a divisor. The mean of all six A elements is `21/6=3.5`; averaging row sums gives `10.5`, a different quantity. This distinction will matter when a batch contains several examples and each example contains several tokens. A changed reduction convention changes the effective loss scale and gradients, even though every individual score is unchanged.\n\nFor a systems analogy, matrix multiplication resembles nested loops whose iteration domain and reduction variable are part of the interface. Loop interchange, tiling and vectorization may preserve real-number algebra while changing memory traffic or floating-point accumulation order. Before optimizing, write down the index equation and a tiny asymmetric test. A matrix full of ones hides many permutations because different addresses contain indistinguishable values.\n\nThe lab asks you to compute one output by hand, then choose which axis to reduce for one total per example. The independent calculation changes both matrices. The transfer check introduces a dimensionally valid but semantically wrong reduction. Passing the compiler's shape rules is useful; matching the intended mapping from examples to outputs is the stronger contract you must defend.\n\nWhen reviewing a reduction, name the surviving axes aloud and state the divisor. That small habit catches many valid-looking but wrongly normalized results.",
+              "sourceRefs": [
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-02-03-check-trace",
+              "type": "assessment",
+              "assessmentId": "fnd-a02-03-trace"
+            },
+            {
+              "id": "fnd-02-03-check-transfer",
+              "type": "assessment",
+              "assessmentId": "fnd-a02-03-transfer"
+            }
+          ],
+          "gateId": "fnd-g02-03"
+        },
+        {
+          "id": "fnd-e02-04",
+          "title": "FP32, FP16, BF16 and why order matters",
+          "objectiveIds": [
+            "fnd-o02-04"
+          ],
+          "blocks": [
+            {
+              "id": "fnd-02-04-text-1",
+              "type": "text",
+              "markdown": "Floating-point numbers approximate real arithmetic using a sign, an exponent and a finite significand. A dtype is both a storage contract and a constraint on representable values. For normal values, FP32 has 8 exponent bits and 23 stored fraction bits; FP16 has 5 and 10; BF16 has 8 and 7. Each also has a sign bit. The implicit leading bit gives more precision than the stored fraction count alone suggests.\n\nFP16 and BF16 both occupy two bytes, but their tradeoffs differ. BF16 spends more bits on exponent range and fewer on precision. Around 1, consecutive normal values are separated by `2^-23` for FP32, `2^-10` for FP16 and `2^-7` for BF16. Those spacings are approximately `0.0000001192`, `0.0009765625` and `0.0078125`. Having FP32-like exponent range does not give BF16 FP32-like resolution.\n\nConsider adding `0.001` to `1`, with the exact sum rounded once to the nearest representable value, ties to even. In FP16 the rounded result is `1.0009765625`. In BF16 it is `1.0`, because the increment is less than half the spacing there. A useful signal can disappear while the result remains perfectly finite. Storage dtype, multiplication precision and accumulation precision may differ in an implementation; this example makes its rounding point explicit.",
+              "sourceRefs": [
+                "fnd-src-float",
+                "fnd-src-bfloat",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-02-04-text-2",
+              "type": "text",
+              "markdown": "Now predict two parenthesizations using FP32 arithmetic at every addition. Let `a=2^24`, `b=1`, `c=-2^24`. The expression `(a+b)+c` returns `0`; `a+(b+c)` returns `1`. At `2^24`, FP32 spacing is two. The halfway sum `2^24+1` rounds to `2^24` under ties-to-even. But `1-2^24` is exactly representable, so the second parenthesization preserves the one.\n\n```python\nimport struct\ndef f32(x):\n    return struct.unpack('f', struct.pack('f', x))[0]\na, b, c = f32(2**24), f32(1), f32(-(2**24))\nleft = f32(f32(a + b) + c)\nright = f32(a + f32(b + c))\nassert (left, right) == (0.0, 1.0)\n```\n\nThe explicit conversion matters because ordinary Python floats on this host use binary64, not binary32. This tiny CPU experiment controls each rounding point and does not claim to emulate every device's fused instructions, underflow behavior or reduction tree.\n\nA parallel reduction can change the addition tree. Consequently, mathematical equivalence, bitwise equality and agreement within a justified tolerance are separate claims. A deterministic wrong transpose can return exactly the same wrong answer every run; a correct alternative reduction may differ slightly. Neither reproducibility nor finiteness establishes correctness by itself.\n\nFor the lab, compare a result to an independent reference using `abs(actual-reference) <= atol + rtol*abs(reference)`, after rejecting nonfinite values. Near a zero reference, absolute tolerance matters. A tolerance must follow from the operation, scale and purpose; do not enlarge it until a failing implementation passes. A large indexing error requires a semantic fix, not a floating-point excuse.\n\nThe independent checks ask for a specific rounded result and a precision-sensitive transfer decision. These are numerical reasoning exercises, not chip qualification. No GPU operation, backend equivalence or production deployment is established by this lesson's CPU calculations.",
+              "sourceRefs": [
+                "fnd-src-float",
+                "fnd-src-bfloat",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-02-04-check-trace",
+              "type": "assessment",
+              "assessmentId": "fnd-a02-04-trace"
+            },
+            {
+              "id": "fnd-02-04-check-transfer",
+              "type": "assessment",
+              "assessmentId": "fnd-a02-04-transfer"
+            }
+          ],
+          "gateId": "fnd-g02-04"
+        }
+      ]
+    },
+    {
+      "id": "chapter03",
+      "title": "What learning actually optimizes",
+      "summary": "Compute a loss and explain why an update can improve it.",
+      "episodes": [
+        {
+          "id": "fnd-e03-01",
+          "title": "One weight, one prediction, one loss",
+          "objectiveIds": [
+            "fnd-o03-01"
+          ],
+          "blocks": [
+            {
+              "id": "fnd-03-01-text-1",
+              "type": "text",
+              "markdown": "Learning needs a rule for deciding whether a prediction is useful. A loss function converts a prediction and a target into a scalar penalty. Minimizing that penalty is a concrete optimization problem; choosing a penalty that reflects the intended task is a separate engineering decision. A scheduler optimized only for average latency may neglect rare stalls. Similarly, a model optimized for one measured error can miss qualities absent from that measure.\n\nUse one weight: `prediction=w*x`. The input and target belong to the example; the weight is the quantity we can change. Define half squared error `L=(prediction-y)^2/2`. The factor one half is a convention that simplifies its derivative. It does not change which weight minimizes a fixed collection of examples, but it does change the gradient scale relative to an unhalved loss.\n\nWith `x=2`, `y=5`, and `w=1`, prediction is `2`, residual is `-3`, and loss is `4.5`. At `w=2`, prediction is `4`, residual is `-1`, and loss is `0.5`. At `w=3`, prediction is `6` and loss is also `0.5`. Losing the residual's sign is intentional: both underprediction and overprediction are penalized. The minimum for this single example is at `w=2.5`, where prediction equals target.\n\n```python\ndef loss(w, x=2, y=5):\n    residual = w * x - y\n    return 0.5 * residual * residual\nassert [loss(w) for w in (1, 2, 2.5, 3)] == [4.5, 0.5, 0.0, 0.5]\n```\n\nPredict what happens at `w=4`: the residual is `3`, and loss returns to `4.5`. The curve is symmetric around `2.5`; the raw weight's magnitude does not by itself tell you whether the prediction is good.",
+              "sourceRefs": [
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-03-01-text-2",
+              "type": "text",
+              "markdown": "An objective over several examples usually aggregates per-example losses. Keep `w=2` and add a second example `x=1,y=1`. The first example's loss is `0.5`; the second's is also `0.5`; their mean is `0.5`. Neither example has perfect prediction. An average is a useful summary that can conceal who is poorly served, so inspect per-example errors when debugging.\n\nThe labels and loss jointly define the task. If targets are milliseconds, the squared error has squared-millisecond units. Changing targets to seconds while leaving everything else unchanged alters the numerical scale. A learning-rate choice that worked with one scaling is not automatically appropriate for the other. Units are part of the model interface, just as they are in telemetry or scheduling code.\n\nA zero training loss does not prove a generally correct predictor. There may be too few examples, repeated examples, inconsistent measurement rules or inputs unlike future traffic. Our single-example optimum says exactly that one point is matched. It says nothing about extrapolation to a new region or robustness to a changed data source.\n\nFor the lab, make a small table of weights, predictions, signed residuals and losses. Predict the direction of improvement before each calculation. Preserve the residual column: it will explain the gradient's sign in the next episode. The independent checks change the target and distinguish minimizing a defined objective from achieving an unstated product goal.",
+              "sourceRefs": [
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-03-01-check-trace",
+              "type": "assessment",
+              "assessmentId": "fnd-a03-01-trace"
+            },
+            {
+              "id": "fnd-03-01-check-transfer",
+              "type": "assessment",
+              "assessmentId": "fnd-a03-01-transfer"
+            }
+          ],
+          "gateId": "fnd-g03-01"
+        },
+        {
+          "id": "fnd-e03-02",
+          "title": "Derivatives as sensitivity; the chain rule",
+          "objectiveIds": [
+            "fnd-o03-02"
+          ],
+          "blocks": [
+            {
+              "id": "fnd-03-02-text-1",
+              "type": "text",
+              "markdown": "A derivative measures local sensitivity. If a differentiable scalar function changes from `L(w)` to `L(w+delta)`, then for a sufficiently small change, `L(w+delta)` is approximately `L(w)+(dL/dw)*delta`. The derivative is not an instruction to change the weight by that amount. It is a rate describing how the output responds near the current state, with every other independent input held fixed.\n\nTake `prediction=w*x`, residual `r=prediction-y`, and `L=r*r/2`. There are three local links: `dL/dr=r`, `dr/dprediction=1`, and `dprediction/dw=x`. The chain rule multiplies sensitivities along this path, giving `dL/dw=r*x`. At `x=2,y=5,w=1`, the residual is `-3`, so the weight gradient is `-6`.\n\nPredict the effect of increasing the weight by `0.01`. The linear approximation gives a loss change of `-6*0.01=-0.06`, predicting loss `4.44`. The exact new prediction is `2.02`, residual `-2.98`, and loss `4.4402`. The discrepancy `0.0002` is the quadratic term omitted by the local linear approximation. Sensitivity reasoning works better for small changes, not because the derivative is uncertain, but because a local line is not the whole curve.\n\nA central finite difference provides an independent numerical check:\n\n```python\ndef loss(w):\n    return 0.5 * (2 * w - 5)**2\nh = 1e-5\nslope = (loss(1 + h) - loss(1 - h)) / (2 * h)\nassert abs(slope - (-6)) < 1e-8\n```\n\nThis estimates the derivative by two forward evaluations. Automatic differentiation instead applies derivative rules to the executed operations. Confusing them can lead to misleading performance and precision expectations.",
+              "sourceRefs": [
+                "fnd-src-numerical",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-03-02-text-2",
+              "type": "text",
+              "markdown": "A model with several parameters has a partial derivative for each. For `prediction=w*x+b`, the same loss yields `dL/dw=r*x` and `dL/db=r`. With `w=1,b=0,x=2,y=5`, those values are `-6` and `-3`. The gradient vector stores both sensitivities. It points toward greatest local increase under the usual Euclidean interpretation; subtracting a suitably scaled gradient is the descent direction.\n\nThink of the chain rule as propagating the effect of a small perturbation through a dataflow graph. A units check helps: output units per residual unit, times residual units per prediction unit, times prediction units per weight unit, leaves loss units per weight unit. The cancellations expose a missing factor of `x` more reliably than memorizing a slogan about backpropagation.\n\nFinite differences are useful but imperfect. Very large steps measure nonlocal behavior; very small steps lose information through subtraction and rounding. Nondifferentiable points need separate treatment. Here the polynomial is smooth, so several nearby step sizes should agree. Later, gradient tests should use a higher-precision reference and avoid claiming that a single numerical match proves all inputs correct.\n\nFor practice, set `x=0` while retaining a nonzero residual. The weight sensitivity becomes zero because changing `w` cannot affect `w*0`; a bias can still influence the prediction. The independent questions test a new chain and ask you to diagnose the missing-factor error on a discriminating input.",
+              "sourceRefs": [
+                "fnd-src-numerical",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-03-02-check-trace",
+              "type": "assessment",
+              "assessmentId": "fnd-a03-02-trace"
+            },
+            {
+              "id": "fnd-03-02-check-transfer",
+              "type": "assessment",
+              "assessmentId": "fnd-a03-02-transfer"
+            }
+          ],
+          "gateId": "fnd-g03-02"
+        },
+        {
+          "id": "fnd-e03-03",
+          "title": "Gradient descent and learning rate",
+          "objectiveIds": [
+            "fnd-o03-03"
+          ],
+          "blocks": [
+            {
+              "id": "fnd-03-03-text-1",
+              "type": "text",
+              "markdown": "Gradient descent converts a sensitivity into an explicit update: `w_new=w-learning_rate*gradient`. The learning rate is a positive scale, commonly written eta. The gradient points toward local increase; subtraction seeks decrease. The update changes parameters. Computing the gradient alone leaves them where they were, just as calculating a proposed configuration change does not commit it.\n\nReturn to `x=2,y=5,w=1`. Loss is `4.5`, and the gradient is `-6`. With eta `0.1`, the new weight is `1.6`, the new prediction is `3.2`, and the new loss is `1.62`. With eta `0.01`, the new weight is `1.06` and loss is `4.1472`: improvement, but a smaller step. With eta `0.6`, the new weight is `4.6` and loss is `8.82`: the update overshot far enough to make the objective worse.\n\n```python\ndef loss(w):\n    return 0.5 * (2 * w - 5)**2\ndef step(w, eta):\n    gradient = (2 * w - 5) * 2\n    return w - eta * gradient\nassert abs(loss(step(1, 0.1)) - 1.62) < 1e-12\nassert abs(loss(step(1, 0.6)) - 8.82) < 1e-12\n```\n\nPredict whether merely crossing the optimum is necessarily failure. It is not. With eta `0.3`, the new weight is `2.8`, on the other side of optimum `2.5`, but loss falls to `0.18`. Overshooting means crossing the minimum; divergence means errors fail to shrink. Those are related but different observations.",
+              "sourceRefs": [
+                "fnd-src-numerical",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-03-03-text-2",
+              "type": "text",
+              "markdown": "This quadratic lets us derive an exact stability condition. Its gradient is `4*(w-2.5)`. Define error `e=w-2.5`; one update gives `e_new=(1-4*eta)*e`. Repeated updates shrink every nonzero error when `abs(1-4*eta)<1`, which means `0<eta<0.5`. At eta `0.5`, the error flips sign without shrinking. At eta `0.25`, this exact scalar problem reaches the minimum in one step. This is a property of this curve, not a universal recipe for neural networks.\n\nNow change the data units or loss reduction. Multiplying the loss by ten multiplies the gradient by ten, so preserving the same update requires dividing eta by ten. Summing a batch instead of averaging it can likewise change the effective step. A learning-rate comparison is uninterpretable unless the objective and reduction conventions are also specified.\n\nFor a systems analogy, treat the optimizer like a controller with a gain. Too small a gain reacts slowly; too large a gain can oscillate or amplify error. The analogy is useful for intuition but does not replace the actual curve's mathematics. Real training introduces several parameters, noisy batches and changing local curvature.\n\nIn the lab, record old weight, loss, gradient, eta, new weight and newly recomputed loss. Do not reuse the old prediction to judge the new parameters. For a multi-parameter step, compute all gradients from the same forward state before mutating any weight. The independent checks ask for an update on a different example and a scaling adjustment that preserves behavior.",
+              "sourceRefs": [
+                "fnd-src-numerical",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-03-03-check-trace",
+              "type": "assessment",
+              "assessmentId": "fnd-a03-03-trace"
+            },
+            {
+              "id": "fnd-03-03-check-transfer",
+              "type": "assessment",
+              "assessmentId": "fnd-a03-03-transfer"
+            }
+          ],
+          "gateId": "fnd-g03-03"
+        },
+        {
+          "id": "fnd-e03-04",
+          "title": "Batches, train/validation/test and generalization",
+          "objectiveIds": [
+            "fnd-o03-04"
+          ],
+          "blocks": [
+            {
+              "id": "fnd-03-04-text-1",
+              "type": "text",
+              "markdown": "A batch groups examples for one objective evaluation. It does not change what a single example means. With per-example losses `L1` through `Ln`, a mean batch loss is their sum divided by n, and its gradient is the corresponding mean of their gradients. Summing instead of averaging creates a different scale. Write the reduction into the specification before comparing implementations or learning rates.\n\nFor `prediction=w*x` at `w=1`, use two examples: `(x=1,y=3)` and `(x=2,y=2)`. Their predictions are `1` and `2`; residuals are `-2` and `0`; half squared losses are `2` and `0`. Mean loss is `1`. Their weight gradients are `-2` and `0`, so the mean gradient is `-1`. With eta `0.1`, one update gives `w=1.1`.\n\n```python\nexamples = [(1, 3), (2, 2)]\nw = 1.0\nlosses = [0.5 * (w*x-y)**2 for x, y in examples]\ngradients = [(w*x-y)*x for x, y in examples]\nassert sum(losses) / len(examples) == 1\nassert sum(gradients) / len(examples) == -1\n```\n\nAfter the update, the two losses are `1.805` and `0.02`, making the mean `0.9125`. The mean improved even though the second example became worse. Optimization of an aggregate need not improve every constituent. This is one reason to inspect distributions and meaningful subgroups, not just a headline average.",
+              "sourceRefs": [
+                "fnd-src-generalization",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-03-04-text-2",
+              "type": "text",
+              "markdown": "Now separate three data roles. Training data drives parameter updates. Validation data informs decisions such as learning rate, model choice or when to stop. Test data estimates performance of the selected procedure on examples held out from those choices. Calling a file “test” does not protect it from leakage if you repeatedly use its score to tune the model.\n\nPredict the risk when successive records from the same device or document are randomly split between training and test. Near duplicates or shared conditions may make the test easier than the intended deployment. If the goal is future-time prediction, a chronological split may be appropriate. If it is transfer to new devices, keep device groups separate. The split should simulate the intended uncertainty rather than maximize the reported score.\n\nPreprocessing can leak too. Estimating normalization statistics from all data before splitting lets held-out examples influence the training procedure. Fit such statistics using the training portion and apply the frozen transformation to validation and test. The same care applies to selecting features, deduplicating and constructing labels; write down where each decision obtained its information.\n\nSuppose training loss falls from `0.8` to `0.2` while validation loss rises from `0.9` to `1.4`. This is evidence that optimization progress did not translate to improvement on that validation set. It is consistent with overfitting, but does not uniquely diagnose the cause; investigate distribution changes, labels and pipeline bugs too.\n\nThe chapter lab closes with a CPU-only table of batch losses and an explicit split plan. The gate requires both arithmetic and transfer: improving training loss is insufficient if the evaluation plan leaks answers. Independent questions use unequal groups and a new deployment scenario, so reproducing the two-example table alone cannot satisfy the chapter's readiness criteria.",
+              "sourceRefs": [
+                "fnd-src-generalization",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-03-04-check-trace",
+              "type": "assessment",
+              "assessmentId": "fnd-a03-04-trace"
+            },
+            {
+              "id": "fnd-03-04-check-transfer",
+              "type": "assessment",
+              "assessmentId": "fnd-a03-04-transfer"
+            }
+          ],
+          "gateId": "fnd-g03-04"
+        }
+      ]
+    },
+    {
+      "id": "chapter04",
+      "title": "Forward, backward, update",
+      "summary": "Implement and test reverse-mode automatic differentiation.",
+      "episodes": [
+        {
+          "id": "fnd-e04-01",
+          "title": "Forward builds values and a computation graph",
+          "objectiveIds": [
+            "fnd-o04-01"
+          ],
+          "blocks": [
+            {
+              "id": "fnd-04-01-text-1",
+              "type": "text",
+              "markdown": "Forward evaluation produces values in dependency order. To differentiate that execution, also record which operations produced which values and what each operation consumed. The result is a directed acyclic computation graph for this finite straight-line calculation. Input and parameter nodes are leaves; intermediate nodes record operation results. This graph resembles an executed dataflow trace more than a list of source lines to run backwards.\n\nConsider `x=3`, `s=x*x`, `z=s+x`. Forward gives `s=9` and `z=12`. There are three value nodes, not two independent copies of x. The multiplication has two operand slots, both referring to the same x node. The final addition also uses x directly. A tree-shaped sketch that duplicates x without retaining shared identity makes it easy to lose or double-count contributions later.\n\n```python\nx = 3.0\nvalues = {'x': x, 's': x*x, 'z': x*x+x}\nparents = {'x': (), 's': ('x', 'x'), 'z': ('s', 'x')}\nassert values['z'] == 12\nassert parents['s'][0] == parents['s'][1]\n```\n\nA valid topological order is `x,s,z`: each operation follows its dependencies. The reverse order `z,s,x` is useful for sensitivities because each node's consumers are processed before that node. A visited set ensures the scheduler executes a shared node once. Operand slots must still be preserved inside its derivative rule; deduplicating those slots would incorrectly change `x*x` into a one-sided dependency.",
+              "sourceRefs": [
+                "fnd-src-autograd",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-04-01-text-2",
+              "type": "text",
+              "markdown": "Predict what information multiplication needs during backward. For `s=a*b`, sensitivity to a depends on b's forward value, and sensitivity to b depends on a's forward value. Saving only s is insufficient in general: `2*6` and `3*4` both produce 12 but have different local derivatives. An operation's forward output is not a complete description of its derivative context.\n\nThis is similar to retaining enough intermediate state for a later compiler pass. You may store operands, save derived data or recompute values, but the needed information must describe the same execution. Mutating a parameter from `3` to `4` between forward and backward must not silently make a derivative use the new value with an old output. Production systems may detect such mutation or preserve appropriate snapshots; our small engine will explicitly capture multiplication's forward operand values.\n\nControl flow adds another boundary. If ordinary Python chooses a branch, an eager graph records the operations that actually ran. For a branch on the sign of x, the local derivative away from the boundary follows that executed branch. It does not automatically differentiate an unexecuted path or assign a meaningful derivative at a discontinuity. Rebuild the graph when the next forward takes another path.\n\nFor the lab, draw nodes for values and arrows for operand slots. Annotate each node with its forward number and each operation with what it must remember. A table is an equally good alternative to a diagram. Then predict which nodes are shared before deriving any gradients. The independent checks use another graph and a saved-state failure; numerical output correctness alone will not establish graph correctness.",
+              "sourceRefs": [
+                "fnd-src-autograd",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-04-01-check-trace",
+              "type": "assessment",
+              "assessmentId": "fnd-a04-01-trace"
+            },
+            {
+              "id": "fnd-04-01-check-transfer",
+              "type": "assessment",
+              "assessmentId": "fnd-a04-01-transfer"
+            }
+          ],
+          "gateId": "fnd-g04-01"
+        },
+        {
+          "id": "fnd-e04-02",
+          "title": "Backward propagates sensitivities",
+          "objectiveIds": [
+            "fnd-o04-02"
+          ],
+          "blocks": [
+            {
+              "id": "fnd-04-02-text-1",
+              "type": "text",
+              "markdown": "Reverse-mode differentiation propagates sensitivity of one scalar output back to its inputs. Write `bar(v)=dL/dv`. Start by seeding the selected scalar loss with `bar(L)=1`, since changing L by one unit changes itself by one unit. For an operation `v=f(a,b)`, multiply the incoming sensitivity by each local partial derivative, then add that contribution to the corresponding input's accumulated sensitivity.\n\nFor addition, both local derivatives are one. For multiplication, they are the opposite operand's forward value. Contributions add because a shared input may influence the output along several paths. This addition is a mathematical requirement, not a performance optimization. A reverse traversal that overwrites a gradient with the most recent contribution silently discards paths.\n\nUse `x=3`, `s=x*x`, `z=s+x`, treating z as the scalar objective. Seed `bar(z)=1`. Backward through the addition gives `bar(s)=1` and a direct contribution `1` to `bar(x)`. Backward through multiplication adds `3` from each operand slot, giving `bar(x)=1+3+3=7`. Symbolically, `z=x^2+x` has derivative `2*x+1`, agreeing at x=3.\n\n| Node | Forward value | Final sensitivity |\n| --- | --- | --- |\n| x | 3 | 7 |\n| s | 9 | 1 |\n| z | 12 | 1 |\n\nPredict what a faulty multiplication rule would return if it updated only one slot when both parents are identical. The result would be `4`, not `7`. Visiting a shared node once and accumulating through every operand slot are compatible requirements.",
+              "sourceRefs": [
+                "fnd-src-autograd-quick",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-04-02-text-2",
+              "type": "text",
+              "markdown": "Now trace an actual loss. Let `p=w*x+b`, `r=p-y`, `L=r*r/2`, with `w=2,x=3,b=1,y=8`. Forward gives `p=7`, `r=-1`, `L=0.5`. Backward yields `bar(p)=-1`, `bar(w)=-3`, `bar(b)=-1`, and `bar(x)=-2`. The target is fixed task data; although the expression has a mathematical derivative with respect to y, our training step does not optimize labels.\n\nAfter backward, w is still 2 and b is still 1. A plain gradient-descent update at rate `0.1` produces `w=2.3,b=1.1`; a new forward predicts 8 and has zero loss in exact arithmetic. This is a lucky one-example illustration, not a general convergence claim. The input's gradient can be useful upstream even when the input itself is not a parameter to update.\n\nIn vector notation, reverse mode computes a vector-Jacobian product. You need not build the full Jacobian to learn the mechanism: a scalar output supplies one incoming sensitivity, and local rules distribute it across dependencies. A non-scalar output would require specifying how its components are seeded or reduced; “backward” alone does not define which scalar question you are asking.\n\nFor practice, annotate every gradient before touching any weights. Test both a single path and fan-out. The independent checks ask for a new shared expression and diagnose an optimizer boundary error. A correct final loss cannot compensate for an incorrect gradient that happens to cancel on one example.",
+              "sourceRefs": [
+                "fnd-src-autograd-quick",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-04-02-check-trace",
+              "type": "assessment",
+              "assessmentId": "fnd-a04-02-trace"
+            },
+            {
+              "id": "fnd-04-02-check-transfer",
+              "type": "assessment",
+              "assessmentId": "fnd-a04-02-transfer"
+            }
+          ],
+          "gateId": "fnd-g04-02"
+        },
+        {
+          "id": "fnd-e04-03",
+          "title": "Saved activations, recomputation and gradient accumulation",
+          "objectiveIds": [
+            "fnd-o04-03"
+          ],
+          "blocks": [
+            {
+              "id": "fnd-04-03-text-1",
+              "type": "text",
+              "markdown": "Backward needs information from forward, so training memory is more than parameter storage. Saved activations can remain live until the operations that depend on them have completed their backward work. From a systems perspective, this is a lifetime problem: freeing a buffer early can break correctness, while retaining everything indefinitely wastes memory. The derivative rule determines what must remain available.\n\nFor a toy memory budget, suppose six stages each save one distinct activation buffer of 1,024 FP32 elements. Keeping all six payloads costs `6*1024*4=24,576` bytes, or 24 KiB. An idealized recomputation schedule that retains two such buffers and has no other activation storage would use 8,192 bytes, or 8 KiB. The hypothetical saving is 16 KiB. These counts deliberately exclude parameters, gradients, temporaries and real checkpoint overhead; they are not a measured framework memory reduction.\n\nRecomputation reruns selected forward work during backward to recreate discarded values. Predict the failure if replay uses new parameter values or a different random mask. The reconstructed values can differ from those that produced the loss, making the gradient correspond to another computation. Correct replay needs the appropriate parameters, inputs and any relevant random state. An operation with external side effects cannot safely be replayed merely because its output fits in a tensor.",
+              "sourceRefs": [
+                "fnd-src-checkpoint",
+                "fnd-src-autograd",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-04-03-text-2",
+              "type": "text",
+              "markdown": "Gradient accumulation has a related lifetime but a different purpose. Instead of retaining one large batch's graph, process microbatches and accumulate their contributions before updating weights. To match the mean over all examples, weight each microbatch mean gradient by its example count divided by the total count. Adding equally weighted microbatch means is wrong when microbatch sizes differ.\n\nSuppose the first microbatch has two examples and mean gradient `3`; the second has one example and mean gradient `-3`. The full mean gradient is `(2*3+1*(-3))/3=1`, not `(3-3)/2=0`. At weight `10` and rate `0.1`, the correct update yields `9.9`.\n\n```python\nmicrobatches = [(2, 3.0), (1, -3.0)]  # count, mean gradient\ncount = sum(n for n, g in microbatches)\ngrad = sum(n*g for n, g in microbatches) / count\nassert grad == 1.0\n```\n\nThis equivalence assumes each contribution was computed at the same parameter values with compatible loss normalization, and that the computation decomposes over those examples. Batch-dependent operations, randomness and rounding can complicate equivalence. If you update weights between microbatches, you are executing several optimization steps, not accumulating one large-batch step.\n\nPredict the next failure: after using accumulated gradient `1`, you forget to clear it, and the next logical batch contributes `2`. The buffer contains `3`, producing an unintended update. Reset at the start of each logical accumulation window; retain contributions within the window. A framework's gradient reset semantics and our coming toy engine's semantics may differ, so read the interface rather than relying on habit.\n\nFor the lab, draw a timeline for saved-value lifetimes and a separate timeline for gradient-buffer accumulation. Mark the single optimizer boundary. The independent checks combine unequal microbatches and deterministic replay requirements. Small CPU arithmetic can validate these semantics without testing a GPU or asserting anything about a live worker's memory behavior.",
+              "sourceRefs": [
+                "fnd-src-checkpoint",
+                "fnd-src-autograd",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-04-03-check-trace",
+              "type": "assessment",
+              "assessmentId": "fnd-a04-03-trace"
+            },
+            {
+              "id": "fnd-04-03-check-transfer",
+              "type": "assessment",
+              "assessmentId": "fnd-a04-03-transfer"
+            }
+          ],
+          "gateId": "fnd-g04-03"
+        },
+        {
+          "id": "fnd-e04-04",
+          "title": "Build a tiny autodiff engine",
+          "objectiveIds": [
+            "fnd-o04-04"
+          ],
+          "blocks": [
+            {
+              "id": "fnd-04-04-text-1",
+              "type": "text",
+              "markdown": "Build a scalar reverse-mode engine with addition and multiplication. The minimum useful node stores a value, a gradient buffer, parent references and a local backward callback. Compose other expressions using these operations and constant nodes. Before reading the reference below, implement the data structure and predict the result of `u=x*x; z=u+u` at x=2. Forward gives 8; the derivative is 8, because both uses of u contribute.\n\nThis reference deliberately resets every reachable gradient on each `backward()` call. Repeating backward on the same graph therefore recomputes one derivative instead of accumulating repeated calls. Accumulating independent microbatches requires a separate parameter-gradient accumulator. It also captures multiplication operands at forward time, so its local rule uses that execution's values.\n\n```python\nclass Value:\n    def __init__(self, value, parents=()):\n        self.value = float(value)\n        self.grad = 0.0\n        self.parents = parents\n        self.pullback = lambda: None\n\n    def __add__(self, other):\n        out = Value(self.value + other.value, (self, other))\n        def pullback():\n            self.grad += out.grad\n            other.grad += out.grad\n        out.pullback = pullback\n        return out\n\n    def __mul__(self, other):\n        a, b = self.value, other.value\n        out = Value(a * b, (self, other))\n        def pullback():\n            self.grad += b * out.grad\n            other.grad += a * out.grad\n        out.pullback = pullback\n        return out\n\n    def backward(self):\n        order, seen = [], set()\n        def visit(node):\n            if node in seen:\n                return\n            seen.add(node)\n            for parent in node.parents:\n                visit(parent)\n            order.append(node)\n        visit(self)\n        for node in order:\n            node.grad = 0.0\n        self.grad = 1.0\n        for node in reversed(order):\n            node.pullback()\n\nx = Value(2)\nu = x * x\nz = u + u\nz.backward()\nassert (z.value, u.grad, x.grad) == (8.0, 2.0, 8.0)\nz.backward()\nassert x.grad == 8.0\n```",
+              "sourceRefs": [
+                "fnd-src-autograd",
+                "fnd-src-gradcheck",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-04-04-text-2",
+              "type": "text",
+              "markdown": "Study two details independently. The visited set schedules a shared node once, after its dependencies are visited. It does not delete repeated operand slots from a local rule. Meanwhile `+=` combines contributions from every consumer and every operand position. Replacing it with assignment breaks shared inputs even if isolated addition and multiplication examples still pass.\n\nFor Capstone A, reconstruct the engine without copying, then build `p=w*x+b`, `r=p+Value(-y)`, and `loss=Value(0.5)*r*r`. Compare each parameter gradient against central differences of a separately written plain-number loss function. Use several nonzero inputs, negative values and a shared intermediate. Include a disconnected parameter: its mathematical derivative is zero, but this engine only resets reachable nodes, so the caller must clear any external accumulator deliberately.\n\nPredict a discriminating negative test. At x=2, `x*x` should have derivative 4; a one-slot multiplication rule returns 2. For `u=x*x; z=u+u`, missing fan-out accumulation also fails. Test a simple path as a control, so you know the harness is capable of accepting a correct implementation. Check that backward leaves parameter values unchanged, then perform one explicit update and rebuild the graph.\n\nThe implementation is intentionally small: scalar real values, first derivatives, no tensor broadcasting, no higher-order derivative graph and no production memory management. Its recursive traversal also has a depth limit. Those are defined scope boundaries, not missing magic. Extend the supported operations only with explicit derivative rules and tests.\n\nComplete the fresh graded checks unaided. Passing them provides evidence about tracing and repair selection; submitting and defending your own engine requires separate practical review. A copied reference implementation, even one that runs, cannot establish that independent capstone skill or any deployed runtime capability.\n\nKeep the numerical reference outside the engine: computing the reference with the same backward callbacks would reproduce their mistakes. Perturb one independent parameter at a time, hold all others fixed, and compare central differences at several step sizes. Record the graph expression, input values, tolerance and a deliberately broken implementation that the check rejects.",
+              "sourceRefs": [
+                "fnd-src-autograd",
+                "fnd-src-gradcheck",
+                "fnd-src-original"
+              ]
+            },
+            {
+              "id": "fnd-04-04-check-trace",
+              "type": "assessment",
+              "assessmentId": "fnd-a04-04-trace"
+            },
+            {
+              "id": "fnd-04-04-check-transfer",
+              "type": "assessment",
+              "assessmentId": "fnd-a04-04-transfer"
+            }
+          ],
+          "gateId": "fnd-g04-04"
+        }
+      ]
+    }
+  ],
+  "assessments": [
+    {
+      "id": "fnd-a01-01-trace",
+      "objectiveIds": [
+        "fnd-o01-01"
+      ],
+      "prompt": "Independent check. A predictor returns w*x+b. Its code and input x=5 stay fixed. Parameters change from (w=2,b=-3) to (w=-1,b=4). What is new output minus old output? Enter one signed number.",
+      "familyId": "fnd-family-coefficient-trace",
+      "type": "numeric",
+      "grading": {
+        "expected": -8,
+        "absoluteTolerance": 0,
+        "explanation": "Old output is 2*5-3=7; new output is -1*5+4=-1. The difference is -1-7=-8. Only parameter state changed."
+      }
+    },
+    {
+      "id": "fnd-a01-01-transfer",
+      "objectiveIds": [
+        "fnd-o01-01"
+      ],
+      "prompt": "Independent transfer check. A document-search application updates its search index, then gives newly retrieved text to a fixed-weight model. Which explanation correctly identifies the changed boundary?",
+      "familyId": "fnd-family-artifact-boundary",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "The model must have learned new parameters because its answer changed."
+        },
+        {
+          "id": "b",
+          "text": "The retrieval store and model input changed; this observation alone does not show a weight update."
+        },
+        {
+          "id": "c",
+          "text": "The search index is necessarily stored in the model weights."
+        },
+        {
+          "id": "d",
+          "text": "The same weights force the same answer regardless of input."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "A fixed parameterized program can produce different outputs for changed inputs. Updating an external retrieval store does not itself update learned coefficients; check the parameter-update path separately."
+      }
+    },
+    {
+      "id": "fnd-a01-02-trace",
+      "objectiveIds": [
+        "fnd-o01-02"
+      ],
+      "prompt": "Independent check. For prediction=w*x, use w=3, x=2, target=4 and L=(prediction-target)^2/2. Forward and backward finish, but the optimizer has not run. What is the current value of w?",
+      "familyId": "fnd-family-training-state-ledger",
+      "type": "numeric",
+      "grading": {
+        "expected": 3,
+        "absoluteTolerance": 0,
+        "explanation": "Prediction is 6, residual is 2 and gradient is 4. Backward produces that gradient while w remains 3. A learning rate and an actual optimizer step would be needed to determine a new weight."
+      }
+    },
+    {
+      "id": "fnd-a01-02-transfer",
+      "objectiveIds": [
+        "fnd-o01-02"
+      ],
+      "prompt": "Independent transfer check. A model begins from a pretrained checkpoint. Its feature-stage weights stay frozen; a trainable final layer receives target-based gradient updates. Requests are also logged. Which classification is supported?",
+      "familyId": "fnd-family-frozen-stage-transfer",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Pure inference, because at least one stage is frozen."
+        },
+        {
+          "id": "b",
+          "text": "Training from random initialization, because any update discards the checkpoint."
+        },
+        {
+          "id": "c",
+          "text": "Fine-tuning with a frozen feature stage; logging alone would not establish training."
+        },
+        {
+          "id": "d",
+          "text": "Automatic learning from every logged request, even without targets or updates."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "Further training from a pretrained model with a selected trainable subset is fine-tuning in this course. Frozen weights still affect predictions; request logs are separate application state."
+      }
+    },
+    {
+      "id": "fnd-a01-03-trace",
+      "objectiveIds": [
+        "fnd-o01-03"
+      ],
+      "prompt": "Independent check. Vocabulary IDs are red=0, blue=1, end=2. Text \"blue red\" encodes as [1,0]. A toy model uses the final ID only. Row 0 has probabilities [0.2,0.3,0.5]; row 1 has [0.6,0.1,0.3]. Greedy selection chooses the maximum probability. What ID is emitted next?",
+      "familyId": "fnd-family-token-pipeline",
+      "type": "numeric",
+      "grading": {
+        "expected": 2,
+        "absoluteTolerance": 0,
+        "explanation": "The last input ID is 0, so use row 0. Its maximum is 0.5 at ID 2, which decodes as end. The most recent token, not the first one, selects this toy model row."
+      }
+    },
+    {
+      "id": "fnd-a01-03-transfer",
+      "objectiveIds": [
+        "fnd-o01-03"
+      ],
+      "prompt": "Independent transfer check. A model was trained with cat=0 and dog=1. A replacement tokenizer silently swaps those IDs while the model tables remain unchanged. Array bounds and row sums still pass. What is the most useful first diagnostic?",
+      "familyId": "fnd-family-tokenizer-abi",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Run more sampling trials; ID semantics cannot affect a deterministic lookup."
+        },
+        {
+          "id": "b",
+          "text": "Check only that every output probability is finite."
+        },
+        {
+          "id": "c",
+          "text": "Increase the vocabulary size without changing any table."
+        },
+        {
+          "id": "d",
+          "text": "Compare the versioned text-to-ID mapping against the mapping expected by the model."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "d",
+        "explanation": "This is a semantic interface mismatch. Valid indices can address the wrong learned entries. Comparing mapping versions and tracing known strings distinguishes it from arithmetic failures."
+      }
+    },
+    {
+      "id": "fnd-a01-04-trace",
+      "objectiveIds": [
+        "fnd-o01-04"
+      ],
+      "prompt": "Independent check. In an invented two-stage model, h=w*x and prediction=v*h. Set x=3, w=2, v=-1, target=0 and L=(prediction-target)^2/2. What scalar dL/dh must the downstream stage send upstream? Do not give dL/dw or dL/dv.",
+      "familyId": "fnd-family-partition-payload",
+      "type": "numeric",
+      "grading": {
+        "expected": 6,
+        "absoluteTolerance": 0,
+        "explanation": "h=6, prediction=-6 and output sensitivity=-6. Multiplying by v=-1 gives dL/dh=6. The local parameter gradients are different: dL/dw=18 and dL/dv=-36."
+      }
+    },
+    {
+      "id": "fnd-a01-04-transfer",
+      "objectiveIds": [
+        "fnd-o01-04"
+      ],
+      "prompt": "Independent transfer check. An invented journal contains backward_done(sample42) and upload_sent(sample42), then a connection timeout. No receiver acknowledgement or accounting event is available. Which claim is justified?",
+      "familyId": "fnd-family-distributed-evidence",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Local computation and a submission attempt are evidenced; acceptance, credit and payment remain unestablished."
+        },
+        {
+          "id": "b",
+          "text": "The upload proves accepted work even without a receiver response."
+        },
+        {
+          "id": "c",
+          "text": "The timeout proves the receiver rejected the work."
+        },
+        {
+          "id": "d",
+          "text": "Backward completion proves payment because a correct gradient is sufficient."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "Local completion and sending do not prove a receiver state transition. The outcome could be unknown after a timeout. Acceptance and accounting each require their own authoritative evidence; this is an invented trace, not a fleet observation."
+      }
+    },
+    {
+      "id": "fnd-a02-01-trace",
+      "objectiveIds": [
+        "fnd-o02-01"
+      ],
+      "prompt": "Independent check. A newly allocated dense contiguous tensor has shape (3,5,2) and two-byte elements. Ignoring metadata and padding, how many payload bytes does its allocation require?",
+      "familyId": "fnd-family-tensor-payload",
+      "type": "numeric",
+      "grading": {
+        "expected": 60,
+        "absoluteTolerance": 0,
+        "explanation": "There are 3*5*2=30 elements, each two bytes, so the payload is 60 bytes. Axis count and last-element byte offset are not allocation size."
+      }
+    },
+    {
+      "id": "fnd-a02-01-transfer",
+      "objectiveIds": [
+        "fnd-o02-01"
+      ],
+      "prompt": "Independent transfer check. A consumer expects (batch,time,features)=(2,2,3). A producer actually stores (time,batch,features)=(2,2,3). Counts and dimension lengths match. What check can expose the mismatch?",
+      "familyId": "fnd-family-semantic-axis-transfer",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Check only that the payload is 48 bytes for FP32."
+        },
+        {
+          "id": "b",
+          "text": "Check only the rank, since three axes uniquely identify their meanings."
+        },
+        {
+          "id": "c",
+          "text": "Use distinct values for each batch/time pair and compare labeled indices to a reference mapping."
+        },
+        {
+          "id": "d",
+          "text": "Fill every slot with one and compare only the grand total."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "Equal-sized axes can conceal a permutation. Distinct labeled values make swapping batch and time observable; size, rank and an all-ones sum cannot establish semantic layout."
+      }
+    },
+    {
+      "id": "fnd-a02-02-trace",
+      "objectiveIds": [
+        "fnd-o02-02"
+      ],
+      "prompt": "Independent check. A valid view into a 12-element FP32 buffer has base element offset 2, shape (3,2), and element strides (1,4). What is the byte offset from the original buffer start of view[2,1]? Each FP32 element is four bytes.",
+      "familyId": "fnd-family-strided-address",
+      "type": "numeric",
+      "grading": {
+        "expected": 32,
+        "absoluteTolerance": 0,
+        "explanation": "The element address is 2+2*1+1*4=8. Multiplying by four gives byte offset 32. Include the base offset and do not treat element strides as byte strides."
+      }
+    },
+    {
+      "id": "fnd-a02-02-transfer",
+      "objectiveIds": [
+        "fnd-o02-02"
+      ],
+      "prompt": "Independent transfer check. Flat storage [2,7,11,13,17,19] is a (2,3) row-major matrix. Its transpose is a (3,2) view with strides (1,3). A faulty kernel uses (2,1). Which proposed test specifically exposes that fault?",
+      "familyId": "fnd-family-transpose-counterexample",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Check only transpose[0,0], which should be 2."
+        },
+        {
+          "id": "b",
+          "text": "Check transpose[1,0], which should be 7; the faulty kernel reads 11."
+        },
+        {
+          "id": "c",
+          "text": "Check only that all six outputs are finite."
+        },
+        {
+          "id": "d",
+          "text": "Check only transpose[2,1], which should be 19."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "At (1,0), the correct offset is 1 and the faulty offset is 2, so 7 differs from 11. Both implementations agree at offsets corresponding to (0,0) and (2,1), illustrating why boundary-only checks miss the error."
+      }
+    },
+    {
+      "id": "fnd-a02-03-trace",
+      "objectiveIds": [
+        "fnd-o02-03"
+      ],
+      "prompt": "Independent check. A has rows [2,-1] and [0,3]. B has rows [4,1] and [-2,5]. For C=A@B, what is C[0,1] using zero-based indices?",
+      "familyId": "fnd-family-matrix-product",
+      "type": "numeric",
+      "grading": {
+        "expected": -3,
+        "absoluteTolerance": 0,
+        "explanation": "Row 0 of A is [2,-1], column 1 of B is [1,5]. Their dot product is 2*1+(-1)*5=-3. Elementwise multiplication or reading a row of B solves another problem."
+      }
+    },
+    {
+      "id": "fnd-a02-03-transfer",
+      "objectiveIds": [
+        "fnd-o02-03"
+      ],
+      "prompt": "Independent transfer check. A score array has shape (batch=3,tokens=4). You need one average score per example, preserving a length-one token axis for later broadcasting. Which operation has the correct contract?",
+      "familyId": "fnd-family-reduction-contract",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Sum axis 0 and keep dimensions, giving shape (1,4)."
+        },
+        {
+          "id": "b",
+          "text": "Mean all elements, giving a scalar."
+        },
+        {
+          "id": "c",
+          "text": "Sum axis 1 and drop dimensions, giving shape (3,)."
+        },
+        {
+          "id": "d",
+          "text": "Mean axis 1 and keep dimensions, giving shape (3,1)."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "d",
+        "explanation": "The token axis is axis 1. Averaging it gives one value per batch member; keeping the axis yields (3,1). A sum has the wrong normalization even if a later reshape could fix its dimensions."
+      }
+    },
+    {
+      "id": "fnd-a02-04-trace",
+      "objectiveIds": [
+        "fnd-o02-04"
+      ],
+      "prompt": "Independent check. Every addition is rounded to IEEE binary32, round-to-nearest ties-to-even. Evaluate (2^25 + 3) + (-2^25), with the inner addition rounded before the outer one. Enter the resulting number.",
+      "familyId": "fnd-family-fp32-rounding",
+      "type": "numeric",
+      "grading": {
+        "expected": 4,
+        "absoluteTolerance": 0,
+        "explanation": "At 2^25, FP32 spacing is 4. The inner exact sum is nearer to 2^25+4 than to 2^25, so it rounds upward by 4. Subtracting 2^25 then gives 4, not the real-number result 3."
+      }
+    },
+    {
+      "id": "fnd-a02-04-transfer",
+      "objectiveIds": [
+        "fnd-o02-04"
+      ],
+      "prompt": "Independent transfer check. You need to store updates around magnitude 1 and preserve differences about 0.002. Both FP16 and BF16 have adequate range here. Which reasoning is correct for their normal-value spacing?",
+      "familyId": "fnd-family-precision-transfer",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "FP16 has finer spacing around 1; BF16 spacing is 1/128, so many differences of this scale disappear when rounded."
+        },
+        {
+          "id": "b",
+          "text": "BF16 is more precise because its exponent has more bits."
+        },
+        {
+          "id": "c",
+          "text": "Both formats have identical precision because both occupy two bytes."
+        },
+        {
+          "id": "d",
+          "text": "Finiteness proves every update is preserved in either format."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "FP16 spacing near 1 is 1/1024, versus BF16 spacing 1/128. Exponent range and local precision are different. This supports the stated storage comparison, not a universal mixed-precision or hardware recommendation."
+      }
+    },
+    {
+      "id": "fnd-a03-01-trace",
+      "objectiveIds": [
+        "fnd-o03-01"
+      ],
+      "prompt": "Independent check. For prediction=w*x+b, set w=2, x=3, b=-1 and target=1. What is half squared error (prediction-target)^2/2?",
+      "familyId": "fnd-family-loss-computation",
+      "type": "numeric",
+      "grading": {
+        "expected": 8,
+        "absoluteTolerance": 0,
+        "explanation": "Prediction is 5 and signed residual is 4. Half squared error is 4^2/2=8. Giving 4 reports the residual rather than the requested loss."
+      }
+    },
+    {
+      "id": "fnd-a03-01-transfer",
+      "objectiveIds": [
+        "fnd-o03-01"
+      ],
+      "prompt": "Independent transfer check. A latency predictor is selected solely for lower mean squared error on a fixed dataset. The product also needs accurate rare extreme latencies. What can the selected score establish?",
+      "familyId": "fnd-family-objective-proxy",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "It proves the rarest cases improved because the mean improved."
+        },
+        {
+          "id": "b",
+          "text": "It proves deployment correctness for all future workloads."
+        },
+        {
+          "id": "c",
+          "text": "It establishes improvement under that aggregate objective; tail behavior needs its own evaluation."
+        },
+        {
+          "id": "d",
+          "text": "It proves training and validation data must be identical."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "An average objective can improve while a small subgroup worsens. The selection criterion establishes only the measured aggregate improvement, with the stated dataset and procedure; tail requirements need evidence aligned with them."
+      }
+    },
+    {
+      "id": "fnd-a03-02-trace",
+      "objectiveIds": [
+        "fnd-o03-02"
+      ],
+      "prompt": "Independent check. Let prediction=3*w+2 and L=(prediction-1)^2/2. At w=0, what is dL/dw?",
+      "familyId": "fnd-family-chain-rule",
+      "type": "numeric",
+      "grading": {
+        "expected": 3,
+        "absoluteTolerance": 0,
+        "explanation": "Prediction is 2, residual is 1 and dprediction/dw=3. The chain rule gives dL/dw=1*3=3. The residual alone omits the inner derivative."
+      }
+    },
+    {
+      "id": "fnd-a03-02-transfer",
+      "objectiveIds": [
+        "fnd-o03-02"
+      ],
+      "prompt": "Independent transfer check. An implementation returns gradient=(w*x-y) for L=(w*x-y)^2/2, omitting the factor x. Which test best exposes this specific bug?",
+      "familyId": "fnd-family-gradient-discriminator",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "x=1, w=2, y=0, comparing against a central difference."
+        },
+        {
+          "id": "b",
+          "text": "x=4, w=1, y=1, comparing against a central difference."
+        },
+        {
+          "id": "c",
+          "text": "x=4, w=1, y=4, checking only that the gradient is zero."
+        },
+        {
+          "id": "d",
+          "text": "Any x and y, checking only that the gradient is finite."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "At x=4,w=1,y=1, the residual is 3 and the correct gradient is 12, while the bug returns 3. x=1 masks the omitted factor; a zero residual masks it too. Finiteness does not discriminate."
+      }
+    },
+    {
+      "id": "fnd-a03-03-trace",
+      "objectiveIds": [
+        "fnd-o03-03"
+      ],
+      "prompt": "Independent check. Use prediction=w*x, L=(prediction-y)^2/2, w=1, x=3, y=6 and learning rate 0.1. After computing the gradient at the old w and taking one descent step, what is the new weight?",
+      "familyId": "fnd-family-optimizer-step",
+      "type": "numeric",
+      "grading": {
+        "expected": 1.9,
+        "absoluteTolerance": 1e-09,
+        "explanation": "The residual is -3 and gradient is -9. Subtracting 0.1*(-9) gives 1.9. Adding the gradient or reporting the new prediction confuses the requested state."
+      }
+    },
+    {
+      "id": "fnd-a03-03-transfer",
+      "objectiveIds": [
+        "fnd-o03-03"
+      ],
+      "prompt": "Independent transfer check. A deterministic four-example objective changes from mean loss to summed loss, using identical examples and parameters. With plain gradient descent, how should the learning rate change to preserve the exact-arithmetic update?",
+      "familyId": "fnd-family-loss-scale-transfer",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Multiply the learning rate by four."
+        },
+        {
+          "id": "b",
+          "text": "Leave the learning rate unchanged; reductions never affect gradients."
+        },
+        {
+          "id": "c",
+          "text": "Negate the learning rate."
+        },
+        {
+          "id": "d",
+          "text": "Divide the learning rate by four."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "d",
+        "explanation": "The summed gradient is four times the mean gradient. Dividing eta by four preserves eta*gradient under plain gradient descent. This does not assert equivalence for arbitrary optimizer state or rounding behavior."
+      }
+    },
+    {
+      "id": "fnd-a03-04-trace",
+      "objectiveIds": [
+        "fnd-o03-04"
+      ],
+      "prompt": "Independent check. A held-out set has three examples with mean loss 2 and a second group of one example with loss 10. What is the mean loss across all four examples? Weight examples equally.",
+      "familyId": "fnd-family-weighted-evaluation",
+      "type": "numeric",
+      "grading": {
+        "expected": 4,
+        "absoluteTolerance": 0,
+        "explanation": "The total loss is 3*2+1*10=16 across four examples, giving 4. Averaging the two group means would give 6 and incorrectly weight the groups equally instead of the examples."
+      }
+    },
+    {
+      "id": "fnd-a03-04-transfer",
+      "objectiveIds": [
+        "fnd-o03-04"
+      ],
+      "prompt": "Independent transfer check. You want to predict next month for users already seen this month. Each user has many adjacent timestamped records. Which evaluation plan best matches that stated goal?",
+      "familyId": "fnd-family-evaluation-leakage",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Train and fit preprocessing on earlier dates, choose settings on a later validation interval, and reserve a still-later test interval until the procedure is fixed."
+        },
+        {
+          "id": "b",
+          "text": "Randomly split adjacent records, normalize with all dates and repeatedly choose settings on the test score."
+        },
+        {
+          "id": "c",
+          "text": "Place exact duplicates in train and test to make the estimates stable."
+        },
+        {
+          "id": "d",
+          "text": "Use training loss as the test estimate because all users are already known."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "A chronological plan models future-time uncertainty for the stated known-user goal. Training-only preprocessing prevents held-out influence. This does not establish transfer to unseen users; that would need a different split."
+      }
+    },
+    {
+      "id": "fnd-a04-01-trace",
+      "objectiveIds": [
+        "fnd-o04-01"
+      ],
+      "prompt": "Independent check. Create leaf nodes x and y, then u=x*y, v=u+u and z=v*x. Constants and operator objects are not value nodes here. How many distinct value nodes should an identity-deduplicating topological traversal of z visit?",
+      "familyId": "fnd-family-dag-identity",
+      "type": "numeric",
+      "grading": {
+        "expected": 5,
+        "absoluteTolerance": 0,
+        "explanation": "The distinct nodes are x,y,u,v,z. Repeated operand references do not create additional values, though each operand slot still contributes in a derivative rule."
+      }
+    },
+    {
+      "id": "fnd-a04-01-transfer",
+      "objectiveIds": [
+        "fnd-o04-01"
+      ],
+      "prompt": "Independent transfer check. Forward computes p=a*b with a=2 and b=5. Before backward, a caller overwrites b with 9. The intended gradient is for that old forward execution, seeded with dp=1. What is a correct implementation response?",
+      "familyId": "fnd-family-saved-forward-state",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Read current b=9 and silently report da=9 for the old p."
+        },
+        {
+          "id": "b",
+          "text": "Use p=10 alone; a product always uniquely determines both local derivatives."
+        },
+        {
+          "id": "c",
+          "text": "Use the saved forward b=5 for da=5, or reject an invalidating mutation rather than silently differentiate mixed state."
+        },
+        {
+          "id": "d",
+          "text": "Update a immediately before deciding which forward execution was recorded."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "The old forward local derivative dp/da was 5. A valid snapshot or an explicit mutation error preserves semantics; using new operands with old outputs does not. The product alone cannot recover both operands."
+      }
+    },
+    {
+      "id": "fnd-a04-02-trace",
+      "objectiveIds": [
+        "fnd-o04-02"
+      ],
+      "prompt": "Independent check. At x=2, define u=x*x and z=u*x+u. Seed dz=1. What is dz/dx, accumulating all paths?",
+      "familyId": "fnd-family-fanout-gradient",
+      "type": "numeric",
+      "grading": {
+        "expected": 16,
+        "absoluteTolerance": 0,
+        "explanation": "z=x^3+x^2, so dz/dx=3*x^2+2*x=12+4=16. Equivalently, u receives x+1=3, giving 12 through u, plus direct contribution u=4."
+      }
+    },
+    {
+      "id": "fnd-a04-02-transfer",
+      "objectiveIds": [
+        "fnd-o04-02"
+      ],
+      "prompt": "Independent transfer check. A scalar parameter w=4 has gradient -2 after backward. An optimizer with rate 0.25 has not run yet. Which before/after pair is correct for w immediately before and after one plain descent step?",
+      "familyId": "fnd-family-optimizer-boundary",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Before -2; after -2.5."
+        },
+        {
+          "id": "b",
+          "text": "Before 4; after 4.5."
+        },
+        {
+          "id": "c",
+          "text": "Before 4.5; after 5."
+        },
+        {
+          "id": "d",
+          "text": "Before 4; after 3.5."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "Backward writes the gradient buffer, leaving w=4. The update is 4-0.25*(-2)=4.5. The pair separates gradient computation from parameter mutation and applies the descent sign."
+      }
+    },
+    {
+      "id": "fnd-a04-03-trace",
+      "objectiveIds": [
+        "fnd-o04-03"
+      ],
+      "prompt": "Independent check. At fixed parameter values, a microbatch of three examples has mean gradient 2, and one example has gradient -6. What is the full four-example mean gradient, assuming example-separable losses?",
+      "familyId": "fnd-family-microbatch-weighting",
+      "type": "numeric",
+      "grading": {
+        "expected": 0,
+        "absoluteTolerance": 0,
+        "explanation": "Weight the microbatch means by sample count: (3*2+1*(-6))/4=0. An unweighted mean of the two microbatch means would give -2 and represent a different objective."
+      }
+    },
+    {
+      "id": "fnd-a04-03-transfer",
+      "objectiveIds": [
+        "fnd-o04-03"
+      ],
+      "prompt": "Independent transfer check. A discarded forward activation used parameters theta0 and a random mask M0. Backward must differentiate that execution. Which replay plan preserves the required computation?",
+      "familyId": "fnd-family-recompute-contract",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Replay with current parameters theta1 and a fresh mask because output shapes match."
+        },
+        {
+          "id": "b",
+          "text": "Replay only until every output is finite, then accept it."
+        },
+        {
+          "id": "c",
+          "text": "Update weights between replayed stages to save storage."
+        },
+        {
+          "id": "d",
+          "text": "Recreate the relevant forward inputs, theta0 and M0, and avoid duplicating external side effects."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "d",
+        "explanation": "Recomputation is valid only when it recreates the needed forward values and semantics. Shape and finiteness do not ensure this; changed parameters or randomness can differentiate a different computation."
+      }
+    },
+    {
+      "id": "fnd-a04-04-trace",
+      "objectiveIds": [
+        "fnd-o04-04"
+      ],
+      "prompt": "Independent check. Using the lesson engine, let x=Value(-2), q=x*x and z=q+x. Call z.backward() twice without changing node values. Under this engine's reset-on-each-call contract, what is x.grad after the second call?",
+      "familyId": "fnd-family-engine-novel-graph",
+      "type": "numeric",
+      "grading": {
+        "expected": -3,
+        "absoluteTolerance": 0,
+        "explanation": "The derivative of x^2+x at x=-2 is -4+1=-3. Each backward resets reachable gradients and recomputes one derivative; it does not accumulate the two calls into -6."
+      }
+    },
+    {
+      "id": "fnd-a04-04-transfer",
+      "objectiveIds": [
+        "fnd-o04-04"
+      ],
+      "prompt": "Independent transfer check. A proposed engine passes isolated addition and multiplication with distinct leaves, but fails u=x*x; z=u+u. Which repair and verification package addresses the actual shared-graph requirements?",
+      "familyId": "fnd-family-engine-repair-suite",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Accumulate each operand contribution with +=, schedule each node once by identity in reverse topological order, and test shared leaves, fan-out and finite differences on fresh nonzero inputs."
+        },
+        {
+          "id": "b",
+          "text": "Deduplicate both operand slots and nodes, then test only x=0."
+        },
+        {
+          "id": "c",
+          "text": "Use assignment for parent gradients and traverse a shared subtree again for each consumer."
+        },
+        {
+          "id": "d",
+          "text": "Hardcode the expected gradient for z=u+u and retain only finiteness checks."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "A node executes once after all its downstream contributions arrive, but every operand slot contributes. Accumulation plus identity-based scheduling preserves both conditions. Fresh numerical checks and negative controls reject lost paths and hardcoding."
+      }
+    }
+  ],
+  "gates": [
+    {
+      "id": "fnd-g01-01",
+      "objectiveIds": [
+        "fnd-o01-01"
+      ],
+      "assessmentIds": [
+        "fnd-a01-01-trace",
+        "fnd-a01-01-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "fnd-g01-02",
+      "objectiveIds": [
+        "fnd-o01-02"
+      ],
+      "assessmentIds": [
+        "fnd-a01-02-trace",
+        "fnd-a01-02-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "fnd-g01-03",
+      "objectiveIds": [
+        "fnd-o01-03"
+      ],
+      "assessmentIds": [
+        "fnd-a01-03-trace",
+        "fnd-a01-03-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "fnd-g01-04",
+      "objectiveIds": [
+        "fnd-o01-04"
+      ],
+      "assessmentIds": [
+        "fnd-a01-04-trace",
+        "fnd-a01-04-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "fnd-g02-01",
+      "objectiveIds": [
+        "fnd-o02-01"
+      ],
+      "assessmentIds": [
+        "fnd-a02-01-trace",
+        "fnd-a02-01-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "fnd-g02-02",
+      "objectiveIds": [
+        "fnd-o02-02"
+      ],
+      "assessmentIds": [
+        "fnd-a02-02-trace",
+        "fnd-a02-02-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "fnd-g02-03",
+      "objectiveIds": [
+        "fnd-o02-03"
+      ],
+      "assessmentIds": [
+        "fnd-a02-03-trace",
+        "fnd-a02-03-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "fnd-g02-04",
+      "objectiveIds": [
+        "fnd-o02-04"
+      ],
+      "assessmentIds": [
+        "fnd-a02-04-trace",
+        "fnd-a02-04-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "fnd-g03-01",
+      "objectiveIds": [
+        "fnd-o03-01"
+      ],
+      "assessmentIds": [
+        "fnd-a03-01-trace",
+        "fnd-a03-01-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "fnd-g03-02",
+      "objectiveIds": [
+        "fnd-o03-02"
+      ],
+      "assessmentIds": [
+        "fnd-a03-02-trace",
+        "fnd-a03-02-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "fnd-g03-03",
+      "objectiveIds": [
+        "fnd-o03-03"
+      ],
+      "assessmentIds": [
+        "fnd-a03-03-trace",
+        "fnd-a03-03-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "fnd-g03-04",
+      "objectiveIds": [
+        "fnd-o03-04"
+      ],
+      "assessmentIds": [
+        "fnd-a03-04-trace",
+        "fnd-a03-04-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "fnd-g04-01",
+      "objectiveIds": [
+        "fnd-o04-01"
+      ],
+      "assessmentIds": [
+        "fnd-a04-01-trace",
+        "fnd-a04-01-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "fnd-g04-02",
+      "objectiveIds": [
+        "fnd-o04-02"
+      ],
+      "assessmentIds": [
+        "fnd-a04-02-trace",
+        "fnd-a04-02-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "fnd-g04-03",
+      "objectiveIds": [
+        "fnd-o04-03"
+      ],
+      "assessmentIds": [
+        "fnd-a04-03-trace",
+        "fnd-a04-03-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "fnd-g04-04",
+      "objectiveIds": [
+        "fnd-o04-04"
+      ],
+      "assessmentIds": [
+        "fnd-a04-04-trace",
+        "fnd-a04-04-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    }
+  ],
+  "sources": [
+    {
+      "id": "fnd-src-original",
+      "title": "Original CPU derivations and content verification record",
+      "url": "urn:private:course-llms-and-models:foundations-review:2026-10-12",
+      "reviewedAt": "2026-10-12T15:15:27Z"
+    },
+    {
+      "id": "fnd-src-design",
+      "title": "Approved private design v0.8, section 15: conceptual TAH map",
+      "url": "urn:private:course-llms-and-models:planning:design-v0.8:2026-10-12:tah",
+      "reviewedAt": "2026-10-12T15:15:27Z"
+    },
+    {
+      "id": "fnd-src-autograd-quick",
+      "title": "PyTorch: Automatic Differentiation with torch.autograd",
+      "url": "https://docs.pytorch.org/tutorials/beginner/basics/autogradqs_tutorial.html",
+      "reviewedAt": "2026-10-12T15:15:27Z"
+    },
+    {
+      "id": "fnd-src-transfer",
+      "title": "PyTorch: Transfer Learning for Computer Vision Tutorial",
+      "url": "https://docs.pytorch.org/tutorials/beginner/transfer_learning_tutorial.html",
+      "reviewedAt": "2026-10-12T15:15:27Z"
+    },
+    {
+      "id": "fnd-src-subword",
+      "title": "Sennrich, Haddow and Birch: Neural Machine Translation of Rare Words with Subword Units",
+      "url": "https://arxiv.org/abs/1508.07909",
+      "reviewedAt": "2026-10-12T15:15:27Z"
+    },
+    {
+      "id": "fnd-src-strides",
+      "title": "NumPy: ndarray.strides",
+      "url": "https://numpy.org/doc/stable/reference/generated/numpy.ndarray.strides.html",
+      "reviewedAt": "2026-10-12T15:15:27Z"
+    },
+    {
+      "id": "fnd-src-broadcast",
+      "title": "NumPy: Broadcasting",
+      "url": "https://numpy.org/doc/stable/user/basics.broadcasting.html",
+      "reviewedAt": "2026-10-12T15:15:27Z"
+    },
+    {
+      "id": "fnd-src-float",
+      "title": "Python: Floating-Point Arithmetic, Issues and Limitations",
+      "url": "https://docs.python.org/3/tutorial/floatingpoint.html",
+      "reviewedAt": "2026-10-12T15:15:27Z"
+    },
+    {
+      "id": "fnd-src-bfloat",
+      "title": "Google Cloud TPU: bfloat16 representation and conversion",
+      "url": "https://docs.cloud.google.com/tpu/docs/bfloat16",
+      "reviewedAt": "2026-10-12T15:15:27Z"
+    },
+    {
+      "id": "fnd-src-numerical",
+      "title": "Goodfellow, Bengio and Courville: Deep Learning, chapter 4, Numerical Computation",
+      "url": "https://www.deeplearningbook.org/contents/numerical.html",
+      "reviewedAt": "2026-10-12T15:15:27Z"
+    },
+    {
+      "id": "fnd-src-generalization",
+      "title": "scikit-learn: Common pitfalls, inconsistent preprocessing and data leakage",
+      "url": "https://scikit-learn.org/stable/common_pitfalls.html",
+      "reviewedAt": "2026-10-12T15:15:27Z"
+    },
+    {
+      "id": "fnd-src-autograd",
+      "title": "PyTorch 2.14: Autograd mechanics",
+      "url": "https://docs.pytorch.org/docs/2.14/notes/autograd.html",
+      "reviewedAt": "2026-10-12T15:15:27Z"
+    },
+    {
+      "id": "fnd-src-checkpoint",
+      "title": "PyTorch 2.14: torch.utils.checkpoint",
+      "url": "https://docs.pytorch.org/docs/2.14/checkpoint.html",
+      "reviewedAt": "2026-10-12T15:15:27Z"
+    },
+    {
+      "id": "fnd-src-gradcheck",
+      "title": "PyTorch 2.14: Gradcheck mechanics",
+      "url": "https://docs.pytorch.org/docs/2.14/notes/gradcheck.html",
+      "reviewedAt": "2026-10-12T15:15:27Z"
+    }
+  ],
+  "visuals": [],
+  "media": [],
+  "extensions": []
+}

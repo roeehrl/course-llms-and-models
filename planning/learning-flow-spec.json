@@ -1,0 +1,52 @@
+{
+  "revision": "0.5",
+  "status": "Proposed contracts and acceptance cases; not implemented platform code",
+  "learner_navigation": {
+    "primary_surface": "guided_path",
+    "primary_action": "exactly one next learning action per active step",
+    "step_labels": ["required", "optional_help", "completed", "current", "locked", "under_review", "closed_with_gaps"],
+    "secondary_surfaces": ["course_map", "learner_profile", "progress_evidence", "learning_agreement"],
+    "administration": "separate authorized workspace",
+    "optional_help_return": "restore step, draft answer, code snapshot, media state and context anchor"
+  },
+  "progression_gate": {
+    "required_fields": ["id", "version", "scope", "requiredObjectives", "readinessCriteria", "eligibleEvidenceKinds", "minimumIndependentEvidence", "assistancePolicy", "nextActivityId", "remediationPolicyRef", "capPolicyRef", "appealPolicy"],
+    "evidence_modes": ["rubric_backed_conversation", "deterministic_interactive_check", "verified_practical_task", "configured_combination"],
+    "not_evidence": ["video_played_to_end", "tab_visited", "learner_confidence_alone", "model_impression_without_rubric", "agent_authored_answer"],
+    "decisions": ["ready", "needs_evidence", "needs_help", "under_review", "closed_with_gaps"],
+    "enforcement": "Core advance command validates current gate, policy, evaluator and evidence versions; an LLM suggestion or enabled button is insufficient.",
+    "cap_interaction": "Unmet gate at cap leads to closure with gaps or separately accepted allowed extension, not infinite retry or automatic pass."
+  },
+  "research_agent": {
+    "request_fields": ["objective", "episodeRevision", "misconceptionHypothesis", "knownPrerequisites", "language", "modality", "remainingLearningTime", "accessibilityNeeds", "sourcePolicy", "requiredOrOptional"],
+    "result_fields": ["sourceUrl", "creator", "inspectedEvidence", "objectiveFit", "prerequisites", "claims", "verifiedSegmentIfAny", "duration", "captionsOrTranscriptStatus", "rightsAndEmbeddingStatus", "reviewedAt", "concerns"],
+    "constraints": ["Minimal public search queries without private learner data", "No metadata-only resource treated as reviewed content", "Bounded time, tool calls and cancellation", "Untrusted source text cannot grant instructions or permissions", "Insertion requires the same content/policy validation as other changes"]
+  },
+  "media_jobs": {
+    "kinds": ["verified_vector_animation", "generated_image", "generated_short_video", "reviewed_external_embed"],
+    "required_provenance": ["objective", "script", "storyboard", "referenceComputationWhenApplicable", "providerCapabilitySnapshot", "modelAndSettings", "assetHash", "reviewReport", "captions", "transcript", "visualDescriptionOrEquivalent", "rights"],
+    "states": ["requested", "budget_reserved", "queued", "generating", "reviewing", "ready", "rejected", "cancelled", "provider_failed", "outcome_unknown"],
+    "provider_contract": ["discoverCapabilities", "estimateCost", "start", "getStatus", "cancelIfSupported", "retrieve", "supportsIdempotency", "retentionPolicy"],
+    "unknown_outcome": "Reconcile with provider where supported; do not blindly retry and risk duplicate cost or publication.",
+    "technical_visuals": "Exact equations, labels, values and causality come from verified scene models. Generated footage is reviewed illustrative material.",
+    "youtube": "Official player, provider attribution/controls, consent-aware loading, eligible embeds, timestamp context and equivalent fallback; no assumption of arbitrary transcript download permission."
+  },
+  "acceptance_cases": [
+    {"id":"F01","case":"Learner cannot identify the next required action","expected":"Usability failure; one primary action and explicit Now/Next labels must be redesigned."},
+    {"id":"F02","case":"User opens progress/profile or watches optional media","expected":"No undeclared requirement and no automatic evidence credit."},
+    {"id":"F03","case":"Advance API called directly with unmet gate","expected":"Server rejects with the missing criteria and allowed next actions."},
+    {"id":"F04","case":"Supervisor evaluates a correct learner explanation in conversation","expected":"Eligible versioned rubric/evidence can satisfy configured readiness without forcing a redundant quiz."},
+    {"id":"F05","case":"Model says learner understands without cited evidence","expected":"No ready decision is authorized."},
+    {"id":"F06","case":"Answer revealed during remediation","expected":"Assistance recorded; fresh eligible evidence required before independent credit."},
+    {"id":"F07","case":"Wrong answer persists until deadline or retry cap","expected":"Closure with gaps/review/allowed extension; no infinite retries or false passing."},
+    {"id":"F08","case":"YouTube embed is removed, disabled or lacks client identity","expected":"Equivalent text/interactive route; preserve the pending step and avoid false mastery failure."},
+    {"id":"F09","case":"Researcher only has title/metadata, not reviewed content","expected":"Unreviewed status; no authoritative claims or invented segment timestamp."},
+    {"id":"F10","case":"Private learner or fleet details would enter a web query","expected":"Minimize/redact before external search; no secret/private-data leakage."},
+    {"id":"F11","case":"New topic selected while research/media job runs","expected":"Versioned result remains attached to original objective; cancel or replan rather than inject stale help."},
+    {"id":"F12","case":"Generated video contradicts its reference calculation","expected":"Reject before use, even if the video looks polished."},
+    {"id":"F13","case":"Video generation completes after cap or consent revocation","expected":"Publication denied by current policy; cleanup and billing reconciliation recorded."},
+    {"id":"F14","case":"Learner cannot use motion/audio/external player","expected":"Accessible equivalent supports the same objective and gate."},
+    {"id":"F15","case":"Two tabs use conflicting gate or course revisions","expected":"Current authoritative versions determine advancement; preserve both drafts and explain conflict."}
+  ],
+  "mockup_scope": "Original code-native illustration, authored timed walkthrough, scripted gates and optional resource placement. No live tutor, YouTube embed or model-generated video in the preview."
+}

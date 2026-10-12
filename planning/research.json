@@ -1,0 +1,709 @@
+{
+  "reviewed_at": "2026-10-12",
+  "scope": "Design research, not a systematic review; primary papers, standards, official product docs, and inspected local SN9 evidence. Educational findings are context dependent.",
+  "sources": [
+    {
+      "id": "R01",
+      "title": "IES: Organizing Instruction and Study to Improve Student Learning",
+      "url": "https://ies.ed.gov/ncee/wwc/PracticeGuide/1",
+      "kind": "Evidence-rated practice guide, 2007",
+      "finding": "Supports spaced review, worked examples alternating with problems, coordinated words and graphics, retrieval, and explanatory questions; recommendations have different evidence ratings.",
+      "decision": "Use predictable explain–predict–manipulate–solve–explain–revisit episodes. Timing defaults are product hypotheses, not scientifically established universal intervals."
+    },
+    {
+      "id": "R02",
+      "title": "Freeman et al.: Active learning in STEM",
+      "url": "https://math.stanford.edu/~conrad/papers/PNAS.pdf",
+      "kind": "2014 meta-analysis; original paper",
+      "finding": "Across 225 undergraduate STEM studies, active learning improved assessment outcomes relative to lecture. This is evidence for participation, not proof for this particular software or adult learner.",
+      "decision": "Require meaningful actions and novel transfer tasks; do not equate watch time or clicking with understanding."
+    },
+    {
+      "id": "R03",
+      "title": "Bastani et al.: Generative AI Without Guardrails Can Harm Learning",
+      "url": "https://hamsabastani.github.io/education_llm.pdf",
+      "kind": "Author-hosted field experiment paper",
+      "finding": "In a high-school mathematics setting, assisted task performance and subsequent unaided learning differed; tutor design and teacher-designed hints mattered.",
+      "decision": "Separate coached practice from independent assessment; record hint use; preserve answer-reveal provenance; do not generalize the numerical effects to this course."
+    },
+    {
+      "id": "R04",
+      "title": "CMU Eberly: Align assessments, objectives and instruction",
+      "url": "https://www.cmu.edu/teaching/assessment/basics/alignment.html",
+      "kind": "University teaching guidance",
+      "finding": "Assessments should test the actual intended capability rather than only factual recall.",
+      "decision": "Each objective maps to an exercise, rubric, misconception set and transfer task. Debugging competence must be assessed by debugging."
+    },
+    {
+      "id": "R05",
+      "title": "Microsoft Research: Guidelines for Human-AI Interaction",
+      "url": "https://www.microsoft.com/en-us/research/publication/guidelines-for-human-ai-interaction/",
+      "kind": "HCI research, 2019",
+      "finding": "The guidelines emphasize capability clarity, appropriate timing, feedback, correction and user control across initial use, normal use and failures.",
+      "decision": "Expose tutor context and uncertainty; explain adaptation reasons; support undo, challenge-grade and decline-detour flows."
+    },
+    {
+      "id": "R06",
+      "title": "Harrison et al.: Practitioner-led micro-randomised trials of AI tutoring",
+      "url": "https://arxiv.org/abs/2609.14789",
+      "kind": "September 2026 preprint; preliminary",
+      "finding": "Reports an encouraging curriculum-aligned result, but substantial attrition and exploratory engagement analyses limit interpretation.",
+      "decision": "Version teaching interventions and measure delayed transfer. Do not claim platform efficacy from engagement or a one-person pilot."
+    },
+    {
+      "id": "R07",
+      "title": "Explorable Explanations",
+      "url": "https://explorabl.es/",
+      "kind": "Interaction design collection",
+      "finding": "Demonstrates explanations that learners manipulate directly.",
+      "decision": "Build small stateful experiments with a prediction before reveal, rather than decorative animation. Inspiration only, not outcome evidence."
+    },
+    {
+      "id": "R08",
+      "title": "Distill: Attention and Augmented Recurrent Neural Networks",
+      "url": "https://distill.pub/2016/augmented-rnns/",
+      "kind": "Original interactive technical article",
+      "finding": "Coordinates technical prose, diagrams and local interactions around a mechanism.",
+      "decision": "Keep the exact formula, tensor state, visual and code line synchronized. Create original artwork and examples."
+    },
+    {
+      "id": "R09",
+      "title": "3Blue1Brown: What is backpropagation really doing?",
+      "url": "https://www.3blue1brown.com/lessons/backpropagation/",
+      "kind": "Original visual lesson",
+      "finding": "Builds intuition for sensitivities before more formal gradient machinery.",
+      "decision": "Use an original scalar computational graph before vectors and autograd. Link external lessons instead of copying them."
+    },
+    {
+      "id": "R10",
+      "title": "Khanmigo for learners",
+      "url": "https://www.khanmigo.ai/learners",
+      "kind": "Official product description; not independent efficacy evidence",
+      "finding": "Presents contextual, conversational tutoring as part of study.",
+      "decision": "Persistent episode-scoped help with hint ladders and worked-example requests; avoid treating product claims as research evidence."
+    },
+    {
+      "id": "R11",
+      "title": "W3C WCAG 2.2",
+      "url": "https://www.w3.org/TR/WCAG22/",
+      "kind": "Web standard",
+      "finding": "Defines testable accessibility requirements including keyboard use, reflow, focus, alternatives to dragging, and accessible authentication.",
+      "decision": "Target AA; keyboard equivalents for graphs and tensor interactions, MathML/text alternatives, reduced motion, 44px product target, and manual screen-reader testing."
+    },
+    {
+      "id": "R12",
+      "title": "1EdTech QTI specification documents",
+      "url": "https://www.1edtech.org/standards/qti/index",
+      "kind": "Assessment interoperability standard",
+      "finding": "QTI represents assessment items, tests and results, including richer portable interactions in v3.",
+      "decision": "Preserve stable IDs, scoring metadata and exportable item structure; scoped QTI export later, no v1 conformance claim."
+    },
+    {
+      "id": "R13",
+      "title": "ADL xAPI data specification",
+      "url": "https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md",
+      "kind": "Learning event specification",
+      "finding": "Models learning experience statements with actor, verb, object and contextual/result information.",
+      "decision": "Use a versioned internal event envelope and later an explicit xAPI adapter. xAPI statements alone do not establish mastery."
+    },
+    {
+      "id": "R14",
+      "title": "H5P package specification",
+      "url": "https://h5p.org/documentation/developers/h5p-specification",
+      "kind": "Official content packaging documentation",
+      "finding": "Separates packaged content parameters from reusable interaction libraries.",
+      "decision": "Separate course content from registered activity renderers. H5P import is a future adapter, not the foundational runtime."
+    },
+    {
+      "id": "R15",
+      "title": "Pyodide: Using Python in a web worker",
+      "url": "https://pyodide.org/en/stable/usage/webworker.html",
+      "kind": "Official runtime documentation",
+      "finding": "Python can run away from the browser UI thread; worker boundaries require explicit message passing.",
+      "decision": "Use lazy browser Python for small CPU lessons, with watchdog termination and an isolated origin. A Web Worker is not a complete security or hard memory boundary."
+    },
+    {
+      "id": "R16",
+      "title": "JupyterLite documentation",
+      "url": "https://jupyterlite.readthedocs.io/en/stable/",
+      "kind": "Official project documentation",
+      "finding": "Supports browser-native notebook experiences, but not all full Jupyter features.",
+      "decision": "Offer notebook export/optional embedding later. Keep the first learning shell simpler; browser Python does not promise native MPS/PyTorch support."
+    },
+    {
+      "id": "R17",
+      "title": "MCP authorization",
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization",
+      "kind": "Protocol specification",
+      "finding": "Defines authorization for restricted MCP resources and tools.",
+      "decision": "Expose course context and proposals through scoped MCP tools; use protocol-compatible authorization for remote transports and scoped local capabilities."
+    },
+    {
+      "id": "R18",
+      "title": "MCP security best practices",
+      "url": "https://modelcontextprotocol.io/docs/2025-11-25/tutorials/security/security_best_practices",
+      "kind": "Official protocol security guidance",
+      "finding": "Describes threats around authorization, confused deputies and token handling.",
+      "decision": "Server-side scopes, no token passthrough, explicit context boundaries, and untrusted learner/source text kept out of privileged control instructions."
+    },
+    {
+      "id": "R19",
+      "title": "Macrocosmos TAH user guide",
+      "url": "https://docs.macrocosmos.ai/product-and-services/tah/tah-user-guide",
+      "kind": "Official operational overview",
+      "finding": "TAH connects consumer computers to IOTA training; work, contributions and changing network parameters affect rewards.",
+      "decision": "Teach the app/network distinction and accepted work versus reward. Current payout formulas are outside fixed course claims and require dated verification."
+    },
+    {
+      "id": "R20",
+      "title": "IOTA technical primer",
+      "url": "https://arxiv.org/html/2507.17766v1",
+      "kind": "2025 Macrocosmos architecture paper",
+      "finding": "Describes heterogeneous pipeline/data-parallel training, orchestration and merging. Some components are explicitly proposals, including CLASP in the initial release.",
+      "decision": "Use it for architectural context, then ground concrete worker behavior in pinned source. Never teach every paper proposal as deployed protocol."
+    },
+    {
+      "id": "R21",
+      "title": "Macrocosmos IOTA repository",
+      "url": "https://github.com/macrocosm-os/IOTA",
+      "kind": "Public upstream source",
+      "finding": "Public implementation and project context are available for source-based teaching.",
+      "decision": "Pin release/commit and file hashes for source walks. Compare the exact patched runtime to its base, not moving main."
+    },
+    {
+      "id": "R22",
+      "title": "PyTorch autograd introduction",
+      "url": "https://docs.pytorch.org/tutorials/beginner/blitz/autograd_tutorial.html",
+      "kind": "Official framework tutorial",
+      "finding": "Autograd tracks differentiable operations and computes gradients through a graph.",
+      "decision": "Contrast forward evaluation, backward gradient accumulation and optimizer updates with executable examples."
+    },
+    {
+      "id": "R23",
+      "title": "PyTorch 2.7 numerical accuracy",
+      "url": "https://docs.pytorch.org/docs/2.7/notes/numerical_accuracy.html",
+      "kind": "Official versioned documentation",
+      "finding": "Floating-point computation can differ by operation order, batching and backend.",
+      "decision": "Teach exact versus numerical equivalence, reference errors, long trajectories, dtypes and reproducibility as separate concepts."
+    },
+    {
+      "id": "R24",
+      "title": "Apple: Accelerated PyTorch training on Mac",
+      "url": "https://developer.apple.com/metal/pytorch/",
+      "kind": "Official platform documentation",
+      "finding": "The MPS backend connects PyTorch operations to Apple GPU acceleration.",
+      "decision": "Draw the Python → framework/autograd → backend → Metal/GPU stack; qualify Mac suitability rather than claiming universal superiority."
+    },
+    {
+      "id": "R25",
+      "title": "MLX documentation",
+      "url": "https://ml-explore.github.io/mlx/build/html/index.html",
+      "kind": "Official framework documentation",
+      "finding": "MLX is a separate array/ML framework designed for Apple silicon with composable transforms and unified memory support.",
+      "decision": "Compare execution models and interoperability costs; do not describe MLX as a PyTorch optimization flag."
+    },
+    {
+      "id": "R26",
+      "title": "Apple: M5 and A19 GPUs",
+      "url": "https://developer.apple.com/videos/play/tech-talks/111432/",
+      "kind": "Official architecture talk",
+      "finding": "Discusses neural accelerators in GPU cores and ML workload acceleration.",
+      "decision": "Explicitly distinguish GPU neural accelerators, the separate Neural Engine and software TensorOps APIs."
+    },
+    {
+      "id": "R27",
+      "title": "Apple: Custom ML operations with Metal tensors",
+      "url": "https://developer.apple.com/videos/play/wwdc2026/330/",
+      "kind": "Official kernel programming talk",
+      "finding": "Discusses tensor operations and requirements for chaining compatible layouts.",
+      "decision": "Use coordinate/layout compatibility as a low-level systems case study; tie the private incident to its measured reproduction."
+    },
+    {
+      "id": "R28",
+      "title": "Karpathy: Neural Networks Zero to Hero",
+      "url": "https://karpathy.ai/zero-to-hero.html",
+      "kind": "Original engineering course",
+      "finding": "Uses code-first progression from gradients toward language models.",
+      "decision": "Borrow the progression principle, with original exercises and added distributed systems, memory and numerical correctness depth."
+    },
+    {
+      "id": "R29",
+      "title": "micrograd",
+      "url": "https://github.com/karpathy/micrograd",
+      "kind": "Original educational implementation",
+      "finding": "Shows how compact scalar reverse-mode autodiff can be.",
+      "decision": "A small original autodiff capstone with independent finite-difference tests; link and respect the source license if any code is later reused."
+    },
+    {
+      "id": "R30",
+      "title": "GitHub Actions secure use reference",
+      "url": "https://docs.github.com/en/actions/reference/security/secure-use",
+      "kind": "Official CI security guidance",
+      "finding": "Recommends least privilege, immutable action pins, and caution around untrusted code in privileged workflows.",
+      "decision": "Public PR jobs have no secrets or production runners; release permissions are isolated. Do not execute fork code via privileged pull_request_target jobs."
+    },
+    {
+      "id": "R31",
+      "title": "npm trusted publishing",
+      "url": "https://docs.npmjs.com/trusted-publishers/",
+      "kind": "Official package release documentation",
+      "finding": "Supports short-lived OIDC publishing and provenance in supported CI environments.",
+      "decision": "Use trusted publishing where supported, reproducible package manifests, and install-test the packed package before release."
+    },
+    {
+      "id": "R32",
+      "title": "GitHub secret scanning",
+      "url": "https://docs.github.com/en/code-security/concepts/secret-security/secret-scanning",
+      "kind": "Official repository security documentation",
+      "finding": "Scans supported secret patterns in repository content; it is not a complete private-data classification system.",
+      "decision": "Combine secret scanning with explicit private-data egress tests and publish allowlists. Public repos never fetch private course content."
+    },
+    {
+      "id": "R33",
+      "title": "Temporal workflow message passing",
+      "url": "https://docs.temporal.io/encyclopedia/workflow-message-passing",
+      "kind": "Official durable-workflow documentation",
+      "finding": "Persistent workflows accept asynchronous signals, read queries and tracked updates.",
+      "decision": "One durable supervisor per enrollment, explicit side-effect activities, idempotent commits, resumable work and bounded histories. Workflow durability is not exactly-once delivery of arbitrary external effects."
+    },
+    {
+      "id": "R34",
+      "title": "LangGraph persistence",
+      "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+      "kind": "Official agent framework documentation",
+      "finding": "Distinguishes per-thread checkpoints from cross-thread stores; in-memory checkpoints do not survive process restarts.",
+      "decision": "Persist learner memory independently from agent conversation checkpoints. Use one orchestration authority; avoid layering two competing durable state machines in v1."
+    },
+    {
+      "id": "R35",
+      "title": "Microsoft Research: Learning outcomes with GenAI",
+      "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2025/10/GenAILearningOutcomes-Report-published-10-07-2025.pdf",
+      "kind": "2025 empirical evidence review",
+      "finding": "Discusses mixed learning effects, overconfidence and the importance of deliberate pedagogical design.",
+      "decision": "Measure unaided transfer and confidence calibration. Do not optimize solely for answer speed, satisfaction or time spent."
+    },
+    {
+      "id": "R36",
+      "title": "Google Research: Learn Your Way",
+      "url": "https://research.google/blog/learn-your-way-reimagining-textbooks-with-generative-ai/",
+      "kind": "2025 product research and small study; first-party report",
+      "finding": "Already explores personalized examples, multiple representations, generated media and quizzes.",
+      "decision": "These features alone are not a novelty claim. Our differentiation must be durable evidence-linked supervision, executable verification, learner control and open course infrastructure; evaluate it."
+    },
+    {
+      "id": "R37",
+      "title": "LearnLM: evaluation-driven educational AI",
+      "url": "https://arxiv.org/abs/2407.12687",
+      "kind": "Primary technical report",
+      "finding": "Develops educational evaluations in collaboration with learners and educators.",
+      "decision": "Maintain pedagogy evals separate from model answer accuracy and software CI. Ask domain reviewers to audit teaching and assessment quality."
+    },
+    {
+      "id": "R38",
+      "title": "LearnLM: Improving Gemini for Learning",
+      "url": "https://arxiv.org/abs/2412.16429",
+      "kind": "Primary technical report",
+      "finding": "Studies pedagogical instruction following and expert preferences.",
+      "decision": "Treat a tutoring model as one component; expert preference is not equivalent to long-term learning outcomes or a reason to hardwire one provider."
+    },
+    {
+      "id": "R39",
+      "title": "Open Learner Models and Learning Analytics Dashboards",
+      "url": "https://repository.tudelft.nl/file/File_2a633928-d6e4-438d-ab93-71a3db4ac6e5",
+      "kind": "Research review, institutional repository",
+      "finding": "Examines open learner models and learner-facing analytics, including learner control and sources of modeling evidence.",
+      "decision": "Make the profile inspectable, correctable and evidence-linked. Distinguish self-reported knowledge, observed attempts and inferred teaching hypotheses."
+    },
+    {
+      "id": "R40",
+      "title": "Learner model techniques in adaptive e-learning",
+      "url": "https://doi.org/10.1016/j.compedu.2024.105184",
+      "kind": "2024 systematic review; abstract/search-level access only",
+      "finding": "Surveys learner-model techniques and highlights gaps in justification for adaptation choices.",
+      "decision": "Start with auditable evidence states rather than uncalibrated mastery percentages; evaluate and version any later predictive model."
+    },
+    {
+      "id": "R41",
+      "title": "Open edX course pacing and schedules",
+      "url": "https://docs.openedx.org/en/latest/educators/references/course_development/about_page.html",
+      "kind": "Official LMS documentation",
+      "finding": "Distinguishes instructor pacing, suggested personalized schedules and a course end date.",
+      "decision": "Model suggested pacing and a binding cap as separate fields. Relative schedules need explicit anchors."
+    },
+    {
+      "id": "R42",
+      "title": "Canvas due dates versus availability dates",
+      "url": "https://community.instructure.com/en/kb/articles/660663-what-is-the-difference-between-assignment-due-dates-and-availability-dates",
+      "kind": "Official LMS documentation",
+      "finding": "Separates a due date from the interval during which submissions are available, and surfaces relevant time zones.",
+      "decision": "Separate learner target, submission cutoff, adaptive-work cutoff and material access. Show the resolved date and time zone."
+    },
+    {
+      "id": "R43",
+      "title": "Moodle quiz settings and overrides",
+      "url": "https://docs.moodle.org/503/en/Quiz_settings",
+      "kind": "Official LMS documentation",
+      "finding": "Individual/group overrides can alter dates, timing and attempt limits.",
+      "decision": "Provide scoped explicit overrides and a policy preview rather than hidden ad hoc exceptions. Our hard-cap hierarchy is a proposed design, not Moodle behavior."
+    },
+    {
+      "id": "R44",
+      "title": "Moodle course completion",
+      "url": "https://docs.moodle.org/503/en/Course_completion",
+      "kind": "Official LMS documentation",
+      "finding": "Course completion is a reporting mechanism distinct from access restriction.",
+      "decision": "Separate completion outcome, mastery evidence and access state; reaching a cap does not award mastery."
+    },
+    {
+      "id": "R45",
+      "title": "Open edX course team roles",
+      "url": "https://docs.openedx.org/en/latest/educators/references/course_development/course_team_roles.html",
+      "kind": "Official LMS documentation",
+      "finding": "Defines distinct course administration/staff responsibilities and limited staff capabilities.",
+      "decision": "Every course gets an admin workspace with scoped roles, learner previews and audit records; administration is not automatically full access to private chats."
+    },
+    {
+      "id": "R46",
+      "title": "W3C Timing Adjustable",
+      "url": "https://www.w3.org/WAI/WCAG22/Understanding/timing-adjustable.html",
+      "kind": "Accessibility guidance",
+      "finding": "Addresses accessibility of time limits, including adjustment/extension mechanisms and specified exceptions.",
+      "decision": "Review applicable interactive time limits separately from course planning dates. No default timed quizzes; accommodations are not charged to discretionary extension allowances."
+    },
+    {
+      "id": "R47",
+      "title": "OWASP Authorization Cheat Sheet",
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html",
+      "kind": "Application security guidance",
+      "finding": "Recommends deny-by-default authorization and checking permissions on every request.",
+      "decision": "Server-side role and scope checks protect admin actions, extensions, artifacts and agent tool commits; UI visibility is not enforcement."
+    },
+    {
+      "id": "R48",
+      "title": "Temporal durable timers",
+      "url": "https://docs.temporal.io/develop/typescript/workflows/timers",
+      "kind": "Official workflow documentation",
+      "finding": "Timers can persist as part of durable workflows.",
+      "decision": "Use durable cap/review timers plus commit-time checks; a delayed timer must never be the sole enforcement mechanism."
+    },
+    {
+      "id": "R49",
+      "title": "Duolingo: the learning path redesign",
+      "url": "https://blog.duolingo.com/new-duolingo-home-screen-design/",
+      "kind": "First-party product/design explanation",
+      "finding": "Describes a linear path with practice integrated into the sequence.",
+      "decision": "Use one recommended next action and incorporate review in the path; do not transplant language-course efficacy claims to this product."
+    },
+    {
+      "id": "R50",
+      "title": "Duolingo: how to use the learning path",
+      "url": "https://blog.duolingo.com/duolingo-101-how-to-learn-a-language-on-duolingo/",
+      "kind": "Official learner guidance",
+      "finding": "Positions the path as choosing what to study and review next.",
+      "decision": "Keep required learning as a guided sequence; place optional resources inline and tracking behind secondary controls."
+    },
+    {
+      "id": "R51",
+      "title": "Duolingo illustration shape language",
+      "url": "https://blog.duolingo.com/shape-language-duolingos-art-style/",
+      "kind": "First-party visual design rationale",
+      "finding": "Emphasizes readable silhouettes, few purposeful details, consistent visual language and scalable vector illustration.",
+      "decision": "Create an original, coherent technical illustration system with semantic colors and accurate motion; do not copy characters or branding."
+    },
+    {
+      "id": "R52",
+      "title": "Duolingo core UI craft redesign",
+      "url": "https://blog.duolingo.com/core-tabs-redesign/",
+      "kind": "2026 first-party interface design account",
+      "finding": "Discusses visual hierarchy, spacing and consistency across product surfaces.",
+      "decision": "Keep one learner interaction vocabulary; administration can remain a separate multi-section workspace."
+    },
+    {
+      "id": "R53",
+      "title": "YouTube IFrame Player API",
+      "url": "https://developers.google.com/youtube/iframe_api_reference",
+      "kind": "Official API reference",
+      "finding": "Provides playback state/events and documents removed/private, embedding-disabled and client-identification errors.",
+      "decision": "Use the official player, validate origin/identity, preserve controls and implement useful fallbacks. Playback events never prove understanding."
+    },
+    {
+      "id": "R54",
+      "title": "YouTube Data API search",
+      "url": "https://developers.google.com/youtube/v3/docs/search/list",
+      "kind": "Official API reference",
+      "finding": "Supports video search filters including embeddability and captions.",
+      "decision": "Dedicated research worker discovers candidates; verify availability and content relevance before insertion, not just title or popularity."
+    },
+    {
+      "id": "R55",
+      "title": "YouTube caption download permissions",
+      "url": "https://developers.google.com/youtube/v3/docs/captions/download",
+      "kind": "Official API reference",
+      "finding": "Caption downloading requires appropriate authorization and can be forbidden.",
+      "decision": "Do not assume transcripts can be fetched for arbitrary videos; use permitted sources, creator transcripts or an explicit unreviewed state."
+    },
+    {
+      "id": "R56",
+      "title": "YouTube embedding and privacy-enhanced mode",
+      "url": "https://support.google.com/youtube/answer/171780",
+      "kind": "Official help documentation",
+      "finding": "Describes privacy-enhanced embeds, caption parameters and embedding constraints.",
+      "decision": "Click-to-load privacy-enhanced players where appropriate; explain external provider behavior without promising zero tracking."
+    },
+    {
+      "id": "R57",
+      "title": "YouTube required minimum functionality",
+      "url": "https://developers.google.com/youtube/terms/required-minimum-functionality",
+      "kind": "Official integration requirements",
+      "finding": "Defines requirements for compliant API/player integration.",
+      "decision": "Keep provider attribution, links and required player behavior; do not obscure controls or treat embedding as permission to redistribute video."
+    },
+    {
+      "id": "R58",
+      "title": "Veo generation in Gemini API",
+      "url": "https://ai.google.dev/gemini-api/docs/veo",
+      "kind": "Official video-generation documentation; capability snapshot",
+      "finding": "Documents short video generation and asynchronous job retrieval, with model-dependent features.",
+      "decision": "Provider-neutral video jobs with capability negotiation, budgets and validation. Compose longer explainers from supported clips when needed; verify access at implementation."
+    },
+    {
+      "id": "R59",
+      "title": "OpenAI video generation",
+      "url": "https://developers.openai.com/api/docs/guides/video-generation",
+      "kind": "Official video-generation documentation; capability snapshot",
+      "finding": "Documents asynchronous video creation, status and media retrieval.",
+      "decision": "Use durable media jobs and provider adapters; no assumption that a chat subscription or current session exposes a video-generation tool."
+    },
+    {
+      "id": "R60",
+      "title": "W3C accessible audio and video content",
+      "url": "https://www.w3.org/WAI/media/av/av-content/",
+      "kind": "Accessibility production guidance",
+      "finding": "Recommends planning accessible visual/audio information, readable overlays and descriptions while scripting and storyboarding.",
+      "decision": "Captions, transcripts, visual descriptions and text/interactive alternatives are mandatory media production outputs."
+    },
+    {
+      "id": "R61",
+      "title": "Expo concepts and free tooling",
+      "url": "https://docs.expo.dev/core-concepts/",
+      "kind": "Official framework documentation",
+      "finding": "Expo supports native Android/iOS and web; framework features are open source/free, hosted EAS services are separate.",
+      "decision": "Prefer Expo/React Native for the universal learner client; no mandatory paid build service."
+    },
+    {
+      "id": "R62",
+      "title": "Expo native development/build workflow",
+      "url": "https://docs.expo.dev/workflow/overview/",
+      "kind": "Official framework documentation",
+      "finding": "Documents MIT tools, native projects/development builds and local or own-CI builds.",
+      "decision": "Build native projects from M1; Expo Go and browser resizing do not prove native readiness."
+    },
+    {
+      "id": "R63",
+      "title": "React DOM components in Expo",
+      "url": "https://docs.expo.dev/guides/dom-components/",
+      "kind": "Official integration documentation",
+      "finding": "DOM content is hosted through WebView mechanisms; ordinary native components are not arbitrary HTML elements.",
+      "decision": "Use explicit platform adapters and audited lab/media islands; never assume browser libraries are native-compatible."
+    },
+    {
+      "id": "R64",
+      "title": "Expo tablet configuration",
+      "url": "https://docs.expo.dev/versions/latest/config/app/",
+      "kind": "Official configuration reference",
+      "finding": "iOS tablet support is explicit configuration and defaults off in the documented setting.",
+      "decision": "Enable and test tablet support, orientations and multi-window behavior as deliberate release requirements."
+    },
+    {
+      "id": "R65",
+      "title": "Capacitor native runtime",
+      "url": "https://capacitorjs.com/docs",
+      "kind": "Official framework documentation",
+      "finding": "Packages web applications with native runtime/plugin integration for iOS and Android.",
+      "decision": "Credible fallback for web-heavy content, but webview interaction/lifecycle/native integration still require validation."
+    },
+    {
+      "id": "R66",
+      "title": "Flutter adaptive design",
+      "url": "https://docs.flutter.dev/ui/adaptive-responsive",
+      "kind": "Official framework documentation",
+      "finding": "Distinguishes fitting content to space from adapting interactions to the available space and input devices.",
+      "decision": "Use effective window size and input capabilities; tablets are not simply enlarged phones."
+    },
+    {
+      "id": "R67",
+      "title": "Flutter web accessibility",
+      "url": "https://docs.flutter.dev/ui/accessibility/web-accessibility",
+      "kind": "Official framework documentation",
+      "finding": "Flutter uses a semantics-to-DOM accessibility layer for its rendered web UI.",
+      "decision": "Include rich text, formulas, selection, browser semantics and editor integration in the Flutter comparison; do not assume web parity."
+    },
+    {
+      "id": "R68",
+      "title": "Android adaptive display guidance",
+      "url": "https://developer.android.com/develop/ui/compose/layouts/adaptive/support-different-display-sizes",
+      "kind": "Official platform guidance",
+      "finding": "Describes adapting interfaces to available display/window space.",
+      "decision": "Validate compact/medium/expanded windows, foldables, rotation and split-screen rather than device-name breakpoints."
+    },
+    {
+      "id": "R69",
+      "title": "React Native accessibility",
+      "url": "https://reactnative.dev/docs/accessibility",
+      "kind": "Official framework documentation",
+      "finding": "Provides native accessibility properties and platform-specific accessibility behavior.",
+      "decision": "VoiceOver/TalkBack and dynamic text acceptance supplement web WCAG tests."
+    },
+    {
+      "id": "R70",
+      "title": "Apple App Review Guidelines",
+      "url": "https://developer.apple.com/app-store/review/guidelines/",
+      "kind": "Official platform distribution rules",
+      "finding": "Addresses executable content, educational-code exceptions, native APIs, privacy and software offered outside the binary.",
+      "decision": "Native extension boundaries and review are first-class design constraints; compile success does not establish store approval."
+    },
+    {
+      "id": "R71",
+      "title": "AI SDK model/tool abstraction",
+      "url": "https://ai-sdk.dev/docs/introduction",
+      "kind": "Official framework documentation",
+      "finding": "Provides TypeScript model-provider, structured-output, tool and agent interfaces.",
+      "decision": "Use a provider-neutral model gateway with bounded role jobs; hosting through the vendor is not required."
+    },
+    {
+      "id": "R72",
+      "title": "Temporal AI SDK integration",
+      "url": "https://docs.temporal.io/develop/typescript/integrations/ai-sdk",
+      "kind": "Official integration documentation",
+      "finding": "Documents integrating model operations with durable TypeScript workflows.",
+      "decision": "Run nondeterministic work through durable activities and verify integration compatibility before adopting versions."
+    },
+    {
+      "id": "R73",
+      "title": "LangGraph overview",
+      "url": "https://docs.langchain.com/oss/python/langgraph/overview",
+      "kind": "Official framework documentation",
+      "finding": "Provides graph-based stateful agent orchestration.",
+      "decision": "Evaluate as an alternative or bounded plugin strategy; do not introduce a second competing durable authority by default."
+    },
+    {
+      "id": "R74",
+      "title": "Pydantic AI",
+      "url": "https://pydantic.dev/docs/ai/overview/",
+      "kind": "Official framework documentation",
+      "finding": "Provides typed Python agent interfaces, dependencies and tool workflows.",
+      "decision": "Support a Python adapter where useful; prefer one primary backend language for the initial service."
+    },
+    {
+      "id": "R75",
+      "title": "Pydantic Evals",
+      "url": "https://pydantic.dev/docs/ai/evals/evals/",
+      "kind": "Official evaluation framework documentation",
+      "finding": "Provides code-based evaluation and custom evaluators for model/agent behavior.",
+      "decision": "Use optional Python evaluation adapters; learning assessment validity still requires independent references and rubrics."
+    },
+    {
+      "id": "R76",
+      "title": "AI SDK telemetry",
+      "url": "https://ai-sdk.dev/docs/ai-sdk-core/telemetry",
+      "kind": "Official observability documentation",
+      "finding": "Documents OpenTelemetry integration and input/output capture controls.",
+      "decision": "Explicitly disable broad content capture by default; build a scoped evidence-aware debugger rather than exposing all raw prompts."
+    },
+    {
+      "id": "R77",
+      "title": "OpenTelemetry GenAI conventions",
+      "url": "https://opentelemetry.io/docs/specs/semconv/gen-ai/",
+      "kind": "Official observability specification",
+      "finding": "Defines evolving conventions for instrumenting generative AI systems.",
+      "decision": "Pin semantic-convention versions and map them into a stable domain trace schema."
+    },
+    {
+      "id": "R78",
+      "title": "Langfuse self-hosting",
+      "url": "https://langfuse.com/self-hosting",
+      "kind": "Official observability documentation",
+      "finding": "Provides self-hostable model observability; repo license distinguishes MIT core and enterprise portions.",
+      "decision": "Optional MIT-core backend adapter; required admin/debug capabilities must not depend on paid enterprise features."
+    },
+    {
+      "id": "R79",
+      "title": "Promptfoo evaluation toolkit",
+      "url": "https://www.promptfoo.dev/docs/intro/",
+      "kind": "Official evaluation documentation",
+      "finding": "Supports systematic prompt/model evaluations and custom assertions.",
+      "decision": "Use for reproducible held-out tutor/agent regression runs; do not use an LLM judge as sole mathematical authority."
+    },
+    {
+      "id": "R80",
+      "title": "Maestro mobile UI testing",
+      "url": "https://docs.maestro.dev/",
+      "kind": "Official test-tool documentation",
+      "finding": "Provides automated mobile UI flow testing.",
+      "decision": "Add real native lesson/placement/resume/gate journeys alongside Playwright web tests."
+    },
+    {
+      "id": "R81",
+      "title": "Duolingo placement-test design",
+      "url": "https://blog.duolingo.com/partial-credit-improvements-to-duolingos-placement-test/",
+      "kind": "First-party technical/product account",
+      "finding": "Describes adaptive placement, partial credit and the need to calibrate scoring rather than choose arbitrary values.",
+      "decision": "Use bounded concept-mapped diagnostics; avoid unsupported psychometric accuracy claims and validate false-skip rates."
+    },
+    {
+      "id": "R82",
+      "title": "Open Policy Agent",
+      "url": "https://www.openpolicyagent.org/docs",
+      "kind": "Official policy-engine documentation",
+      "finding": "Provides a general policy evaluation engine.",
+      "decision": "Candidate for organizational policy complexity; v1 can keep deterministic typed policy functions with replay/property tests."
+    },
+    {
+      "id": "R83",
+      "title": "Framework license snapshots",
+      "url": "framework-license-snapshot.json",
+      "kind": "Primary repository license files fetched 2026-10-12",
+      "finding": "Verified Expo/RN/RNW/Capacitor/Temporal/LangGraph/Pydantic AI/SVG MIT; Flutter BSD; AI SDK/OTel/Maestro Apache; Promptfoo MIT. Langfuse excludes enterprise paths; Phoenix is ELv2.",
+      "decision": "Use permissive core dependencies by default. Pin packages, inspect transitive/bundled licenses and separate optional commercial services before release."
+    },
+    {
+      "id": "R84",
+      "title": "React Native Skia rendering and platform requirements",
+      "url": "https://wcandillon.github.io/react-native-skia/docs/getting-started/installation/",
+      "kind": "Official graphics framework documentation",
+      "finding": "Supports demanding 2D rendering with explicit version/platform requirements.",
+      "decision": "Candidate dense-scene renderer; pin compatible versions and prove web/native support, not just a mocked rendering test."
+    },
+    {
+      "id": "R85",
+      "title": "React Native Reanimated",
+      "url": "https://docs.swmansion.com/react-native-reanimated/",
+      "kind": "Official animation framework documentation",
+      "finding": "Provides declarative motion, native UI-thread execution and gesture integration.",
+      "decision": "Use animation/gesture adapters under scene/timeline contracts; actual frame pacing and accessibility remain test requirements."
+    },
+    {
+      "id": "R86",
+      "title": "Lottie runtime",
+      "url": "https://github.com/airbnb/lottie-web",
+      "kind": "Primary project source; MIT runtime",
+      "finding": "Renders authored animation assets across supported runtime integrations.",
+      "decision": "Optional import adapter; runtime availability does not imply all authoring/export tools are free or all features match across platforms."
+    },
+    {
+      "id": "R87",
+      "title": "Rive runtime",
+      "url": "https://github.com/rive-app/rive-runtime",
+      "kind": "Primary project source; MIT runtime",
+      "finding": "Provides artboard/state-machine animation and graphics runtime interfaces.",
+      "decision": "Optional authored-animation adapter; retain a complete free code/vector route and validate capability parity and asset rights."
+    }
+  ],
+  "limitations": [
+    "A Nature 2025 AI tutoring paper could not be fetched because of access redirects; its reported results are not used as design evidence.",
+    "Product inspiration is not evidence of educational efficacy.",
+    "The September 2026 tutoring result is a preprint in a different educational setting.",
+    "The course has not yet been authored or evaluated; these are design decisions and testable hypotheses."
+  ],
+  "revision": "v0.8-rich-visual-authoring"
+}

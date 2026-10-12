@@ -1,0 +1,17 @@
+{
+  "name": "@private-courses/llms-and-models",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": { "node": ">=26" },
+  "scripts": {
+    "build": "node scripts/assemble.mjs",
+    "build:preview": "node scripts/assemble.mjs --preview",
+    "test": "node --test test/*.test.mjs",
+    "verify:math": "python3 verification/foundations.py && python3 verification/training-and-transformers.py"
+  },
+  "dependencies": {
+    "@course-core/sdk": "https://github.com/roeehrl/course-sdk/releases/download/v0.1.0/course-core-sdk-0.1.0.tgz"
+  }
+}

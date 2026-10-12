@@ -1,0 +1,250 @@
+{
+  "title": "From dummy to professional: LLMs and models",
+  "audience": "Experienced systems programmer, new to machine learning",
+  "language": "Python for minimal executable examples; C/C++/Metal and memory-layout parallels; optional Rust translations",
+  "scope_note": "Professional competence is demonstrated by artifacts and independent reviews, not promised by finishing a fixed number of hours. These are planned episodes, not completed course content.",
+  "chapters": [
+    {
+      "id": "01",
+      "title": "A map of learned software",
+      "goal": "Locate data, code, parameters, inference and training in one system.",
+      "episodes": [
+        "A model is a parameterized program",
+        "Training versus inference versus fine-tuning",
+        "From text to token IDs and predictions",
+        "TAH, IOTA, SN9 and our four Macs: the map"
+      ],
+      "lab": "Trace one text example through a tiny prediction program; distinguish code from learned parameters.",
+      "check": "Explain which state changes during inference, backward and an optimizer step; identify training versus serving logs.",
+      "misconception": "A model contains a database of all its training examples or learns automatically from every prompt."
+    },
+    {
+      "id": "02",
+      "title": "Tensors are structured buffers",
+      "goal": "Reason about shape, dtype, layout and memory before using a framework.",
+      "episodes": [
+        "Scalars, vectors, matrices and tensor shapes",
+        "Strides, views, broadcasting and aliasing",
+        "Dot products, matrix multiplication and reductions",
+        "FP32, FP16, BF16 and why order matters"
+      ],
+      "lab": "Manipulate a tensor memory viewer; reconstruct offsets and expose a wrong transpose.",
+      "check": "Predict output shapes and allocation sizes; explain a finite but wrong result.",
+      "misconception": "A view is always a copy, or identical formulas imply identical floating-point results."
+    },
+    {
+      "id": "03",
+      "title": "What learning actually optimizes",
+      "goal": "Compute a loss and explain why an update can improve it.",
+      "episodes": [
+        "One weight, one prediction, one loss",
+        "Derivatives as sensitivity; the chain rule",
+        "Gradient descent and learning rate",
+        "Batches, train/validation/test and generalization"
+      ],
+      "lab": "Adjust a scalar model, compute its slope, and see understepping and overshooting.",
+      "check": "Compute one update by hand and distinguish training loss from unseen-data performance.",
+      "misconception": "Lower training loss always means a better model, or the gradient points downhill."
+    },
+    {
+      "id": "04",
+      "title": "Forward, backward, update",
+      "goal": "Implement and test reverse-mode automatic differentiation.",
+      "episodes": [
+        "Forward builds values and a computation graph",
+        "Backward propagates sensitivities",
+        "Saved activations, recomputation and gradient accumulation",
+        "Build a tiny autodiff engine"
+      ],
+      "lab": "Capstone A: scalar reverse-mode engine with shared nodes, fan-out and gradient checks.",
+      "check": "Predict every gradient and weight before/after backward and optimizer.step; fix missing accumulation.",
+      "misconception": "Backward changes the weights, or simply runs the forward code in reverse."
+    },
+    {
+      "id": "05",
+      "title": "From neurons to a training loop",
+      "goal": "Train and debug a small network with the same conceptual pieces as a large one.",
+      "episodes": [
+        "Linear layers, nonlinearity and composition",
+        "Initialization, normalization and residual paths",
+        "SGD, momentum, AdamW and optimizer state",
+        "Checkpoints, reproducibility and broken training loops"
+      ],
+      "lab": "Train a tiny MLP and diagnose wrong-sign updates, stale gradients and optimizer state mismatch.",
+      "check": "Explain each line of a training loop and account for parameters, gradients and optimizer memory.",
+      "misconception": "The checkpoint is only the weights, or optimizer state is interchangeable across runs."
+    },
+    {
+      "id": "06",
+      "title": "How language models work",
+      "goal": "Explain next-token training and construct the data/loss path.",
+      "episodes": [
+        "Tokenization, embeddings and positional information",
+        "Logits, softmax and cross-entropy",
+        "Teacher forcing, causal masking and sequence batches",
+        "Sampling, context, KV caches and inference costs"
+      ],
+      "lab": "Inspect logits and probabilities in a small vocabulary and compute a next-token loss.",
+      "check": "Detect target leakage, shifted-label bugs and confusion between training and inference caches.",
+      "misconception": "Loss is accuracy, attention sees future tokens, or a token is always a word."
+    },
+    {
+      "id": "07",
+      "title": "Inside a transformer",
+      "goal": "Trace shapes and gradients through a transformer block.",
+      "episodes": [
+        "Queries, keys and values as learned projections",
+        "Attention scores, masking, softmax and weighted values",
+        "Heads, grouped-query attention, RoPE and RMSNorm",
+        "Assemble and train a tiny decoder"
+      ],
+      "lab": "Capstone B: small CPU transformer; inspect attention and compare gradients to a reference.",
+      "check": "Trace Q/K/V and projection dimensions; show how an incorrect output can corrupt upstream gradients.",
+      "misconception": "An attention head is a TAH layer, or attention weights alone fully explain a model."
+    },
+    {
+      "id": "08",
+      "title": "The software stack under Python",
+      "goal": "Read a framework operation down to its device implementation.",
+      "episodes": [
+        "PyTorch tensors, modules, autograd and optimizers",
+        "Dispatch, operator implementations and asynchronous devices",
+        "MLX: arrays, lazy evaluation, transforms and memory",
+        "Training, fine-tuning, LoRA, evaluation and alignment"
+      ],
+      "lab": "Implement the same small operation in plain Python and PyTorch; compare an optional MLX variant.",
+      "check": "Explain framework versus backend versus kernel, and why framework replacement requires qualification.",
+      "misconception": "MLX is a PyTorch flag, or pretraining creates a finished instruction-following assistant."
+    },
+    {
+      "id": "09",
+      "title": "What the GPU actually does",
+      "goal": "Relate ML operations to parallel execution, data movement and synchronization.",
+      "episodes": [
+        "Threads, SIMD groups, threadgroups and parallel reductions",
+        "Memory hierarchy, tiling, occupancy and arithmetic intensity",
+        "Metal, MPS, MPSGraph, TensorOps and GPU neural accelerators",
+        "Why Apple silicon fits this use case—and its limits"
+      ],
+      "lab": "A tiled matrix multiplication simulator with bytes moved, FLOPs and a scheduling timeline.",
+      "check": "Choose between fusion, tiling and reducing transfers from a profile; distinguish GPU accelerators from ANE.",
+      "misconception": "Unified memory is free memory, GPU utilization equals useful work, or all Macs are faster than datacenter GPUs."
+    },
+    {
+      "id": "10",
+      "title": "One model across many machines",
+      "goal": "Trace a distributed training sample and its return gradients.",
+      "episodes": [
+        "Data, tensor and pipeline parallelism",
+        "Microbatches, bubbles, stale work and backpressure",
+        "IOTA orchestration, peer routing and replicated splits",
+        "Upload, pseudo-gradients, merge and the next epoch"
+      ],
+      "lab": "Pause a simulated peer and inspect queued activations, deadlines and accepted completions.",
+      "check": "Route a forward and backward through L0/L1/L2; explain local updates versus global merge.",
+      "misconception": "Our four Macs form a fixed private pipeline, or a TAH epoch necessarily means one pass over the dataset."
+    },
+    {
+      "id": "11",
+      "title": "Read the actual TAH worker",
+      "goal": "Connect the mental model to versioned code and observed events.",
+      "episodes": [
+        "Official host, worker process and control plane",
+        "Head/body/tail split implementations",
+        "Training queue, activation cache and optimizer boundary",
+        "Our behavioral patches, telemetry and admission lifecycle"
+      ],
+      "lab": "Follow an anonymized recorded sample through pinned source and journal events.",
+      "check": "Identify where a sample waited versus computed; explain why local backward completion does not prove credited work.",
+      "misconception": "The GUI performs tensor math, or a worker registered in a run is necessarily training."
+    },
+    {
+      "id": "12",
+      "title": "The corruption incident",
+      "goal": "Reconstruct a numerical failure from evidence and design a stronger test.",
+      "episodes": [
+        "Finite, deterministic and correct are different claims",
+        "The M5 coordinate-layout bug and forward/backward damage",
+        "Batch calibration, fallback changes and misleading smoke tests",
+        "Diagnosis, containment, disclosure and causal uncertainty"
+      ],
+      "lab": "Replay a tiny analogous layout bug; compare forward, dQ, dK and dV and assemble an evidence timeline.",
+      "check": "Reject a finite-only test, design chip-specific counterexamples, and separate measured causality from historical inference.",
+      "misconception": "Passing on one chip qualifies another, or a healthy run-loss plot proves local equivalence."
+    },
+    {
+      "id": "13",
+      "title": "Optimize without changing the answer",
+      "goal": "Design a measured, numerically justified optimization and its rollback.",
+      "episodes": [
+        "Head/loss tiling and finite-check synchronization",
+        "Normalization fusion, recomputation and buffer lifetime",
+        "Attention layouts, precision and forward/backward qualification",
+        "Benchmarking, memory gates, fault injection and guarded rollout"
+      ],
+      "lab": "Capstone C: qualify a small kernel-like transformation against independent reference and negative controls.",
+      "check": "Catch a misleading microbenchmark, invalid comparison, retained buffer and false-success guard.",
+      "misconception": "A faster isolated kernel guarantees higher tokens/hour, or a passing old artifact qualifies edited source."
+    },
+    {
+      "id": "14",
+      "title": "Operate like an ML systems engineer",
+      "goal": "Defend an end-to-end design and communicate the limits of its evidence.",
+      "episodes": [
+        "Read papers, distinguish claims and inspect implementations",
+        "Build a reproducible experiment and evidence report",
+        "End-to-end performance, network limits and resource budgets",
+        "Final review: teach back, diagnose and propose a safe improvement"
+      ],
+      "lab": "Final portfolio: tiny model, gradient tests, distributed trace, incident reconstruction, benchmark and rollout proposal.",
+      "check": "Independent oral/written defense plus a new held-out debugging task and delayed revisit.",
+      "misconception": "Course completion is equivalent to professional certification or proof of production safety."
+    }
+  ],
+  "suggested_paths": {
+    "orientation": "A 2–3 hour guided map drawn from chapters 1, 4, 9, 10 and 12; explicitly does not confer mastery.",
+    "core": "56 episodes, typically 12–20 minutes of focused explanation/practice; labs and reviews extend the planned total to roughly 35–50 learner hours. Re-estimate after pilot.",
+    "deep": "Optional tensor algebra, Metal/C++ kernel, framework source and distributed consistency branches; roughly 60–90 total hours including larger capstones, depending on diagnostic results. No fixed expertise promise."
+  },
+  "policy_requirement": "Every enrollment must resolve a bounded policy or explicitly permitted open-ended mode. POC deadline/duration and extension amounts are to be configured, not silently assigned by the design.",
+  "administration": "Course core provides the same scoped admin interface for this private module as for every other SDK course.",
+  "delivery": "One guided path with explicit readiness gates; contextual optional help; reviewed/generated media and conversational or interactive evidence.",
+  "platform_requirement": "Required learning objectives supported on iOS/iPadOS, Android phones/tablets, mobile web and widescreen web; platform adapters or objective-equivalent fallbacks validated.",
+  "placement": "Admin-enabled and learner-optional. Author a concept-mapped blueprint before granting exemptions; placement is not fabricated lesson completion or retained mastery.",
+  "roadmap_groups": [
+    {
+      "title": "Foundations",
+      "chapter_ids": [
+        "01",
+        "02",
+        "03"
+      ]
+    },
+    {
+      "title": "The learning loop",
+      "chapter_ids": [
+        "04",
+        "05",
+        "06",
+        "07"
+      ]
+    },
+    {
+      "title": "Systems & silicon",
+      "chapter_ids": [
+        "08",
+        "09",
+        "10"
+      ]
+    },
+    {
+      "title": "Real-world engineering",
+      "chapter_ids": [
+        "11",
+        "12",
+        "13",
+        "14"
+      ]
+    }
+  ]
+}
