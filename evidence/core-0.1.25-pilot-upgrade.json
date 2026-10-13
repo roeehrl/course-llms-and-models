@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "coreVersion": "0.1.25",
+  "coreTag": "v0.1.25",
+  "coreCommit": "dfe4f2b1a5e813ac4c99e2165897e3e8d76931bf",
+  "coreTagObject": "41e588dbf836b454424304ed8de71ae1ff0b52d0",
+  "coreReleaseRun": 38468281537,
+  "coreCandidateArtifact": 11856082469,
+  "coreArtifactDigest": "sha256:2fd6731738edeb0f9369abd9a7d6abd53ecfd4b11053e63d9ea017d0b1a02ab8",
+  "coreManifestSha256": "b47d3e92d34aed112b5f512c025a08f15969465109424fd71666269cdd765e05",
+  "coreRelease": "https://github.com/roeehrl/course-core/releases/tag/v0.1.25",
+  "consumerChecks": {
+    "sha256sumsAllOk": true,
+    "installedRuntimeCheck": {
+      "checkedMembers": 1213,
+      "uniqueFiles": 699
+    },
+    "publishedWebMembersRestored": 15
+  },
+  "nativePilotUpgrade": {
+    "from": "0.1.19",
+    "to": "0.1.25",
+    "origin": "http://127.0.0.1:4310",
+    "procedure": [
+      "stopped 0.1.19 launcher (not_running confirmed)",
+      "pinned the existing Temporal task queue course-core-pilot-20acd740cb919bbc30409674 in config.json after confirming it in the Temporal store and the 0.1.19 derivation",
+      "0.1.25 backup.mjs create: 59 tables, 130 rows, 4 files",
+      "0.1.25 backup.mjs verify: restored into a disposable database, rows and 15 migrations matched, Temporal integrity_ok, disposable database dropped",
+      "started 0.1.25 launcher on the same state; health ok; migrations 016-020 applied"
+    ],
+    "preservedEnrollment": {
+      "id": "6d7439c7-43b0-42d9-a2e2-c0ad5f8367ec",
+      "subject": "qa:pilot-learner",
+      "pinnedCourse": "0.1.4",
+      "status": "active",
+      "completedEpisodes": 1,
+      "evidence": 2
+    },
+    "services": [
+      "temporal",
+      "api",
+      "worker",
+      "dispatcher"
+    ]
+  },
+  "pilotAcceptance": {
+    "viewports": [
+      {
+        "name": "phone",
+        "completedEpisode": "fnd-e01-01"
+      },
+      {
+        "name": "tablet",
+        "resumedEpisode": "fnd-e01-02"
+      },
+      {
+        "name": "desktop",
+        "resumedEpisode": "fnd-e01-02"
+      }
+    ],
+    "resumedExistingEnrollment": true,
+    "operatorEnrolled": false,
+    "qaRoleCheck": "verified_via_people_api",
+    "knownAxeDefectsObserved": []
+  },
+  "knownIssues": [
+    "0.1.25 erasure does not clear reviewer findings quoting written answers, and its export omits newer learner records; fixed on Core main after this tag (not yet released)"
+  ],
+  "liveProviderAcceptance": false,
+  "notVerified": [
+    "live provider behavior",
+    "learning efficacy",
+    "physical devices",
+    "native app binaries",
+    "private 56-episode released-consumer acceptance against 0.1.25 (last run against 0.1.19)"
+  ],
+  "observedAt": "2026-10-13T22:52:00Z"
+}
