@@ -19,8 +19,10 @@ Private downloadedall7publishedassets,installedthroughreleasedCLI and restored
 exactpublishedwebexports afterinstaller rebuilt them. New consumer verifier pin
 updated to actual0.1.10identity; forged-manifest negative test passes. Installed
 archive1082declaredmembers/627uniquefiles verified. HTTPcourse56episode acceptance
-RUNNINGexec41007, latest28/56/recovered2families. Do not restarton timeout;
-private .local/private-v10-http-acceptance.log. Browser acceptance NOTstarted yet.
+PASSEDexec41007/exit0:all3practical recoveries,6assignments/exact270min/6episodes,
+all56premature-completiondenials,failedbankwithoutnewcharge/gatechange.
+Private .local/private-v10-http-acceptance.log. Browser acceptance RUNNINGexec95761;
+private .local/private-v10-browser-acceptance.log. Pollsamehandle;no timeout restart.
 
 Pinned native0.1.10runtime STAGED,NOTactive:
 /Users/tnt/Library/Application Support/Course Core/Pilot/releases/v0.1.10/course-core
@@ -29,7 +31,7 @@ already-qualifiedTemporalbinary copied and hashed. Provenanceactivated:false.
 Activepilot remains0.1.8, explicitoldroot/state detailedbelow. Existing course0.1.3
 unchanged,3enrollments/owner0/providercredentials0/paidlimits0.
 
-Next:sameHTTPhandle toterminal,privatebrowser path,consistentstopped backup plus
+Next:samebrowserhandle toterminal,consistentstopped backup plus
 isolatedrestore andkeycustody,state-preserving0.1.10activation/nativeUIvalidation.
 Then resume mainmoat:novelteaching/visuals/research/media/verifier/creatorstrategies
 andremainingplacement/policy/privacy/ops/native-readiness gates. LiveGooglerequires
