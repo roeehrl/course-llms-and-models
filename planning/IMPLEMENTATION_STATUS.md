@@ -1,3 +1,36 @@
+# Published0.1.17 private acceptance COMPLETE — 2026-10-13
+
+Fullv0.8goalACTIVE/incomplete. Existing live handles56614/8385 are TERMINALsuccess0;
+no duplicate/restarted acceptance process. Published Core0.1.17 and installed
+member identity1105/640 independently verified against manifest
+25a358dbf66c2532af7a98505949b833a8ffb0197e7ffc96a6827e5a947e2906.
+
+HTTP all56episode path PASS,3practical families recovered,6committed assignments,
+unearned completion rejected every episode. Finite bank2replacements/exhaustion
+PASS, unchanged gate, no additional charge, unavailability explained. Actual
+Postgres/releasedHTTP/isolatedPython, course0.1.3 baseline remains unchanged.
+Browser PASSphone56,desktop16,tablet16: recovery, code draft preserved on reload,
+no horizontaloverflow, code accessibility,0pageerrors. These are actual released
+private consumer paths; they do NOT establish real provider or learning efficacy.
+Owner remained unenrolled. Owned test schemas/processes cleaned at terminal.
+Ignored private logs .local/private-v17-http-retry.log and browser-retry.log;
+private verification pins now committed68a08f9. Earlier startup failure was missing
+explicit passwordless test role in minimal childenv, now correctly normalized.
+
+Active nativepilot remains0.1.10. NEXT actual installation gate: stage EXACT
+published runtime/web bytes and self-contained dependencies under native
+releases/v0.1.17; preserve fresh operator/account/coursepins/plans/budgets/config;
+graceful owned service stop; consistent PG/Temporal/config/key backup; disposable
+DB restore/key custody proof;0.1.17 activation with explicit root/state; actual
+nativeHTTP plus owner/learner browser and state equality. Do not assume provider
+credentials/budgets remain zero if user answered the pending Google setup question.
+Never print secret sessions/config/key material; no other services/fleet controls.
+
+Research development PR25/CI38434748255 and all broader objective work remain
+incomplete as described below. Private worked0.1.4 staging/constructor/registry/
+model-tool/application is still separate acceptance after baseline native upgrade.
+No full goal completion, implicit paid calls or native mobile binaries.
+
 # Published0.1.17 consumer active; public research queued — 2026-10-13
 
 Fullv0.8goalACTIVE/incomplete.0.1.17 is genuinely PUBLISHED, independently byte
