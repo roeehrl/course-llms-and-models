@@ -25,9 +25,14 @@ and policy. Its154-profile registry combines115existing recovery profiles with
 The other17episodes are not cleared for novel teaching by this arithmetic package.
 
 Core0.1.17's published creator-guidance/profile-capacity interfaces are required
-before runtime qualification, binding or installation. After publication, load
-the exact definition in the actual isolated broker; require positive/negative
-constructor cases plus real model-tool-check-repair-delivery acceptance. Approve
+before constructor binding, course integration or installation. Program-only
+isolation has already passed through the independently byte-verified published
+Core0.1.10 broker:172positive/negative cases across39topics in8bounded batches,
+with128MiB memory/0.5CPU/5second/64KiB limits. This consumed no model call and
+created no registry approval, lesson or mastery evidence. It does not establish
+acceptance through the new installation/supervision interfaces. After publication,
+require those constructor cases plus real model-tool-check-repair-delivery
+acceptance. Approve
 the exact course/extension/configuration identities through authorized runtime
 interfaces, then verify released consumer, private state preservation and actual
 responsive learner paths. Existing enrollments retain their current release pin.
