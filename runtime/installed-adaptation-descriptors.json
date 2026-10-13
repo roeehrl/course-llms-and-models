@@ -11,6 +11,12 @@
       "implementationDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
       "kind": "bank",
       "authorization": "release_registry_approval_required"
+    },
+    {
+      "id": "authored-code-bank-v1",
+      "implementationDigest": "05d8ba2439c6b2e26a06a1dfd4d366700f08a3b964eb1f1d24ea3fd73e9f7cc2",
+      "kind": "code-bank",
+      "authorization": "release_registry_approval_required"
     }
   ]
 }

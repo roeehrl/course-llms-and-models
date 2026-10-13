@@ -11,7 +11,7 @@ contracts remain required.
 | Public course-agnostic core and SDK; private course | Public repos, SDK0.2.0 and Core0.1.3 hosted assets, exact-byte consumer checks; private source pushed | Later fresh-recovery runtime artifact; private hosted CI cannot start because of billing restriction | Partial |
 | Complete private crash-course curriculum | 14 chapters/56 episodes, substantive prose, 115 canonical families, qualified CPU examples, six interactive illustrations, six code tasks | Actual full learner path; independent content review; responsive media and illustration coverage throughout the course | Partial |
 | Clear linear mobile/tablet/desktop learning | Real connected browser workflows, one next action, gated completion, saved code drafts, accessibility/overflow tests | Private 56-episode path, physical device and other browser-engine checks, visual review of all screens and dialogs | Partial |
-| Honest independent assessment and recovery | Wrong answers/repeats/help cannot manufacture independent credit; numeric/choice fresh recovery active in private0.1.2; generic reviewed code recovery passes real Postgres/Docker/browsers in PR10 | Reviewed private code recovery in all three practical families; repeated failures, exhaustion and valid alternatives throughout the private path | Partial |
+| Honest independent assessment and recovery | Wrong answers/repeats/help cannot manufacture independent credit; numeric/choice fresh recovery active in private0.1.2; generic reviewed code recovery passes real Postgres/Docker/browsers merged and deployed in PR10 | Reviewed private code recovery in all three practical families; repeated failures, exhaustion and valid alternatives throughout the private path | Partial |
 | Persistent supervisor that actually adapts teaching | Persistent Temporal jobs, host fences, outbox, budgets, saved context, replay and lost-ack qualification | Structured tool loop, real source-linked explanations/visuals/assessments and verified lesson application. Current non-companion candidate summaries do not change lessons | Open |
 | Contextual companion and editable learner model | Connected context, bounded history/model projection, learner-owned editing and self-report separation, durable question records | Live Google responses; explicit context-used/history/source GUI; whole-history scoped retrieval; profile hypotheses and learner corrections used by the supervisor | Partial |
 | Placement and progress governance | Server evidence/policy interfaces and existing tests | Real enabled/disabled/declined/interrupted placement UI, justified exemptions, no invented lesson visits, full private-course transfer checks | Partial |
@@ -26,8 +26,8 @@ contracts remain required.
 
 ## Next implementation order
 
-1. Finish PR10 CI/merge; preserve the owned pilot and existing learner state when
-   deploying the qualified recovery runtime. Release the updated runtime through
+1. PR10 CI/merge and owned-pilot deployment passed, preserving saved learner
+   state. Release the updated runtime through
    the immutable artifact gates before claiming released-interface consumption.
 2. Author and independently qualify real fresh private coding contracts/fixtures,
    bind all practical families through the generic installed adapter and approve
