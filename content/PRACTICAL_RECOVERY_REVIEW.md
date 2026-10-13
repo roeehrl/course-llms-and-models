@@ -49,8 +49,10 @@ unchanged; six deliberate recovery assignments cost270 planned minutes. These ar
 planning estimates, not a reading timer or a guarantee of required study time.
 
 Eleven assembly/binding tests, the112-family numerical/choice authoring checks and
-all existing math/visual/baseline-practical regressions passed. Corrected-content
-released HTTP/browser/native publication remains pending Core0.1.5 release and
-actual reexecution. The prior3561... prototype was superseded. Do not treat its
-full-path pass as acceptance of this corrected digest. No paid provider call,
-actual owner enrollment, new grader activation or course publication occurred.
+all existing math/visual/baseline-practical regressions passed. Corrected-content actual releasedCore0.1.5 HTTP passed all56episodes and exact
+270-minute/6-episode recovery costs. Phone browserpassedall56; desktop/tablet
+passedthrough the first16/private codingrecovery, with reload/accessibility/overflow
+and no page errors. Nativeprivate0.1.3 ispublished/registryactive aftersaved-state
+migration; actualnativeQA passed16episodes/canonicalrecovery. The prior3561... prototype was superseded. Do not treat its
+full-path pass as acceptance of this corrected digest. No paid provider call oractual owner enrollment occurred. LiveAI tutoring and
+completeplatform/pedagogicalacceptance remainopen.
