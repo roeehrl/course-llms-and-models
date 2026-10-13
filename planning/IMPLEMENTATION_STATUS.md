@@ -1,3 +1,43 @@
+# Core 0.1.19 released, consumed and deployed on the new host — 2026-10-13
+
+Continuation on a new host (fresh clones; no prior-host state, secrets or learner
+data transferred). Full approved v0.8 objective remains ACTIVE and incomplete.
+
+- PR26 merged at its qualified head as main c4c6e66 after 12/12 hosted checks.
+  Annotated tag v0.1.19 (object 4dcd4ae) dispatched release run 38456418473:
+  identity + 12 CI + candidate assembly passed. Artifact 11844970096 digest
+  matched GitHub's upload digest; candidate bytes and all 462 source members were
+  re-verified against Git before a draft upload; hosted draft bytes compared equal;
+  then published as prerelease https://github.com/roeehrl/course-core/releases/tag/v0.1.19.
+- Released consumer: published assets installed through the released orchestrator;
+  exact published web exports restored; independent verifier 1125 members/652 files.
+  verification/released-runtime.mjs now pins 0.1.19 (0.1.17 kept as expectedCoreRelease17).
+  Private 0.1.4 HTTP 56/56 and browser phone 56 + desktop/tablet 16 passed through it.
+- Native pilot on this host: released runtime under the user's Application Support
+  Course Core/Pilot/releases/v0.1.19, state in Pilot/state (0700, config 0600),
+  checksum-verified Temporal CLI 1.9.1, dedicated PostgreSQL 17 database
+  course_core_pilot. Four services running at http://127.0.0.1:4310 (admin /admin/).
+  scripts/install-pilot-course.mjs imported the verified 0.1.4 package through the
+  real review/publish/registry APIs: selected for new learners, 154 profiles. A
+  separate QA account enrolled and passed episode 1 on phone; tablet/desktop resumed
+  the same enrollment (verification/pilot-acceptance.mjs). Operator is UNENROLLED.
+  The QA account's role was set to learner by SQL because Core has no membership
+  API yet (gap: People and permissions administration).
+- Real defect found by the live pilot: wide lesson code blocks were not keyboard
+  scrollable on phones (axe scrollable-region-focusable). Fixed in Core PR27 with
+  unit and 3-viewport browser coverage (negative control fails without the fix).
+  Not yet released/deployed.
+- Core PR27 (open): stored research source catalog, bounded inspection, evidence-
+  backed review with rights, revocable/expiring optional episode attachments, admin
+  Research sources view and learner optional-help panel. Local: API 288, learner 109,
+  admin 54, connected learner 24, admin real 21, audit/infra pass. CI pending.
+- No provider credentials or allowance are configured here; no paid calls; no live
+  Google acceptance. Private hosted CI remains unverified (billing restriction noted
+  earlier; not changed).
+
+Next: PR27 CI → merge → 0.1.20 release → upgrade the native pilot preserving the QA
+enrollment; People/permissions administration; remaining handoff items 5–8.
+
 # Handoff prepared; catalogue CI complete — 2026-10-13
 
 User requested transfer to another coding session, possibly on a different host

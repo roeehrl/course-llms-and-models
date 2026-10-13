@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "coreVersion": "0.1.19",
+  "coreTag": "v0.1.19",
+  "coreCommit": "c4c6e662966579850d147f20a4c41a8f8f4eb806",
+  "coreTagObject": "4dcd4ae086d49a05a43f66d54803d2e68db0021e",
+  "coreReleaseRun": 38456418473,
+  "coreCandidateArtifact": 11844970096,
+  "coreArtifactDigest": "sha256:953c11c71a5874466a76587bab676d5291a36e63e594a938a042c0cd37de01be",
+  "coreManifestSha256": "f67f5e1fed04bbb49c3c6c92db555733549165c02ad63f8147a2b8feb58bc6eb",
+  "coreRelease": "https://github.com/roeehrl/course-core/releases/tag/v0.1.19",
+  "installedRuntimeCheck": { "checkedMembers": 1125, "uniqueFiles": 652 },
+  "courseVersion": "0.1.4",
+  "courseDigest": "bf54e1289f1fda0c49c4a7d1ac4525376be5c666a0d08e8394021da38af669bb",
+  "courseArtifactSha256": "8a40b0ae76a8f1dd9d49354d1cd69a273479019e90d88b1cafb72e07878c8a47",
+  "releasedConsumerAcceptance": {
+    "http": { "episodes": 56, "practicalFamiliesRecovered": 3, "recoveryAssignments": 6, "unearnedCompletionRejectedEveryEpisode": true, "exhaustedBankNoFurtherCharge": true },
+    "browser": { "phoneEpisodes": 56, "desktopEpisodes": 16, "tabletEpisodes": 16, "codeRecovery": true, "reloadPreservedCode": true, "horizontalOverflow": false, "pageErrors": 0 }
+  },
+  "nativePilot": {
+    "host": "destination macOS host (Apple silicon), fresh installation; prior-host state was not transferred",
+    "origin": "http://127.0.0.1:4310",
+    "services": ["temporal", "api", "worker", "dispatcher"],
+    "temporalCli": { "version": "1.9.1", "archiveSha256": "41e0425378fcb4fb5766340b97435e20fe47bbff2d7bf644ec2d51f7662b7c56" },
+    "courseInstalledThroughApis": true,
+    "adaptationProfiles": 154,
+    "selectedForNewLearners": "0.1.4",
+    "qaLearner": { "phoneEnrollAndFirstEpisodeGate": true, "tabletAndDesktopResumedSameEnrollment": true, "pageErrors": 0, "horizontalOverflow": false },
+    "operatorEnrolled": false,
+    "accessibilityDefectFound": "scrollable-region-focusable on wide lesson code (phone); fixed in Core PR 27, not yet released or deployed"
+  },
+  "liveProviderAcceptance": false,
+  "observedAt": "2026-10-13T20:07:54Z"
+}
