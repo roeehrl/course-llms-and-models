@@ -1,3 +1,62 @@
+# Creator verifier installation qualified; parent merged — 2026-10-13 17:25 IDT
+
+The full v0.8 goal remains ACTIVE/incomplete. This milestone supplies a stock
+runtime installation path for creator-owned independent verifier programs, with
+real isolated execution and actual database-backed teaching delivery. It does
+not complete arbitrary teaching validity, the private course integration, rich
+media/research, or live model/learning acceptance.
+
+- PR18 MERGED after all12 hosted checks succeeded at exact head
+  1f8096af570db520a641bf6c3f9f86bdb15d18bb. Main merge commit
+  db8fe34407d59fc0e1c1f3e76faad39b8aaad66f. Source equals that qualified head.
+  Root main target0.1.11; not released/deployed.
+- PR19 retargeted to main and ready for review. Current head
+  8a69b95f15e67917165d1fbefaf730d0a14b0d72. Merge conflicts from squash ancestry
+  were resolved only after proving incoming main's tree exactly equals PR18;
+  the integrated PR19 tree exactly equals its already-tested6b5c619 tree.
+  CI38412876083 is the current active handle. Original38409220607 was cancelled
+  by normal workflow concurrency after a real head push, not an observation retry.
+- Draft PR20 https://github.com/roeehrl/course-core/pull/20 is attached, based on
+  codex/generated-teaching. Clean/pushed branch codex/isolated-teaching-verifiers
+  at e2b2141d66f7c30eb0682fb91423c1b3519f7275, target0.1.13. CI38413220760 queued.
+  It includes a source-identical merge of PR19's updated ancestry. After PR19
+  merges, integrate/retarget PR20 and retain protected CI before release.
+- Stock API TEACHING_VERIFIER_FILES / native teachingVerifierFiles load only
+  bounded, private, owned regular definition files; no JavaScript import loader.
+  SHA256 binds program, reference data and positive/negative qualification to
+  extension/registry approval. Creator Python executes in the existing pinned
+  Docker broker with no network, read-only mounts,128MiB/0.5CPU/time/output/process
+  limits and one execution at a time. Only the API receives definition paths.
+- At least2 distinct valid and2 distinct invalid examples are executed. Renaming
+  content cannot fake coverage. Wrong fingerprints, unsupported checks/identity,
+  one-sided/malformed cases, unready broker and always-approve/always-reject
+  programs fail closed. No capability or paid permission is inferred from a file.
+- API268 tests/25 files and typechecks PASS; targeted new semantic coverage/version
+  tests also PASS; native lifecycle13 PASS; public audit454 files PASS. Real Docker
+  practical gate PASS: private file load, correct new example, rejected wrong
+  math/unsupported prose and rejected constant-answer programs. The SAME isolated
+  verifier passes actual owner registry approval plus Postgres/API staging and
+  application: wrong content leaves no writes, correct text delivered once,
+  duplicate receipt replay and unchanged gates/evidence. Existing code practical
+  recovery/batching/hidden references pass alongside it. Initial gate failed an
+  incorrect test snapshot field; fixed to use the authoritative adaptation summary.
+- Ignored Core receipts: .local/isolated-teaching-api-final.log,
+  isolated-teaching-practical-fixed.log, isolated-teaching-lifecycle-final.log.
+  No live provider was invoked. Programs/reference data never enter browser bundles.
+
+Active pinned native pilot remains Core0.1.10; SDK0.2.0 and private course0.1.3
+unchanged. No new release/tag/native migration. No miner/remoteMac/GPU/wallet work.
+Private provider credentials and positive paid allowance remain absent.
+
+Next: finish PR19/PR20 protected CI and merge, then immutable release, released
+private consumer/native backup+restore/state-preserving deployment qualification;
+package production private-course verifiers through released contracts. Continue
+bounded generate-check-repair autonomy, creator SDK/UI extensibility, full
+research/media agent dispatch/inspection/review/delivery, rich visual/episode/
+branch construction, remaining placement/caps/deadlines/privacy/operations gates,
+then real Google acceptance with secure credentials and explicit allowance.
+Native binaries remain deferred. The goal has not been narrowed or completed.
+
 # Novel teaching delivery implemented and locally qualified — 2026-10-13 16:57 IDT
 
 The full approved v0.8 goal remains ACTIVE and incomplete. This milestone adds
