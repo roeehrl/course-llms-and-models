@@ -1,3 +1,94 @@
+# Current subscription adapter and native upgrade — 2026-10-13
+
+The complete v0.8 goal remains ACTIVE. This turn made verified implementation,
+release-consumer, migration, backup and real UI progress. No live provider was
+called and no paid allowance was enabled.
+
+- Core PR16 MERGED after all12hosted checks passed at exact head
+  a07efb7859ac2098436dcb94b92f5efdb386843c. Clean main is
+  f06c22fbcadc52a912427a5a2e7363e171aa85dc, root0.1.9.
+  https://github.com/roeehrl/course-core/pull/16 (attached).
+- Generic subscriptionAdapter and typed fresh entitlement/atomic-admission hooks
+  added to provider framework. Core accepts non-secret subscription references
+  without an API-key-shaped primary binding. Optional API fallback defaults off,
+  requires separate fresh host consent/budget authorization, shares the original
+  timeout and cannot replay submitted uncertainty. Video jobs keep their route.
+  Admin opt-in/out persists through the real API and does not increase budgets.
+  No actual subscription connector is installed; Google consumer access remains
+  unsupported. Future supported connectors still need their own qualification.
+- Local checks:68provider,252API,53admin unit,18real Postgres/browser cases across
+  desktop/phone/tablet,48infra and12lifecycle passed. All12hosted checks passed.
+  The whole admin formatting command still reports seven pre-existing untouched
+  files; touched admin files were formatted. Initial browser host import issue was
+  fixed; the final18case real browser suite passed.
+- Core0.1.8 is now ACTIVE at the pinned root below, after private56episode HTTP
+  and56episode phone browser acceptance; desktop/tablet16each through recovery,
+  saved code/accessibility/overflow/zero-errors verified. Existing3native course
+  pins/enrollments/plans/policy/budgets/accounts match before migration; owner has
+  no enrollment. Native authenticated HTTP and actual desktop-admin/phone-learner
+  browser checks passed. Saved completed counts16,1,0; provider credentials0 and
+  paid limits0. Pinned runtime archive bytes1074members/622files verified.
+- Active native root:
+  /Users/tnt/Library/Application Support/Course Core/Pilot/releases/v0.1.8/course-core
+  State remains /Users/tnt/git/course-core/.local/pilot. Always pass explicit root
+  and state to the pinned controller. Latest observed instance
+  8d0563a6-ac8a-4661-889b-48399fd5268e; installation
+  d7f3c99c-0071-41da-b3f8-6f0c4f1b494e. Revalidate handles/PIDs before any control.
+- Consistent stopped backups and disposable restore verification PASSED before
+  and after migration. Core/.local/pilot/backups/v8-20261013114042668 before;
+  v8-20261013114305018 after, includes new32byte0600provider encryption key.
+  Backed-up key decrypted a synthetic probe from the restarted live vault. No
+  existing database was overwritten. Backup helper PGDATABASE URL expansion bug
+  was corrected by separate libpq environment parameters, verified by real restore.
+  Operational receipts/sessions/keys are ignored0600; never print their contents.
+- Immutable tagv0.1.9 pushed and release workflow dispatched ONCE. Not published
+  or deployed yet. Track its existing run; verify immutable artifact, manifest,
+  archive/member/lock/dependency and hosted assets before publication and upgrade.
+
+Next:finish0.1.9release/consumer/native delivery of the requested generic adapter,
+then continue novel supervisor generation/research/media/creator-path tooling and
+remaining governance/privacy/operations/placement/multiplatform acceptance. Native
+app binaries are deferred. Live Google needs secure configuration plus explicit
+allowance; no unattended default grants permission. Private GitHub CI billing
+restriction persists. No miner, remote Mac, GPU, wallet or unrelated repo changes.
+
+# Current released consumer qualification — 2026-10-13
+
+The full v0.8 goal remains ACTIVE. Core0.1.8 is now publicly released at
+https://github.com/roeehrl/course-core/releases/tag/v0.1.8, from
+main db54ca0853db996ae21db62da740e6d5af06f0a7. Release38385397184 succeeded;
+immutable artifact11805068314 and downloaded hosted assets were independently
+verified. SDK0.2.0 is unchanged. Core0.1.7 was never published.
+
+- Private released Core0.1.8 install and all1074declaredmembers/622files verified.
+  Consumer verifier now pins the manifest SHA as well as release identity,
+  CI and actual installed bytes. A coherently forged replacement manifest and
+  payload are rejected. All12private unit tests passed.
+- Actual released HTTP/Postgres/isolated-Python acceptance PASSED all56episodes,
+  all3practical-family recoveries, both fresh variants, exact270min/6episode
+  committed costs, premature-completion denial in every episode, and exhaustion
+  without extra cost or changed gates. Process50733 terminated successfully.
+  Private log .local/private-v8-http-acceptance.log and protected run receipts.
+- Browser acceptance process99672 is RUNNING: phone56, desktop/tablet through
+  recovery, reload/draft/accessibility/overflow gates. Poll the same process;
+  do not restart solely because an observation times out. Private log
+  .local/private-v8-browser-acceptance.log. Native pilot is still Core0.1.5.
+- New pinned Core0.1.8 runtime is staged and byte-qualified but NOT activated.
+  Next: browser acceptance, old authenticated graceful stop, consistent backup,
+  disposable restore, migration preserving all3enrollments/queue/plan/policy,
+  key custody and authenticated native/browser acceptance.
+- User requested subscription-cost research. Dated official-source findings are
+  planning/GOOGLE_SUBSCRIPTION_ACCESS_2026-10-13.md: Google AI Pro/Ultra monthly
+  developer credits can offset metered API charges; consumer Antigravity CLI
+  wrapping in third-party applications is explicitly unsupported. No account
+  inspection, benefit redemption, paid calls or billing change occurred.
+
+Full novel supervision, research/media delivery, creator strategy/path tools,
+placement/lifecycle/operations/privacy gates and live provider acceptance remain
+open. No real provider credentials or positive allowance are configured; unanswered
+choices are not authorization. Native app binaries are deferred. Do not touch
+SN9, remote Macs, workers, GPU experiments, wallets or unrelated checkout files.
+
 # Current release repair and migration preparation — 2026-10-13 13:46 IDT
 
 The complete v0.8 goal remains ACTIVE. This turn made verified release repair

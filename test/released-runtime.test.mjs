@@ -1,0 +1,20 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';import {tmpdir} from 'node:os';import path from 'node:path';import {createHash} from 'node:crypto';
+import {verifyReleasedRuntime,releaseCiNames} from '../verification/released-runtime.mjs';
+const sha=b=>createHash('sha256').update(b).digest('hex');
+test('delivered runtime verification rejects changed member bytes, missing assets and forged identity rather than trusting version alone',async()=>{
+ const root=await mkdtemp(path.join(tmpdir(),'private-release-test-')),runtime=path.join(root,'runtime'),assets=path.join(root,'assets'),identity={version:'test',tag:'vtest',commit:'a'.repeat(40),tagObject:'b'.repeat(40),runId:123};try{
+  await mkdir(runtime);await mkdir(assets);const pkg=Buffer.from(JSON.stringify({name:'@course-core/repository',version:'test'}));await writeFile(path.join(runtime,'package.json'),pkg);for(const sub of ['apps/learner/dist','apps/admin/dist'])await mkdir(path.join(runtime,sub),{recursive:true});
+  const records=[];for(const kind of ['source','runtime','learner','admin','visuals']){const filename=kind+'.tgz',bytes=Buffer.from('synthetic '+kind);await writeFile(path.join(assets,filename),bytes);let entries=[];if(kind==='source'||kind==='runtime')entries=[{path:'course-core/package.json',size:pkg.length,sha256:sha(pkg),mode:0o644}];if(kind==='learner'||kind==='admin'){const html=Buffer.from(kind);await writeFile(path.join(runtime,'apps',kind,'dist','index.html'),html);entries=[{path:'course-core/index.html',size:html.length,sha256:sha(html),mode:0o644}];}records.push({kind,filename,size:bytes.length,sha256:sha(bytes),entries});}
+  const manifest={identity:{repository:'roeehrl/course-core',...identity},ci:{headSha:identity.commit,runId:123,jobs:releaseCiNames.map((name,index)=>({id:index+1,name:'Full CI / '+name,conclusion:'success'}))},verificationScope:'source_ci_and_installed_package_only_no_live_provider_or_deployment',assets:records};const save=()=>{const bytes=Buffer.from(JSON.stringify(manifest));identity.manifestSha256=sha(bytes);return writeFile(path.join(assets,'release-manifest.json'),bytes);};await save();assert.equal((await verifyReleasedRuntime(runtime,assets,identity)).uniqueFiles,3);
+  // A replacement manifest cannot bless replacement payload bytes while copying
+  // the expected commit, tag and successful CI labels from the genuine release.
+  const originalManifest=await import('node:fs/promises').then(fs=>fs.readFile(path.join(assets,'release-manifest.json')));
+  const forged=Buffer.from('forged learner');await writeFile(path.join(runtime,'apps/learner/dist/index.html'),forged);
+  const originalEntry={...records[2].entries[0]};records[2].entries[0].size=forged.length;records[2].entries[0].sha256=sha(forged);
+  await writeFile(path.join(assets,'release-manifest.json'),JSON.stringify(manifest));await assert.rejects(verifyReleasedRuntime(runtime,assets,identity),/release_manifest_bytes_mismatch/);
+  records[2].entries[0]=originalEntry;await writeFile(path.join(runtime,'apps/learner/dist/index.html'),'learner');await writeFile(path.join(assets,'release-manifest.json'),originalManifest);
+  await writeFile(path.join(runtime,'package.json'),Buffer.concat([pkg,Buffer.from('\nchanged')]));await assert.rejects(verifyReleasedRuntime(runtime,assets,identity),/installed_delivery_changed/);await writeFile(path.join(runtime,'package.json'),pkg);
+  manifest.ci.jobs[1].name=manifest.ci.jobs[0].name;await save();await assert.rejects(verifyReleasedRuntime(runtime,assets,identity),/release_ci_mismatch/);manifest.ci.jobs[1].name='Full CI / '+releaseCiNames[1];
+  manifest.identity.commit='c'.repeat(40);await save();await assert.rejects(verifyReleasedRuntime(runtime,assets,identity),/release_identity_mismatch/);manifest.identity.commit=identity.commit;manifest.assets.pop();await save();await assert.rejects(verifyReleasedRuntime(runtime,assets,identity),/release_asset_missing/);
+ }finally{await rm(root,{recursive:true,force:true});}
+});

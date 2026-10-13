@@ -8,11 +8,13 @@ import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {createServer} from 'node:net';
 import pg from 'pg';
+import {verifyReleasedRuntime,expectedCoreRelease} from './released-runtime.mjs';
 const exec=promisify(execFile),root=fileURLToPath(new URL('../',import.meta.url));
 class Failure extends Error {constructor(code){super(code);this.code=code;}}
 const check=(condition,code)=>{if(!condition)throw new Failure(code);};
-const args=process.argv.slice(2);check((args.length===2||(args.length===3&&args[2]==='--browser'))&&args[0]==='--runtime-dir','usage_runtime_dir');const browserMode=args[2]==='--browser';
-const runtime=path.resolve(args[1]),manifest=JSON.parse(await readFile(path.join(runtime,'package.json'),'utf8'));check(manifest.name==='@course-core/repository'&&manifest.version==='0.1.5','released_runtime_version_required');
+const args=process.argv.slice(2);check((args.length===4||(args.length===5&&args[4]==='--browser'))&&args[0]==='--runtime-dir'&&args[2]==='--release-dir','usage_runtime_and_release_dirs');const browserMode=args[4]==='--browser';
+const runtime=path.resolve(args[1]),manifest=JSON.parse(await readFile(path.join(runtime,'package.json'),'utf8'));check(manifest.name==='@course-core/repository'&&manifest.version===expectedCoreRelease.version,'released_runtime_version_required');
+const releaseReceipt=await verifyReleasedRuntime(runtime,path.resolve(args[3]));
 check(process.env.TEST_DATABASE_URL&&!process.env.DATABASE_URL,'disposable_database_required');
 const url=new URL(process.env.TEST_DATABASE_URL);check(['postgres:','postgresql:'].includes(url.protocol)&&['localhost','127.0.0.1','[::1]'].includes(url.hostname)&&/^\/course_core_(?:ci|test(?:_[a-z0-9_]+)?)$/.test(url.pathname)&&!url.search&&!url.hash,'disposable_database_required');
 const compiled=JSON.parse(await readFile(path.join(root,'dist/course.compiled.json'),'utf8')),course=compiled.server,configuration=JSON.parse(await readFile(path.join(root,'runtime/recovery-registry.json'),'utf8'));
@@ -116,8 +118,8 @@ try{
   }
   }
   check(requireOk(await request(teacher,'GET','/api/enrollments'),'owner_enrollments').length===0,'operator_course_clock_started');
-  await writeFile(path.join(state,'acceptance.json'),JSON.stringify({observedAt:new Date().toISOString(),coreVersion:manifest.version,courseVersion:course.version,courseDigest:compiled.digest,storage:'actual_postgresql',execution:'actual_released_http_and_isolated_python',reports,ownerUnenrolled:true,liveProviderAcceptance:false},null,2)+'\n',{mode:0o600});
-  console.log(JSON.stringify({verified:true,coreVersion:manifest.version,courseVersion:course.version,reports,ownerUnenrolled:true,liveProviderAcceptance:false}));
+  await writeFile(path.join(state,'acceptance.json'),JSON.stringify({observedAt:new Date().toISOString(),coreVersion:manifest.version,releaseReceipt,courseVersion:course.version,courseDigest:compiled.digest,storage:'actual_postgresql',execution:'actual_released_http_and_isolated_python',reports,ownerUnenrolled:true,liveProviderAcceptance:false},null,2)+'\n',{mode:0o600});
+  console.log(JSON.stringify({verified:true,coreVersion:manifest.version,releaseReceipt,courseVersion:course.version,reports,ownerUnenrolled:true,liveProviderAcceptance:false}));
 }catch(error){await writeFile(path.join(state,'failure.json'),JSON.stringify({code:error instanceof Failure?error.code:'private_acceptance_failed',type:error?.name,detailCode:error?.code,message:String(error?.message??'').slice(0,2000)})+'\n',{mode:0o600});console.error(error instanceof Failure?error.code:'private_acceptance_failed');process.exitCode=1;
 }finally{
   if(!childExit){server.kill('SIGTERM');for(let i=0;i<50&&!childExit;i++)await pause(100);if(!childExit){server.kill('SIGKILL');for(let i=0;i<20&&!childExit;i++)await pause(100);}}
