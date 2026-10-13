@@ -6,6 +6,14 @@
     "url": "urn:private-course:recovery-cpu-v1",
     "reviewedAt": "2026-10-12T21:00:00Z"
   },
+  "sources": [
+    {
+      "id": "practical-recovery-reviewed",
+      "title": "Independently checked practical transfer contracts",
+      "url": "urn:private:practical-recovery-v1",
+      "reviewedAt": "2026-10-13T01:56:52Z"
+    }
+  ],
   "extensions": [
     {
       "id": "course-numeric-creator",
@@ -44,12 +52,32 @@
         "reducedMotion": true,
         "textAlternative": "Verified text, numeric and choice recovery controls."
       }
+    },
+    {
+      "id": "course-code-creator",
+      "version": "1.0.0",
+      "integrity": "sha256-05d8ba2439c6b2e26a06a1dfd4d366700f08a3b964eb1f1d24ea3fd73e9f7cc2",
+      "entrypoint": "extensions/authored-code-bank-v1.js",
+      "execution": "server",
+      "platforms": [
+        "web"
+      ],
+      "capabilities": [
+        "teaching.generate",
+        "teaching.verify"
+      ],
+      "accessibility": {
+        "keyboard": true,
+        "reducedMotion": true,
+        "textAlternative": "Verified text, numeric and choice recovery controls."
+      }
     }
   ],
   "adaptation": {
     "schemaVersion": 1,
     "sourceRefs": [
-      "ada-src-reviewed-bank"
+      "ada-src-reviewed-bank",
+      "practical-recovery-reviewed"
     ],
     "profileFieldIds": [],
     "targets": [
@@ -2036,6 +2064,42 @@
         ],
         "numericalRecipeIds": [],
         "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "llm-practical-autodiff",
+        "canonicalAssessmentId": "llm-code-autodiff-vjp",
+        "generatorIds": [
+          "course-code-generator"
+        ],
+        "verifierIds": [
+          "course-code-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 2
+      },
+      {
+        "familyId": "llm-practical-transformer",
+        "canonicalAssessmentId": "llm-code-attention-pullback",
+        "generatorIds": [
+          "course-code-generator"
+        ],
+        "verifierIds": [
+          "course-code-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 2
+      },
+      {
+        "familyId": "llm-practical-qualification",
+        "canonicalAssessmentId": "llm-code-qualification-numerics",
+        "generatorIds": [
+          "course-code-generator"
+        ],
+        "verifierIds": [
+          "course-code-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 2
       }
     ],
     "generators": [
@@ -2056,6 +2120,17 @@
         "extensionId": "course-bank-creator",
         "sourceRefs": [
           "ada-src-reviewed-bank"
+        ],
+        "artifactKinds": [
+          "assessment_variant"
+        ]
+      },
+      {
+        "id": "course-code-generator",
+        "version": "1.0.0",
+        "extensionId": "course-code-creator",
+        "sourceRefs": [
+          "practical-recovery-reviewed"
         ],
         "artifactKinds": [
           "assessment_variant"
@@ -2083,6 +2158,20 @@
         "extensionId": "course-bank-creator",
         "sourceRefs": [
           "ada-src-reviewed-bank"
+        ],
+        "artifactKinds": [
+          "assessment_variant"
+        ],
+        "requiredCheckIds": [
+          "authored-bank-match"
+        ]
+      },
+      {
+        "id": "course-code-verifier",
+        "version": "1.0.0",
+        "extensionId": "course-code-creator",
+        "sourceRefs": [
+          "practical-recovery-reviewed"
         ],
         "artifactKinds": [
           "assessment_variant"
@@ -4583,7 +4672,7 @@
       "maxOperations": 4,
       "maxArtifacts": 4,
       "maxArtifactBytes": 20000,
-      "maxPlannedMinutesPerAssignment": 10,
+      "maxPlannedMinutesPerAssignment": 30,
       "maxAdditionalEpisodesPerAssignment": 1,
       "allowedClassifications": [
         "required",
@@ -4595,6 +4684,6 @@
     "basis": "private_independent_cpu_domain_checks_and_reviewed_bank",
     "creatorCode": "exact_installed_generic_implementation",
     "registryAuthorization": "not_granted",
-    "practicalRecovery": "not_covered"
+    "practicalRecovery": "reviewed_host_fixture_bank"
   }
 }

@@ -6,14 +6,14 @@ import {assemble,fragments} from './assemble.mjs';
 
 // Declarations pin executable host code. They cannot authenticate proofs, approve
 // a registry, install plugins or place answer banks in the free baseline course.
-export function bindRecoveryRuntime({descriptors,authored,fresh,baseCourse}) {
+export function bindRecoveryRuntime({descriptors,authored,fresh,baseCourse,codeRecovery}) {
   assert(Array.isArray(descriptors)&&descriptors.length<=16,'Invalid installed adapter descriptors');
   const select=kind=>{
-    const candidates=descriptors.filter(a=>a.id===(kind==='numeric'?'bounded-numeric-v1':'authored-bank-v1')&&a.kind===kind);
+    const candidates=descriptors.filter(a=>a.id===({numeric:'bounded-numeric-v1',bank:'authored-bank-v1','code-bank':'authored-code-bank-v1'}[kind])&&a.kind===kind);
     assert.equal(candidates.length,1,'Required installed creator is absent or ambiguous');
     const a=candidates[0];assert(/^[a-f0-9]{64}$/.test(a.implementationDigest)&&a.authorization==='release_registry_approval_required','Invalid installed creator descriptor');return a;
   };
-  const numeric=select('numeric'),bank=select('bank'),adaptation=structuredClone(authored.adaptation),source=structuredClone(authored.source);
+  const numeric=select('numeric'),bank=select('bank'),adapters=[numeric,bank],adaptation=structuredClone(authored.adaptation),source=structuredClone(authored.source),sources=[];
   assert(adaptation?.families&&Array.isArray(authored.bindings)&&Array.isArray(fresh.assessments),'Invalid reviewed authoring payload');
   const extensions=[numeric,bank].map(a=>({id:`course-${a.kind}-creator`,version:'1.0.0',integrity:`sha256-${a.implementationDigest}`,entrypoint:`extensions/${a.id}.js`,execution:'server',platforms:['web'],capabilities:['teaching.generate','teaching.verify'],accessibility:{keyboard:true,reducedMotion:true,textAlternative:'Verified text, numeric and choice recovery controls.'}}));
   const ids=kind=>({generator:`course-${kind}-generator`,verifier:`course-${kind}-verifier`,extension:`course-${kind}-creator`});
@@ -36,9 +36,34 @@ export function bindRecoveryRuntime({descriptors,authored,fresh,baseCourse}) {
     profiles.push(profile);
   }
   const configuration={authorizationMinutes:30,verifiers:[numeric,bank].map(a=>({id:ids(a.kind).verifier,version:'1.0.0',implementationDigest:a.implementationDigest,sourceRefs:[source.id],artifactKinds:['assessment_variant'],checkIds:[a.kind==='numeric'?'independent-answer':'authored-bank-match']})),profiles};
-  const overlay={schemaVersion:1,source,extensions,adaptation,qualification:{basis:'private_independent_cpu_domain_checks_and_reviewed_bank',creatorCode:'exact_installed_generic_implementation',registryAuthorization:'not_granted',practicalRecovery:'not_covered'}};
+  if(codeRecovery){
+    assert(codeRecovery.schemaVersion===1&&Array.isArray(codeRecovery.bindings)&&Array.isArray(codeRecovery.assessments),'Invalid practical recovery declaration');
+    const adapter=select('code-bank'),name=ids('code');sources.push(structuredClone(codeRecovery.source));adaptation.sourceRefs.push(codeRecovery.source.id);
+    extensions.push({...structuredClone(extensions[1]),id:name.extension,integrity:`sha256-${adapter.implementationDigest}`,entrypoint:'extensions/authored-code-bank-v1.js'});
+    adaptation.generators.push({id:name.generator,version:'1.0.0',extensionId:name.extension,sourceRefs:[codeRecovery.source.id],artifactKinds:['assessment_variant']});
+    adaptation.verifiers.push({id:name.verifier,version:'1.0.0',extensionId:name.extension,sourceRefs:[codeRecovery.source.id],artifactKinds:['assessment_variant'],requiredCheckIds:['authored-bank-match']});
+    configuration.verifiers.push({id:name.verifier,version:'1.0.0',implementationDigest:adapter.implementationDigest,sourceRefs:[codeRecovery.source.id],artifactKinds:['assessment_variant'],checkIds:['authored-bank-match']});
+    const groups=new Map();
+    for(const binding of codeRecovery.bindings){
+      const canonical=baseCourse.assessments.find(a=>a.id===binding.canonicalAssessmentId),assessment=codeRecovery.assessments.find(a=>a.id===binding.assessmentId);
+      assert(canonical?.type==='code'&&assessment?.type==='code','Practical variant must retain the code type');
+      assert.equal(assessment.familyId,canonical.familyId,'Practical family changed');assert.deepEqual([...assessment.objectiveIds].sort(),[...canonical.objectiveIds].sort(),'Practical objectives changed');
+      assert.equal(assessment.grading.evaluatorId,canonical.grading.evaluatorId,'Practical evaluator changed');
+      assert(Number.isSafeInteger(binding.plannedMinutes)&&binding.plannedMinutes>0&&binding.plannedMinutes<=40&&binding.additionalEpisodes===1,'Invalid practical effort estimate');
+      const group=groups.get(canonical.id)??{canonical,episodeId:binding.episodeId,plannedMinutes:binding.plannedMinutes,bank:[]};
+      assert(group.episodeId===binding.episodeId&&group.plannedMinutes===binding.plannedMinutes,'Conflicting practical family binding');
+      group.bank.push({id:`bank-${assessment.id}`,sourceRefs:[codeRecovery.source.id],assessment:structuredClone(assessment)});groups.set(canonical.id,group);
+    }
+    for(const {canonical,episodeId,plannedMinutes,bank:items} of groups.values()){
+      assert(items.length>=2,'A practical recovery family needs distinct alternatives');
+      adaptation.families.push({familyId:canonical.familyId,canonicalAssessmentId:canonical.id,generatorIds:[name.generator],verifierIds:[name.verifier],numericalRecipeIds:[],maxVariantsPerPlan:items.length});
+      profiles.push({id:`profile-${canonical.id}`,episodeId,operation:'add_assessment_variant',generatorId:name.generator,verifierId:name.verifier,adapterId:adapter.id,adapterDigest:adapter.implementationDigest,canonicalAssessmentId:canonical.id,classification:'required',plannedMinutes,additionalEpisodes:1,bank:items});
+    }
+    adaptation.limits.maxPlannedMinutesPerAssignment=Math.max(adaptation.limits.maxPlannedMinutesPerAssignment,...[...groups.values()].map(g=>g.plannedMinutes));
+  }
+  const overlay={schemaVersion:1,source,...(sources.length?{sources}:{}),extensions,adaptation,qualification:{basis:'private_independent_cpu_domain_checks_and_reviewed_bank',creatorCode:'exact_installed_generic_implementation',registryAuthorization:'not_granted',practicalRecovery:codeRecovery?'reviewed_host_fixture_bank':'not_covered'}};
   const course=structuredClone(baseCourse);assert(!course.adaptation,'Bind against an unadapted baseline, not a previously generated release');
-  course.adaptation=adaptation;course.sources.push(source);course.extensions.push(...extensions);
+  course.adaptation=adaptation;course.sources.push(source,...sources);course.extensions.push(...extensions);
   const checked=compileCourse(course);assert(!('adaptation' in checked.learner));
   assert.deepEqual(course.assessments,baseCourse.assessments);assert.deepEqual(course.gates,baseCourse.gates);
   return {overlay,configuration};
@@ -49,8 +74,8 @@ async function main(){
   const config=await read('content/course-config.json'),modules=await Promise.all(fragments.map(name=>read(`content/${name}.json`)));
   // Build from source without the prior recovery overlay, so a second invocation
   // cannot duplicate declarations or depend on a stale compiled artifact.
-  const base=assemble(config,modules,{practicalOverlay:await read('content/practicals.json'),visualOverlays:await Promise.all(['visuals','systems-visuals'].map(name=>read(`content/${name}.json`)))});
-  const {overlay,configuration}=bindRecoveryRuntime({descriptors:(await read('runtime/installed-adaptation-descriptors.json')).adapters,authored:await read('content/adaptation-authoring.json'),fresh:await read('content/fresh-assessments.json'),baseCourse:base.server});
+  const base=assemble(config,modules,{practicalOverlay:await read('content/practicals.json'),practicalRuntimeOverlay:await read('content/practical-runtime.json'),visualOverlays:await Promise.all(['visuals','systems-visuals'].map(name=>read(`content/${name}.json`)))});
+  const {overlay,configuration}=bindRecoveryRuntime({descriptors:(await read('runtime/installed-adaptation-descriptors.json')).adapters,authored:await read('content/adaptation-authoring.json'),fresh:await read('content/fresh-assessments.json'),codeRecovery:await read('content/practical-recovery.json'),baseCourse:base.server});
   for(const [file,value] of [['content/recovery-runtime.json',overlay],['runtime/recovery-registry.json',configuration]])await writeFile(new URL(file,root),JSON.stringify(value,null,2)+'\n',{mode:0o600});
   console.log({profiles:configuration.profiles.length,numericalTemplates:overlay.adaptation.numericalRecipes.length,reviewedBanks:configuration.profiles.filter(p=>p.bank).length,registryAuthorization:'not_granted',baselineAssessmentsUnchanged:true});
 }

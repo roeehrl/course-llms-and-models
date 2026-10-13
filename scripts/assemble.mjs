@@ -5,7 +5,7 @@ import { compileCourse, verifyCompiledCourse } from '@course-core/sdk/compiler';
 
 export const fragments = ['foundations', 'training-and-transformers', 'systems-and-distribution', 'engineering-practice'];
 export const fields = ['objectives', 'chapters', 'assessments', 'gates', 'sources', 'visuals', 'media', 'extensions'];
-export function assemble(config, modules, { preview = false, visualOverlay, visualOverlays = [], practicalOverlay,recoveryOverlay } = {}) {
+export function assemble(config, modules, { preview = false, visualOverlay, visualOverlays = [], practicalOverlay,practicalRuntimeOverlay,recoveryOverlay } = {}) {
   const course = structuredClone(config);
   for (const field of fields) course[field] = modules.flatMap(module => {
     assert(Array.isArray(module[field]), `Fragment lacks ${field}`);
@@ -18,7 +18,7 @@ export function assemble(config, modules, { preview = false, visualOverlay, visu
     sources.set(source.id, source);
   }
   course.sources = [...sources.values()];
-  if(recoveryOverlay){assert(recoveryOverlay.schemaVersion===1&&recoveryOverlay.adaptation&&Array.isArray(recoveryOverlay.extensions),'Invalid recovery declaration');course.adaptation=structuredClone(recoveryOverlay.adaptation);course.sources.push(structuredClone(recoveryOverlay.source));course.extensions.push(...structuredClone(recoveryOverlay.extensions));}
+  if(recoveryOverlay){assert(recoveryOverlay.schemaVersion===1&&recoveryOverlay.adaptation&&Array.isArray(recoveryOverlay.extensions),'Invalid recovery declaration');course.adaptation=structuredClone(recoveryOverlay.adaptation);course.sources.push(structuredClone(recoveryOverlay.source),...structuredClone(recoveryOverlay.sources??[]));course.extensions.push(...structuredClone(recoveryOverlay.extensions));}
   for (const overlay of [...(visualOverlay ? [visualOverlay] : []), ...visualOverlays]) {
     assert(overlay.extension && Array.isArray(overlay.visuals) && Array.isArray(overlay.bindings), 'Invalid visual overlay');
     const existing = course.extensions.find(e => e.id === overlay.extension.id);
@@ -60,6 +60,15 @@ export function assemble(config, modules, { preview = false, visualOverlay, visu
       gate.minimumIndependentFamilies = new Set(course.assessments.filter(item => gate.assessmentIds.includes(item.id)).map(item => item.familyId)).size;
       gate.requireAllObjectives = true;
     }
+  }
+  if(practicalRuntimeOverlay){
+    assert(practicalRuntimeOverlay.schemaVersion===1&&practicalOverlay,'Invalid practical runtime declaration');
+    assert.deepEqual(practicalRuntimeOverlay.replaces,practicalOverlay.extension,'Practical baseline implementation changed');
+    const replacement=practicalRuntimeOverlay.extension;
+    assert(replacement?.id!==practicalOverlay.extension.id&&replacement.execution==='server'&&replacement.capabilities.includes('assessment.evaluate'),'A new pinned evaluator identity is required');
+    const index=course.extensions.findIndex(e=>e.id===practicalOverlay.extension.id);assert(index>=0,'Missing original evaluator');
+    course.extensions[index]=structuredClone(replacement);
+    for(const assessment of course.assessments)if(assessment.type==='code'&&assessment.grading.evaluatorId===practicalOverlay.extension.id)assessment.grading.evaluatorId=replacement.id;
   }
   if (preview) {
     course.id += '-preview'; course.title += ' · development preview';
@@ -105,7 +114,9 @@ async function main() {
   catch (error) { if (error.code !== 'ENOENT') throw error; }
   let recoveryOverlay;
   try{recoveryOverlay=JSON.parse(await readFile(new URL('content/recovery-runtime.json',root),'utf8'));}catch(error){if(error.code!=='ENOENT')throw error;}
-  const compiled = assemble(config, modules, { preview, visualOverlay, visualOverlays, practicalOverlay,recoveryOverlay });
+  let practicalRuntimeOverlay;
+  try{practicalRuntimeOverlay=JSON.parse(await readFile(new URL('content/practical-runtime.json',root),'utf8'));}catch(error){if(error.code!=='ENOENT')throw error;}
+  const compiled = assemble(config, modules, { preview, visualOverlay, visualOverlays, practicalOverlay,practicalRuntimeOverlay,recoveryOverlay });
   const directory = new URL('dist/', root); await mkdir(directory, { recursive: true, mode: 0o700 });
   const stem = preview ? 'course-preview' : 'course';
   await writeFile(new URL(`${stem}.manifest.json`, directory), JSON.stringify(compiled.server, null, 2) + '\n', { mode: 0o600 });

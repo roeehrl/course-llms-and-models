@@ -382,13 +382,13 @@ console.log(JSON.stringify({sdk:'@course-core/sdk',valid:true,episodeCount:origi
     return json.loads(run.stdout)
 
 
-def docker_checks(registry,source,broker):
+def docker_checks(registry,source,broker,mutator=None):
     # Docker on this host exposes the checkout, not necessarily the OS temp tree.
     storage=tempfile.mkdtemp(prefix='.practical-qualification-', dir=ROOT/'runtime')
     payload={'broker':str(broker),'storage':storage,'entries':[]}
     for fixture in registry['fixtures']:
         task=fixture['cases'][0]['input']['task']
-        payload['entries'].append({'id':fixture['id'],'source':source,'broken':broken_candidate(source,task),'cases':fixture['cases']})
+        payload['entries'].append({'id':fixture['id'],'source':source,'broken':(mutator or broken_candidate)(source,task),'cases':fixture['cases']})
     script=r'''
 import fs from 'node:fs';
 import os from 'node:os';

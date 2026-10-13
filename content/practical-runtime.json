@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "replaces": {
+    "id": "llm-practical-code",
+    "version": "0.1.0",
+    "platforms": [
+      "web"
+    ],
+    "execution": "server",
+    "capabilities": [
+      "assessment.evaluate"
+    ],
+    "entrypoint": "runtime/code-fixtures.json",
+    "integrity": "sha256-e4254dd60781f612e3cdf1a3633833ab2c0d59cc17047331f71945ccdac6a51f",
+    "accessibility": {
+      "keyboard": true,
+      "reducedMotion": true,
+      "textAlternative": "Plain-text protocols, editable Python and textual diagnostic results; no motion, audio or canvas required."
+    }
+  },
+  "extension": {
+    "id": "llm-practical-code-recovery",
+    "version": "0.1.0",
+    "platforms": [
+      "web"
+    ],
+    "execution": "server",
+    "capabilities": [
+      "assessment.evaluate"
+    ],
+    "entrypoint": "runtime/code-fixtures-recovery.json",
+    "integrity": "sha256-469fd227086d41bd3cee3bc3eb51d94f5fb067fd200f34b31ff36de15e8f5f86",
+    "accessibility": {
+      "keyboard": true,
+      "reducedMotion": true,
+      "textAlternative": "Plain-text protocols, editable Python and textual diagnostic results; no motion, audio or canvas required."
+    }
+  }
+}

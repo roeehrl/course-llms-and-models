@@ -13,15 +13,18 @@
     "test": "node --test test/*.test.mjs",
     "verify:math": "python3 verification/foundations.py && python3 verification/training-and-transformers.py && python3 verification/systems-and-distribution.py && python3 verification/engineering-practice.py",
     "verify:recovery": "python3 -B verification/adaptation-authoring.py && python3 -B verification/test-adaptation-authoring.py",
-    "verify:practicals": "python3 -B verification/practicals.py",
-    "verify:visuals": "node verification/visuals.mjs && node verification/systems-visuals.mjs"
+    "verify:practicals": "python3 -B verification/practicals.py && python3 -B verification/recovery-practicals.py",
+    "verify:visuals": "node verification/visuals.mjs && node verification/systems-visuals.mjs",
+    "verify:practical-recovery": "python3 -B verification/recovery-practicals.py"
   },
   "dependencies": {
     "@course-core/sdk": "https://github.com/roeehrl/course-sdk/releases/download/v0.2.0/course-core-sdk-0.2.0.tgz",
     "@course-core/visuals": "https://github.com/roeehrl/course-core/releases/download/v0.1.3/course-core-visuals-0.1.0.tgz"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "1.64.0",
-    "esbuild": "0.28.2"
+    "esbuild": "0.28.2",
+    "pg": "^8.23.1"
   }
 }

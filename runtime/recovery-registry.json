@@ -28,6 +28,20 @@
       "checkIds": [
         "authored-bank-match"
       ]
+    },
+    {
+      "id": "course-code-verifier",
+      "version": "1.0.0",
+      "implementationDigest": "05d8ba2439c6b2e26a06a1dfd4d366700f08a3b964eb1f1d24ea3fd73e9f7cc2",
+      "sourceRefs": [
+        "practical-recovery-reviewed"
+      ],
+      "artifactKinds": [
+        "assessment_variant"
+      ],
+      "checkIds": [
+        "authored-bank-match"
+      ]
     }
   ],
   "profiles": [
@@ -4079,6 +4093,177 @@
             "grading": {
               "correctOptionId": "option-2",
               "explanation": "Evidence supports scoped claims. Independent achievements remain valid, but they do not satisfy an unpassed required gate elsewhere."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-llm-code-autodiff-vjp",
+      "episodeId": "fnd-e04-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-code-generator",
+      "verifierId": "course-code-verifier",
+      "adapterId": "authored-code-bank-v1",
+      "adapterDigest": "05d8ba2439c6b2e26a06a1dfd4d366700f08a3b964eb1f1d24ea3fd73e9f7cc2",
+      "canonicalAssessmentId": "llm-code-autodiff-vjp",
+      "classification": "required",
+      "plannedMinutes": 30,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-llm-recovery-graph-jvp",
+          "sourceRefs": [
+            "practical-recovery-reviewed"
+          ],
+          "assessment": {
+            "id": "llm-recovery-graph-jvp",
+            "type": "code",
+            "objectiveIds": [
+              "fnd-o04-04"
+            ],
+            "familyId": "llm-practical-autodiff",
+            "language": "python",
+            "starterCode": "import json\n\ndef solve(data):\n    # Implement the specified contract.\n    pass\n\nif __name__ == \"__main__\":\n    practice = json.loads('{\"task\":\"graph_jvp\",\"inputs\":[-1.1660000000000001,0.388,1.138],\"nodes\":[{\"op\":\"input\",\"index\":0},{\"op\":\"input\",\"index\":1},{\"op\":\"input\",\"index\":2},{\"op\":\"const\",\"value\":-0.625},{\"op\":\"input\",\"index\":0},{\"op\":\"mul\",\"args\":[0,0]},{\"op\":\"add\",\"args\":[5,4]},{\"op\":\"mul\",\"args\":[6,1]},{\"op\":\"add\",\"args\":[7,6]},{\"op\":\"tanh\",\"args\":[8]},{\"op\":\"neg\",\"args\":[9]}],\"directions\":[[-0.3986067573317411,-0.009831871344037513,-0.6401939642372174],[0.0,0.0,0.0],[1.0,-0.5,0.25]]}')\n    print(solve(practice))\n",
+            "prompt": "Recovery transfer check: graph jvp\n\nImplement standard-library Python solve(data), returning the stated JSON value rather than printing it. Each call is independent; all returned numeric values must be finite. Object-key order is irrelevant, array order and shape are significant. There is no network, third-party package or file access. A whole attempt has 128 MiB, 0.5 CPU, 5 seconds and 64 KiB of combined output. The starter practice input is separate from graded cases and intentionally has no supplied answer.\n\nInput is {task:\"graph_jvp\", inputs:[I numbers], nodes:[N scalar records], directions:[D input-direction vectors]}. I=3, N<=24, D<=3. Node position is its identity; references are strictly earlier positions. Supported nodes: input/index, const/value, add/args[a,b], mul/args[a,b], neg/args[a], tanh/args[a]. Repeated operand slots and input indices, disconnected nodes and constant outputs are allowed. Return {values:[N primal values], tangents:[[N directional derivatives] per direction]}. Differentiate with respect to the underlying inputs, not independent node perturbations. For each direction v, tangents is J(inputs)*v for all node outputs. Constants have zero tangents; every read of the same input slot receives that slot's direction. Directions may be zero or negative. Start each request and each direction independently.\n\nFloating values are checked with 2e-8 absolute plus 2e-7 relative tolerance; discrete statuses/indices/reasons/booleans must match exactly. Qualification and ranking ratios use 1e-10 absolute and relative tolerance.",
+            "grading": {
+              "evaluatorId": "llm-practical-code-recovery",
+              "fixtureRef": "llm-recovery-graph-jvp-v1"
+            }
+          }
+        },
+        {
+          "id": "bank-llm-recovery-momentum-training",
+          "sourceRefs": [
+            "practical-recovery-reviewed"
+          ],
+          "assessment": {
+            "id": "llm-recovery-momentum-training",
+            "type": "code",
+            "objectiveIds": [
+              "fnd-o04-04"
+            ],
+            "familyId": "llm-practical-autodiff",
+            "language": "python",
+            "starterCode": "import json\n\ndef solve(data):\n    # Implement the specified contract.\n    pass\n\nif __name__ == \"__main__\":\n    practice = json.loads('{\"task\":\"momentum_training\",\"initial\":[0.41203070312679596,-0.38501098997923827,-0.5459446233214039],\"microbatches\":[{\"x\":[1.0397937525380507],\"y\":[0.1248002504283493]},{\"x\":[-1.0637013670255622,0.18213681022313222,-0.5474594872123693],\"y\":[-0.23482332471070727,-0.12893593834657324,0.15420638965744116]}],\"eta\":0.0,\"steps\":3,\"l2\":0.0,\"velocity\":[-0.06104199869993909,-0.0183880984112256,0.15883604745073437],\"beta\":0.0}')\n    print(solve(practice))\n",
+            "prompt": "Recovery transfer check: momentum training\n\nImplement standard-library Python solve(data), returning the stated JSON value rather than printing it. Each call is independent; all returned numeric values must be finite. Object-key order is irrelevant, array order and shape are significant. There is no network, third-party package or file access. A whole attempt has 128 MiB, 0.5 CPU, 5 seconds and 64 KiB of combined output. The starter practice input is separate from graded cases and intentionally has no supplied answer.\n\nInput is {task:\"momentum_training\",initial:[w,b,c],velocity:[vw,vb,vc],beta:number,microbatches:[{x:[...],y:[...]}],eta:number,steps:integer,l2:number}. There are <=8 scalar examples across <=3 nonempty microbatches, with unequal sizes allowed. Steps<=3, 0<=beta<1, eta and l2 are nonnegative. For every example h=w*x+b and prediction=h*h+c*h. At each old parameter vector compute loss=sum(0.5*(prediction-y)^2)/TOTAL examples +0.5*l2*(w*w+b*b+c*c). Compute all gradients there. Then set velocity=beta*old_velocity+gradient, and parameters=old_parameters-eta*NEW_velocity, simultaneously. Recompute from fresh forward values at the next step. Do not divide gradients by the microbatch count, reset velocity, fold eta into velocity, use Nesterov, or update between microbatches. Return {trace:[{loss,grads:[dw,db,dc],velocity:[...],parameters:[...]}],final:[...],velocity:[...]}. Supplied initial velocity is real optimizer state. This is the stated recurrence; it does not imply framework-default buffer initialization.\n\nFloating values are checked with 2e-8 absolute plus 2e-7 relative tolerance; discrete statuses/indices/reasons/booleans must match exactly. Qualification and ranking ratios use 1e-10 absolute and relative tolerance.",
+            "grading": {
+              "evaluatorId": "llm-practical-code-recovery",
+              "fixtureRef": "llm-recovery-momentum-training-v1"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-llm-code-attention-pullback",
+      "episodeId": "ttf-e07-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-code-generator",
+      "verifierId": "course-code-verifier",
+      "adapterId": "authored-code-bank-v1",
+      "adapterDigest": "05d8ba2439c6b2e26a06a1dfd4d366700f08a3b964eb1f1d24ea3fd73e9f7cc2",
+      "canonicalAssessmentId": "llm-code-attention-pullback",
+      "classification": "required",
+      "plannedMinutes": 30,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-llm-recovery-attention-jvp",
+          "sourceRefs": [
+            "practical-recovery-reviewed"
+          ],
+          "assessment": {
+            "id": "llm-recovery-attention-jvp",
+            "type": "code",
+            "objectiveIds": [
+              "ttf-o07-04"
+            ],
+            "familyId": "llm-practical-transformer",
+            "language": "python",
+            "starterCode": "import json\n\ndef solve(data):\n    # Implement the specified contract.\n    pass\n\nif __name__ == \"__main__\":\n    practice = json.loads('{\"task\":\"attention_jvp\",\"q\":[[0.071,0.0],[0.75,-0.5]],\"k\":[[1.0,-0.25],[-0.5,0.625],[0.0,1.0]],\"v\":[[2.0,-1.0],[-0.5,1.5],[0.25,0.75]],\"allowed\":[[true,true,true],[false,true,true]],\"direction\":{\"q\":[[0.4693657854886424,0.556278267288709],[-0.20983836356302354,-0.5205959192008734]],\"k\":[[-0.12476241565821944,0.6239120069711228],[0.6595852681268195,-0.7446261850986255],[0.09223180453629387,0.684479768924694]],\"v\":[[0.7409179838350146,-0.4737395469866183],[-0.6487167736208819,-0.6224578946935291],[-0.08403538594886917,-0.49578944111517365]]}}')\n    print(solve(practice))\n",
+            "prompt": "Recovery transfer check: attention jvp\n\nImplement standard-library Python solve(data), returning the stated JSON value rather than printing it. Each call is independent; all returned numeric values must be finite. Object-key order is irrelevant, array order and shape are significant. There is no network, third-party package or file access. A whole attempt has 128 MiB, 0.5 CPU, 5 seconds and 64 KiB of combined output. The starter practice input is separate from graded cases and intentionally has no supplied answer.\n\nInput is {task:\"attention_jvp\",q:[Nq x d],k:[Nk x d],v:[Nk x dv],allowed:[Nq x Nk booleans],direction:{q:matching matrix,k:matching matrix,v:matching matrix}}. All matrices are nonempty, rectangular, dimensions<=5, and each mask row permits at least one key. For each query compute scores=q dot k / sqrt(d), a stable softmax over permitted keys ONLY, then the weighted sum of v. Return {output:[Nq x dv],tangent:[Nq x dv]}. Tangent is d/dt attention(q+t*direction.q,k+t*direction.k,v+t*direction.v) at t=0 with the mask fixed. The score normalization, softmax derivative and value-direction term all contribute. Forbidden keys have exactly zero contribution. No parameter update occurs. Use the original array shapes, not flattened output.\n\nFloating values are checked with 2e-8 absolute plus 2e-7 relative tolerance; discrete statuses/indices/reasons/booleans must match exactly. Qualification and ranking ratios use 1e-10 absolute and relative tolerance.",
+            "grading": {
+              "evaluatorId": "llm-practical-code-recovery",
+              "fixtureRef": "llm-recovery-attention-jvp-v1"
+            }
+          }
+        },
+        {
+          "id": "bank-llm-recovery-shared-attention",
+          "sourceRefs": [
+            "practical-recovery-reviewed"
+          ],
+          "assessment": {
+            "id": "llm-recovery-shared-attention",
+            "type": "code",
+            "objectiveIds": [
+              "ttf-o07-04"
+            ],
+            "familyId": "llm-practical-transformer",
+            "language": "python",
+            "starterCode": "import json\n\ndef solve(data):\n    # Implement the specified contract.\n    pass\n\nif __name__ == \"__main__\":\n    practice = json.loads('{\"task\":\"shared_attention\",\"k\":[[1.071,-0.25],[-0.5,0.625],[0.0,1.0]],\"v\":[[2.0,-1.0],[-0.5,1.5],[0.25,0.75]],\"queries\":[{\"q\":[[0.0,0.0],[0.75,-0.5]],\"allowed\":[[true,true,true],[false,true,true]],\"upstream\":[[1.0,-0.5],[-0.25,1.0]]},{\"q\":[[0.0,0.0]],\"allowed\":[[true,true,true]],\"upstream\":[[-0.3,0.15]]}]}')\n    print(solve(practice))\n",
+            "prompt": "Recovery transfer check: shared attention\n\nImplement standard-library Python solve(data), returning the stated JSON value rather than printing it. Each call is independent; all returned numeric values must be finite. Object-key order is irrelevant, array order and shape are significant. There is no network, third-party package or file access. A whole attempt has 128 MiB, 0.5 CPU, 5 seconds and 64 KiB of combined output. The starter practice input is separate from graded cases and intentionally has no supplied answer.\n\nInput is {task:\"shared_attention\",k:[Nk x d],v:[Nk x dv],queries:[{q:[Nq x d],allowed:[Nq x Nk booleans],upstream:[Nq x dv]}]}. There are 1-3 query groups, with different query counts allowed. Every nonempty rectangular dimension<=5; each mask row permits at least one key. Each group applies stable masked scaled-dot-product attention using the same physical K and V matrices. Its scalar objective is sum(output*upstream). The complete objective is the SUM of the group objectives, with no averaging. Return {queries:[{output,dQ} in input order],dK:shared key gradient,dV:shared value gradient}. Each dQ belongs only to its group, while dK and dV sum ALL group contributions. Reset all accumulators for each solve call. Negative and zero upstream values are valid; never overwrite shared gradients with the last group.\n\nFloating values are checked with 2e-8 absolute plus 2e-7 relative tolerance; discrete statuses/indices/reasons/booleans must match exactly. Qualification and ranking ratios use 1e-10 absolute and relative tolerance.",
+            "grading": {
+              "evaluatorId": "llm-practical-code-recovery",
+              "fixtureRef": "llm-recovery-shared-attention-v1"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-llm-code-qualification-numerics",
+      "episodeId": "eng-e13-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-code-generator",
+      "verifierId": "course-code-verifier",
+      "adapterId": "authored-code-bank-v1",
+      "adapterDigest": "05d8ba2439c6b2e26a06a1dfd4d366700f08a3b964eb1f1d24ea3fd73e9f7cc2",
+      "canonicalAssessmentId": "llm-code-qualification-numerics",
+      "classification": "required",
+      "plannedMinutes": 30,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-llm-recovery-qualification-coverage",
+          "sourceRefs": [
+            "practical-recovery-reviewed"
+          ],
+          "assessment": {
+            "id": "llm-recovery-qualification-coverage",
+            "type": "code",
+            "objectiveIds": [
+              "eng-o13-04"
+            ],
+            "familyId": "llm-practical-qualification",
+            "language": "python",
+            "starterCode": "import json\n\ndef solve(data):\n    # Implement the specified contract.\n    pass\n\nif __name__ == \"__main__\":\n    practice = json.loads('{\"task\":\"qualification_coverage\",\"artifact\":\"practice-v1\",\"required\":[\"chip-a/layer-1/f32/b4\",\"chip-a/layer-2/f32/b4\",\"chip-b/layer-1/f32/b2\"],\"reports\":[{\"configuration\":\"chip-a/layer-1/f32/b4\",\"artifact\":\"candidate-v3\",\"path\":\"candidate\",\"passed\":true},{\"configuration\":\"chip-a/layer-2/f32/b4\",\"artifact\":\"candidate-v3\",\"path\":\"candidate\",\"passed\":true},{\"configuration\":\"chip-b/layer-1/f32/b2\",\"artifact\":\"candidate-v3\",\"path\":\"candidate\",\"passed\":true}]}')\n    print(solve(practice))\n",
+            "prompt": "Recovery transfer check: qualification coverage\n\nImplement standard-library Python solve(data), returning the stated JSON value rather than printing it. Each call is independent; all returned numeric values must be finite. Object-key order is irrelevant, array order and shape are significant. There is no network, third-party package or file access. A whole attempt has 128 MiB, 0.5 CPU, 5 seconds and 64 KiB of combined output. The starter practice input is separate from graded cases and intentionally has no supplied answer.\n\nInput is {task:\"qualification_coverage\",artifact:string,required:[ordered unique configuration strings],reports:[{configuration:string,artifact:string,path:string,passed:boolean}]}. Each configuration names the complete chip/layer/dtype/batch contract. Return {configurations:[{configuration,reasons:[...],passed:boolean} for each REQUIRED configuration in order],passed:boolean}. For each required configuration consider ALL exact-matching reports. Append reasons in this order: missing when there are none; artifact_mismatch when ANY artifact differs from the requested one; candidate_not_executed when ANY path is not \"candidate\"; numerics_failed when ANY passed flag is false. A later passing duplicate cannot erase a prior failure. Ignore reports for configurations outside the required list. Per-configuration passed means no reasons; overall passed requires every required configuration. This audits synthetic supplied evidence; it does not authorize a rollout or prove untested configurations.\n\nFloating values are checked with 2e-8 absolute plus 2e-7 relative tolerance; discrete statuses/indices/reasons/booleans must match exactly. Qualification and ranking ratios use 1e-10 absolute and relative tolerance.",
+            "grading": {
+              "evaluatorId": "llm-practical-code-recovery",
+              "fixtureRef": "llm-recovery-qualification-coverage-v1"
+            }
+          }
+        },
+        {
+          "id": "bank-llm-recovery-layer-ranking",
+          "sourceRefs": [
+            "practical-recovery-reviewed"
+          ],
+          "assessment": {
+            "id": "llm-recovery-layer-ranking",
+            "type": "code",
+            "objectiveIds": [
+              "eng-o13-04"
+            ],
+            "familyId": "llm-practical-qualification",
+            "language": "python",
+            "starterCode": "import json\n\ndef solve(data):\n    # Implement the specified contract.\n    pass\n\nif __name__ == \"__main__\":\n    practice = json.loads('{\"task\":\"layer_ranking\",\"run\":\"practice-run\",\"layer\":2,\"now\":100,\"max_age\":10,\"workers\":[{\"id\":\"a\",\"seated\":true,\"run\":\"run-a\",\"layer\":2,\"last_work\":90,\"qualified\":true,\"trials\":[{\"start\":0,\"completed\":1.0,\"accepted\":[\"a\",\"b\",\"b\"]},{\"start\":4,\"completed\":5.0,\"accepted\":[\"c\",\"d\",\"c\"]},{\"start\":10,\"completed\":11.0,\"accepted\":[\"e\",\"f\",\"e\"]}]},{\"id\":\"b\",\"seated\":true,\"run\":\"run-a\",\"layer\":2,\"last_work\":90,\"qualified\":true,\"trials\":[{\"start\":0,\"completed\":0.5,\"accepted\":[\"a\",\"b\",\"b\"]},{\"start\":4,\"completed\":4.5,\"accepted\":[\"c\",\"d\",\"c\"]},{\"start\":10,\"completed\":10.5,\"accepted\":[\"e\",\"f\",\"e\"]}]},{\"id\":\"c\",\"seated\":true,\"run\":\"run-a\",\"layer\":2,\"last_work\":90,\"qualified\":true,\"trials\":[{\"start\":0,\"completed\":0.25,\"accepted\":[\"a\",\"b\",\"b\"]},{\"start\":4,\"completed\":4.25,\"accepted\":[\"c\",\"d\",\"c\"]},{\"start\":10,\"completed\":10.25,\"accepted\":[\"e\",\"f\",\"e\"]}]}]}')\n    print(solve(practice))\n",
+            "prompt": "Recovery transfer check: layer ranking\n\nImplement standard-library Python solve(data), returning the stated JSON value rather than printing it. Each call is independent; all returned numeric values must be finite. Object-key order is irrelevant, array order and shape are significant. There is no network, third-party package or file access. A whole attempt has 128 MiB, 0.5 CPU, 5 seconds and 64 KiB of combined output. The starter practice input is separate from graded cases and intentionally has no supplied answer.\n\nInput is {task:\"layer_ranking\",run:string,layer:integer,now:number,max_age:nonnegative number,workers:[...]}. Worker IDs are unique strings. Each worker has id,seated:boolean,run,layer,last_work:number,qualified:boolean,trials:[{start,completed,accepted:[work-ID strings]}]. Trial durations are positive, there are 1-5 trials per worker. Evaluate each worker independently. Reject it with every applicable reason in this fixed order: not_seated, different_run, different_layer, stale_or_future (now-last_work<0 or >max_age), unqualified. Boundaries 0 and max_age are fresh. Rejected workers retain input order. For eligible workers, rate is the median of per-trial UNIQUE accepted-ID count divided by completed-start. Retry IDs count once per trial; medians use the mean of two central values at even length. Rank by descending rate, then ascending ID on ties. Return {ranked:[{id,rate,ratio_to_median}],rejected:[{id,reasons}],median_rate}. Median_rate uses eligible worker rates only; it is null when none are eligible. Ratio is rate/median_rate when that median is positive, otherwise null. Do not compare workers from other layers or runs, count submission-only rates, pool durations, or use stale presence as evidence of work.\n\nFloating values are checked with 2e-8 absolute plus 2e-7 relative tolerance; discrete statuses/indices/reasons/booleans must match exactly. Qualification and ranking ratios use 1e-10 absolute and relative tolerance.",
+            "grading": {
+              "evaluatorId": "llm-practical-code-recovery",
+              "fixtureRef": "llm-recovery-layer-ranking-v1"
             }
           }
         }
