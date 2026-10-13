@@ -1,3 +1,33 @@
+# Catalogue release selection in hosted qualification — 2026-10-13
+
+Private course0.1.4 is genuinely published/installed and native acceptance passed
+(as below). New Core PR26 is attached and OPEN, at immutable source
+4cae6ab52c82d3ebb56a412dbb177e68fd26aeab/root0.1.19:
+https://github.com/roeehrl/course-core/pull/26
+Actual CI38454055282 is LIVE/in_progress;11of12jobs PASS, only API/Postgres
+and connected learner remains. Poll that SAME run; no failed job/restart/release
+is established. Source is NOT released or installed.
+
+PR26 shows one selected published release per course, with a reversible admin
+Use for new learners action. Existing pins/evidence/progress/windows stay intact.
+Migration015 backfills previous catalogues; scoped staff explicitly request
+includeHistorical=true. Draft visibility retains its existing role restrictions;
+explicit historic enrollment/staff assignment remains supported. New selection
+uses catalog-first locks, runtime/digest validation, transactional audit, revision
+fences and idempotency. Real PG7cases PASS include migration,rollback,permissions,
+foreign-catalogue identity,stale/replay and racing legacy publication/selection.
+Full API285/admin54/typechecks PASS; connected learner21scenarios and real admin
+publication/selection/reload3viewports PASS. Publicsource audit clean.
+
+Core checkout is clean codex/course-catalogue-default. Private main69f4a26
+currently pushed; completed-course acceptance matrix updated. Native remains
+Core0.1.17 with course0.1.4,4saved QA enrollments (old16/1/0 plus new1),operator
+unenrolled,all4services running. No live model acceptance or paid calls.
+NEXT:26CI terminal success before merge exactHEAD; immutable fresh Core release,
+independent published consumer/native preservation/UI acceptance; source
+inspection/review/rights/media and ALL remaining approvedv0.8 gates.
+Do not treat the selected-release source increment as deployed or shrink the goal.
+
 # Private course0.1.4 published and installed — 2026-10-13
 
 Full v0.8 goal ACTIVE/incomplete. Private course0.1.4 is NOW actually published
