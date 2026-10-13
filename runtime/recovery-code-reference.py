@@ -54,17 +54,19 @@ def shared_attention(data):
 
 
 def qualification_coverage(data):
-    reports=[];all_passed=True
+    summaries=[]
     for required in data['required']:
         matching=[row for row in data['reports'] if row['configuration']==required]
-        # Every observed failure survives; a later successful retry cannot erase it.
-        flags=[]
-        if not matching:flags.append('missing')
-        if any(row['artifact']!=data['artifact'] for row in matching):flags.append('artifact_mismatch')
-        if any(row['path']!='candidate' for row in matching):flags.append('candidate_not_executed')
-        if any(not row['passed'] for row in matching):flags.append('numerics_failed')
-        reports.append({'configuration':required,'reasons':flags,'passed':not flags});all_passed=all_passed and not flags
-    return {'configurations':reports,'passed':bool(all_passed)}
+        computed=[numerical_audit(row['evidence']) for row in matching]
+        reasons=[]
+        if not matching:reasons.append('missing')
+        if any(row['evidence']['required_artifact']!=data['artifact'] or row['evidence']['observed_artifact']!=data['artifact'] for row in matching):reasons.append('artifact_mismatch')
+        if any(row['evidence']['required_configuration']!=required or row['evidence']['observed_configuration']!=required for row in matching):reasons.append('configuration_mismatch')
+        if any(row['evidence']['observed_path']!='candidate' for row in matching):reasons.append('candidate_not_executed')
+        if any(any(c['status']!='pass' for c in r['channels']) for r in computed):reasons.append('numerics_failed')
+        if any(row['claimed_passed']!=r['passed'] for row,r in zip(matching,computed)):reasons.append('claim_mismatch')
+        summaries.append({'configuration':required,'reasons':reasons,'passed':not reasons})
+    return {'configurations':summaries,'passed':all(r['passed'] for r in summaries)}
 
 
 def layer_ranking(data):
@@ -76,7 +78,9 @@ def layer_ranking(data):
         if row['layer']!=data['layer']:reasons.append('different_layer')
         age=data['now']-row['last_work']
         if age<0 or age>data['max_age']:reasons.append('stale_or_future')
-        if not row['qualified']:reasons.append('unqualified')
+        qualification=numerical_audit(row['qualification'])
+        if not qualification['passed'] or row['qualification']['required_artifact']!=data['artifact']:reasons.append('unqualified')
+        if row['claimed_qualified']!=qualification['passed']:reasons.append('claim_mismatch')
         if reasons:rejected.append({'id':row['id'],'reasons':reasons});continue
         speed=median([len(set(t['accepted']))/(t['completed']-t['start']) for t in row['trials']])
         usable.append({'id':row['id'],'rate':speed})
@@ -89,7 +93,7 @@ TASKS=['graph_jvp','momentum_training','attention_jvp','shared_attention','quali
 SOLVERS={name:globals()[name] for name in TASKS}
 # Functions above deliberately share only the qualified legacy primitives. Tests
 # use reverse/analytic references and additional numerical perturbations.
-for _name in ['Dual','value','variables','graph_values','shared_loss','attention','attention_vjp','add_rows']:
+for _name in ['Dual','value','variables','graph_values','shared_loss','attention','attention_vjp','add_rows','numerical_audit']:
     globals()[_name]=getattr(LEGACY,_name)
 
 
@@ -124,14 +128,81 @@ def cases():
         for trial in w['trials']:trial['accepted']=[]
     even=copy.deepcopy(base);even['workers'][0]['trials']=even['workers'][0]['trials'][:2];even['workers'][0]['trials'][1]['completed']=6
     result['layer_ranking'].extend([zero,even])
+    raw=LEGACY.numerical_cases()[0]
+    for data in result['qualification_coverage']:
+        for row in data['reports']:
+            e=copy.deepcopy(raw);e['required_artifact']=data['artifact'];e['observed_artifact']=row['artifact'];e['required_configuration']=row['configuration'];e['observed_configuration']=row['configuration'];e['observed_path']=row['path']
+            claimed=row.pop('passed')
+            if not claimed:e['channels'][0]['candidate'][0]+=2.
+            row['evidence']=e;row['claimed_passed']=claimed;row.pop('artifact');row.pop('path')
+    result['qualification_coverage'][2]['reports'][0]['claimed_passed']=True
+    result['qualification_coverage'][11]['reports'][0]['claimed_passed']=False
+    # Distinguish configuration scope, missing channels and false positive claims.
+    good=copy.deepcopy(result['qualification_coverage'][0])
+    for change in ['configuration','missing_channel','shape']:
+        item=copy.deepcopy(good);e=item['reports'][0]['evidence']
+        if change=='configuration':e['observed_configuration']='wrong-scope'
+        elif change=='missing_channel':e['channels'].pop()
+        else:e['channels'][0]['candidate_shape']=[1,4]
+        item['reports'][0]['claimed_passed']=True;result['qualification_coverage'].append(item)
+    for data in result['layer_ranking']:
+        data['artifact']='candidate-v3'
+        for row in data['workers']:
+            e=copy.deepcopy(raw);e['required_artifact']=data['artifact'];e['observed_artifact']=data['artifact'];e['required_configuration']=f"{row['run']}/layer-{row['layer']}";e['observed_configuration']=e['required_configuration']
+            claimed=row.pop('qualified')
+            if not claimed:e['channels'][0]['candidate'][0]+=2.
+            row['qualification']=e;row['claimed_qualified']=claimed
+    result['layer_ranking'][6]['workers'][2]['claimed_qualified']=True
+    ranking=copy.deepcopy(result['layer_ranking'][0]);ranking['workers'][0]['qualification']['observed_artifact']='old-artifact';result['layer_ranking'].append(ranking)
+    for index,task in enumerate(TASKS):
+        group=GROUPS[index//2]
+        for ordinal,data in enumerate(result[task]):data['canonical_trials']=canonical_pair(group,ordinal,True)
     return result
 
 
+GROUPS=['autodiff','decoder','qualification']
+PAIR_TASKS={'autodiff':['graph_vjp','shared_training'],'decoder':['attention_vjp','decoder_step'],'qualification':['numerical_audit','evidence_audit']}
+GENERATOR_BY_TASK=dict(zip([task for _,task in LEGACY.FIXTURES],LEGACY.GENERATORS))
+
+
+def canonical_pair(group,ordinal,fresh=False):
+    pair=[]
+    for task in PAIR_TASKS[group]:
+        inputs=GENERATOR_BY_TASK[task]();data=copy.deepcopy(inputs[ordinal%len(inputs)])
+        if fresh:
+            delta=0.003*(ordinal+1)
+            if task=='graph_vjp':data['inputs'][0]+=delta
+            elif task=='shared_training':data['initial'][0]+=delta
+            elif task=='attention_vjp':data['q'][0][0]+=delta
+            elif task=='decoder_step':data['weights']['embedding'][0][0]+=delta
+            elif task=='numerical_audit':
+                data['required_artifact']+='-transfer'
+                if data['observed_artifact']=='a-v7':data['observed_artifact']=data['required_artifact']
+            else:
+                data['candidate_artifact']+='-transfer'
+                if data['qualification']['artifact']=='kernel-v4':data['qualification']['artifact']=data['candidate_artifact']
+        pair.append(data)
+    return pair
+
+
+def solve_qualified(data):
+    answer={'canonical':[LEGACY.solve(item) for item in data['canonical_trials']]}
+    if data['task'] in SOLVERS:answer['transfer']=SOLVERS[data['task']](data)
+    return answer
+
+
 def registry():
-    original=LEGACY.build_registry();original['id']='llm-practical-code-recovery';original['version']='0.1.0'
-    for task,inputs in cases().items():
-        original['fixtures'].append({'id':'llm-recovery-'+task.replace('_','-')+'-v1','language':'python','cases':[{'id':f'recovery_{i:03d}','input':data,'expected':SOLVERS[task](data),'absoluteTolerance':2e-8 if task not in TASKS[-2:] else 1e-10,'relativeTolerance':2e-7 if task not in TASKS[-2:] else 1e-10} for i,data in enumerate(inputs)]})
-    return original
+    fixtures=[]
+    for group in GROUPS:
+        inputs=[{'task':'canonical_suite_'+group,'canonical_trials':canonical_pair(group,i)} for i in range(max(len(GENERATOR_BY_TASK[t]()) for t in PAIR_TASKS[group]))]
+        fixtures.append({'id':'llm-suite-'+group+'-v1','language':'python','cases':[make_case(data,i) for i,data in enumerate(inputs)]})
+    for task,inputs in cases().items():fixtures.append({'id':'llm-recovery-'+task.replace('_','-')+'-v1','language':'python','cases':[make_case(data,i) for i,data in enumerate(inputs)]})
+    return {'schemaVersion':1,'id':'offline-qualified-practical-collection','version':'0.1.0','fixtures':fixtures}
+
+
+def make_case(data,index):
+    qualification=data['task'].endswith('qualification') or data['task'] in TASKS[-2:]
+    return {'id':f'qualified_{index:03d}','input':data,'expected':solve_qualified(data),'absoluteTolerance':1e-10 if qualification else 2e-8,'relativeTolerance':1e-10 if qualification else 2e-7}
 
 
 def candidate_source():
@@ -139,7 +210,7 @@ def candidate_source():
     legacy=p.candidate_source().replace('def solve(data):','def legacy_solve(data):',1)
     tree=ast.parse(Path(__file__).read_text());selected=[node for node in tree.body if isinstance(node,ast.FunctionDef) and node.name in TASKS]
     added=ast.unparse(ast.Module(body=selected,type_ignores=[]))
-    source=legacy+'\n'+added+'\nRECOVERY_SOLVERS={'+','.join(repr(name)+':'+name for name in TASKS)+'}\ndef solve(data):\n    return RECOVERY_SOLVERS[data["task"]](data) if data["task"] in RECOVERY_SOLVERS else legacy_solve(data)\n'
+    source=legacy+'\n'+added+'\nRECOVERY_SOLVERS={'+','.join(repr(name)+':'+name for name in TASKS)+'}\ndef solve(data):\n    if \"canonical_trials\" not in data: return legacy_solve(data)\n    result={\"canonical\":[legacy_solve(item) for item in data[\"canonical_trials\"]]}\n    if data[\"task\"] in RECOVERY_SOLVERS: result[\"transfer\"]=RECOVERY_SOLVERS[data[\"task\"]](data)\n    return result\n'
     assert len(source.encode())<64000 and 'build_registry' not in source and 'expected' not in source
     return source
 
@@ -155,30 +226,46 @@ PROTOCOLS={
 
 
 def write_authoring():
-    payload=registry();raw=(json.dumps(payload,indent=2,ensure_ascii=False,allow_nan=False)+'\n').encode();assert len(raw)<1024*1024
-    (ROOT/'runtime/code-fixtures-recovery.json').write_bytes(raw);(ROOT/'runtime/code-fixtures-recovery.json').chmod(0o600)
-    old=json.loads((ROOT/'content/practicals.json').read_text());extension=copy.deepcopy(old['extension']);extension['id']=payload['id'];extension['entrypoint']='runtime/code-fixtures-recovery.json';extension['integrity']='sha256-'+hashlib.sha256(raw).hexdigest()
-    runtime={'schemaVersion':1,'replaces':old['extension'],'extension':extension}
-    assessments=[];bindings=[];inputs=cases()
-    canonical=[old['assessments'][0],old['assessments'][2],old['assessments'][4]]
-    for i,task in enumerate(TASKS):
-        base=canonical[i//2];binding=next(b for b in old['bindings'] if b['assessmentId']==base['id']);practice=copy.deepcopy(inputs[task][0])
-        # This practice input is distinct from every graded case and has no key.
-        if task=='graph_jvp':practice['inputs'][0]+=0.071
-        elif task=='momentum_training':practice['initial'][0]+=0.071
-        elif task=='attention_jvp':practice['q'][0][0]+=0.071
-        elif task=='shared_attention':practice['k'][0][0]+=0.071
-        elif task=='qualification_coverage':practice['artifact']='practice-v1'
-        else:practice['run']='practice-run'
-        assert practice not in inputs[task]
-        starter='import json\n\ndef solve(data):\n    # Implement the specified contract.\n    pass\n\nif __name__ == "__main__":\n    practice = json.loads('+repr(json.dumps(practice,separators=(',',':')))+')\n    print(solve(practice))\n'
-        assessment={'id':'llm-recovery-'+task.replace('_','-'),'type':'code','objectiveIds':base['objectiveIds'],'familyId':base['familyId'],'language':'python','starterCode':starter,'prompt':'Recovery transfer check: '+task.replace('_',' ')+'\n\nImplement standard-library Python solve(data), returning the stated JSON value rather than printing it. Each call is independent; all returned numeric values must be finite. Object-key order is irrelevant, array order and shape are significant. There is no network, third-party package or file access. A whole attempt has 128 MiB, 0.5 CPU, 5 seconds and 64 KiB of combined output. The starter practice input is separate from graded cases and intentionally has no supplied answer.\n\n'+PROTOCOLS[task]+'\n\nFloating values are checked with 2e-8 absolute plus 2e-7 relative tolerance; discrete statuses/indices/reasons/booleans must match exactly. Qualification and ranking ratios use 1e-10 absolute and relative tolerance.','grading':{'evaluatorId':extension['id'],'fixtureRef':'llm-recovery-'+task.replace('_','-')+'-v1'}}
-        assessments.append(assessment);bindings.append({'episodeId':binding['episodeId'],'canonicalAssessmentId':base['id'],'assessmentId':assessment['id'],'plannedMinutes':30,'additionalEpisodes':1})
-    source={'id':'practical-recovery-reviewed','title':'Independently checked practical transfer contracts','url':'urn:private:practical-recovery-v1','reviewedAt':'2026-10-13T01:56:52Z'}
-    overlay={'schemaVersion':1,'source':source,'assessments':assessments,'bindings':bindings,'qualification':{'reference':'private_cpu_reference_with_separate_oracles_and_finite_differences','registryAuthorization':'not_granted'}}
-    for file,data in [('content/practical-runtime.json',runtime),('content/practical-recovery.json',overlay)]:
-        p=ROOT/file;p.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n');p.chmod(0o600)
-    return {'fixtureBytes':len(raw),'freshFixtures':6,'freshCases':sum(map(len,inputs.values())),'newCanonicalFamilies':0,'plannedMinutesPerTransferCheck':30,'registryAuthorization':'not_granted'}
+    old=json.loads((ROOT/'content/practicals.json').read_text());collection=registry();inputs=cases()
+    extensions=[];registry_records=[];baseline=[];basebindings=[];assessments=[];bindings=[]
+    common='Implement standard-library Python solve(data). Return the specified JSON value rather than printing it. Each call is independent; numeric outputs must be finite. Object-key order is irrelevant; array order, shape and discrete types matter. No network, third-party package or file access is available. A whole attempt has128MiB,0.5CPU,5seconds and64KiB combined output. The separate starter practice input has no supplied answer.'
+    coverage='Input contains canonical_trials, exactly two problem records in the stated order. Return canonical, an array containing the COMPLETE result of each original task. Neither task is optional. A recovery input additionally contains the transfer fields; return its complete result under transfer. Correct transfer-only output cannot pass.'
+    new_protocols={
+      'qualification_coverage':'Each report has configuration, evidence and claimed_passed. evidence is the full numerical_audit record specified below. For every required configuration compute EVERY matching report from its raw channels. Reasons, in order: missing; artifact_mismatch if any required/observed artifact differs from artifact; configuration_mismatch if any required/observed configuration differs from the required scope; candidate_not_executed if any observed_path differs from candidate; numerics_failed if any computed channel status fails; claim_mismatch if any claimed_passed differs from its computed full passed result. Preserve every failure across retries, ignore outside scopes, keep required order. Return configurations with configuration,reasons,passed and overall passed. Do not trust a supplied pass flag.',
+      'layer_ranking':'Each worker has qualification (a complete raw numerical_audit record) and claimed_qualified. Compute qualification from its channels and identity/path checks; reject unqualified when the computed result fails or its required_artifact differs from the top-level artifact. Reject claim_mismatch when claimed_qualified differs from the computed passed result. These two reasons follow stale_or_future, in that order. Qualification data follows the canonical numerical_audit protocol below.'}
+    for group_index,group in enumerate(GROUPS):
+        fixtures=[collection['fixtures'][group_index]]+[f for f in collection['fixtures'][3:] if f['cases'][0]['input']['task'] in TASKS[2*group_index:2*group_index+2]]
+        payload={'schemaVersion':1,'id':'llm-practical-'+group+'-qualified','version':'0.1.0','fixtures':fixtures}
+        raw=(json.dumps(payload,indent=2,ensure_ascii=False,allow_nan=False)+'\n').encode();assert len(raw)<=1024*1024,(group,'registry envelope',len(raw))
+        filename='runtime/code-fixtures-'+group+'-qualified.json';p=ROOT/filename;p.write_bytes(raw);p.chmod(0o600)
+        extension=copy.deepcopy(old['extension']);extension.update(id=payload['id'],entrypoint=filename,integrity='sha256-'+hashlib.sha256(raw).hexdigest());extensions.append(extension)
+        registry_records.append({'file':filename,'id':payload['id'],'version':payload['version'],'sha256':hashlib.sha256(raw).hexdigest(),'bytes':len(raw)})
+        pair=old['assessments'][2*group_index:2*group_index+2]
+        specs=[]
+        for original,task in zip(pair,PAIR_TASKS[group]):
+            text=original['prompt'].split('\n\n\n',1)[-1];specs.append('Canonical task '+task+'\n'+text)
+        base=pair[0];binding=next(b for b in old['bindings'] if b['assessmentId']==base['id']);canonical_id='llm-suite-'+group
+        suite={'task':'canonical_suite_'+group,'canonical_trials':canonical_pair(group,91,True)}
+        def starter(practice):
+            return 'import json\n\ndef solve(data):\n    # Implement both canonical tasks and any requested transfer.\n    pass\n\nif __name__ == "__main__":\n    practice = json.loads('+repr(json.dumps(practice,separators=(',',':')))+')\n    print(solve(practice))\n'
+        prompt=common+'\n\n'+coverage+'\n\n'+'\n\n'.join(specs)+'\n\nFloating tolerances:2e-8 absolute plus2e-7 relative for differentiation/training;1e-10 for numerical/evidence audit ratios. Discrete fields must match exactly.'
+        baseline.append({'id':canonical_id,'type':'code','objectiveIds':base['objectiveIds'],'familyId':base['familyId'],'language':'python','starterCode':starter(suite),'prompt':'Full practical suite: '+group+'\n\n'+prompt,'grading':{'evaluatorId':extension['id'],'fixtureRef':'llm-suite-'+group+'-v1'}})
+        basebindings.append({'episodeId':binding['episodeId'],'gateId':binding['gateId'],'assessmentId':canonical_id})
+        for task in TASKS[2*group_index:2*group_index+2]:
+            practice=copy.deepcopy(inputs[task][0]);practice['canonical_trials']=canonical_pair(group,91,True)
+            assert practice not in inputs[task]
+            transfer=PROTOCOLS[task]
+            if task=='qualification_coverage':transfer='Input has task=qualification_coverage, artifact, required (ordered unique complete configuration names), reports (at most8 records), and canonical_trials. '+new_protocols[task]
+            if task=='layer_ranking':transfer='Input has task=layer_ranking, artifact, run, layer, now, max_age, workers, and canonical_trials. Each worker has a unique id, seated flag, run, layer, last_work, qualification, claimed_qualified and1-5 trials. Trial start<completed; accepted contains work-ID strings. Reject every applicable reason in order: not_seated, different_run, different_layer, stale_or_future (age<0 or>max_age), unqualified, claim_mismatch. '+new_protocols[task]+' For eligible workers rate is the median of UNIQUE accepted-ID count divided by completed-start per trial. Sort descending rate, then ascending ID. Return ranked with id,rate,ratio_to_median; rejected with id,reasons in input order; and median_rate. An empty eligible set has null median; a zero median has null ratios. Medians of even lists average their central values. Equality at freshness boundaries is allowed.'
+            assessment={'id':'llm-recovery-'+task.replace('_','-'),'type':'code','objectiveIds':base['objectiveIds'],'familyId':base['familyId'],'language':'python','starterCode':starter(practice),'prompt':'Full-coverage recovery: '+task.replace('_',' ')+'\n\n'+prompt+'\n\nTransfer component (return under transfer):\n'+transfer,'grading':{'evaluatorId':extension['id'],'fixtureRef':'llm-recovery-'+task.replace('_','-')+'-v1'}}
+            assert len(json.dumps(assessment).encode())<45000,(task,'assessment envelope')
+            assessments.append(assessment);bindings.append({'episodeId':binding['episodeId'],'canonicalAssessmentId':canonical_id,'assessmentId':assessment['id'],'plannedMinutes':45,'additionalEpisodes':1})
+    source={'id':'practical-recovery-reviewed','title':'Full-coverage practical contracts; runtime qualification required','url':'urn:private:practical-recovery-v2','reviewedAt':'2026-10-13T03:00:00Z'}
+    overlay={'schemaVersion':1,'source':source,'assessments':assessments,'bindings':bindings,'qualification':{'reference':'independent_canonical_and_transfer_computations','registryAuthorization':'not_granted','requiresAllCanonicalTasks':True}}
+    records=[('content/practicals-qualified.json',{'schemaVersion':1,'extensions':extensions,'assessments':baseline,'bindings':basebindings}),('runtime/practical-registries.json',{'schemaVersion':1,'registries':registry_records}),('content/practical-recovery.json',overlay)]
+    for filename,data in records:
+        p=ROOT/filename;p.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n');p.chmod(0o600)
+    return {'registryBytes':{r['id']:r['bytes'] for r in registry_records},'canonicalSuites':3,'canonicalCases':sum(len(f['cases']) for f in collection['fixtures'][:3]),'freshCases':sum(map(len,inputs.values())),'newCanonicalFamilies':0,'plannedMinutesPerTransferCheck':45,'registryAuthorization':'not_granted'}
 
 
 if __name__=='__main__':

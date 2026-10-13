@@ -1,3 +1,14 @@
+# Current coverage state — corrected suites; runtime release gate pending
+
+The superseded3561... prototype below is retained as historical evidence. The current unpublished0.1.3 candidate is5d4169ff837abf5835daeb917ab1ab897b6d82dfe97b8158666f93c5ab47704b.
+
+- Coverage correctionIMPLEMENTED:3canonical practical suites, each requiring both original computations;6fresh variants each require both canonical outputs plus its transfer. Raw qualification evidence is computed and incorrect claims detected. Original92fixture inputs are all covered; legacy file/identity retained. Thresholds/families/course quotas unchanged; required gate item IDs strengthen in the newimmutable version.
+- Independent validationPASS:54canonical+78fresh cases,655FD checks,132missing-required-task controls,78wrong-key controls,22substantive mutants. Nine actual releasedCore0.1.4 sandbox positive/negative fixture setsPASS. Registry sizes431305/749493/768719bytes, individual files<1MiB. No cases trimmed or tolerances weakened. Eleven assembly/binding tests and all existingmath/visual/legacy/recovery regressionsPASS.
+- Runtime batchingIMPLEMENTED/MERGED in publicCore PR12 at52208cf3c7ffd968e5a5f9c3e90e2ad7a9bb55a6, all12hosted checksSUCCESS.20actualDocker tests,221API tests,5sandbox units,actuallarge-fixture HTTP/Postgres/Docker pass. Sharedlock/deadline/combinedoutput never reset; later failure/cancel cannot grantpartialcredit, uncertaincleanup quarantines. Host cancellation-test race fixedbywaiting foractualrunning secondcontainer; quarantineguard unchanged.
+- Corev0.1.5 tag exists; release workflow38344151592 isVERIFIEDLIVE, notstopped, and stillrunning fullCI/candidate preparation atthischeckpoint. No hostedv5 releaseassets published yet. DoNOT move/replace tag after a failedcandidate. Check same run/handle instead ofstartingduplicate.
+- Private45minute assignments (270plannedminutes for6recoveries) fit unchanged300min/20episode/perconceptcaps. Updated user-path harnessrequiresRELEASEDCore0.1.5 and3qualifiedregistry files. Await completeHTTP response before checking finalbrowserstate. Full correctedHTTP/browser/native gates remainOPEN; the priorprototype's56episode pass doesnotprove this newdigest.
+- Nativepilot remainsoldprivate0.1.2, originalgrader; no newdataactivation/publication/owner enrollment or paidmodelcalls. Superseded469f... stagedgradernotactivated. Use3newper-family registries foractivation onlyAFTER corrected user-path gates. Broader fullv0.8 goal remainsactive.
+
 # Private0.1.3 candidate: publication hold
 
 The current candidate3561b2cfbc515ca2a0ff04510dab5579e9afda09377b56e3e3e69ae00119840a is NOT deployed/published. Private0.1.2 remains active. Its staged652,815-byte recovery grader469fd227086d41bd3cee3bc3eb51d94f5fb067fd200f34b31ff36de15e8f5f86 is NOT activated.

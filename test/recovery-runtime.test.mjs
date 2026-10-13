@@ -36,18 +36,18 @@ test('real binding CLI is repeatable even when dist already contains a recovery 
     assert.deepEqual(await read('content/recovery-runtime.json'),before);
   }
 });
-test('all practical families bind reviewed alternatives without replacing canonical gates or exposing fixture keys',async()=>{
-  const [runtime,codeRecovery]=await Promise.all([read('content/practical-runtime.json'),read('content/practical-recovery.json')]);
-  const rebased=assemble(config,modules,{practicalOverlay:practical,practicalRuntimeOverlay:runtime,visualOverlays:visuals});
-  const bound=bindRecoveryRuntime({...input,baseCourse:rebased.server,codeRecovery}),compiled=assemble(config,modules,{practicalOverlay:practical,practicalRuntimeOverlay:runtime,visualOverlays:visuals,recoveryOverlay:bound.overlay});
-  assert.equal(bound.configuration.profiles.length,115);const code=bound.configuration.profiles.filter(p=>p.adapterId==='authored-code-bank-v1');assert.equal(code.length,3);assert(code.every(p=>p.bank.length===2&&p.plannedMinutes===30));
-  assert.deepEqual(compiled.server.gates,base.server.gates);assert.equal(compiled.server.assessments.length,base.server.assessments.length);
-  const before=base.server.assessments.map(a=>({...a,grading:undefined})),after=compiled.server.assessments.map(a=>({...a,grading:undefined}));assert.deepEqual(after,before);
-  for(const a of codeRecovery.assessments){assert(!compiled.server.assessments.some(b=>b.id===a.id));assert(!JSON.stringify(compiled.learner).includes(a.prompt));assert(!JSON.stringify(compiled.learner).includes(a.grading.fixtureRef));}
-  const bytes=await readFile(new URL('runtime/code-fixtures-recovery.json',root));assert.equal(runtime.extension.integrity,'sha256-'+createHash('sha256').update(bytes).digest('hex'));
-  const registry=JSON.parse(bytes),old=await read('runtime/code-fixtures.json');assert.deepEqual(registry.fixtures.slice(0,6),old.fixtures);assert.notEqual(registry.id,old.id);
-  for(const mutate of [p=>{p.replaces.integrity='sha256-'+'f'.repeat(64);},p=>{p.extension.id=p.replaces.id;}]){
-    const bad=structuredClone(runtime);mutate(bad);assert.throws(()=>assemble(config,modules,{practicalOverlay:practical,practicalRuntimeOverlay:bad}));
-  }
-  const bad=structuredClone(codeRecovery);bad.assessments[0].grading.evaluatorId='arbitrary-evaluator';assert.throws(()=>bindRecoveryRuntime({...input,baseCourse:rebased.server,codeRecovery:bad}),/Practical evaluator changed/);
+test('qualified suites require both original tasks and keep families, thresholds, privacy and quotas',async()=>{
+  const [qualified,codeRecovery,registryMetadata]=await Promise.all([read('content/practicals-qualified.json'),read('content/practical-recovery.json'),read('runtime/practical-registries.json')]);
+  const suiteBase=assemble(config,modules,{practicalOverlay:qualified,visualOverlays:visuals});
+  const bound=bindRecoveryRuntime({...input,baseCourse:suiteBase.server,codeRecovery}),compiled=assemble(config,modules,{practicalOverlay:qualified,visualOverlays:visuals,recoveryOverlay:bound.overlay});
+  const code=bound.configuration.profiles.filter(p=>p.adapterId==='authored-code-bank-v1');assert.equal(bound.configuration.profiles.length,115);assert.equal(code.length,3);assert(code.every(p=>p.bank.length===2&&p.plannedMinutes===45));
+  assert.deepEqual(compiled.server.policy,config.policy);assert.deepEqual(compiled.server.gates,suiteBase.server.gates);assert.equal(compiled.server.chapters.flatMap(c=>c.episodes).length,56);
+  assert.equal(compiled.server.assessments.filter(a=>a.type==='code').length,3);
+  for(const a of qualified.assessments){assert.match(a.prompt,/Neither task is optional/);const gate=compiled.server.gates.find(g=>g.assessmentIds.includes(a.id));assert.equal(gate.minimumIndependentFamilies,3);}
+  for(const a of codeRecovery.assessments){assert.match(a.prompt,/Neither task is optional/);assert(!compiled.server.assessments.some(b=>b.id===a.id));assert(!JSON.stringify(compiled.learner).includes(a.prompt));assert(!JSON.stringify(compiled.learner).includes(a.grading.fixtureRef));}
+  const first=structuredClone(codeRecovery);first.assessments[0].grading.evaluatorId='arbitrary-evaluator';assert.throws(()=>bindRecoveryRuntime({...input,baseCourse:suiteBase.server,codeRecovery:first}),/Practical evaluator changed/);
+  const excessive=structuredClone(codeRecovery);excessive.bindings[0].plannedMinutes=46;assert.throws(()=>bindRecoveryRuntime({...input,baseCourse:suiteBase.server,codeRecovery:excessive}),/Invalid practical effort/);
+  assert.equal(registryMetadata.registries.length,3);
+  for(const r of registryMetadata.registries){const bytes=await readFile(new URL(r.file,root));assert(bytes.length<=1024*1024);assert.equal(bytes.length,r.bytes);assert.equal(createHash('sha256').update(bytes).digest('hex'),r.sha256);assert(qualified.extensions.some(e=>e.id===r.id&&e.integrity==='sha256-'+r.sha256));}
+  const legacy=await readFile(new URL('runtime/code-fixtures.json',root));assert.equal(createHash('sha256').update(legacy).digest('hex'),'e4254dd60781f612e3cdf1a3633833ab2c0d59cc17047331f71945ccdac6a51f');
 });

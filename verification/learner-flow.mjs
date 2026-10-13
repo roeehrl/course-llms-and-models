@@ -3,7 +3,7 @@
 import {readFile,writeFile,mkdir,mkdtemp,rm} from 'node:fs/promises';
 import {spawn,execFile} from 'node:child_process';
 import {promisify,isDeepStrictEqual} from 'node:util';
-import {randomUUID} from 'node:crypto';
+import {randomUUID,createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {createServer} from 'node:net';
@@ -12,18 +12,21 @@ const exec=promisify(execFile),root=fileURLToPath(new URL('../',import.meta.url)
 class Failure extends Error {constructor(code){super(code);this.code=code;}}
 const check=(condition,code)=>{if(!condition)throw new Failure(code);};
 const args=process.argv.slice(2);check((args.length===2||(args.length===3&&args[2]==='--browser'))&&args[0]==='--runtime-dir','usage_runtime_dir');const browserMode=args[2]==='--browser';
-const runtime=path.resolve(args[1]),manifest=JSON.parse(await readFile(path.join(runtime,'package.json'),'utf8'));check(manifest.name==='@course-core/repository'&&manifest.version==='0.1.4','released_runtime_version_required');
+const runtime=path.resolve(args[1]),manifest=JSON.parse(await readFile(path.join(runtime,'package.json'),'utf8'));check(manifest.name==='@course-core/repository'&&manifest.version==='0.1.5','released_runtime_version_required');
 check(process.env.TEST_DATABASE_URL&&!process.env.DATABASE_URL,'disposable_database_required');
 const url=new URL(process.env.TEST_DATABASE_URL);check(['postgres:','postgresql:'].includes(url.protocol)&&['localhost','127.0.0.1','[::1]'].includes(url.hostname)&&/^\/course_core_(?:ci|test(?:_[a-z0-9_]+)?)$/.test(url.pathname)&&!url.search&&!url.hash,'disposable_database_required');
 const compiled=JSON.parse(await readFile(path.join(root,'dist/course.compiled.json'),'utf8')),course=compiled.server,configuration=JSON.parse(await readFile(path.join(root,'runtime/recovery-registry.json'),'utf8'));
 const candidate=(await exec('python3',['-B','-c',"import importlib.util;s=importlib.util.spec_from_file_location('r','runtime/recovery-code-reference.py');r=importlib.util.module_from_spec(s);s.loader.exec_module(r);print(r.candidate_source())"],{cwd:root,maxBuffer:64000})).stdout;
+const registryMetadata=JSON.parse(await readFile(path.join(root,'runtime/practical-registries.json'),'utf8'));
+check(registryMetadata.schemaVersion===1&&registryMetadata.registries.length===3,'qualified_registries_required');
+for(const r of registryMetadata.registries){check(/^runtime\/code-fixtures-(autodiff|decoder|qualification)-qualified\.json$/.test(r.file),'qualified_registry_path');const bytes=await readFile(path.join(root,r.file));check(bytes.length===r.bytes&&bytes.length<=1024*1024&&createHash('sha256').update(bytes).digest('hex')===r.sha256,'qualified_registry_bytes_changed');}
 const schema='course_private_flow_'+randomUUID().replaceAll('-',''),admin=new pg.Pool({connectionString:url.href,max:1});
 const pgVersion=Number((await admin.query("SELECT current_setting('server_version_num') AS version")).rows[0].version);check(pgVersion>=170000&&pgVersion<180000,'postgres_17_required');
 const port=await new Promise(resolve=>{const s=createServer();s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>resolve(p));});});
 const origin=`http://127.0.0.1:${port}`,instanceId=randomUUID();
 await mkdir(path.join(root,'.local/learner-flow'),{recursive:true,mode:0o700});const state=await mkdtemp(path.join(root,'.local/learner-flow/run-'));
 await admin.query(`CREATE SCHEMA ${schema}`);url.searchParams.set('options',`-csearch_path=${schema}`);const db=new pg.Pool({connectionString:url.href,max:2});
-const childEnv={PATH:process.env.PATH,DATABASE_URL:url.href,PUBLIC_ORIGIN:origin,API_HOST:'127.0.0.1',PORT:String(port),CORE_INSTANCE_ID:instanceId,LEARNER_WEB_DIR:path.join(runtime,'apps/learner/dist'),CODE_FIXTURE_FILES:JSON.stringify([path.join(root,'runtime/code-fixtures-recovery.json')]),ADAPTATION_ADAPTERS:JSON.stringify(['bounded-numeric-v1','authored-bank-v1','authored-code-bank-v1']),SANDBOX_STORAGE_DIR:path.join(state,'sandbox')};
+const childEnv={PATH:process.env.PATH,DATABASE_URL:url.href,PUBLIC_ORIGIN:origin,API_HOST:'127.0.0.1',PORT:String(port),CORE_INSTANCE_ID:instanceId,LEARNER_WEB_DIR:path.join(runtime,'apps/learner/dist'),CODE_FIXTURE_FILES:JSON.stringify(registryMetadata.registries.map(r=>path.join(root,r.file))),ADAPTATION_ADAPTERS:JSON.stringify(['bounded-numeric-v1','authored-bank-v1','authored-code-bank-v1']),SANDBOX_STORAGE_DIR:path.join(state,'sandbox')};
 const server=spawn(process.execPath,['--max-old-space-size=512','services/api/dist/main.js'],{cwd:runtime,env:childEnv,stdio:['ignore','pipe','pipe']});let childExit=false,output='';server.once('exit',()=>{childExit=true;});server.once('error',()=>{childExit=true;});for(const pipe of [server.stdout,server.stderr])pipe.on('data',b=>{output=(output+b.toString()).slice(-65536);});
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 async function ready(){for(let n=0;n<120;n++){check(!childExit,'released_api_startup_failed');try{const r=await fetch(origin+'/health',{signal:AbortSignal.timeout(1000)});if(r.ok&&(await r.json()).instanceId===instanceId)return;}catch{}await pause(100);}throw new Failure('released_api_readiness_timeout');}
@@ -46,7 +49,7 @@ try{
   await ready();teacher=await bootstrap('private-acceptance-owner','owner');
   const adapters=requireOk(await request(teacher,'GET','/api/runtime/adaptation-adapters'),'runtime_descriptors').adapters;
   check(configuration.profiles.every(p=>adapters.some(a=>a.id===p.adapterId&&a.implementationDigest===p.adapterDigest)),'installed_creator_digest_mismatch');
-  const extensions=requireOk(await request(teacher,'GET','/api/runtime/extensions'),'runtime_extensions').extensions;check(extensions.some(e=>e.id==='llm-practical-code-recovery'&&e.codeReady),'code_grader_not_ready');
+  const extensions=requireOk(await request(teacher,'GET','/api/runtime/extensions'),'runtime_extensions').extensions;check(registryMetadata.registries.every(r=>extensions.some(e=>e.id===r.id&&e.codeReady&&e.integrity==='sha256-'+r.sha256)),'code_grader_not_ready');
   releaseId=requireOk(await request(teacher,'POST',`/api/workspaces/${teacher.workspaceId}/releases`,course),'course_import').id;
   const catalog=requireOk(await request(teacher,'GET','/api/admin/session'),'admin_session').courses[0];check(catalog,'catalog_missing');
   for(const action of ['submit-review','approve','publish']){
@@ -92,7 +95,7 @@ try{
   }
   const end=await snapshot(first);check(end.nextEpisodeId===null&&end.complete===true&&end.lessons.filter(l=>l.status==='completed').length===56&&recovered===3,'full_course_path_incomplete');
   const reservationRows=(await db.query('SELECT snapshot FROM policy_states WHERE enrollment_id=$1',[first.enrollmentId])).rows[0].snapshot.reservations,committed=reservationRows.filter(r=>r.state==='committed');check(committed.length===6,'recovery_cost_receipts_missing');
-  check(committed.reduce((n,r)=>n+r.work.additionalMinutes,0)===180&&committed.reduce((n,r)=>n+r.work.additionalEpisodes,0)===6,'recovery_cost_terms_changed');
+  check(committed.reduce((n,r)=>n+r.work.additionalMinutes,0)===270&&committed.reduce((n,r)=>n+r.work.additionalEpisodes,0)===6,'recovery_cost_terms_changed');
   reports.push({flow:'all_56_episodes_with_recovery',episodes:56,practicalFamiliesRecovered:recovered,committedRecoveryAssignments:6,unearnedCompletionRejectedEveryEpisode:true});
   // Separate learner proves a finite bank can end without silently granting credit.
   const exhausted=await enroll('private-exhaustion');

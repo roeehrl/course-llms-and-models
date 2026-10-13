@@ -9,9 +9,9 @@
   "sources": [
     {
       "id": "practical-recovery-reviewed",
-      "title": "Independently checked practical transfer contracts",
-      "url": "urn:private:practical-recovery-v1",
-      "reviewedAt": "2026-10-13T01:56:52Z"
+      "title": "Full-coverage practical contracts; runtime qualification required",
+      "url": "urn:private:practical-recovery-v2",
+      "reviewedAt": "2026-10-13T03:00:00Z"
     }
   ],
   "extensions": [
@@ -2067,7 +2067,7 @@
       },
       {
         "familyId": "llm-practical-autodiff",
-        "canonicalAssessmentId": "llm-code-autodiff-vjp",
+        "canonicalAssessmentId": "llm-suite-autodiff",
         "generatorIds": [
           "course-code-generator"
         ],
@@ -2079,7 +2079,7 @@
       },
       {
         "familyId": "llm-practical-transformer",
-        "canonicalAssessmentId": "llm-code-attention-pullback",
+        "canonicalAssessmentId": "llm-suite-decoder",
         "generatorIds": [
           "course-code-generator"
         ],
@@ -2091,7 +2091,7 @@
       },
       {
         "familyId": "llm-practical-qualification",
-        "canonicalAssessmentId": "llm-code-qualification-numerics",
+        "canonicalAssessmentId": "llm-suite-qualification",
         "generatorIds": [
           "course-code-generator"
         ],
@@ -4672,7 +4672,7 @@
       "maxOperations": 4,
       "maxArtifacts": 4,
       "maxArtifactBytes": 20000,
-      "maxPlannedMinutesPerAssignment": 30,
+      "maxPlannedMinutesPerAssignment": 45,
       "maxAdditionalEpisodesPerAssignment": 1,
       "allowedClassifications": [
         "required",

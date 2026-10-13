@@ -31,7 +31,7 @@ export async function browserAcceptance({origin,bootstrap,request,requireOk,cour
           const wrongFirst=hasCode&&!recovery;let codeFailures=0;
           for(let step=0;step<10;step++){
             const s=await snapshot();if(s.lessons.find(l=>l.id===episode.id).gate.passed)break;
-            const fresh=page.getByRole('button',{name:'Get a fresh check · 30 min →',exact:true}),isFresh=await fresh.count()>0;
+            const fresh=page.getByRole('button',{name:'Get a fresh check · 45 min →',exact:true}),isFresh=await fresh.count()>0;
             const endpointSuffix=isFresh?'/adaptation/fresh-question':'/challenges';
             const issued=page.waitForResponse(r=>new URL(r.url()).pathname.endsWith(endpointSuffix)&&r.request().method()==='POST');
             await (isFresh?fresh:page.getByRole('button',{name:'Start the next check →',exact:true})).click();
@@ -40,7 +40,7 @@ export async function browserAcceptance({origin,bootstrap,request,requireOk,cour
             if(c.question.type==='code'){
               const failed=wrongFirst&&!isFresh;await page.getByRole('textbox',{name:'Your code',exact:true}).fill(failed?'def solve(data): return None':candidate);
               if(isFresh){
-                check(codeFailures===2,'browser_did_not_use_existing_code_variants');
+                check(codeFailures===1,'browser_did_not_use_existing_code_variants');
                 check(await page.getByRole('button',{name:'Complete episode →',exact:true}).isDisabled(),'browser_fresh_question_granted_credit');
                 check(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth),'browser_code_horizontal_overflow');
                 const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();check(axe.violations.length===0,'browser_code_accessibility');
@@ -55,7 +55,7 @@ export async function browserAcceptance({origin,bootstrap,request,requireOk,cour
               else await page.getByRole('textbox',{name:'Your numeric answer',exact:true}).fill(String(a.grading.expected));
               await page.getByRole('button',{name:'Check answer',exact:true}).click();
             }
-            await page.getByRole('button',{name:'Start the next check →',exact:true}).or(page.getByRole('button',{name:'Get a fresh check · 30 min →',exact:true})).or(page.getByText('Your independent checks are complete.',{exact:true})).first().waitFor();
+            await page.getByRole('button',{name:'Start the next check →',exact:true}).or(page.getByRole('button',{name:'Get a fresh check · 45 min →',exact:true})).or(page.getByText('Your independent checks are complete.',{exact:true})).first().waitFor();
           }
           check((await snapshot()).lessons.find(l=>l.id===episode.id).gate.passed,'browser_gate_not_passed');
           const saved=page.waitForResponse(r=>new URL(r.url()).pathname.endsWith('/complete')&&r.request().method()==='POST');

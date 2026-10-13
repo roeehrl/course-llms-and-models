@@ -63,24 +63,26 @@ def shared_attention_analytic(data,bug=None):
 
 
 def coverage_stream(data,bug=None):
-    state={name:{'count':0,'artifact':False,'path':False,'numerics':False} for name in data['required']}
+    state={name:{'count':0,'artifact':False,'configuration':False,'path':False,'numerics':False,'claim':False} for name in data['required']}
     for row in data['reports']:
         target=state.get(row['configuration'])
         if target is None:continue
-        target['count']+=1
-        for name,failed in [('artifact',row['artifact']!=data['artifact']),('path',row['path']!='candidate'),('numerics',not row['passed'])]:
-            target[name]=failed if bug=='last_report' else target[name] or failed
+        target['count']+=1;e=row['evidence'];result=P.numerical_decimal(e)
+        flags=[('artifact',e['required_artifact']!=data['artifact'] or e['observed_artifact']!=data['artifact']),('configuration',e['required_configuration']!=row['configuration'] or e['observed_configuration']!=row['configuration']),('path',e['observed_path']!='candidate'),('numerics',any(c['status']!='pass' for c in result['channels'])),('claim',row['claimed_passed']!=result['passed'])]
+        if bug=='trust_claims':flags=[(name,not row['claimed_passed'] if name=='numerics' else False if name=='claim' else failed) for name,failed in flags]
+        for name,failed in flags:target[name]=failed if bug=='last_report' else target[name] or failed
     results=[]
-    for name,s in state.items():
-        failures=[reason for flag,reason in [(s['count']==0,'missing'),(s['artifact'] and bug!='ignore_artifact','artifact_mismatch'),(s['path'] and bug!='ignore_path','candidate_not_executed'),(s['numerics'],'numerics_failed')] if flag]
-        results.append({'configuration':name,'reasons':failures,'passed':not failures})
+    for name,t in state.items():
+        checks=[(t['count']==0,'missing'),(t['artifact'] and bug!='ignore_artifact','artifact_mismatch'),(t['configuration'] and bug!='ignore_configuration','configuration_mismatch'),(t['path'] and bug!='ignore_path','candidate_not_executed'),(t['numerics'] and bug!='ignore_channels','numerics_failed'),(t['claim'],'claim_mismatch')]
+        reasons=[label for failed,label in checks if failed];results.append({'configuration':name,'reasons':reasons,'passed':not reasons})
     return {'configurations':results,'passed':all(r['passed'] for r in results)}
 
 
 def ranking_fraction(data,bug=None):
     rejected=[];eligible=[]
     for row in data['workers']:
-        flags=[(not row['seated'],'not_seated'),(row['run']!=data['run'],'different_run'),(row['layer']!=data['layer'] and bug!='cross_layer','different_layer'),(row['last_work']>data['now'] or data['now']-row['last_work']>data['max_age'],'stale_or_future'),(not row['qualified'],'unqualified')]
+        computed=P.numerical_decimal(row['qualification'])
+        flags=[(not row['seated'],'not_seated'),(row['run']!=data['run'],'different_run'),(row['layer']!=data['layer'] and bug!='cross_layer','different_layer'),(row['last_work']>data['now'] or data['now']-row['last_work']>data['max_age'],'stale_or_future'),(not (row['claimed_qualified'] if bug=='trust_claims' else computed['passed']) or row['qualification']['required_artifact']!=data['artifact'],'unqualified'),(row['claimed_qualified']!=computed['passed'] and bug!='trust_claims','claim_mismatch')]
         reasons=[label for failed,label in flags if failed]
         if reasons:rejected.append({'id':row['id'],'reasons':reasons});continue
         rates=[]
@@ -91,35 +93,55 @@ def ranking_fraction(data,bug=None):
         if bug=='mean_trials':speed=sum(rates)/n
         eligible.append((speed,row['id']))
     eligible.sort(key=lambda pair:(-pair[0],pair[1]));rates=sorted(r[0] for r in eligible);n=len(rates)
-    median=(rates[(n-1)//2]+rates[n//2])/2 if rates else None
-    return {'ranked':[{'id':name,'rate':float(rate),'ratio_to_median':float(rate/median) if median else None} for rate,name in eligible],'rejected':rejected,'median_rate':float(median) if median is not None else None}
+    middle=(rates[(n-1)//2]+rates[n//2])/2 if rates else None
+    return {'ranked':[{'id':name,'rate':float(rate),'ratio_to_median':float(rate/middle) if middle else None} for rate,name in eligible],'rejected':rejected,'median_rate':float(middle) if middle is not None else None}
 
 
 ORACLES={'graph_jvp':graph_reverse_direction,'momentum_training':momentum_analytic,'attention_jvp':attention_reverse_direction,'shared_attention':shared_attention_analytic,'qualification_coverage':coverage_stream,'layer_ranking':ranking_fraction}
-MUTANTS={'graph_jvp':['repeated_path','forget_direction'],'momentum_training':['batch_means','reset_velocity','fold_eta_into_buffer','plain_sgd'],'attention_jvp':['missing_scale','ignore_mask','omit_value_direction'],'shared_attention':['last_group','mean_groups','omit_key'],'qualification_coverage':['last_report','ignore_artifact','ignore_path'],'layer_ranking':['cross_layer','retry_ids','mean_trials']}
+MUTANTS={'graph_jvp':['repeated_path','forget_direction'],'momentum_training':['batch_means','reset_velocity','fold_eta_into_buffer','plain_sgd'],'attention_jvp':['missing_scale','ignore_mask','omit_value_direction'],'shared_attention':['last_group','mean_groups','omit_key'],'qualification_coverage':['last_report','ignore_artifact','ignore_path','trust_claims','ignore_configuration','ignore_channels'],'layer_ranking':['cross_layer','retry_ids','mean_trials','trust_claims']}
+
+
+def canonical_reference(data):
+    return [P.ORACLES[item['task']](item) for item in data['canonical_trials']]
 
 
 def verify():
-    generated=R.registry();raw=(json.dumps(generated,indent=2,ensure_ascii=False,allow_nan=False)+'\n').encode()
-    assert (ROOT/'runtime/code-fixtures-recovery.json').read_bytes()==raw,'Recovery fixtures differ from deterministic reference production'
-    baseline=json.loads((ROOT/'runtime/code-fixtures.json').read_text());assert generated['fixtures'][:6]==baseline['fixtures'],'Original fixtures changed'
-    metadata=json.loads((ROOT/'content/practical-runtime.json').read_text());assert metadata['extension']['integrity']=='sha256-'+hashlib.sha256(raw).hexdigest()
-    source=R.candidate_source();namespace={};exec(compile(source,'offline-authored-reference','exec'),namespace)
-    fd=0;wrong_key=0;mutants=[];case_count=0
-    for fixture in generated['fixtures'][6:]:
-        task=fixture['cases'][0]['input']['task'];oracle=ORACLES[task]
+    generated=R.registry();receipts=json.loads((ROOT/'runtime/practical-registries.json').read_text());assert len(receipts['registries'])==3
+    delivered=[];registry_bytes={}
+    for receipt in receipts['registries']:
+        raw=(ROOT/receipt['file']).read_bytes();assert len(raw)==receipt['bytes'] and len(raw)<=1024*1024
+        assert hashlib.sha256(raw).hexdigest()==receipt['sha256']
+        payload=json.loads(raw);assert payload['id']==receipt['id'];delivered.extend(payload['fixtures']);registry_bytes[payload['id']]=len(raw)
+    assert {f['id'] for f in delivered}=={f['id'] for f in generated['fixtures']}
+    assert all(next(f for f in delivered if f['id']==g['id'])==g for g in generated['fixtures'])
+    original=json.loads((ROOT/'runtime/code-fixtures.json').read_text());assert R.LEGACY.build_registry()==original
+    for group,fixture in zip(R.GROUPS,generated['fixtures'][:3]):
+        for index,task in enumerate(R.PAIR_TASKS[group]):
+            covered=[c['input']['canonical_trials'][index] for c in fixture['cases']]
+            assert all(c['input'] in covered for f in original['fixtures'] for c in f['cases'] if c['input']['task']==task),(group,'canonical input coverage')
+    source=R.candidate_source();namespace={};exec(compile(source,'offline-qualified-reference','exec'),namespace)
+    fd=0;wrong_key=0;missing_task=0;mutants=[];case_count=0;canonical_count=0;maximum_outputs={}
+    for fixture in generated['fixtures']:
+        task=fixture['cases'][0]['input']['task'];oracle=ORACLES.get(task)
+        output_bytes=0
         for case in fixture['cases']:
-            data=case['input'];expected=case['expected'];actual=oracle(data);P.validate_json(actual)
-            assert P.equivalent(actual,expected,case['absoluteTolerance'],case['relativeTolerance']),(task,case['id'],'independent_oracle')
-            assert P.equivalent(namespace['solve'](data),actual,case['absoluteTolerance'],case['relativeTolerance']),(task,'authored_candidate')
-            bad=copy.deepcopy(expected)
+            data=case['input'];whole=case['expected'];actual={'canonical':canonical_reference(data)}
+            if oracle:actual['transfer']=oracle(data)
+            P.validate_json(actual)
+            assert P.equivalent(actual,whole,case['absoluteTolerance'],case['relativeTolerance']),(task,case['id'],'independent oracle')
+            assert P.equivalent(namespace['solve'](data),actual,case['absoluteTolerance'],case['relativeTolerance']),(task,'authored candidate')
+            output_bytes+=len(json.dumps({'id':case['id'],'output':actual},ensure_ascii=True).encode())+1
+            absent=copy.deepcopy(whole);absent['canonical']=absent['canonical'][:1]
+            assert not P.equivalent(absent,actual,case['absoluteTolerance'],case['relativeTolerance']);missing_task+=1
+            if not oracle:canonical_count+=1;continue
+            expected=whole['transfer'];bad=copy.deepcopy(expected)
             if task=='graph_jvp':bad['tangents'][0][-1]+=1.
             elif task=='momentum_training':bad['trace'][0]['grads'][0]+=1.
             elif task=='attention_jvp':bad['tangent'][0][0]+=1.
             elif task=='shared_attention':bad['dV'][0][0]+=1.
             elif task=='qualification_coverage':bad['passed']=not bad['passed']
             else:bad['median_rate']=12345.
-            assert not P.equivalent(bad,actual,case['absoluteTolerance'],case['relativeTolerance']);wrong_key+=1;case_count+=1
+            assert not P.equivalent(bad,actual['transfer'],case['absoluteTolerance'],case['relativeTolerance']);wrong_key+=1;case_count+=1
             if task=='graph_jvp':
                 for direction,calculated in zip(data['directions'],expected['tangents']):
                     plus=copy.deepcopy(data);minus=copy.deepcopy(data);h=1e-5
@@ -142,18 +164,23 @@ def verify():
                         def loss(y):q=p[:];q[j]=y;return P.training_derivatives(q,data)[0]
                         assert P.equivalent(P.finite_difference(loss,x),step['grads'][j],2e-6,2e-5);fd+=1
                     p=step['parameters'][:]
+        maximum_outputs[fixture['id']]=output_bytes;assert output_bytes<=65536,(task,'complete output envelope',output_bytes)
+        if not oracle:continue
         for mutation in MUTANTS[task]:
-            failed=sum(not P.equivalent(oracle(case['input'],mutation),case['expected'],case['absoluteTolerance'],case['relativeTolerance']) for case in fixture['cases'])
+            failed=sum(not P.equivalent(oracle(case['input'],mutation),case['expected']['transfer'],case['absoluteTolerance'],case['relativeTolerance']) for case in fixture['cases'])
             assert failed>0,(task,mutation,'undetected');mutants.append({'task':task,'mutation':mutation,'failedCases':failed})
-    return {'freshFixtures':6,'cases':case_count,'finiteDifferenceChecks':fd,'wrongKeyControls':wrong_key,'mutantsRejected':len(mutants),'negativeControls':mutants,'registryBytes':len(raw),'originalFixturesUnchanged':True,'publicationAuthority':'not_granted'}
+    return {'canonicalSuites':3,'canonicalCases':canonical_count,'freshFixtures':6,'cases':case_count,'finiteDifferenceChecks':fd,'wrongKeyControls':wrong_key,'missingCanonicalTaskControls':missing_task,'mutantsRejected':len(mutants),'negativeControls':mutants,'registryBytes':registry_bytes,'maximumOutputBytes':maximum_outputs,'originalFixturesUnchanged':True,'publicationAuthority':'not_granted'}
 
 
 def broken_candidate(source,task):
+    if task.startswith('canonical_suite_'):
+        before='[legacy_solve(item) for item in data[\"canonical_trials\"]]'
+        assert source.count(before)==1;return source.replace(before,'[legacy_solve(data[\"canonical_trials\"][0])]',1)
     changes={'graph_jvp':('Dual(v, [t])','Dual(v, [0.0])'),
       'momentum_training':("data['beta'] * v + g",'g'),
       'attention_jvp':('Dual(x, [d])',"Dual(x, [0.0 if key == 'v' else d])"),
       'shared_attention':("dk = add_rows(dk, row['dK'])","dk = row['dK']"),
-      'qualification_coverage':("any((not row['passed'] for row in matching))","(not matching[-1]['passed'] if matching else False)"),
+      'qualification_coverage':("row['claimed_passed'] != r['passed']","False"),
       'layer_ranking':("len(set(t['accepted']))","len(t['accepted'])")}
     before,after=changes[task];assert source.count(before)==1,(task,'ambiguous mutation');return source.replace(before,after,1)
 
@@ -162,5 +189,5 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('--docker',action='store_true');parser.add_argument('--broker',type=Path);args=parser.parse_args();report=verify()
     if args.docker:
         if not args.broker or not args.broker.is_file():parser.error('A released installed sandbox broker is required for --docker')
-        report['docker']=P.docker_checks({'fixtures':R.registry()['fixtures'][6:]},R.candidate_source(),args.broker,mutator=broken_candidate)
+        report['docker']=P.docker_checks({'fixtures':R.registry()['fixtures']},R.candidate_source(),args.broker,mutator=broken_candidate)
     print(json.dumps(report,indent=2))

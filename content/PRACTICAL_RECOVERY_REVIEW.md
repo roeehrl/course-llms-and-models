@@ -1,60 +1,56 @@
-# Practical recovery qualification
+# Corrected full-coverage practical suites
 
-**Publication hold:** this prototype's numerical/runtime checks passed, but its
-canonical learning coverage is insufficient. Read
-`planning/PRACTICAL_COVERAGE_HOLD.md` before interpreting the results below.
-The replacement tasks and baseline practical alternatives must be strengthened
-and requalified; private0.1.3 is not published or activated.
+The private0.1.3 candidate replaces each pair of optional alternative code tasks
+with one canonical suite requiring BOTH original computations. It retains the
+three practical families and minimum independent-family thresholds; gate item IDs
+change in the new immutable version. Existing0.1.2 enrollments and the original
+92-case grader remain pinned to their original bytes.
 
-The candidate adds two reviewed transfer tasks to each existing practical family:
-graph directional sensitivities and momentum state; attention directional changes
-and shared key/value gradients; configuration coverage and current same-layer work
-ranking. They retain the original three objectives/families. New task IDs cannot
-substitute for an additional independent family.
+Autodiff requires graph VJP and shared-parameter training. Decoder requires
+attention VJP and a complete decoder step. Qualification requires numerical audit
+and release-evidence audit, including useful completed-work timing, storage lifetime
+and fault/cancellation gates. Every replacement question requires the same complete
+canonical results as well as its transfer component. A partial or forward-only
+result cannot grant credit for the full practical.
 
-These contracts teach explicit mathematical behavior. Forward sensitivities follow
-the Jacobian-vector mapping described in the official [JAX documentation](https://docs.jax.dev/en/latest/jacobian-vector-products.html).
-The momentum task declares its initial buffer and exact recurrence, avoiding an
-implicit assumption about framework initialization; the official [PyTorch SGD
-documentation](https://docs.pytorch.org/docs/main/generated/torch.optim.sgd.SGD_class.html)
-describes why optimizer conventions need to be stated. The tests use standard-library
-CPU implementations; they do not execute JAX, PyTorch, MLX or a mining worker.
+The transfer tasks cover directional sensitivities, momentum state, shared key/value
+gradients, raw qualification coverage and fresh same-layer ranking. Qualification
+flags are recalculated from raw channels and identity/path evidence; a supplied
+pass claim cannot hide wrong numerics. Differences between framework conventions
+are explicit in the protocol. Background sources: official [JAX differentiation](https://docs.jax.dev/en/latest/jacobian-vector-products.html)
+and [PyTorch SGD](https://docs.pytorch.org/docs/main/generated/torch.optim.sgd.SGD_class.html).
+Tests use standard-library CPU algorithms and do not execute a mining worker.
 
-All 74 generated case outputs matched separate references: reverse-mode graph
-derivatives versus forward tangents, analytic attention pullbacks versus directional
-dual-number propagation, analytic training derivatives, streaming configuration
-coverage, and rational arithmetic for timing/medians. Another 655 central finite
-differences checked graph/attention tangents and gradients throughout optimizer
-trajectories. All 74 wrong-key controls and 18 substantive algorithm mutants were
-rejected. Initial median fixtures hid a retry-counting mutation; discriminating
-retry, uneven-rate, zero-work and even-count cases were added before acceptance.
+Independent reference verification passed54 canonical suite cases and78 fresh cases.
+The canonical suite fixtures cover all92 original inputs. All132 missing-canonical-task
+controls and78 wrong-transfer-key controls were rejected. Twenty-two substantive mutants,
+including false qualification claims, were rejected; another655 finite differences
+checked graph/attention tangents and gradients through optimizer trajectories. The
+original197 derivative checks and32 baseline mutations remain separate regressions.
 
-The actual released Core0.1.3 sandbox broker graded all six authored positive
-programs and rejected a selected substantive mutation for each in real pinned
-arm64 containers. Fake self-awarded pass output was rejected; only runner/source
-files were mounted. Observed positive durations were227–315ms. Each attempt used
-128MiB,0.5CPU,5seconds,64KiB combined output and no network/GPU. These observations
-qualify the tested fixture protocols, not all possible inputs or physical hosts.
+Actual released Core0.1.4 sandbox qualification passed all9 positive fixture batches
+and rejected a selected substantive fault for each. Fake self-awarded pass output
+was rejected. Only runner/submission files were mounted; expected outputs stayed in
+the host. Each attempt retained128MiB,0.5CPU,5seconds,64KiB output and no network/GPU.
+Largest complete observed/reference output envelope was55,977bytes. These tests prove
+the tested computations and isolation; they do not establish learner understanding
+or all possible inputs.
 
-The new registry is652,815bytes. Its first six fixtures are exactly the original
-92-case registry; the original registry/file/identity is retained for existing
-enrollments. A separate evaluator identity serves a new immutable course version.
-The six bank questions are not inserted in the free baseline or the learner bundle;
-host approval still pins the installed creator, evaluator and fixture bytes.
+Registry data is split into three files:431,305bytes autodiff,749,493bytes decoder,
+768,719bytes qualification. Each is below1MiB and has its own digest-pinned evaluator
+identity. No discriminating case was removed to fit an envelope. The API's conservative
+preflight needs the generic bounded-batch implementation in Core PR12; the hard
+whole-attempt time/output/admission limits must remain unchanged. The corrected
+content cannot be activated under an API that lacks that implementation.
 
-Each assigned coding transfer check estimates30minutes and consumes one additional
-episode/remediation cycle. Estimates are planning constraints, not a stopwatch or
-guarantee of learner effort. Existing course quotas/deadlines still apply. Neither
-qualification nor an approved bank authorizes unlimited retries, raises a cap,
-starts the actual owner's course clock, or grants mastery without an independent
-submitted result.
+Each fresh suite transfer estimates45minutes and consumes one additional episode
+and remediation cycle. The existing300-minute,20-episode and per-concept caps are
+unchanged; six deliberate recovery assignments cost270 planned minutes. These are
+planning estimates, not a reading timer or a guarantee of required study time.
 
-The independent CPU/Docker qualification and SDK assembly passed. Actual released
-Core0.1.4 HTTP/PostgreSQL acceptance completed all56episodes, recovered all three
-practical families after failures, rejected premature completion in every episode,
-and kept a separate exhausted learner blocked with unchanged gates and no new plan.
-The test used a disposable database and left its operator unenrolled. Browser and
-native publication acceptance remain separate gates until recorded after execution. Hosted private CI remains unavailable while the account's
-billing restriction prevents jobs starting. This is not a claim of live tutoring,
-learner understanding, runtime generation of arbitrary code exercises or complete
-platform delivery.
+Eleven assembly/binding tests, the112-family numerical/choice authoring checks and
+all existing math/visual/baseline-practical regressions passed. Corrected-content
+released HTTP/browser/native publication remains pending Core0.1.5 release and
+actual reexecution. The prior3561... prototype was superseded. Do not treat its
+full-path pass as acceptance of this corrected digest. No paid provider call,
+actual owner enrollment, new grader activation or course publication occurred.

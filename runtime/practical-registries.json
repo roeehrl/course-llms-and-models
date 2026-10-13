@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "registries": [
+    {
+      "file": "runtime/code-fixtures-autodiff-qualified.json",
+      "id": "llm-practical-autodiff-qualified",
+      "version": "0.1.0",
+      "sha256": "fbfa367fd9a5a365054fe7b57ec8dfcb7b80d4291a0164e20aee729ddf14aeda",
+      "bytes": 431305
+    },
+    {
+      "file": "runtime/code-fixtures-decoder-qualified.json",
+      "id": "llm-practical-decoder-qualified",
+      "version": "0.1.0",
+      "sha256": "086271060d922a0f1ba6cd78bcd63420c6647646b1e0a9b0a9db392de41f04d7",
+      "bytes": 749493
+    },
+    {
+      "file": "runtime/code-fixtures-qualification-qualified.json",
+      "id": "llm-practical-qualification-qualified",
+      "version": "0.1.0",
+      "sha256": "428fe268ccaca6238ec0dbcd56811d399b786ff1a557dc6a7e32aa6252eacfc1",
+      "bytes": 768719
+    }
+  ]
+}

@@ -13,7 +13,7 @@ export function bindRecoveryRuntime({descriptors,authored,fresh,baseCourse,codeR
     assert.equal(candidates.length,1,'Required installed creator is absent or ambiguous');
     const a=candidates[0];assert(/^[a-f0-9]{64}$/.test(a.implementationDigest)&&a.authorization==='release_registry_approval_required','Invalid installed creator descriptor');return a;
   };
-  const numeric=select('numeric'),bank=select('bank'),adapters=[numeric,bank],adaptation=structuredClone(authored.adaptation),source=structuredClone(authored.source),sources=[];
+  const numeric=select('numeric'),bank=select('bank'),adaptation=structuredClone(authored.adaptation),source=structuredClone(authored.source),sources=[];
   assert(adaptation?.families&&Array.isArray(authored.bindings)&&Array.isArray(fresh.assessments),'Invalid reviewed authoring payload');
   const extensions=[numeric,bank].map(a=>({id:`course-${a.kind}-creator`,version:'1.0.0',integrity:`sha256-${a.implementationDigest}`,entrypoint:`extensions/${a.id}.js`,execution:'server',platforms:['web'],capabilities:['teaching.generate','teaching.verify'],accessibility:{keyboard:true,reducedMotion:true,textAlternative:'Verified text, numeric and choice recovery controls.'}}));
   const ids=kind=>({generator:`course-${kind}-generator`,verifier:`course-${kind}-verifier`,extension:`course-${kind}-creator`});
@@ -49,7 +49,7 @@ export function bindRecoveryRuntime({descriptors,authored,fresh,baseCourse,codeR
       assert(canonical?.type==='code'&&assessment?.type==='code','Practical variant must retain the code type');
       assert.equal(assessment.familyId,canonical.familyId,'Practical family changed');assert.deepEqual([...assessment.objectiveIds].sort(),[...canonical.objectiveIds].sort(),'Practical objectives changed');
       assert.equal(assessment.grading.evaluatorId,canonical.grading.evaluatorId,'Practical evaluator changed');
-      assert(Number.isSafeInteger(binding.plannedMinutes)&&binding.plannedMinutes>0&&binding.plannedMinutes<=40&&binding.additionalEpisodes===1,'Invalid practical effort estimate');
+      assert(Number.isSafeInteger(binding.plannedMinutes)&&binding.plannedMinutes>0&&binding.plannedMinutes<=45&&binding.additionalEpisodes===1,'Invalid practical effort estimate');
       const group=groups.get(canonical.id)??{canonical,episodeId:binding.episodeId,plannedMinutes:binding.plannedMinutes,bank:[]};
       assert(group.episodeId===binding.episodeId&&group.plannedMinutes===binding.plannedMinutes,'Conflicting practical family binding');
       group.bank.push({id:`bank-${assessment.id}`,sourceRefs:[codeRecovery.source.id],assessment:structuredClone(assessment)});groups.set(canonical.id,group);
@@ -74,7 +74,7 @@ async function main(){
   const config=await read('content/course-config.json'),modules=await Promise.all(fragments.map(name=>read(`content/${name}.json`)));
   // Build from source without the prior recovery overlay, so a second invocation
   // cannot duplicate declarations or depend on a stale compiled artifact.
-  const base=assemble(config,modules,{practicalOverlay:await read('content/practicals.json'),practicalRuntimeOverlay:await read('content/practical-runtime.json'),visualOverlays:await Promise.all(['visuals','systems-visuals'].map(name=>read(`content/${name}.json`)))});
+  const base=assemble(config,modules,{practicalOverlay:await read('content/practicals-qualified.json'),visualOverlays:await Promise.all(['visuals','systems-visuals'].map(name=>read(`content/${name}.json`)))});
   const {overlay,configuration}=bindRecoveryRuntime({descriptors:(await read('runtime/installed-adaptation-descriptors.json')).adapters,authored:await read('content/adaptation-authoring.json'),fresh:await read('content/fresh-assessments.json'),codeRecovery:await read('content/practical-recovery.json'),baseCourse:base.server});
   for(const [file,value] of [['content/recovery-runtime.json',overlay],['runtime/recovery-registry.json',configuration]])await writeFile(new URL(file,root),JSON.stringify(value,null,2)+'\n',{mode:0o600});
   console.log({profiles:configuration.profiles.length,numericalTemplates:overlay.adaptation.numericalRecipes.length,reviewedBanks:configuration.profiles.filter(p=>p.bank).length,registryAuthorization:'not_granted',baselineAssessmentsUnchanged:true});

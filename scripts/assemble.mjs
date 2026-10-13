@@ -37,8 +37,9 @@ export function assemble(config, modules, { preview = false, visualOverlay, visu
     }
   }
   if (practicalOverlay) {
-    assert(practicalOverlay.extension && Array.isArray(practicalOverlay.assessments) && Array.isArray(practicalOverlay.bindings), 'Invalid practical overlay');
-    course.extensions.push(structuredClone(practicalOverlay.extension));
+    const evaluators=practicalOverlay.extensions??[practicalOverlay.extension];
+    assert(evaluators.length&&evaluators.every(e=>e?.execution==='server'&&e.capabilities.includes('assessment.evaluate'))&&Array.isArray(practicalOverlay.assessments)&&Array.isArray(practicalOverlay.bindings),'Invalid practical overlay');
+    course.extensions.push(...structuredClone(evaluators));
     course.assessments.push(...structuredClone(practicalOverlay.assessments));
     const boundFamilies = new Set(), affectedGates = new Set();
     for (const binding of practicalOverlay.bindings) {
@@ -106,17 +107,13 @@ async function main() {
   let visualOverlay;
   try { visualOverlay = JSON.parse(await readFile(new URL('content/visuals.json', root), 'utf8')); }
   catch (error) { if (error.code !== 'ENOENT') throw error; }
-  let practicalOverlay;
-  try { practicalOverlay = JSON.parse(await readFile(new URL('content/practicals.json', root), 'utf8')); }
-  catch (error) { if (error.code !== 'ENOENT') throw error; }
+  const practicalOverlay=JSON.parse(await readFile(new URL('content/practicals-qualified.json',root),'utf8'));
   const visualOverlays = [];
   try { visualOverlays.push(JSON.parse(await readFile(new URL('content/systems-visuals.json', root), 'utf8'))); }
   catch (error) { if (error.code !== 'ENOENT') throw error; }
   let recoveryOverlay;
   try{recoveryOverlay=JSON.parse(await readFile(new URL('content/recovery-runtime.json',root),'utf8'));}catch(error){if(error.code!=='ENOENT')throw error;}
-  let practicalRuntimeOverlay;
-  try{practicalRuntimeOverlay=JSON.parse(await readFile(new URL('content/practical-runtime.json',root),'utf8'));}catch(error){if(error.code!=='ENOENT')throw error;}
-  const compiled = assemble(config, modules, { preview, visualOverlay, visualOverlays, practicalOverlay,practicalRuntimeOverlay,recoveryOverlay });
+  const compiled = assemble(config, modules, { preview, visualOverlay, visualOverlays, practicalOverlay,recoveryOverlay });
   const directory = new URL('dist/', root); await mkdir(directory, { recursive: true, mode: 0o700 });
   const stem = preview ? 'course-preview' : 'course';
   await writeFile(new URL(`${stem}.manifest.json`, directory), JSON.stringify(compiled.server, null, 2) + '\n', { mode: 0o600 });
