@@ -1,3 +1,40 @@
+# Core 0.1.25 published and deployed; SDK 0.4.0 and Core features in review — 2026-10-14
+
+Full approved v0.8 objective ACTIVE and incomplete. States are distinguished below.
+
+- PUBLISHED Core 0.1.25 (prerelease; tag object 41e588d on dfe4f2b, release run
+  38468281537, artifact 11856082469 digest 2fd67317…, manifest b47d3e92…; 503
+  source members byte-compared; hosted draft bytes identical): People & roles,
+  export/erasure, pilot backup/restore drill, placement runs, reviewed written
+  answers, release API retry. Known issue in 0.1.25 (stated in its notes):
+  erasure keeps reviewer quotes of written answers and the export omits newer
+  records; fixed on a Core branch, not yet released.
+- DEPLOYED: native pilot upgraded 0.1.19 -> 0.1.25 on this host. Stop, explicit
+  Temporal queue pin (confirmed in the store), backup + real restore drill (59
+  tables, 130 rows, Temporal integrity ok), start, migrations 016-020. QA
+  enrollment preserved (0.1.4 pin, 1 completed, 2 evidence); browser acceptance
+  phone/tablet/desktop passed, no axe defects (evidence/core-0.1.25-pilot-upgrade.json).
+  Installed runtime verified 1213 members / 699 files. Private 56-episode
+  released-consumer acceptance has NOT been rerun against 0.1.25.
+- MERGED SDK PR6 (remedial episodes, insert_episode); tag v0.4.0 pushed, release
+  run queued (GitHub runner backlog). Not yet published.
+- IMPLEMENTED + TESTED locally on stacked Core branches (CI pending behind PR33
+  retention checks): personal-change visibility, completed-course Q&A,
+  least-privilege runtime DB role, pilot upgrade tool, deadline/retention
+  wakeups, reviewed remedial episode insertion (staff and supervisor paths),
+  WebKit (desktop/iPhone/iPad) + Firefox learner journeys in CI (found and fixed
+  a visual ResizeObserver loop), release cache + batched policy reads (load
+  review: 201 -> 784 req/s at 200 learners on a 62-episode course, 0 failures),
+  erasure/export coverage fix, AI-drafted findings for human reviewers (separate
+  learner opt-in; draft never evidence; quotes verified), reviewer-learner
+  conversation for written answers (neutral probe keeps independence), provider
+  calls + verification in the run inspector. API 321/321, learner 115/115,
+  admin 59/59, browsers Chromium 45/45, WebKit+Firefox 60/60, admin real 30/30.
+  Scripted models only: none of this shows real model quality or learning efficacy.
+- Still open: live Google providers (user configuration + explicit allowance),
+  learning efficacy, physical devices/native binaries, more illustrations,
+  release of the above after CI.
+
 # Research, people, data lifecycle, placement, rubric review; course 0.1.5 staged — 2026-10-14
 
 Full approved v0.8 objective ACTIVE and incomplete. Distinguish states below.
