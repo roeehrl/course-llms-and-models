@@ -1,3 +1,55 @@
+# Private worked-example application and UI qualified — 2026-10-13
+
+Full v0.8 goal ACTIVE/incomplete. New private verification/worked-example-flow.mjs
+(sourcef7551b7) imports ONLY independently byte-verified published Core0.1.17;
+no sibling/unpublished implementation. Actual prepared isolated Python constructor
+accepted the private16positive/negative qualification examples and exact definition
+SHA c5330df6e377eb7d6d69e6273a7391369f21f44ed57c83e3655b3bcaf6f6541d.
+
+A new owned disposable PG schema and actualHTTP server imported/published the
+proposed0.1.4 course bf54e1289f1fda0c49c4a7d1ac4525376be5c666a0d08e8394021da38af669bb
+within the TEST environment, approved154profile registry, enabled learner-scoped
+adaptive consent and used5SCRIPTED model rounds. Isolated reference rejected
+wrong first draft, model repaired it, separate verification/application delivered
+one correct example exactly once.3optional minutes/0additional episodes; no
+mastery/evidence write and exact original gates unchanged. Duplicate application
+replayed one receipt. Approved creator format brief reached the model prompt.
+
+Actual delivered example UI PASS390/834/1440: reachable in linear reading and
+review, completion remains disabled, Axe/nooverflow/0pageerrors. All viewport
+contexts used the SAME test enrollment, preserving earlier reading. Test helper
+initial failures were an application/json header on an empty publish POST and
+later contexts trying to acknowledge already-read content instead of using
+reading-review Part controls. Both corrected actual user paths passed; runtime
+and native were not restarted for these helper failures.
+
+Owned server/schema/sandbox storage cleaned after terminal success. Ignored
+receipt .local/generated-teaching/application-receipt.json; logs
+worked-example-application-retry.log and worked-example-browser-corrected.log;
+screenshots worked-delivery-390/834/1440.png. Private14tests PASS. Declaration and
+CPU1654/broker172 acceptances remain distinct from this integrated application
+acceptance. External model remains SCRIPTED: no real Google/learning efficacy.
+
+CRITICAL scope:0.1.4 is STILL STAGED; test 'published' means publication ONLY in
+owned disposable test schema. It is NOT a saved production course release, not
+installed as native default and did not change existing native0.1.3 pins. Before
+actual0.1.4 installation, complete its full56episode/private published-artifact
+release/creator registry/native configuration/authorized enrollment lifecycle
+and actual learner acceptance. Preserve old progress; do not silently migrate pins.
+
+Native Core0.1.17 remains running and qualified (ownership below); research25
+MERGED after12hosted checks atdb3fe264f61a192c743a740c409278fcc66d5c17, main
+ dea1d259d3d476e7ea70030371b30c0c2d6d2b96/root0.1.18. This research source is NOT
+published/installed. No financial/password/GPU/miner/remote changes. Google setup
+question pending; no actual provider/configuration/budget authority from silence.
+
+Next: private0.1.4 complete delivery/56episode/native integration through released
+Core; actual source inspection/content/rights review and approved YouTube/media
+attachment/expiry/revocation/admin UI; broader creator SDK/episode/branch/visual
+and placement/caps/deadline/privacy/operations/native-ready/livelearning objective.
+Native binaries deferred. Do not treat arithmetic/application milestones as the
+full requested breakthrough platform or reduce the remaining scope.
+
 # Native0.1.17 upgrade genuinely verified — 2026-10-13
 
 Fullv0.8goalACTIVE/incomplete. Published/consumer-qualified Core0.1.17 is NOW
