@@ -111,6 +111,8 @@ async function main() {
   const visualOverlays = [];
   try { visualOverlays.push(JSON.parse(await readFile(new URL('content/systems-visuals.json', root), 'utf8'))); }
   catch (error) { if (error.code !== 'ENOENT') throw error; }
+  try { visualOverlays.push(JSON.parse(await readFile(new URL('content/learning-visuals.json', root), 'utf8'))); }
+  catch (error) { if (error.code !== 'ENOENT') throw error; }
   let recoveryOverlay;
   try{recoveryOverlay=JSON.parse(await readFile(new URL('content/recovery-runtime.json',root),'utf8'));}catch(error){if(error.code!=='ENOENT')throw error;}
   const compiled = assemble(config, modules, { preview, visualOverlay, visualOverlays, practicalOverlay,recoveryOverlay });
