@@ -1,3 +1,37 @@
+# Current merged operator phase — 2026-10-13 13:20 IDT
+
+The complete v0.8 goal remains ACTIVE. PR14 merged after all twelve hosted checks
+passed at exact head9747ad9d5c80ad3a5f0f44b119fd1d254d303456, hosted run
+38381832115. Core main is clean at
+851419019a1713d42e097920e5ce01a11cb0a122, root version0.1.7.
+https://github.com/roeehrl/course-core/pull/14
+
+Annotated candidate tagv0.1.7 object28719edf57ffe843edcf2ace2ae77b4bd3ec6359
+peels to that main commit. Verified release workflow was dispatched once as
+run38382533084 and freshly observed IN_PROGRESS:
+https://github.com/roeehrl/course-core/actions/runs/38382533084.
+Preserve this handle, wait for terminal evidence, and verify exact immutable
+candidate/draft/hosted bytes before publishing. Do not duplicate the run or move
+this tag. Core0.1.6 remains the actual published release; Core0.1.7 is not yet a
+published or deployed runtime. Native pilot remains pinned Core0.1.5; private
+course0.1.3 is unchanged. No real keys, paid calls or owner progress were created.
+
+This phase now has guided scoped connections/model metadata/role drafts, encrypted
+credentials, explicit admission and separate budgets, durable replay/rotation
+fences, and real operator tool/configuration observability. Local evidence in the
+next checkpoint: API250, admin52,15real admin browser cases,10combined real
+PG/HTTP/Temporal scenarios,22history replays and synthetic external services only.
+The final root command's old-label browser failures were corrected by retaining
+the same zero-count assertion under the precise host-tool wording; all14browser
+cases passed on rerun, and all twelve hosted checks subsequently passed unchanged
+at the final source head. No gate or timeout was weakened.
+
+Next: complete release/consumer identity and native migration/key custody/saved
+state acceptance, then secure user configuration and explicitly allowed live
+Google tutoring/video checks. Also continue the full supervisor-generation,
+research/media, SDK/personal-episode, policy/privacy/operations requirements; this
+operator module, green CI or synthetic model results are not full completion.
+
 # Current operator setup PR checkpoint — 2026-10-13 13:15 IDT
 
 The full approved v0.8 goal remains ACTIVE. This turn made concrete source and
