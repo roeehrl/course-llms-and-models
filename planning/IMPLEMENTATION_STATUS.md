@@ -1,3 +1,56 @@
+# Native0.1.17 upgrade genuinely verified — 2026-10-13
+
+Fullv0.8goalACTIVE/incomplete. Published/consumer-qualified Core0.1.17 is NOW
+ACTUALLY INSTALLED and running all4native services at http://127.0.0.1:4310.
+Pin /Users/tnt/Library/Application Support/Course Core/Pilot/releases/v0.1.17/course-core;
+state /Users/tnt/git/course-core/.local/pilot. Exact1105members/640files verified;
+128dependency links all resolve inside pin; prior qualified Temporalbinary copied
+and hashed. Provenanceactivated:true. Never use the development checkout as root.
+
+Latest ownership: installationb774621a-327b-4577-9c79-8de2c853a610, label
+com.coursecore.pilot.28b077471d07ed03.b774621a327b45779c798de2c853a610,
+instance2906388b-a4d6-42c5-84ba-d0e33f2c2000. ObservedPIDs controller95572,
+Temporal95582/API95636/worker95775/dispatcher95779; revalidate before control.
+
+Old service was stopped by its authenticated owned control. Its response was
+'stopping', so the first immediate backup correctly rejected remaining ownership.
+Authoritative follow-up confirmed no owner/runlock/notrunning before backup.
+No observer-timeout restart and no live unrelated agents/processes were touched.
+New stronger consistent backupv17-20261013170654252 includes PGdump,SQLite,
+config,key and snapshots of enrollments/plans/policies/budgets/provider-version
+fingerprints/memberships. Actual new owned disposableDB restore passed; only
+that owned DB removed.32byte backed-up key decrypts synthetic current vault probe.
+Old validv8-20261013170556778 backup is retained too; no immutablebackup rewritten.
+
+Before/after exact equality verified for configSHA,enrollments,plans,policy,
+workspace/enrollmentbudgets,accounts,providerVersions/providerSettings. Only
+expected013_supervisor_learner_model.sql added and matched published bytes.
+New root installed with fresh owned manager after old owner was stopped; no
+financial/wallet/password/GPU/miner or remote machine actions.
+
+Actual nativeHTTP acceptance PASS. Old operator/QA identities renewed through
+published bootstrap without printing tokens. Passwordless Unix-socket child URI
+needed a local hostname plus explicit already-authenticated role; normalized
+only in helper memory, not saved config.3saved enrollments,completed16/1/0,
+ownerunenrolled. Observed credentials0,roles0,workspacebudget0/0; no live model.
+Native desktopAdmin/phoneLearner real-browser acceptance PASS: course/provider
+screens,3saved cards,compact pane ends abovecompanion,nooverflow,Axe,drawer/
+returnfocus and0pageerrors. Initial helper failures were wrong 'Overview' heading
+(actualCourse&releases) and not waiting for catalogue-to-roadmap transition;
+corrected controls/actual UI passed. These were helper mistakes, not state loss.
+Protected receipts Core/.local/pilot/native-v17-{migration,key-custody,http,
+browser}.json; screenshotsnative-v17-admin.png/native-v17-learner.png. Existing
+error diagnostics are stale prior attempts; latestbrowser-corrected.log is PASS.
+Publicationreceipt nativeDeployed/privateConsumerVerified:true,liveProvider:false.
+
+Private course0.1.3 remains pinned. New0.1.4 worked package still requires actual
+published constructor/registry/model-tool/application qualification before new
+course publication or opt-in enrollment. Research25 source/CI and remaining
+inspection/review/media delivery are separate. All broader SDK/admin/visual/
+episode/branch/placement/caps/deadline/privacy/operations/native-readiness/live
+learning requirements remain. Google setup question pending; no paid authority
+from silence. Native binaries deferred. Do not claim overall goal complete.
+
 # Published0.1.17 private acceptance COMPLETE — 2026-10-13
 
 Fullv0.8goalACTIVE/incomplete. Existing live handles56614/8385 are TERMINALsuccess0;
