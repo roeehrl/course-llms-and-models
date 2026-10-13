@@ -1,3 +1,32 @@
+# Research, people, data lifecycle, placement, rubric review; course 0.1.5 staged — 2026-10-14
+
+Full approved v0.8 objective ACTIVE and incomplete. Distinguish states below.
+
+- PUBLISHED Core 0.1.20 (tag a3d1648, run 38461227063, artifact digest f16f7091…,
+  manifest b7786221…, 473 source files byte-compared, hosted bytes identical):
+  stored research source catalogue, bounded inspection, evidence-quoted review
+  with rights, expiring/revocable optional episode help (admin Research sources
+  view, learner optional panel); keyboard-scrollable wide code on phones.
+- MERGED to Core main, CI 12/12 each, NOT yet published: People & roles (PR28),
+  learner export + irreversible erasure + pilot backup/restore drill (PR29),
+  optional placement runs (PR30), reviewed written-answer rubric assessments
+  (PR31). Release candidates v0.1.22 (run 38464791907) and v0.1.23 (run
+  38466011224) passed all 12 CI jobs but failed candidate assembly on a
+  transient GitHub API HTTP 502; both tags stay unpublished. PR32 adds bounded
+  retry for read-only GitHub calls; next release uses a fresh version.
+- Native pilot on this host still runs PUBLISHED Core 0.1.19 + course 0.1.4;
+  QA enrollment preserved; operator unenrolled. Upgrade (stop, backup, restore
+  drill, new pinned runtime, acceptance) waits for the next published release.
+- Private: nine new verified illustrations committed (22b43da): 15/56 episodes
+  now illustrated; 6,135 oracle cases, 22/22 negative controls, 45 browser
+  cases. Course 0.1.5 = 0.1.4 + illustrations, packaged from clean commit
+  9c47cf7 (digest dd72d513…) with compact members; acceptance through released
+  Core in progress; NOT published or installed.
+- Still open: retention/delayed checks (needs an SDK item contract), conversational
+  assessment and model-proposed rubric findings, deadline/retention wakeups,
+  remedial episodes/branches, completed-course Q&A, least-privilege DB role,
+  load/resource review, live Google providers (user configuration + allowance).
+
 # Core 0.1.19 released, consumed and deployed on the new host — 2026-10-13
 
 Continuation on a new host (fresh clones; no prior-host state, secrets or learner
