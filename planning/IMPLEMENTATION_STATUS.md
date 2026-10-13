@@ -1,3 +1,59 @@
+# Compact companion qualified; verifier and repair merged — 2026-10-13 18:22 IDT
+
+Full v0.8 goal ACTIVE/incomplete. Source milestones20/21 merged; mobile layout
+22 awaits its protected gate. No new release or native deployment yet.
+
+- PR20 MERGED after all12checks at97b439669fcd9e4f322113b77d68602b9b9cd447;
+  main mergebb0b9737a803c8e4b18ab843a2cf04c4bedaf2b3. Initial38418681452 failed
+  a learner memory test that clicked while the previous write was still busy.
+  The test now waits for Add-claim enabled, adds the empty claim, then waits for
+  Save enabled. Application write-lock protection is unchanged. Specific targeted
+  memory14 tests passed, and fresh hosted20/21 full gates passed subsequently.
+- PR21 MERGED after all12 actual required checks at
+  f507eb2206b97435ac3ce78a38e07d6dd9c1489a. Merge commit
+  9625ae03380b5b7d0c95b7e200d3241195dec397; source main target0.1.14. Cancelled
+  interpolated placeholder check names were old workflow artifacts; the actual
+  required12 names and run38421055642 succeeded. No requirement was bypassed.
+- PR22 attached https://github.com/roeehrl/course-core/pull/22, READY, main base,
+  clean/pushed codex/mobile-companion-layout at
+  b129c7344442fd9699e02958e3e527585fe5d9e4, root0.1.15. Current specific CI
+ 38422110495 live;11actual checks passed, API/connected gate in progress. Preserve
+  this handle. Latest ancestry integration preserves exactly qualifiedea0eb706
+  tree. The temporary ordinary Git release-integration worktree was removed.
+- Compact layout follows runtime wide/font-scale/height decision instead of only
+  CSS width. Header is separate; main has a keyboard-focusable bounded scroll
+  pane; companion has its own footer row. Modal drawer/inert background/return
+  focus and responsive drafts persist. Episode/view transitions reset both the
+  appropriate main scroller and document position. Desktop keeps its side panel.
+- Local learner105 tests/typecheck PASS. Full API connected21 and learner-owned
+  connected9 PASS (30 total across desktop/phone/tablet). New geometry and actual
+  element hit tests establish no companion overlap at reading/record text;1280x500
+  short-wide landscape is compact; restored drawer focus, no overflow and Axe
+  checks pass. Screenshot Core/.local/mobile-companion-phone.png was inspected:
+  reference rejection text is unobscured and companion remains available below.
+  Physical device and native-binary acceptance are still separate/deferred.
+- Core ignored receipts: mobile-companion-export.log,
+  mobile-companion-learner-tests.log,mobile-companion-geometry.log,
+  mobile-companion-browser-full.log,mobile-companion-learner-connected.log.
+
+Active pinned pilot remains0.1.10, SDK0.2.0, private course0.1.3. All course tests
+used owned disposable test databases/schemas; no miner, remote Mac, GPU or wallet
+changes. A pending asynchronous user question asks them to configure Google
+credentials/models and an explicit budget directly in http://127.0.0.1:4310/admin/
+for eventual live acceptance. Do not request secrets in chat, infer configuration
+or paid authority from silence, or initiate dependent real model calls without
+actual authorized configuration. The user may configure while engineering runs;
+future native snapshots must read fresh metadata and preserve their changes,
+not assume old credential/budget counts remain zero.
+
+Next: complete22CI/merge, fresh immutable0.1.15 release candidate/hosted bytes and
+released private consumer, backup/restore/key custody/state-preserving native
+qualification; production course-owned verifiers using released interfaces.
+Continue the full remaining SDK/admin creator controls, rich visual/episode/
+branch authoring, research/media agent dispatch/review/delivery, placement/caps/
+deadline/privacy/operations completion and real provider/learner acceptance.
+The goal is not complete and has not been narrowed to these increments.
+
 # Bounded teaching repair qualified; generation merged — 2026-10-13 18:03 IDT
 
 The full v0.8 goal remains ACTIVE/incomplete. PR19 has merged; isolated verifier
