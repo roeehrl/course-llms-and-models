@@ -11,7 +11,10 @@
     "build": "node scripts/assemble.mjs",
     "build:preview": "node scripts/assemble.mjs --preview",
     "test": "node --test test/*.test.mjs",
-    "verify:math": "python3 verification/foundations.py && python3 verification/training-and-transformers.py && python3 verification/systems-and-distribution.py && python3 verification/engineering-practice.py"
+    "verify:math": "python3 verification/foundations.py && python3 verification/training-and-transformers.py && python3 verification/systems-and-distribution.py && python3 verification/engineering-practice.py",
+    "verify:recovery": "python3 -B verification/adaptation-authoring.py && python3 -B verification/test-adaptation-authoring.py",
+    "verify:practicals": "python3 -B verification/practicals.py",
+    "verify:visuals": "node verification/visuals.mjs && node verification/systems-visuals.mjs"
   },
   "dependencies": {
     "@course-core/sdk": "https://github.com/roeehrl/course-sdk/releases/download/v0.2.0/course-core-sdk-0.2.0.tgz",

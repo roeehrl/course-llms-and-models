@@ -33,5 +33,11 @@ jobs:
         run: npm run verify:math
       - name: Validate full authored curriculum bundle
         run: npm run build
+      - name: Independently qualify private practical fixtures and negative controls
+        run: npm run verify:practicals
+      - name: Verify recovery domains, wrong-key controls and actual authoring commands
+        run: npm run verify:recovery
+      - name: Verify released renderer arithmetic and altered illustration controls
+        run: npm run verify:visuals
       # Full authored coverage is separate from practical/live platform acceptance.
       # No private bundles or source evidence are uploaded as public artifacts.

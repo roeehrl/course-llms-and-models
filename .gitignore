@@ -6,4 +6,4 @@ dist/
 *.tgz
 learner-data/
 test-results/
-
+.local/
