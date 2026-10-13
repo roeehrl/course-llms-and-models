@@ -1,3 +1,32 @@
+# Current release checkpoint — 2026-10-13 09:55 IDT
+
+The full v0.8 goal remains ACTIVE. PR13 merged after all twelve hosted checks
+passed at exact head `58bffc4244b220a8c203c29261c026d0dd7a31e4`, run
+`38358825263`. Core main is now
+`bcd98a29b517233f799a78c056263cc0f01a3d40`, with a clean worktree.
+
+Annotated candidate tag `v0.1.6` has object
+`4f9aadc187ff99331bb896859a76d04d79f83939` and peels to that main commit.
+The verified release workflow was dispatched once as run `38359445830`:
+https://github.com/roeehrl/course-core/actions/runs/38359445830.
+It is not terminal yet. Do not move the tag, duplicate the workflow, publish
+unverified candidates, or claim 0.1.6 released/deployed. Preserve this handle for
+the next continuation and complete immutable candidate/consumer checks first.
+
+Native pilot remains pinned on Core0.1.5; private course0.1.3 is unchanged.
+Enabling the new tool loop in deployment additionally requires explicit host job
+policy configuration: the current native default is 10,000 reserved tokens,
+which cannot admit a four-round 30,000-character loop. Do not silently enlarge a
+paid budget or weaken reservation guards. Implement operator admission settings
+alongside secure provider/model/budget UI before live activation. Source-level
+API qualification supplied an explicit 600,000-token job allowance and separate
+shared ledgers; this does not prove native configuration or live Google use.
+
+All remaining v0.8 rows are still open or partial. Novel generation, full source
+and history retrieval, research/media delivery, SDK creator tools and operator
+GUI remain implementation work. Previous checkpoint below contains exact local
+and hosted test evidence. No deployment or model spend occurred in this phase.
+
 # Current continuation — supervisor tools PR 13, 2026-10-13 09:49 IDT
 
 The full approved v0.8 goal is ACTIVE and incomplete. This continuation delivered
