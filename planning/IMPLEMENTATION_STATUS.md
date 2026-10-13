@@ -1,3 +1,49 @@
+# Published broker qualification passed;0.1.17 candidate live — 2026-10-13
+
+Full v0.8 goal ACTIVE/incomplete. New actual isolation evidence and a fresh
+immutable release candidate; no publication/course application/native upgrade.
+
+PR24 MERGED after12hosted required checks atd30de2d4f37d9b5c56409a6ec2eda7aaaa0d3bc6.
+Main74e60f4c9b1f5116f6e5984185c23cb64cbf8dc8 equals that qualified source tree;
+root0.1.17. New annotated tagv0.1.17 objectfd60139916c0ec72442796e7d9bfbecdbce5ee6d
+points to that exact commit. Workflow dispatched FROM tag with explicit commit:
+run38428514171 confirmed QUEUED/live identity job. Preserve this handle:
+https://github.com/roeehrl/course-core/actions/runs/38428514171
+Core/.local/releases/v0.1.17/{expected-identity.json,verify.mjs} binds exact
+repository/version/commit/tagObject/run. Verify immutable artifacts and live
+successful12jobs before hosted publication; then independent released consumer
+and state-preserving native qualification. Failedv0.1.15 remains unchanged and
+unpublished; source0.1.16 readiness fix merged without separate release.
+
+Private source6d79d6f adds verification/worked-example-broker.mjs. It imports ONLY
+independently byte-verified PUBLISHED Core0.1.10 broker; no sibling/unpublished
+installation API. Its delivery recheck1082members/627files matched pinned manifest
+3d89d4b66b70275fd5246a7d9a6a041c21a206d3adb3709ccaf5a753cae60b19.
+Actual prepared digest-pinned ARM64Python container execution PASS172positive/
+negative cases covering all39topics at nominal and maximum-domain values plus
+16constructor examples.8bounded batches,2548ms total reported execution,
+14154outputbytes;128MiB/0.5CPU/5000ms/65536B limits; sourceDigest
+f0cc7dd1ce9a90e62ae4f4109112696905442e1d37cff8bdd15ab9880f68a587.
+Private verifier definition digest remains
+c5330df6e377eb7d6d69e6273a7391369f21f44ed57c83e3655b3bcaf6f6541d.
+Owned temporary broker storage removed after success. Receipt privateignored
+.local/generated-teaching/broker-receipt.json; log.local/worked-example-broker.log.
+
+This proves PROGRAM-ONLY execution in the published isolated broker. It grants no
+registry approval, lesson/evidence/paid authority or new course release, and
+proves no live model quality/arbitrary prose/pedagogical efficacy. Full private
+constructor/registry/model-tool-check-repair/application integration needs the
+PUBLISHED0.1.17 runtime and its actual consumer acceptance.
+
+Active pilot0.1.10, SDK0.2.0 and course0.1.3 remain. Google setup question pending;
+preserve any fresh user edits, no paid calls from silence/defaults. No original
+miner/remoteMac/GPU/wallet work. Remaining full-scope work: current release and
+private integration; creator SDK/admin extensibility; wider verified teaching,
+visuals/whole episodes/branches; dedicated research/media dispatch/review/delivery;
+placement/caps/deadline/privacy/operations/native-readiness and real provider/
+learner acceptance. Native binaries deferred. Do not redefine completion around
+these qualified mathematics/interface increments.
+
 # Course-owned worked examples staged; creator guidance pending — 2026-10-13 19:03 IDT
 
 Fullv0.8goalACTIVE/incomplete. New source and meaningful private arithmetic
