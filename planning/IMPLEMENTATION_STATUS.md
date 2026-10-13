@@ -1,3 +1,44 @@
+# Core0.1.10 native rollout verified — 2026-10-13
+
+Fullv0.8goalACTIVE/incomplete. This turnPROGRESS: completed private browser
+qualification, consistent backup/disposable restore, pinned runtime activation,
+state equality, key custody and actual authenticated native HTTP/browser checks.
+
+- Private0.1.10 browser95761 TERMINATEDsuccess:phone56episodes,desktop/tablet16each,
+  practical recovery/reload code drafts/accessibility/overflow/zero pageerrors.
+  HTTP41007 was already completed. No duplicate acceptance process remains.
+- Core0.1.10 ACTIVE at
+  /Users/tnt/Library/Application Support/Course Core/Pilot/releases/v0.1.10/course-core
+  State /Users/tnt/git/course-core/.local/pilot. Explicit pinned root/state required.
+  Latest observed installation47943c39-71be-40f6-bba6-e5958ca8dbbe, label
+  com.coursecore.pilot.45b782c8c65c71d4.47943c3971be40f6bba6e5958ca8dbbe,
+  instance5bf22738-5824-4921-b91b-005e57a55d85. Revalidate before control; PIDs stale.
+- Before backupv8-20261013124409985 contains consistent stopped PG/SQLite/config/key;
+  newly created disposable database restore passed and only that owned DB removed.
+  Existing3enrollments/coursepins/plans/policy/budgets/accounts/config match exact
+  protected snapshots. Saved completed counts16,1,0. Ownerunenrolled, credentials0,
+  paidlimits0. Existing backed-up key decrypts synthetic probe from new live vault.
+- Receipts Core/.local/pilot/native-v10-migration.json,native-v10-http.json,
+  native-v10-browser.json,v10-before/after-snapshot.json are ignored0600. Do not
+  print sessions/configs/keys. Native provider screen's fallback control defaults
+  off and toggles in a draft without budget changes; no unsupported provider was
+  saved or real model called. Pin provenance nowactivated:true. Future supported
+  connectors still need their own implementation/qualification.
+- Coremain clean e96763e5dbfbc2f036e84fe8a38bb514f21b1551. SDK0.2.0 unchanged;
+  privatecourse0.1.3 unchanged. Public0.1.10 actuallypublished;0.1.9 remainsfailed
+  andunpublished. Original SN9 checkout/fleet untouched.
+
+Next primary phase: supervisor-controlled novel teaching/research/media and
+learner-model maintenance, with separate trusted review/verification, scoped
+source retrieval, durable dispatch/accounting and learner-visible effects. Current
+scoped toolloop only selects exact reviewed support; source-linked learner-model
+proposal/review APIs exist but are not wired to the supervisor. Existing native
+launcher ALREADY allows authored-teaching-bank-v1 (do not "fix" an imagined missing
+allowlist entry). Preserve full plan:creator strategies/whole episodes/branches,
+placement/caps/deadlines/privacy/operations/native-readiness and liveGoogle gates.
+No real credentials/positive allowance configured; no paid calls until authorized.
+Native mobile binaries deferred. No blocked audit applies; meaningful work remains.
+
 # Published0.1.10 and private consumer — 2026-10-13
 
 Fullv0.8goalACTIVE. PR17merged after all12hosted checks at exact head
