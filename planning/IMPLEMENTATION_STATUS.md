@@ -1,3 +1,41 @@
+# Published0.1.10 and private consumer — 2026-10-13
+
+Fullv0.8goalACTIVE. PR17merged after all12hosted checks at exact head
+61f84dccfbc8feb702583e9ed55ae72a0a1540de. Coremain clean
+ e96763e5dbfbc2f036e84fe8a38bb514f21b1551,root0.1.10.
+Annotated tagobjectf86c3d4046e54396efe2a33973269404bb1426b1.
+Release38394906665 SUCCESSattempt1. Immutableartifact11812235789,
+ZIP3616446bytes/SHA2038c93a899a2f4318f00c272b1d41cbf269984ef0cf48cf88dc56381e5b4522.
+All7members,5archiveassets,444Git sourcefiles,member/hash/lock/license/source-CI
+identities verified; uploaded draft assets downloaded/reverified before actual
+publication. Public prerelease:
+https://github.com/roeehrl/course-core/releases/tag/v0.1.10.
+ManifestSHA3d89d4b66b70275fd5246a7d9a6a041c21a206d3adb3709ccaf5a753cae60b19.
+SourceSHA4c579472c986447eabb6241b3965eb69b3b7847d5a15fa91ad4c80357f8a62cc;
+runtimeSHA47dd98700f3480b0a632cf8fb651f1c695c4cf0d05239c32b5f89e957c36c221.
+Failedv0.1.9 remainsunchanged/unpublished.
+
+Private downloadedall7publishedassets,installedthroughreleasedCLI and restored
+exactpublishedwebexports afterinstaller rebuilt them. New consumer verifier pin
+updated to actual0.1.10identity; forged-manifest negative test passes. Installed
+archive1082declaredmembers/627uniquefiles verified. HTTPcourse56episode acceptance
+RUNNINGexec41007, latest28/56/recovered2families. Do not restarton timeout;
+private .local/private-v10-http-acceptance.log. Browser acceptance NOTstarted yet.
+
+Pinned native0.1.10runtime STAGED,NOTactive:
+/Users/tnt/Library/Application Support/Course Core/Pilot/releases/v0.1.10/course-core
+All1082members/627files verified;59dependencylinks resolveinside pinnedroot;
+already-qualifiedTemporalbinary copied and hashed. Provenanceactivated:false.
+Activepilot remains0.1.8, explicitoldroot/state detailedbelow. Existing course0.1.3
+unchanged,3enrollments/owner0/providercredentials0/paidlimits0.
+
+Next:sameHTTPhandle toterminal,privatebrowser path,consistentstopped backup plus
+isolatedrestore andkeycustody,state-preserving0.1.10activation/nativeUIvalidation.
+Then resume mainmoat:novelteaching/visuals/research/media/verifier/creatorstrategies
+andremainingplacement/policy/privacy/ops/native-readiness gates. LiveGooglerequires
+secureconfigurationandexplicitallowance;no paid calls/no newsubscriptions allowed
+by defaults. No miner/remoteMac/GPU/wallet actions. Native binariesdeferred.
+
 # Release qualification repair — 2026-10-13
 
 Core0.1.8 native pilot remains ACTIVE and verified. Subscription/fallback PR16 is

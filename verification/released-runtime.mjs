@@ -1,7 +1,7 @@
 import {readFile,lstat} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
-export const expectedCoreRelease={version:'0.1.8',tag:'v0.1.8',commit:'db54ca0853db996ae21db62da740e6d5af06f0a7',tagObject:'7fa2746884185093d71aab2dc5238a03d2810f50',runId:38385397184,manifestSha256:'8a13690e2d1f2d7836e104b31fc7859b34eb224cb686a5ab9467445616a0a232'};
+export const expectedCoreRelease={version:'0.1.10',tag:'v0.1.10',commit:'e96763e5dbfbc2f036e84fe8a38bb514f21b1551',tagObject:'f86c3d4046e54396efe2a33973269404bb1426b1',runId:38394906665,manifestSha256:'3d89d4b66b70275fd5246a7d9a6a041c21a206d3adb3709ccaf5a753cae60b19'};
 export const releaseCiNames=['Public source and orchestration','Module / policy','Module / providers','Module / adaptation','Module / research','Module / example-courses','Module / supervisor','Sandbox / real Docker Linux','API and connected learner / Postgres 17','Browser / visuals','Browser / learner','Browser / admin'];
 const check=(v,code)=>{if(!v)throw Error(code);},sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 /** Verify published delivery data and installed files independently of Core
