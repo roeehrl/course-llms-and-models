@@ -1,3 +1,65 @@
+# Bounded teaching repair qualified; generation merged — 2026-10-13 18:03 IDT
+
+The full v0.8 goal remains ACTIVE/incomplete. PR19 has merged; isolated verifier
+installation and bounded draft repair remain pending source/CI/release work.
+Active native deployment still0.1.10, SDK0.2.0, private course0.1.3. No credentials,
+positive paid allowance, release tag, native migration or original fleet changes.
+
+- PR19 MERGED after all12 checks at0a0046b169ebbbddec809fb14c8850ebd784efb4;
+  main merge66255b03299168100171635ec20cf87814e336ed, root0.1.12.
+- Hosted failures38412876083/38413220760 were real browser test ambiguities from
+  adding a second catalogue course. Distinct fixture ID/title plus course-card
+  selectors fixed API-owned journeys. Subsequent38416217677/38416236006 exposed
+  the SAME ambiguity in the separate learner-owned connected suite; fixed all
+  three of its selectors as well. Full current API browser18 and learner browser9
+  now PASS across three viewports; parent19 full hosted gates subsequently passed.
+  This was a harness correction, not a miner/provider/runtime timeout diagnosis.
+- PR20 ready, based on main atdbbde2b672ca95d9dcfd38c9464b4fb3ec175a14.
+  Current CI38418681452 running. Merging main preserved exactly the previously
+  qualified34c2dd936d41a0263dfc872e297c68f803a19801 tree; root0.1.13 target.
+  Prior successful12checks38417548608 precede this ancestry integration.
+- Draft PR21 https://github.com/roeehrl/course-core/pull/21 attached, based on
+  codex/isolated-teaching-verifiers. Clean/pushed codex/verified-teaching-repair
+  at600ccee04b38a204a89dcb1125ae58ddd0cbcf0f, root0.1.14. CI38418775988 running.
+  Tree equals locally qualified51cb528 tree after ancestry-only merge. The
+  temporary ordinary Git QA worktree was removed cleanly after cherry-picking
+  isolated selector fixes to both parents. No test process remains active.
+- check_teaching loads only the operation's actual candidate and runs installed
+  reference checks. Feedback is metadata, not proof/credit. At most2 candidates
+  per job; only the latest selected candidate or exact reviewed alternative is
+  applied. Model round/deadline/reservation limits remain configured, never
+  automatically increased. Every model call's usage is retained. Same-step check
+  retries reuse one receipt; cancellation aborts verification, rolls back its
+  incomplete receipt and prevents another model round. Final review/application
+  still recheck scope, consent, registry, verification and work caps.
+- Learner/admin activity distinguishes rejected feedback, superseded candidate and
+  the one delivered option; raw pre-delivery prose is withheld. Wrong generated
+  teaching is not learner deficiency evidence. Corrected text survives reload;
+  completion remains disabled until actual independent evidence is earned.
+- Final local API274 tests/25files and learner105 tests/typechecks PASS;
+  API browser18 + learner connected9 PASS; real isolated-verifier/Postgres/practical
+  recovery gate PASS. Actual Postgres/HTTP/Temporal13 scenarios PASS with18 scripted
+  supervisor rounds,6 worker restarts,5 lost apply acknowledgements,25 history
+  replays/406 payloads. External models remain synthetic; no live quality or
+  learning-effectiveness claim. New negative tests cover foreign/fabricated
+  check requests, candidate/round limits, cancelled reference calls, repaired
+  delivery and reviewed fallback without mastery or double work.
+- Ignored Core receipts: .local/teaching-repair-api-final.log,
+  teaching-repair-temporal.log, teaching-repair-connected-browser.log,
+  teaching-repair-learner-connected.log,teaching-repair-practical.log,
+  teaching-repair-phone.png. Latest phone screenshot shows a remaining existing
+  floating-companion overlap in the activity view; reserve layout space and add
+  explicit occlusion checks in the responsive UI phase. Axe/overflow alone do
+  not prove text is unobscured.
+
+Next: finish20/21 protected CI, merge in order and perform immutable release,
+released consumer, backup/restore and state-preserving native qualification;
+install production private-course verifiers through released interfaces. Continue
+creator SDK/admin controls, verified rich visuals/whole personal episodes/branches,
+research/media agent dispatch/review/delivery, placement/caps/deadline/privacy/
+operations completion and real Google acceptance. Keep the approved full scope,
+mobile build deferral and explicit credential/allowance gate. No goal completion.
+
 # Creator verifier installation qualified; parent merged — 2026-10-13 17:25 IDT
 
 The full v0.8 goal remains ACTIVE/incomplete. This milestone supplies a stock
