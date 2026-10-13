@@ -1,3 +1,61 @@
+# Course-owned worked examples staged; creator guidance pending — 2026-10-13 19:03 IDT
+
+Fullv0.8goalACTIVE/incomplete. New source and meaningful private arithmetic
+acceptance progressed; no source-to-production or live teaching claim.
+
+- Immutablev0.1.15 candidate38423148670 TERMINALLY FAILED in learner unit test
+  'leaves a stale write refreshable': Refresh was clicked before the write lock
+  released. No artifact/release published. Tag7bae6f7c095ab12738a813833ee42bbc2c29cd6c
+  remains unchanged. LogCore/.local/releases/v0.1.15/learner-failure.log.
+- PR23 MERGED after all12required checks atf4999a91cc514ff19402bcf5978f4ea2e66d402f;
+  main65a24da67aee3a763360ad2579aafb561abaa544, root0.1.16. Regression actions now
+  wait for their specific enabled control, not rendered notice/error. New held
+  write proves Refresh cannot read/resubmit while busy and resumes explicitly
+  after rejection. Learner106 tests/typecheck PASS; no application/budget change.
+- PR24 https://github.com/roeehrl/course-core/pull/24 attached, main base, OPEN;
+  cleancodex/creator-generation-guides atd30de2d4f37d9b5c56409a6ec2eda7aaaa0d3bc6,
+  root0.1.17. Live CI38427176106; use that handle. source main integration preserves
+  exact qualifiedf164ba4 tree. Creator generationBrief max3000 chars goes only to
+  scoped current-episode model tools as content, not authority. Registry512 profiles
+  under unchanged2MiB body,12000char projection,input/work/deadline/paid ceilings.
+  Nongenerated adapters reject briefs; registry identity binds all edits.
+- Local Core API276/typecheck PASS. Actual Postgres/HTTP/Temporal13 scenarios PASS,
+ 18scripted supervisor rounds,6restarts,5lost application acknowledgements,
+ 25history replays/406payloads. New tests: scoped brief to model/no credit;
+  accepted142profiles;513/empty/oversize/wrong-adapter denied without registry
+  revision changes. External models remain synthetic. Ignored logs
+  .local/creator-guides-api.log,creator-guides-temporal.log.
+- Private sourceff922d3 adds scripts/stage-worked-examples.mjs,
+  runtime/worked-example-wrapper.py,verification/worked-examples.py and tests.
+  Producer uses releasedSDK0.2.0 expression evaluator. Independent verifier uses
+  separately authored procedural CPU references/finite differences; no generated
+  key/expression is read as the oracle.39numeric topics, varied/max input examples,
+  wrong math, changed scope and unsupported text:1654actual CPU checks PASS.
+  Private14tests PASS; no GPU/model/wallet/worker experiment.
+- Ignored private .local/generated-teaching/{verifier.json,registry.json,
+  examples.json,proposed-course.compiled.json}. Definition60380bytes/digest
+  c5330df6e377eb7d6d69e6273a7391369f21f44ed57c83e3655b3bcaf6f6541d;
+  referenceData20490bytes.16constructor examples. Proposed0.1.4 preserves14/56
+  curriculum and exact assessments/gates/policy.154profiles=115existing+39optional
+  three-minute worked examples,0additionalepisodes. Repeated builds same bytes.
+  Learner export contains no program/referenceData/expectedChecks/adaptation.
+- This staging explicitly requires PUBLISHED Core0.1.17 before runtime/broker
+  qualification and integration. It imports no unpublished Core interface. CPU
+  checks are NOT actual broker/live model/learning acceptance. Arithmetic grammar
+  clears39topics only; other17episodes and arbitrary novel prose remain open.
+  Current course0.1.3 release/runtime and enrollments remain unchanged.
+
+Active pinnedpilot0.1.10; SDK0.2.0. User Google configuration question still pending;
+do not infer credentials/budgets from silence and preserve fresh user settings.
+No new tag/publication/native migration, original fleet/GPU/wallet changes.
+Next:24protectedCI/merge, fresh0.1.17 immutable release, exact delivered bytes,
+released consumer+native backup/restore/key custody/state preservation; qualify
+private worked package inside actual broker and real supervisor flow through
+published interfaces. Continue ALL remaining SDK/admin authoring, broader novel
+teaching/visual/episode/branch, research/media dispatch/review/delivery, placement/
+caps/deadlines/privacy/operations/native-readiness and actual learner/provider
+acceptance. Native binaries deferred. No goal completion or scope reduction.
+
 # 0.1.15 immutable candidate dispatched — 2026-10-13
 
 Full v0.8 goal ACTIVE/incomplete. PR22 merged only after all12 required checks.
