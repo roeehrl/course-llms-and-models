@@ -7,7 +7,6 @@ import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import path from 'node:path';
-import pg from 'pg';
 import {chromium} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import {verifyWorkedPackage} from '../scripts/package-worked-course.mjs';
@@ -31,16 +30,25 @@ async function code(subject,name){
 const operator=JSON.parse(await readFile(path.join(state,'bootstrap.json'),'utf8'));
 const qa=await code(QA_SUBJECT,'QA learner');
 assert(qa.userId!==operator.userId&&qa.workspaceId===operator.workspaceId,'QA identity must be distinct from the operator');
-// There is no released membership-management API yet; the QA account is the
-// only row changed, and only from owner to learner.
-const db=new pg.Pool({connectionString:config.databaseUrl,max:1});
-try{
-  const changed=await db.query("UPDATE memberships m SET role='learner' FROM app_users u WHERE m.user_id=u.id AND u.subject=$1 AND m.workspace_id=$2 AND m.user_id<>$3",[QA_SUBJECT,qa.workspaceId,operator.userId]);
-  assert(changed.rowCount===1,'Expected exactly one QA membership');
-}finally{await db.end();}
+// The QA account must already be a learner. Core 0.1.23+ manages roles through
+// the authenticated People API; this driver never edits memberships itself.
+async function assertQaRole(){
+  const record=await code('operator:owner','Course operator');
+  const signed=await fetch(origin+'/auth/redeem',{method:'POST',headers:{origin,'content-type':'application/json'},body:JSON.stringify({token:new URL(record.oneTimeSignInUrl).hash.slice('#signin='.length)})});
+  assert(signed.ok,'Operator sign-in failed');
+  const cookie=signed.headers.getSetCookie().map(c=>c.split(';')[0]).join('; ');
+  const people=await fetch(`${origin}/api/admin/workspaces/${operator.workspaceId}/people`,{headers:{cookie}});
+  if(people.status===404)return 'people_api_unavailable';
+  const qaRow=(await people.json()).people.find(p=>p.userId===qa.userId);
+  assert.equal(qaRow?.role,'learner','QA account must have the learner role; change it under People & roles');
+  await fetch(origin+'/auth/logout',{method:'POST',headers:{origin,cookie,'x-csrf-token':(await signed.json()).csrfToken}});
+  return 'verified_via_people_api';
+}
+
 
 const episodes=course.chapters.flatMap(c=>c.episodes),first=episodes[0],second=episodes[1];
 const report={origin,course:{id:course.id,version:course.version},viewports:[],operatorEnrolled:null,liveProviderAcceptance:false};
+report.qaRoleCheck=await assertQaRole();
 const browser=await chromium.launch({channel:'chrome'});
 async function context(name,width,height){
   const ctx=await browser.newContext({baseURL:origin,viewport:{width,height},isMobile:name==='phone',hasTouch:name!=='desktop'}),page=await ctx.newPage(),errors=[];
