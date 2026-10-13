@@ -1,3 +1,50 @@
+# Supervisor learner-model integration — 2026-10-13
+
+Fullv0.8goalACTIVE. This turnPROGRESS: real supervisor-to-source-linked model
+suggestion delivery, source/permission/assessment guards, separate verification,
+learner corrections/disputes, GUI observability and real recovery acceptance.
+
+Corebranchcodex/supervisor-learner-model clean at
+1f8096af570db520a641bf6c3f9f86bdb15d18bb,root0.1.11. PR18 OPEN:
+https://github.com/roeehrl/course-core/pull/18 (attached). Hosted checks running;
+not merged/released/deployed. Active pinnedpilot remains0.1.10; no real model,
+new credentials, paid allowance or original fleet changes.
+
+- Tools get_model_sources/suggest_model stage a bounded pace/explanation-style/
+  objective-review suggestion with exact scoped learner-event digests. Separate
+  verifier matches tool receipts and current sources/consent. Fenced application
+  creates a pending learner-model proposal, increments model/profile revisions,
+  suppresses supervisor feedback and records an explicit job-effect link.
+- Manual preferences/earned evidence are preserved. Pending/disputed suggestions
+  excluded from provider context; learner acceptance/correction remains editable.
+  Fix discovered in real phone screenshot: latest corrected wording survives
+  dispute/reacceptance instead of reverting to original suggestion.
+- New013_supervisor_learner_model.sql application-effect mapping. Older supervisor
+  plan representation/hash preserved by optional field without default insertion.
+  Learner activity and admin inspector expose metadata rather than private text.
+- Local258API tests PASS, including cross-learner/unobserved/changed sources,
+  changed consent, independent checks, duplicate apply, manual-preference dominance
+  and correction/dispute/reacceptance.104learner tests/typechecks PASS.
+- CombinedactualPostgres/HTTP/Temporal11scenarios PASS:3synthetic externalHTTPcalls,
+ 10synthetic supervisor modelrounds,4workerrestarts, loststart1/settle1/apply3,
+ 23nativehistoryreplays/362payloads; no credit/privatecanary leakage. External models
+ remain synthetic. LogCore/.local/supervisor-model-temporal.log.
+- Existing9connectedbrowsercases passed. Newdesktop/phone/tablet real API model
+ reviewflow PASS after correcting pre-enrolled navigation; correction persists
+ through reload/dispute, no mastery, accessibility/overflow checks pass.
+ Log .local/supervisor-model-browser-retry.log. Source peer pipelines remain scoped
+ to disposable schema/database; test-only seeded model route is not production.
+- Publicaudit446files,48infra/12lifecycle PASS. Coretargetalready0.1.11. Preserve
+ PRhead/checks before merge; use release protocol, exact immutable artifacts and
+ native schema/state/backup qualification before deployment.
+
+Next:PR18hostedCI/merge/release/deployment; implement novel teaching generation
+and independent review/application, research/media dispatch/inspection/delivery,
+creator strategies/wholeepisodes/branches and full remainingv0.8governance/privacy/
+operations/placement/multiplatform gates. Source-linked preferences are a real
+increment of the moat, not full adaptive-supervisor completion. LiveGoogle still
+needs secure user configuration and explicitly approved allowance. No blocked audit.
+
 # Core0.1.10 native rollout verified — 2026-10-13
 
 Fullv0.8goalACTIVE/incomplete. This turnPROGRESS: completed private browser
