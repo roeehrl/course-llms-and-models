@@ -1,3 +1,63 @@
+# Current operator setup PR checkpoint — 2026-10-13 13:15 IDT
+
+The full approved v0.8 goal remains ACTIVE. This turn made concrete source and
+qualification progress. Core0.1.6 remains published; native pilot remains pinned
+Core0.1.5/private course0.1.3. No real keys or paid model calls were configured.
+
+Public Core branch codex/provider-setup is clean/pushed at
+9747ad9d5c80ad3a5f0f44b119fd1d254d303456. PR14 is open/attached:
+https://github.com/roeehrl/course-core/pull/14. Root version0.1.7 is a candidate,
+not a released/deployed version. Wait for all twelve hosted checks at the exact
+head before merging. Preserve immutable existing tags. Full v0.8 remains open.
+
+- Guided connection/model setup replaces advanced JSON as the required starting
+  path. Keys stay encrypted server-side. Google discovery uses fixed-origin GET
+  model metadata with bounded bytes/pages/time/concurrency and no generation.
+  Registered neutral metadata/build adapters can supply their own implementation.
+  Metadata/method declarations do not establish teaching, research, image/video
+  quality or live capability. Advanced JSON and explicit video declarations remain.
+- Migration012 stores scoped operator/version-bound inspection receipts with
+  finite deadlines. Replays use one request; expired interrupted inspections are
+  failed without automatic resubmission. Rotation/membership loss drops results.
+  Malformed bodies, redirects, key echoes, excess bytes and repeated page cursors
+  fail closed. A catalogue truncated after four pages is explicitly marked.
+- Role drafts check model/method/token metadata, leave protocol overhead in input
+  limits, preserve roles unless explicitly changed, and expose conservative job
+  token reservations. An operator chooses the draft and separately saves it.
+  Cost allowance and paid budgets are not silently increased. Positive budget
+  approval stays separate and defaults zero. Saving a budget no longer discards
+  unrelated unsaved model/credential drafts; adding a connection requires resolving
+  a conflicting draft. Account/workspace changes clear private UI state.
+- Operator run inspector now shows true host-tool receipt count separately from
+  reported provider attempts (unknown when unreported), actual scoped tool metadata,
+  exact configuration binding and matching delivered-support plan revision.
+  It selects no raw model reasoning, credentials, history or draft teaching. Actual
+  PG/HTTP test proves two tools/three provider attempts and no teaching-text leakage.
+- Configured-workspace PG/HTTP/Temporal gate now binds an encrypted key and a
+  distinct615001-token admission budget through the real operator API. Committed
+  application ack loss plus fresh worker produces one lesson effect/usage charge.
+  Rotation during the first provider response blocks a second model round, cancels
+  delivery, preserves observed usage and retains uncertain full reservations.
+  Every new native history is replayed and scanned for key/history/content canaries.
+- Final local API250tests, admin52tests, real admin15browser cases across phone/
+  tablet/desktop, and ten combined supervision scenarios passed. Combined proof:
+  three external tutoring calls, seven synthetic supervisor rounds, three worker
+  replacements, one start/one settlement/two application ack losses,22history
+  replays and340decoded payloads. Only external models/metadata are synthetic.
+- Full root components passed. Its final command initially failed four old admin
+  browser assertions expecting the former tool-count label. Expectations now assert
+  the same zero count under the precise new host-tool label; all14admin browser
+  cases reran and passed, with no timeout/gate weakening. Public audit441source
+  files/11locks and typechecking pass. Hosted CI remains required and in progress.
+
+NEXT: complete PR14 hosted checks, merge exact head, produce/verify immutable0.1.7
+release and private consumer, then qualify native migration/key custody with saved
+state. Secure user configuration and explicit spend allowance are still required
+before actual Google tutoring/video acceptance. Continue full supervisor generation,
+research/media review/attachment, SDK creator tools/personal episodes, policy timers,
+privacy/operations GUI and every remaining v0.8 acceptance row. Do not treat this
+operator phase or synthetic providers as full platform/learning completion.
+
 # Current continuation checkpoint — 2026-10-13 12:01 IDT
 
 The full approved v0.8 goal remains ACTIVE. This turn made implementation and
