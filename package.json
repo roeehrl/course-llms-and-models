@@ -14,7 +14,7 @@
     "verify:math": "python3 verification/foundations.py && python3 verification/training-and-transformers.py && python3 verification/systems-and-distribution.py && python3 verification/engineering-practice.py",
     "verify:recovery": "python3 -B verification/adaptation-authoring.py && python3 -B verification/test-adaptation-authoring.py",
     "verify:practicals": "python3 -B verification/practicals.py && python3 -B verification/recovery-practicals.py",
-    "verify:visuals": "node verification/visuals.mjs && node verification/systems-visuals.mjs && node verification/learning-visuals.mjs",
+    "verify:visuals": "node verification/visuals.mjs && node verification/systems-visuals.mjs && node verification/learning-visuals.mjs && node verification/concept-visuals.mjs",
     "verify:practical-recovery": "python3 -B verification/recovery-practicals.py",
     "verify:worked": "python3 -B verification/worked-examples.py",
     "package:worked": "node scripts/package-worked-course.mjs",
