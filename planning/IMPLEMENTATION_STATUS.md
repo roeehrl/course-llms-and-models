@@ -1,3 +1,35 @@
+# 0.1.15 immutable candidate dispatched — 2026-10-13
+
+Full v0.8 goal ACTIVE/incomplete. PR22 merged only after all12 required checks.
+Main commitf8dc30a9a9b885dac9c3e63e465d6034a0295c46 is byte-identical to qualified
+headb129c7344442fd9699e02958e3e527585fe5d9e4. Rootversion0.1.15. No GitHub
+release publication, private consumer update or native installation has occurred.
+
+Fresh annotated tagv0.1.15 points to this exact commit; tag object
+7bae6f7c095ab12738a813833ee42bbc2c29cd6c. Release workflow dispatched FROM that
+tag with explicit commit input. Specific run38423148670 confirmed QUEUED:
+https://github.com/roeehrl/course-core/actions/runs/38423148670
+Poll that run; a transient observation timeout is not permission to restart it.
+Immutable failed tags0.1.7/0.1.9 stay untouched.0.1.11–0.1.14 source milestones
+merged without separate releases;0.1.15 combines them into a new candidate.
+
+Ignored Core .local/releases/v0.1.15/expected-identity.json binds repository,
+version,commit,tagObject,runId. verify.mjs is copied from the earlier operational
+verifier and will recheck complete immutable source/asset bytes plus live CI/tag
+identity. After success, download the exact immutable candidate artifact, verify
+all members and hashes, stage a draft release, download/reverify its hosted bytes
+before publication. Consumer must pin the new manifest SHA and independently
+verify actual released archives/installed bytes. Then preserve fresh native
+state with backup/disposable restore/key custody and actual upgrade acceptance.
+
+Active native0.1.10, SDK0.2.0 and private course0.1.3 remain unchanged. Real Google
+setup question remains pending; do not infer credentials/paid authority from
+silence. Preserve any user configuration made through the existing admin UI.
+Remaining objective includes real private-course generative verifier integration,
+SDK/admin creator extensibility, rich visual/media/research/episode/branch delivery,
+placement/caps/deadlines/privacy/operations and live learning acceptance. Native
+binaries remain deferred; do not narrow success to the completed source milestones.
+
 # Compact companion qualified; verifier and repair merged — 2026-10-13 18:22 IDT
 
 Full v0.8 goal ACTIVE/incomplete. Source milestones20/21 merged; mobile layout
