@@ -1,3 +1,67 @@
+# Published0.1.17 consumer active; public research queued — 2026-10-13
+
+Fullv0.8goalACTIVE/incomplete.0.1.17 is genuinely PUBLISHED, independently byte
+verified and installed in a private consumer; native upgrade still pending.
+A separate research collection increment is locally qualified and awaiting CI.
+
+- Public prerelease https://github.com/roeehrl/course-core/releases/tag/v0.1.17
+  published2026-10-13T16:40:10Z,notdraft. Commit74e60f4c9b1f5116f6e5984185c23cb64cbf8dc8;
+  tagObjectfd60139916c0ec72442796e7d9bfbecdbce5ee6d; fullrelease38428514171 success1.
+  Immutableartifact11830606850 ZIP3705854B/SHA
+  6d116fca4354a49d7160205fc5ff8a410d23f8fb759474e1d119b346ba6471be.
+ 7flatmembers/5archives/454source files compared to immutable Git and successful
+ 12CIjobs. Hosted draft assets downloaded/reverified BEFORE actual publication.
+  ManifestSHA25a358dbf66c2532af7a98505949b833a8ffb0197e7ffc96a6827e5a947e2906.
+  RuntimeSHA087bc7737990db41d42671a67679ac0ae20a9a66500a7754c8cce263057003bd.
+- Private downloaded/hashed actual published assets. Fresh runtime
+  .local/released-core-v0.1.17/course-core and assets
+  .local/released-core-artifacts/v0.1.17. Released orchestrator installall PASS.
+  Installer-regenerated exports moved to ignored backups, exact published web
+  members restored. Independent verifier1105members/640unique files PASS. Pin
+  verification/released-runtime.mjs now0.1.17; old published broker script explicitly
+  retains expectedCoreRelease10 instead of silently borrowing latest identity.
+- Private initial HTTP/browser attempts failed startup because a passwordless URL
+  omitted its database role while the child intentionally strips inherited USER.
+  Private harness now copies already-authenticated SELECTcurrent_user into URL;
+  no password/secrets read. Old owned schemas/processes cleaned. Fresh live handles
+ 56614 HTTP /8385 browser; latest42/56completed and2practical recoveries/phone42.
+  Poll SAME handles; an observation timeout does not authorize restart.
+  Logs .local/private-v17-http-retry.log,private-v17-browser-retry.log. They are
+  NOT completed acceptance yet. Course0.1.3 remains the tested/pinned baseline;
+  proposed0.1.4 worked package still requires actual application integration.
+- New Core PR25 https://github.com/roeehrl/course-core/pull/25 attached,OPEN,
+  mainbase clean/pushed codex/public-topic-research at
+  db3fe264f61a192c743a740c409278fcc66d5c17, root0.1.18. CI38434748255 queued.
+  Integration preserves locally qualifiedf705881 source tree. This development
+  branch is NOT part of published0.1.17 or any installed native runtime.
+- Supervisor lists immutable creator public topics and stages up to2requests.
+  Actual tool/consent/course/query receipts require separate plan verification;
+  only application activates an outbox event. Distinct child research jobs share
+  existing budget/deadline/fence checks. Public-query-only context excludes learner
+  profile/history/attempts/keys. Fulltext/parts/sources/citations retainedunreviewed;
+  providerHTML discarded. Dedicated can_collect_research authority cannot approve
+  course adaptations. Child application publishes1unreviewed queue entry, no
+  lesson/mastery or source-use/rights approval. Duplicate operations/event/job/
+  application receipts do not resubmit search. Ordinary endpoints/debug/timeline
+  are scoped metadata; owner/admin/instructor release endpoint reads untrusted
+  output for review. Another learner gets404; learner staff route403.
+- Core API278/typecheck and learner106/typecheck PASS. Actual PG/HTTP/Temporal14
+  scenarios PASS:22scripted supervisor/research calls,8restarts,7lostapplyacks,
+ 27history replays/450payloads; no privatecanary/credit. External search is synthetic.
+  Logs .local/public-research-api-final.log,public-research-learner-final.log,
+  public-research-temporal.log. Publication to QUEUE is not source truth/lesson use.
+
+Active native remains0.1.10; no stop/migration/deployment yet. User Google setup
+question pending; preserve fresh settings/no paid authority from silence. No
+miner/remoteMac/GPU/wallet changes. Failedimmutable0.1.15 remains untouched.
+Next: existing private acceptance handles to terminal; native staged0.1.17
+backup/disposable restore/key custody/state-preserving upgrade; newprivate
+worked constructor/registry/model-tool/application. Continue25CI and actual
+source fetching/inspection/relevance/content/rights review, approved media
+attachment/expiry/revocation/administration, ALL remainingSDK/episode/visual/
+branch/placement/caps/deadline/privacy/ops/native-readiness/livelearning gates.
+Native binaries deferred. No full completion or smaller substitute objective.
+
 # Published broker qualification passed;0.1.17 candidate live — 2026-10-13
 
 Full v0.8 goal ACTIVE/incomplete. New actual isolation evidence and a fresh
