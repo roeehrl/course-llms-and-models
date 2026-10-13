@@ -1,3 +1,33 @@
+# Release qualification repair — 2026-10-13
+
+Core0.1.8 native pilot remains ACTIVE and verified. Subscription/fallback PR16 is
+merged, but release38392806501 for immutable tagv0.1.9 TERMINALLY FAILED. Sandbox
+job115280709432 failed the two-batch deadline fixture:actualcleanup_failed versus
+expectedtimeout at2624ms. No0.1.9assets were published and the tag stays unchanged.
+Protected public CI log:Core/.local/v9-release-sandbox-job.log. Do not retry this
+unchanged release or move its tag.
+
+Code review found that the short2.6s fixture could expire during an unacknowledged
+second create, where quarantine is required. PR17 separates actual execution
+expiry from that uncertainty:15s test envelope/two8s sleeps, both create IDs must
+be acknowledged, first batch completes/second times out, second timeout allowance
+must shrink by first-batch elapsed time, no credit and exact cleanup. Separate
+real delayed-ack driver proves quarantine and denied new admission. Production
+sandbox code/defaults/limits unchanged. Original failed run had no phase trace;
+its exact internal branch was not directly observed, so do not overstate that.
+
+PR17 is OPEN at61f84dccfbc8feb702583e9ed55ae72a0a1540de:
+https://github.com/roeehrl/course-core/pull/17 (attached). Hosted checks are running.
+Local native LinuxARM64 realDocker21cases,unit5,typechecks,publicaudit passed.
+Corebranchcodex/sandbox-deadline-qualification is clean; root0.1.10. Preserve these
+exact CI handles. After all12checks pass, merge exact head; create freshv0.1.10
+release, verify immutable candidates/hosted bytes, then private consumer and native
+upgrade. Generic subscription feature is not yet released or active in the pilot.
+
+Fullv0.8goalACTIVE/incomplete. No blocked audit; meaningful work and qualification
+remain. Do not touch miner/GPU/remoteMac/wallet data. No real provider credentials
+or paid allowance configured. Native0.1.8root/state/receipts described below.
+
 # Current subscription adapter and native upgrade — 2026-10-13
 
 The complete v0.8 goal remains ACTIVE. This turn made verified implementation,
