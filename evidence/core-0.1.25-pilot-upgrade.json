@@ -64,7 +64,7 @@
     "knownAxeDefectsObserved": []
   },
   "knownIssues": [
-    "0.1.25 erasure does not clear reviewer findings quoting written answers, and its export omits newer learner records; fixed on Core main after this tag (not yet released)"
+    "0.1.25 erasure does not clear reviewer findings quoting written answers, and its export omits newer learner records; fixed only on an unpushed local Core branch (rubric-assist, commit cb24b2c); not merged or released, so the deployed 0.1.25 pilot still has it"
   ],
   "liveProviderAcceptance": false,
   "notVerified": [
