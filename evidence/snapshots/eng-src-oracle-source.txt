@@ -1,0 +1,41 @@
+"""CPU oracle for causal GQA attention: forward, LSE and all three gradients.
+
+Computed in float64 from the exact bf16 inputs the GPU sees (strictly tighter
+than an fp32 oracle; the fp32-vs-fp64 gap is ~1e-7 relative, three orders
+below bf16 noise). Batch elements are processed one at a time to bound memory.
+"""
+from __future__ import annotations
+
+import math
+
+import torch
+
+
+def oracle(q, k, v, do, *, dtype=torch.float64, batches=None):
+    """q:[B,H,S,D] k,v:[B,KV,S,D] do:[B,H,S,D] (any dtype, any device).
+
+    Returns dict of CPU tensors in `dtype`: out, lse, dq, dk, dv. `batches`
+    restricts the computation to a subset of batch indices (runtime self-test).
+    """
+    b_all, h, s, d = q.shape
+    kv = k.shape[1]
+    g = h // kv
+    scale = 1.0 / math.sqrt(d)
+    mask = torch.ones(s, s, dtype=torch.bool).triu(1)
+    idx = list(range(b_all)) if batches is None else list(batches)
+    outs, lses, dqs, dks, dvs = [], [], [], [], []
+    for b in idx:
+        qb = q[b].to("cpu", dtype).requires_grad_()
+        kb = k[b].to("cpu", dtype).requires_grad_()
+        vb = v[b].to("cpu", dtype).requires_grad_()
+        kk = kb.repeat_interleave(g, dim=0)
+        vv = vb.repeat_interleave(g, dim=0)
+        scores = (qb @ kk.transpose(-2, -1)) * scale
+        scores = scores.masked_fill(mask, float("-inf"))
+        lse = torch.logsumexp(scores, dim=-1)
+        out = torch.softmax(scores, dim=-1) @ vv
+        out.backward(do[b].to("cpu", dtype))
+        outs.append(out.detach()); lses.append(lse.detach())
+        dqs.append(qb.grad); dks.append(kb.grad); dvs.append(vb.grad)
+    return {n: torch.stack(x) for n, x in
+            (("out", outs), ("lse", lses), ("dq", dqs), ("dk", dks), ("dv", dvs))}

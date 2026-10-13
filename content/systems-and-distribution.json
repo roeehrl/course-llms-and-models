@@ -1,0 +1,1537 @@
+{
+  "objectives": [
+    {
+      "id": "sys-o09-01",
+      "description": "Derive dispatch coverage and cooperative reduction behavior while respecting execution and barrier scopes.",
+      "prerequisites": [
+        "fnd-o02-04",
+        "ttf-o08-02"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "sys-o09-02",
+      "description": "Calculate tiling traffic and arithmetic intensity and explain occupancy/resource tradeoffs without turning bounds into performance claims.",
+      "prerequisites": [
+        "sys-o09-01",
+        "fnd-o02-03"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "sys-o09-03",
+      "description": "Distinguish Apple compute APIs and GPU neural accelerators, and qualify fusion/layout claims at the correct boundary.",
+      "prerequisites": [
+        "sys-o09-02",
+        "ttf-o08-01",
+        "ttf-o08-02"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "sys-o09-04",
+      "description": "Build complete shared-memory and time budgets and state workload-specific limits on Apple-silicon performance claims.",
+      "prerequisites": [
+        "sys-o09-03",
+        "ttf-o05-03"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "sys-o10-01",
+      "description": "Distinguish data, tensor and pipeline parallelism and derive their aggregation and gradient-message contracts.",
+      "prerequisites": [
+        "ttf-o07-04",
+        "fnd-o04-02"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "sys-o10-02",
+      "description": "Compute pipeline schedules and explain microbatch backpressure, cache lifetime and stale-work handling.",
+      "prerequisites": [
+        "sys-o10-01",
+        "fnd-o04-03"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "sys-o10-03",
+      "description": "Trace IOTA orchestration, replicated-stage routing and return-aware feedback without conflating discovery, delivery and completed work.",
+      "prerequisites": [
+        "sys-o10-02",
+        "fnd-o01-04"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "sys-o10-04",
+      "description": "Derive pseudo-gradient and outer-merge transitions and distinguish artifact production, submission and next-epoch acceptance.",
+      "prerequisites": [
+        "sys-o10-03",
+        "ttf-o05-03",
+        "ttf-o05-04"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "sys-o11-01",
+      "description": "Map official host, supervisor/relay and worker responsibilities and interpret readiness evidence from pinned source.",
+      "prerequisites": [
+        "sys-o10-04",
+        "ttf-o08-02"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "sys-o11-02",
+      "description": "Trace pinned head/body/tail source, conditional retained state and shape contracts using a bounded historical record.",
+      "prerequisites": [
+        "sys-o11-01",
+        "ttf-o07-04"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "sys-o11-03",
+      "description": "Follow queue selection, cached recomputation and conditional optimizer steps in pinned worker source.",
+      "prerequisites": [
+        "sys-o11-02",
+        "sys-o10-02",
+        "fnd-o04-03"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "sys-o11-04",
+      "description": "Interpret versioned behavioral patches and typed events without conflating lifecycle, computation and accepted contribution.",
+      "prerequisites": [
+        "sys-o11-03",
+        "sys-o10-03"
+      ],
+      "critical": true,
+      "placeable": false
+    }
+  ],
+  "chapters": [
+    {
+      "id": "chapter09",
+      "title": "What the GPU actually does",
+      "summary": "Relate ML operations to parallel execution, data movement and synchronization.",
+      "episodes": [
+        {
+          "id": "sys-e09-01",
+          "title": "Threads, SIMD groups, threadgroups and parallel reductions",
+          "objectiveIds": [
+            "sys-o09-01"
+          ],
+          "blocks": [
+            {
+              "id": "sys-09-01-text-1",
+              "type": "text",
+              "markdown": "A GPU runs many instances of a kernel over an index domain. A thread identifies one instance; a threadgroup collects cooperating instances; a grid covers the dispatch. SIMD groups are smaller execution groups within that hierarchy. They are not operating-system threads, machines or model partitions. Their useful analogy is a team executing related instruction streams over different data, subject to explicit rules for communication and synchronization.\n\nDo not assume a fixed execution width from a chip name. Apple's compute-pipeline interface exposes `threadExecutionWidth` and `maxTotalThreadsPerThreadgroup`; the latter depends on the compiled pipeline's resource needs. A legal group size is not automatically optimal. Nonuniform dispatch support and edge handling also belong to the device and API contract. Our numerical examples use an invented width four to make the arithmetic inspectable, not to describe an Apple GPU's actual width.\n\nReduce values one through ten with uniform eight-thread groups. Two groups provide sixteen logical slots, six beyond the input. Fill those slots with the additive identity zero. Group zero sums one through eight to 36; group one sums nine and ten to 19. A second reduction combines the partial sums into 55. Within each eight-slot group, a pairwise tree needs three combining rounds.\n\n```python\nvalues = list(range(1,11))\ngroup_size = 8\npadded = values + [0]*((-len(values)) % group_size)\npartials = [sum(padded[i:i+group_size])\n            for i in range(0,len(padded),group_size)]\nassert partials == [36,19]\nassert sum(partials) == 55\n```\n\nPredict the error from discarding the incomplete final group. The answer becomes 36, even though every processed value and intermediate sum is finite. Boundary tests must include nonmultiples of the group size. For other reductions, choose the correct identity: zero is suitable for addition but not a general replacement for an excluded minimum or product element.",
+              "sourceRefs": [
+                "sys-src-threads",
+                "sys-src-groups",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-09-01-text-2",
+              "type": "text",
+              "markdown": "A tree reduction also needs ordering. After threads write shared partial values, a later step must not read them before the writes are visible under the required execution scope. A threadgroup barrier is not a global barrier between arbitrary groups. A common design writes one result per group, then launches a dependent second dispatch to combine them. Device completion and CPU consumption need their own synchronization boundary.\n\nAn edge thread cannot simply return before a barrier that the rest of its group must reach. Under a uniform cooperative algorithm, it should contribute an identity while participating in required barriers. Similarly, a subgroup primitive only combines the lanes in its documented scope; using its result as a whole-grid total drops other groups. Branch divergence changes active-lane behavior and must be accounted for by the chosen primitive.\n\nThe chapter lab models indices, padding and reduction rounds on the CPU before any shader exists. Compare a tree implementation with an independent sequential integer sum, then repeat with non-power-of-two input sizes and negative values. Floating-point order may introduce additional differences, as the foundations examples showed. The independent questions test launch geometry and a synchronization failure; they do not establish a compiled kernel's correctness or chip qualification.",
+              "sourceRefs": [
+                "sys-src-threads",
+                "sys-src-groups",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-09-01-check-trace",
+              "type": "assessment",
+              "assessmentId": "sys-a09-01-trace"
+            },
+            {
+              "id": "sys-09-01-check-transfer",
+              "type": "assessment",
+              "assessmentId": "sys-a09-01-transfer"
+            }
+          ],
+          "gateId": "sys-g09-01"
+        },
+        {
+          "id": "sys-e09-02",
+          "title": "Memory hierarchy, tiling, occupancy and arithmetic intensity",
+          "objectiveIds": [
+            "sys-o09-02"
+          ],
+          "blocks": [
+            {
+              "id": "sys-09-02-text-1",
+              "type": "text",
+              "markdown": "Matrix multiplication often spends substantial effort moving data that several outputs could reuse. Tiling changes the traversal so a loaded input region serves multiple products before being discarded. The mathematical contract remains `C[i,j]=sum_k A[i,k]*B[k,j]`. Memory counts require their own contract: which hierarchy level is counted, whether caches are assumed, and whether C is read as well as written.\n\nConsider square four-by-four matrices with FP32 elements and initially empty output. Count each multiply-add as two operations, including addition to a zero accumulator. The operation count is `2*4^3=128`. A deliberately naive implementation loads both inputs for each product: 128 element reads, or 512 bytes. Writing sixteen output elements costs another 64 bytes, making 576 bytes in this no-cache accounting model.\n\nNow use two-by-two output tiles and inner-dimension chunks of two. There are four output tiles, each visiting two inner chunks. Each chunk loads four A and four B elements. Total input reads are `4*2*8=64` elements, or 256 bytes; final output writes still cost 64 bytes. The total is 320 bytes. Arithmetic intensity rises from `128/576`, about 0.222 operations per byte, to `128/320=0.4`.\n\n```python\nn,tile,bytes_per_value = 4,2,4\nops = 2*n**3\ninput_elements = (n//tile)**2*(n//tile)*(2*tile**2)\ntraffic = (input_elements+n*n)*bytes_per_value\nassert input_elements == 64 and traffic == 320\nassert ops/traffic == 0.4\n```",
+              "sourceRefs": [
+                "sys-src-tensorops",
+                "sys-src-roofline",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-09-02-text-2",
+              "type": "text",
+              "markdown": "Predict the idealized count if one four-by-four tile can load each input once and hold every accumulator. Reading two sixteen-element inputs and writing sixteen outputs costs 192 bytes. That is a traffic lower bound for this stated single-operation model, not a guarantee that the tile fits registers or runs fastest. Real cache reuse also means the naive kernel's physical device-memory traffic need not equal our intentionally pessimistic count.\n\nArithmetic intensity connects traffic to a roofline bound. For a fictional device with peak two trillion operations per second and bandwidth 200 billion bytes per second, a kernel at 0.4 operations per byte is bandwidth-limited to at most 80 billion operations per second under that model. The smaller of compute peak and bandwidth times intensity is a ceiling, not a predicted benchmark result. Launch cost and imperfect utilization can lower actual performance further.\n\nBigger tiles consume more live resources. Holding two input tiles in threadgroup memory takes `2*tile^2*element_bytes` in a conventional explicit-staging design, before padding or double buffering. Accumulators occupy registers or other storage. Resource pressure can reduce the number of resident groups that help hide latency. Newer tensor-operation APIs may exploit hardware caching without the same explicit staging strategy, so this simulator is a teaching model, not mandatory Metal implementation advice.\n\nThe lab implements both loop orders, counts logical reads and writes, and verifies identical integer products against a separate reference. Include edge tiles where dimensions are not divisible by tile width. Independent checks ask for a new byte count and a resource tradeoff. A faster kernel claim still requires measured completed work, matching numerical semantics and an end-to-end workload boundary.",
+              "sourceRefs": [
+                "sys-src-tensorops",
+                "sys-src-roofline",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-09-02-check-trace",
+              "type": "assessment",
+              "assessmentId": "sys-a09-02-trace"
+            },
+            {
+              "id": "sys-09-02-check-transfer",
+              "type": "assessment",
+              "assessmentId": "sys-a09-02-transfer"
+            }
+          ],
+          "gateId": "sys-g09-02"
+        },
+        {
+          "id": "sys-e09-03",
+          "title": "Metal, MPS, MPSGraph, TensorOps and GPU neural accelerators",
+          "objectiveIds": [
+            "sys-o09-03"
+          ],
+          "blocks": [
+            {
+              "id": "sys-09-03-text-1",
+              "type": "text",
+              "markdown": "Metal, Metal Performance Shaders, MPSGraph and TensorOps name different abstraction levels. Metal provides GPU resources, command submission and shader execution. Metal Performance Shaders supplies tuned operations that integrate with Metal resources. MPSGraph describes tensor computations as a graph that can be compiled and executed. TensorOps exposes tensor operations inside Metal shader code, allowing matrix arithmetic to be combined with surrounding custom work.\n\nKeep software API and hardware target separate. The Apple documentation reviewed on 12 October 2026 describes GPU-core neural accelerators for the Apple10 GPU family and later, and describes TensorOps shader implementations on earlier supported Apple GPUs. These GPU blocks are distinct from the Apple Neural Engine. The current MPSGraph overview describes multiple compute-device types, including CPU, GPU and Neural Engine; a graph API's capabilities do not prove which device a particular framework call used.\n\nA PyTorch MPS operation is a framework dispatch path. It should not be assumed to execute an arbitrary custom TensorOps kernel or to use the Neural Engine merely because the operation is called a tensor operation. Resolve the exact framework, operator implementation, OS/API availability and selected device when making such a claim. A source example that uses an API is not evidence that the production worker selected it.\n\nFor a small fusion example, let A rows be `[1,-2]`, `[3,1]`, and B rows `[2,0]`, `[1,-1]`. Their product is `[[0,2],[7,-1]]`; applying ReLU gives `[[0,2],[7,0]]`. Two separate passes could write and reread the four-element intermediate. At four bytes per value, eliminating that intermediate saves 32 logical bytes in this simple model, not all input or output traffic.\n\n```python\nA,B = [[1,-2],[3,1]],[[2,0],[1,-1]]\nC = [[sum(A[i][k]*B[k][j] for k in range(2))\n      for j in range(2)] for i in range(2)]\nassert C == [[0,2],[7,-1]]\nassert [[max(0,x) for x in row] for row in C] == [[0,2],[7,0]]\n```",
+              "sourceRefs": [
+                "sys-src-mps",
+                "sys-src-mpsgraph",
+                "sys-src-inline",
+                "sys-src-tensorops",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-09-03-text-2",
+              "type": "text",
+              "markdown": "Predict why a cooperative tensor cannot safely be treated as a contiguous row-major slice owned by each lane. Apple's sample describes its elements as distributed across participating threads in register storage. A thread's local element index and the global logical matrix coordinate are different concepts. Use the API's indexing/store contract; guessing a coordinate mapping from one observed device can produce finite values in the wrong positions.\n\nThis is exactly where software portability and numerical qualification separate. An API may be available across several GPU families while a custom implementation still needs per-chip tests covering layouts, boundary sizes, forward results and all gradients. Compiler flags, dtype, tile shape and OS version belong in the tested artifact identity. A CPU reference can catch the intended arithmetic error without claiming to reproduce hardware scheduling.\n\nThe lab compares fused and unfused integer calculations, then deliberately permutes an intermediate coordinate before ReLU. The independent checks separate byte savings from total traffic and choose a valid hardware-attribution claim. No shader is compiled or executed here, and no benchmark speedup is inferred from the traffic calculation or Apple's example applications.",
+              "sourceRefs": [
+                "sys-src-mps",
+                "sys-src-mpsgraph",
+                "sys-src-inline",
+                "sys-src-tensorops",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-09-03-check-trace",
+              "type": "assessment",
+              "assessmentId": "sys-a09-03-trace"
+            },
+            {
+              "id": "sys-09-03-check-transfer",
+              "type": "assessment",
+              "assessmentId": "sys-a09-03-transfer"
+            }
+          ],
+          "gateId": "sys-g09-03"
+        },
+        {
+          "id": "sys-e09-04",
+          "title": "Why Apple silicon fits this use case—and its limits",
+          "objectiveIds": [
+            "sys-o09-04"
+          ],
+          "blocks": [
+            {
+              "id": "sys-09-04-text-1",
+              "type": "text",
+              "markdown": "Apple silicon's unified memory can make a useful workload fit without maintaining a separate full host and device copy for every shared resource. CPU and GPU share physical system memory, while Metal storage modes determine permitted access and resource use. Shared addressability does not imply unlimited capacity, free bandwidth or automatic permission for the CPU to read a buffer before a GPU write completes.\n\nBuild a budget before comparing machines. In a fictional system with 24 GiB physical memory, reserve 6 GiB for the operating system and other activity. Suppose parameters occupy 5 GiB, gradients 5 GiB, optimizer buffers 10 GiB and live activations 3 GiB. The workload needs 23 GiB, but the planned available budget is 18 GiB: a five-GiB deficit. Counting only parameters would incorrectly declare abundant headroom.\n\n```python\nphysical,other = 24,6\nparts = {'parameters':5,'gradients':5,'optimizer':10,'activations':3}\nneeded = sum(parts.values())\navailable = physical-other\nassert needed == 23 and available == 18\nassert needed-available == 5\n```\n\nPredict which intervention directly addresses that particular budget. Reducing live activations by recomputation can help their portion, while compressing only stored weights does not automatically shrink optimizer moments or gradients. Offloading changes transfers and latency. Any altered representation or recomputation path needs correctness checks. A memory-saving method is not qualified merely because allocation succeeds.",
+              "sourceRefs": [
+                "sys-src-storage",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-09-04-text-2",
+              "type": "text",
+              "markdown": "Suitability is workload-specific. A large resident memory pool, an efficient supported backend and local availability can be attractive for a partition or a small experiment. A different workload may be limited by sustained bandwidth, unsupported operations, accelerator memory format, network delays, synchronization or thermal conditions. Neither Apple's advertised peak arithmetic nor a busy GPU proves high accepted training throughput. Compare the same operation, model state, numerical contract and completed-work boundary.\n\nUse Amdahl's law to expose one limit. In an invented step taking ten seconds, four seconds are GPU computation and six are communication or waiting. Doubling GPU speed reduces the step to eight seconds, a 1.25-times speedup. Even eliminating compute entirely cannot beat six seconds under the unchanged serial-wait model. Overlap or protocol changes could alter that model; a kernel benchmark alone cannot assume they happened.\n\nThe private course uses Macs as an educational case, but this episode makes no current statement about their chips, assignments, health or relative speed. The pinned source and historical case material in later episodes explain a software path, not a fresh fleet survey. No device query or live worker measurement is needed to understand the budget arithmetic.\n\nFor the lab, annotate a hypothetical execution timeline with compute, dependency waits and memory lifetimes. Change one quantity at a time and predict the bound before recomputing it. Keep GiB distinct from decimal GB, and distinguish allocated, retained and actually used payloads. The independent checks combine a new memory ledger with a bottleneck diagnosis. They establish resource reasoning rather than a purchasing recommendation or a universal ranking of Apple and datacenter hardware.",
+              "sourceRefs": [
+                "sys-src-storage",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-09-04-check-trace",
+              "type": "assessment",
+              "assessmentId": "sys-a09-04-trace"
+            },
+            {
+              "id": "sys-09-04-check-transfer",
+              "type": "assessment",
+              "assessmentId": "sys-a09-04-transfer"
+            }
+          ],
+          "gateId": "sys-g09-04"
+        }
+      ]
+    },
+    {
+      "id": "chapter10",
+      "title": "One model across many machines",
+      "summary": "Trace a distributed training sample and its return gradients.",
+      "episodes": [
+        {
+          "id": "sys-e10-01",
+          "title": "Data, tensor and pipeline parallelism",
+          "objectiveIds": [
+            "sys-o10-01"
+          ],
+          "blocks": [
+            {
+              "id": "sys-10-01-text-1",
+              "type": "text",
+              "markdown": "Distributed training can partition different dimensions of the problem. Data parallelism replicates a model and gives replicas different examples. Tensor parallelism splits the work or stored values inside an operation. Pipeline parallelism assigns consecutive groups of model operations to different stages. These can be combined, but their messages carry different meanings: parameter gradients, partial operation results, forward activations or sensitivities returning across a stage boundary.\n\nFor data parallelism, suppose one replica processes one example with gradient two and another processes three examples with mean gradient six, all at the same parameters. The full four-example mean gradient is `(1*2+3*6)/4=5`, not four. An equal average of replica means gives the wrong weighting when local sample counts differ. A synchronization primitive cannot infer the objective's intended denominator from array shape alone.\n\nTensor parallelism can split a matrix product in different ways. With row input `[1,2]` and matrix rows `[1,3]`, `[2,4]`, the output is `[5,11]`. Splitting output columns lets two workers compute five and eleven separately, then concatenate them. Splitting the input-feature dimension yields partial vectors `[1,3]` and `[4,8]`, which must be summed. Concatenation and reduction are not interchangeable communication contracts.\n\n```python\nx = [1,2]\nW = [[1,3],[2,4]]\npartial0 = [x[0]*v for v in W[0]]\npartial1 = [x[1]*v for v in W[1]]\nassert partial0 == [1,3] and partial1 == [4,8]\nassert [a+b for a,b in zip(partial0,partial1)] == [5,11]\n```",
+              "sourceRefs": [
+                "sys-src-gpipe",
+                "sys-src-diloco",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-10-01-text-2",
+              "type": "text",
+              "markdown": "Pipeline parallelism preserves a different dependency chain. For stage A `h=w*x` and stage B `prediction=v*h`, let x one, w two, v three and target four. Prediction is six and half squared loss is two. The output sensitivity is two; B's weight gradient is four, while the gradient sent back to A is six. A's weight gradient is six. That return message is sensitivity to h, not B's weight gradient.\n\nPredict the failure if A substitutes an arbitrary same-shaped backward tensor from another sample. Even when dimensions and values are finite, the local gradient now belongs to a different computation. Associate messages with the relevant run, phase or model version, sample/activation identity, stage and direction. A transport sequence number alone does not explain the numerical context.\n\nThe deployment unit also differs from the mathematical partition. A single machine may host multiple logical roles, while one pipeline stage may have several replicas on different machines. A diagram with three model stages does not establish that exactly three permanent computers are wired together. Within-stage replication and cross-stage dependencies must be drawn separately.\n\nThe lab executes the same tiny calculation centrally and with explicit stage messages, then compares outputs and all parameter gradients. It separately reconstructs a matrix product from feature partitions and checks weighted data aggregation. The independent questions ask for a new reduction and the correct message meaning. Matching one final output is insufficient evidence that distributed gradients or optimizer state are equivalent to the intended central computation.",
+              "sourceRefs": [
+                "sys-src-gpipe",
+                "sys-src-diloco",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-10-01-check-trace",
+              "type": "assessment",
+              "assessmentId": "sys-a10-01-trace"
+            },
+            {
+              "id": "sys-10-01-check-transfer",
+              "type": "assessment",
+              "assessmentId": "sys-a10-01-transfer"
+            }
+          ],
+          "gateId": "sys-g10-01"
+        },
+        {
+          "id": "sys-e10-02",
+          "title": "Microbatches, bubbles, stale work and backpressure",
+          "objectiveIds": [
+            "sys-o10-02"
+          ],
+          "blocks": [
+            {
+              "id": "sys-10-02-text-1",
+              "type": "text",
+              "markdown": "Microbatches create smaller units that can move through a pipeline while other units occupy later stages. They trade scheduling opportunities against overhead, memory and update semantics. Splitting a batch does not by itself authorize changing the loss denominator or updating parameters between pieces that were intended to contribute to one gradient. Distinguish a scheduling microbatch from a local optimizer accumulation window.\n\nConsider an ideal forward-only pipeline with three stages, four microbatches and two time units per stage. No communication cost, stalls or overlap within one stage are modeled. The first microbatch finishes at time six; the next three finish at eight, ten and twelve. The total is `(microbatches+stages-1)*stage_time=12`, compared with 24 if every microbatch traversed all stages before the next began.\n\n```python\nstages,microbatches,duration = 3,4,2\nfinish = [[0]*microbatches for _ in range(stages)]\nfor s in range(stages):\n    for m in range(microbatches):\n        previous_stage = finish[s-1][m] if s else 0\n        previous_item = finish[s][m-1] if m else 0\n        finish[s][m] = max(previous_stage,previous_item)+duration\nassert finish[-1] == [6,8,10,12]\n```\n\nAverage stage utilization in this model is `4/(4+3-1)=2/3`. The remaining stage-time slots are fill/drain bubbles. Do not apply this exact formula to a full training schedule with backward passes, unequal stages or network waits without specifying the new schedule. A faster first stage cannot outrun the bottleneck indefinitely; it can merely fill an upstream queue.",
+              "sourceRefs": [
+                "sys-src-gpipe",
+                "sys-src-up-queue",
+                "sys-src-patched-training",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-10-02-text-2",
+              "type": "text",
+              "markdown": "Outstanding forwards also consume state while waiting for gradients. In a teaching simulator with capacity two, send A at time zero and B at time one. C arrives at time two but cannot obtain a slot. A's backward arrives at time four, releasing one slot; C can then be admitted. A peer that acknowledges quickly but takes a long time to return gradients can therefore reduce useful throughput even when network submission latency looks excellent.\n\nPredict why dropping the oldest cached input to admit C is not an innocent queue optimization. The eventual gradient for that input may require its forward context. If the protocol expires or rejects that work, record that outcome; do not silently attach the late gradient to a new activation reusing the same slot. Identity and lifetime are semantic requirements, not just memory-management choices.\n\nBackpressure turns downstream capacity into an admission condition. A useful simulator pauses one downstream stage, records the resulting queue/cache growth, then resumes it. Prioritizing ready backward work can free outstanding state; blindly prioritizing more forwards can keep the cache full. Version changes introduce another boundary: a gradient associated with an older state must follow an explicit stale-work policy rather than being accepted merely because it arrived.\n\nThe lab uses a deterministic event queue and never contacts peers. Inspect generated wait intervals, expirations and accepted completions separately. The independent checks change stage times and cache events. They test schedule reasoning; neither an ideal utilization calculation nor a simulated completion rate is a measured claim about IOTA or any current fleet.",
+              "sourceRefs": [
+                "sys-src-gpipe",
+                "sys-src-up-queue",
+                "sys-src-patched-training",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-10-02-check-trace",
+              "type": "assessment",
+              "assessmentId": "sys-a10-02-trace"
+            },
+            {
+              "id": "sys-10-02-check-transfer",
+              "type": "assessment",
+              "assessmentId": "sys-a10-02-transfer"
+            }
+          ],
+          "gateId": "sys-g10-02"
+        },
+        {
+          "id": "sys-e10-03",
+          "title": "IOTA orchestration, peer routing and replicated splits",
+          "objectiveIds": [
+            "sys-o10-03"
+          ],
+          "blocks": [
+            {
+              "id": "sys-10-03-text-1",
+              "type": "text",
+              "markdown": "IOTA's public description identifies a combination of data and pipeline parallel training over heterogeneous, unreliable participants. That architectural statement is distinct from the exact behavior of a particular worker revision. In this course, private implementation claims refer to the dated local sources listed in the review: upstream tag v4.12.10 and a named historical patched package. They do not describe a freshly observed network or current assignments.\n\nSeparate orchestration from tensor transport. Registration and phase coordination establish which run and role a worker may participate in. A run-scoped peer registry supplies candidates for communication. A local router selects among eligible peers, while forward activations and returning gradients carry numerical work. Merely seeing an address in a discovery feed is not equivalent to admission or verification that the peer belongs to the required stage.\n\nReplicated splits mean several peers can provide the same logical stage. A teaching route might be A0 to B1 to C2, while another sample follows D0 to E1 to C2. The subscripts name stages; the letters name distinct peers. Nothing in this arrangement makes the course's four motivating Macs a fixed private pipeline. Nor does a stage number identify one attention head or one neuron.\n\nThe inspected patched `TransportHealthRouter` tracks the elapsed time from an acknowledged forward to its matching backward return, or an expiry cost. This is additional behavioral routing logic, not a change to the model equation. A fast acknowledgement can coexist with a long occupied cache slot, so the router's useful feedback extends beyond send latency.",
+              "sourceRefs": [
+                "sys-src-iota",
+                "sys-src-patched-router",
+                "sys-src-patched-mesh",
+                "sys-src-fixset",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-10-03-text-2",
+              "type": "text",
+              "markdown": "One documented scoring component uses `clamp((reference_cost/peer_cost)^1.5,0.2,4.0)`, with the reference based on candidate costs and new peers remaining neutral until enough observations exist. Use a simplified two-candidate example with established costs 20 and 80 seconds and reference 50. The factors are approximately `3.952847` and `0.494106`. With otherwise equal base scores, the ratio is eight to one. These are invented inputs to the pinned formula, not measured peer speeds.\n\n```python\ndef factor(reference,cost):\n    return min(4.0,max(0.2,(reference/cost)**1.5))\na,b = factor(50,20),factor(50,80)\nassert abs(a/b-8) < 1e-12\nassert factor(50,1000) == 0.2\n```\n\nPredict the attribution error when this worker's own endpoint was unavailable. Charging every missing return to downstream peers would teach the router the wrong lesson. The inspected implementation has a path that forgets unresolved return records after its own endpoint rebuild while preserving previously learned costs. That is a specific implementation behavior, not evidence that every historical outage was handled successfully.\n\nRetries create similar ambiguity: a timeout may mean lost acknowledgement after delivery. Reuse logical activation identity and distinguish an attempt from a unique completed work item. An invented journal with three send attempts and one matching backward describes one returned activation, not three successful samples.\n\nFor the lab, vary peer delays and local outages in a CPU event simulator, then inspect who was blamed, which slots remained occupied and which results were accepted. Independent checks apply the scoring rule and choose an evidence-preserving retry policy. Behavioral differences from upstream are intentional here; numerical equivalence must still cover the activations, gradients and state actually computed.",
+              "sourceRefs": [
+                "sys-src-iota",
+                "sys-src-patched-router",
+                "sys-src-patched-mesh",
+                "sys-src-fixset",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-10-03-check-trace",
+              "type": "assessment",
+              "assessmentId": "sys-a10-03-trace"
+            },
+            {
+              "id": "sys-10-03-check-transfer",
+              "type": "assessment",
+              "assessmentId": "sys-a10-03-transfer"
+            }
+          ],
+          "gateId": "sys-g10-03"
+        },
+        {
+          "id": "sys-e10-04",
+          "title": "Upload, pseudo-gradients, merge and the next epoch",
+          "objectiveIds": [
+            "sys-o10-04"
+          ],
+          "blocks": [
+            {
+              "id": "sys-10-04-text-1",
+              "type": "text",
+              "markdown": "Local optimization and global merging are different state transitions. A worker can apply several local updates while its stage peers also train. At an orchestrated boundary, participants provide update-related artifacts, and an outer procedure combines eligible contributions into the next shared state. Such an epoch is a protocol phase boundary; it need not mean that every example in a fixed dataset was visited exactly once.\n\nThe pinned patched phase worker constructs a pseudo-gradient as previous weights minus current local weights, subtracting in FP32 chunks and storing the result in BF16 before optional clipping. A pseudo-gradient summarizes a local parameter displacement. It is not necessarily the raw derivative of one mini-batch: learning rates, multiple updates and optimizer history have affected that displacement.\n\nTake previous weights `[10,20]`. Local A ends at `[9,18]`, giving displacement `[1,2]`; local B ends at `[8,21]`, giving `[2,-1]`. Their equal-weight average is `[1.5,0.5]`. The sign matters: subtracting this average from the old weights moves toward the local results, while negating it moves away under that simple outer-step convention.\n\n```python\nold,a,b = [10,20],[9,18],[8,21]\nda = [x-y for x,y in zip(old,a)]\ndb = [x-y for x,y in zip(old,b)]\ng = [(x+y)/2 for x,y in zip(da,db)]\nassert da == [1,2] and db == [2,-1]\nassert g == [1.5,0.5]\n```",
+              "sourceRefs": [
+                "sys-src-diloco",
+                "sys-src-patched-phase",
+                "sys-src-patched-merge",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-10-04-text-2",
+              "type": "text",
+              "markdown": "The inspected merge implementation does more than average final models. It averages eligible pseudo-gradients, optionally using configured contributor weights, then applies an outer Nesterov-style update with its own momentum state. In an exact-arithmetic teaching example, set old momentum zero, momentum coefficient `0.5` and outer learning rate `0.2`. The new buffer is g, the update direction is `g+0.5*g=[2.25,0.75]`, and new weights are `[9.55,19.85]`. These illustrative coefficients are not the package's asserted runtime settings.\n\nPredict what happens if all contributors are invalid. There is no meaningful average to divide by zero or quietly replace with a successful zero update. The inspected merge code rejects an empty valid set. It also checks layer identity and contributor shapes before accepting values. A correct-length blob for another layer or epoch can be numerically finite and still be the wrong state.\n\nOne misleading name deserves attention: the phase worker's `pseudo_gradient_batch_count` controls partitioning the flat vector into processing chunks. The inspected subtraction does not divide the pseudo-gradient by this count. For ten elements and count three, ceiling division gives chunk length four and slices of lengths four, four and two. Treating the variable as a gradient-averaging denominator would change the algorithm.\n\nUploads add evidence boundaries. Producing bytes, sending all parts, submitting a descriptor, acceptance by the coordinator, merging and later accounting are separate observations. A successful upload can still miss an eligible phase or belong to an obsolete binding. Preserve run, stage, epoch, generation and artifact identity through the pipeline.\n\nThe lab performs a tiny weighted merge with explicit old state, then injects a sign reversal, stale binding and empty contributor set. CPU arithmetic verifies the conceptual formulas; it does not qualify BF16 rounding, clipping, serialization or real protocol acceptance. The independent questions test a new outer update and the chunk-count trap.",
+              "sourceRefs": [
+                "sys-src-diloco",
+                "sys-src-patched-phase",
+                "sys-src-patched-merge",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-10-04-check-trace",
+              "type": "assessment",
+              "assessmentId": "sys-a10-04-trace"
+            },
+            {
+              "id": "sys-10-04-check-transfer",
+              "type": "assessment",
+              "assessmentId": "sys-a10-04-transfer"
+            }
+          ],
+          "gateId": "sys-g10-04"
+        }
+      ]
+    },
+    {
+      "id": "chapter11",
+      "title": "Read the actual TAH worker",
+      "summary": "Connect the mental model to versioned code and observed events.",
+      "episodes": [
+        {
+          "id": "sys-e11-01",
+          "title": "Official host, worker process and control plane",
+          "objectiveIds": [
+            "sys-o11-01"
+          ],
+          "blocks": [
+            {
+              "id": "sys-11-01-text-1",
+              "type": "text",
+              "markdown": "Read a worker as several cooperating processes and state machines rather than one opaque “mining app.” The public TAH guide describes the user-facing application. The private local-worker source describes a mounted arrangement with an official host, a STRATA supervisor/relay and a Python worker. The host's readiness and control messages, the supervisor's lifecycle decisions and the worker's numerical work have different responsibilities and evidence boundaries.\n\nThis episode uses source inspected on 12 October 2026. Upstream code is pinned to v4.12.10 commit `22d702acd07453dabb187abedfad185826091341`. Patched numerical examples use the named historical package recorded in the review. The local entrypoint and explanatory README have their own file hashes. A checkout commit alone would not pin locally modified contents, so the review records bytes as well as revision context. None of these observations identifies a currently running process.\n\nThe inspected `mounted_worker_entrypoint.py` prepares import roots, validates mounted context and selects a control port before loading the pool entrypoint. Its wrapper supplies the configured control port and attempts to enable a loopback health endpoint. A failed health-port bind can be reported without making that endpoint a prerequisite for all worker execution. Therefore, “health endpoint absent” and “worker definitely stopped” are not equivalent statements.\n\nPredict the error in calling the GUI ready as soon as a child process exists. Process creation does not prove that control binding, handshake or host readiness completed. A meaningful trace distinguishes `spawn requested`, `process created`, `control bound`, `welcome received` and `host ready`. These labels describe separate milestones; a tool displaying one should not silently promote it to the next.",
+              "sourceRefs": [
+                "sys-src-tah-guide",
+                "sys-src-entrypoint",
+                "sys-src-local-readme",
+                "sys-src-up-splits",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-11-01-text-2",
+              "type": "text",
+              "markdown": "Use an invented monotonic timeline: host launch at 0.0 seconds, worker launch at 1.2, control binding at 3.5, welcome at 3.8 and readiness at 4.0. The worker launch-to-bind interval is 2.3 seconds; welcome follows binding by 0.3 seconds. Against a hypothetical five-second readiness budget, the margin is one second. These numbers demonstrate attribution and are not measurements of the private fleet.\n\n```python\ntrace = {'host_launch':0.0,'worker_launch':1.2,\n         'control_bound':3.5,'welcome':3.8,'ready':4.0}\nassert abs(trace['control_bound']-trace['worker_launch']-2.3) < 1e-12\nassert 5-trace['ready'] == 1\n```\n\nThe dated README supplies a historical counterexample to source-only confidence: an audit call was placed on an object without the expected journal method, and the resulting runtime failure was missed by tests that inspected source text without executing that path. The lesson is about test coverage and lifecycle attribution. It does not infer that the failure exists in today's installed application or reproduce the incident's operational details.\n\nFor the lab, draw process boundaries and place each observed or simulated event on its owning component. Inspect the pinned entrypoint as text; do not import it, because imports and main functions can start services or read operational state. Independent checks calculate a new readiness margin and diagnose a missing handshake. Process ownership, numerical correctness and network admission each need their own evidence.",
+              "sourceRefs": [
+                "sys-src-tah-guide",
+                "sys-src-entrypoint",
+                "sys-src-local-readme",
+                "sys-src-up-splits",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-11-01-check-trace",
+              "type": "assessment",
+              "assessmentId": "sys-a11-01-trace"
+            },
+            {
+              "id": "sys-11-01-check-transfer",
+              "type": "assessment",
+              "assessmentId": "sys-a11-01-transfer"
+            }
+          ],
+          "gateId": "sys-g11-01"
+        },
+        {
+          "id": "sys-e11-02",
+          "title": "Head/body/tail split implementations",
+          "objectiveIds": [
+            "sys-o11-02"
+          ],
+          "blocks": [
+            {
+              "id": "sys-11-02-text-1",
+              "type": "text",
+              "markdown": "The upstream `splits.py` defines three distinct model roles: `Llama3HeadModel`, `Llama3BodyModel` and `Llama3TailModel`. Inspect their constructors and forward methods at the pinned v4.12.10 commit rather than infer architecture from display labels. A split is a collection of model operations. It is not one neuron, one attention head or necessarily exactly one transformer block.\n\nThe head owns token embeddings followed by its assigned transformer blocks. The body consumes floating activations and applies its assigned blocks. The tail applies remaining blocks, final RMS normalization and a bias-free vocabulary projection. Loss computation occurs in the training path outside the tail's basic forward return. This separation explains why “tail returned logits” and “training loss was computed and differentiated” are separate steps.\n\nBlock counts can be read from the loops. In a fictional twelve-block configuration with head end four and body range four through eight, the head creates four blocks, the body four and the tail four. The head and body code can use a bottleneck block at their boundary when configuration requests it. Their transferred feature width therefore cannot be assumed to equal the model embedding width without reading that configuration.\n\nA dated archived local benchmark supplies a concrete observation: its 2 September 2026 head warmup record reports output shape `[4,800,32]` and a null loss field. This is an anonymized selection of those fields from a hashed historical JSONL file, not a live worker journal or a claim that every head has width 32. The record is consistent with an activation-producing head, but source and configuration remain necessary to interpret its dimensions.",
+              "sourceRefs": [
+                "sys-src-up-splits",
+                "sys-src-head-record",
+                "sys-src-patched-model",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-11-02-text-2",
+              "type": "text",
+              "markdown": "Under an explicit two-byte-per-element assumption, that shape has `4*800*32=102400` values and a 204800-byte payload, exactly 200 KiB. If a separate fixture had width 128 instead, the payload would be 800 KiB. A shape change matters to network traffic and cache capacity even when batch and token counts stay fixed.\n\n```python\nbatch,tokens,width,element_bytes = 4,800,32,2\npayload = batch*tokens*width*element_bytes\nassert payload == 204800 and payload/1024 == 200\n```\n\nPredict the backward contract at a non-tail split. The source calls backward on output activations with an incoming activation gradient. If activation quantization is enabled, the head/body state dictionary retains original activations for that backward path. An empty-state assumption is therefore conditional, not a property of every model that happens to expose the same method names.\n\nThe tail produces a vocabulary dimension instead of the hidden activation width. In a small invented case with batch two, sequence three and vocabulary five, logits contain 30 numbers. Labels contain one target ID per predicted position, so six IDs, under the stated next-token setup. Treating all 30 logits as 30 separate examples would alter the loss and its normalization.\n\nFor the lab, annotate input type, output shape, retained state and backward seed for each pinned class. Compare the archived record with the correct role, and keep its benchmark scope visible. Independent checks ask for a fresh split count and identify an invalid loss or quantization assumption. The source walk does not prove a particular run selected these classes or that its custom kernels were numerically qualified.",
+              "sourceRefs": [
+                "sys-src-up-splits",
+                "sys-src-head-record",
+                "sys-src-patched-model",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-11-02-check-trace",
+              "type": "assessment",
+              "assessmentId": "sys-a11-02-trace"
+            },
+            {
+              "id": "sys-11-02-check-transfer",
+              "type": "assessment",
+              "assessmentId": "sys-a11-02-transfer"
+            }
+          ],
+          "gateId": "sys-g11-02"
+        },
+        {
+          "id": "sys-e11-03",
+          "title": "Training queue, activation cache and optimizer boundary",
+          "objectiveIds": [
+            "sys-o11-03"
+          ],
+          "blocks": [
+            {
+              "id": "sys-11-03-text-1",
+              "type": "text",
+              "markdown": "The worker's training path combines a ready-work queue, cached forward context, numerical execution and a local optimizer boundary. These are separate structures. The pinned upstream activation queue maintains forward and backward deques. Its selection logic prefers a ready backward; it permits a forward when the activation cache has capacity. Queue length alone cannot tell you whether the worker is compute-limited or waiting for the return of earlier work.\n\nIn the named historical patched `TrainingPhase`, non-tail forward processing retains input activations and related metadata under an activation identity. The outbound forward tensor is detached in the model-manager path. When a backward arrives, the code retrieves cached input and recomputes a differentiable forward in local slices before propagating sensitivities. This is why receiving a backward tensor is insufficient if its matching cached input has expired.\n\nThe cached record also holds previous-stage routing information. The patched backward path consults those source peer IDs when publishing the returning activation gradient. If the entry disappears before that lookup, the inspected code can omit the direct push target and rely on the publication/pull path it documents. That fallback path's presence in source is not proof that any particular late backward was delivered.\n\nPredict why cache identity must outlive a queue pop. Removing an item from the ready queue means execution has begun; it does not mean forward context is no longer needed. Conversely, keeping every input forever prevents new work from being admitted. Lifetime follows the numerical and protocol dependencies, not whichever container currently holds an item.",
+              "sourceRefs": [
+                "sys-src-up-queue",
+                "sys-src-patched-queue",
+                "sys-src-patched-cache",
+                "sys-src-patched-training",
+                "sys-src-patched-model",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-11-03-text-2",
+              "type": "text",
+              "markdown": "Use an explicit teaching trace with cache capacity two and optimizer threshold three. F(A) and F(B) occupy both slots. A ready B(A) is selected ahead of another forward C; successful backward A removes its cache entry and increments the accumulation counter. F(C) can now enter. After successful backwards for B and C, the counter reaches three and one local optimizer transition is eligible. Three slices of one backward would not necessarily count as three activation completions.\n\n```python\ncapacity,threshold = 2,3\ncache = set()\ncompleted,steps = 0,0\nevents = [('F','A'),('F','B'),('B','A'),('F','C'),('B','B'),('B','C')]\nfor direction,name in events:\n    if direction == 'F':\n        assert len(cache) < capacity\n        cache.add(name)\n    else:\n        cache.remove(name)\n        completed += 1\n        if completed == threshold:\n            steps += 1\n            completed = 0\nassert steps == 1 and completed == 0 and not cache\n```\n\nThe actual threshold is read from model metadata or configured defaults in the pinned source; three is our fixture value. Its model-manager method clips/checks accumulated gradients, can reject nonfinite state or skip an empty window, and calls the optimizer separately from backward. The patched caller records whether optimization occurred rather than treating every threshold crossing as a weight update.\n\nSource order also affects telemetry interpretation. In this package, the backward completion message comes after publication setup, cleanup and any eligible local optimization path. It still does not prove remote acceptance or accounting. The lab annotates a synthetic event trace alongside exact source locations, while the separate archived head record remains explicitly a local benchmark. Independent checks count valid accumulation windows and diagnose a stale-cache failure without running the worker.",
+              "sourceRefs": [
+                "sys-src-up-queue",
+                "sys-src-patched-queue",
+                "sys-src-patched-cache",
+                "sys-src-patched-training",
+                "sys-src-patched-model",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-11-03-check-trace",
+              "type": "assessment",
+              "assessmentId": "sys-a11-03-trace"
+            },
+            {
+              "id": "sys-11-03-check-transfer",
+              "type": "assessment",
+              "assessmentId": "sys-a11-03-transfer"
+            }
+          ],
+          "gateId": "sys-g11-03"
+        },
+        {
+          "id": "sys-e11-04",
+          "title": "Our behavioral patches, telemetry and admission lifecycle",
+          "objectiveIds": [
+            "sys-o11-04"
+          ],
+          "blocks": [
+            {
+              "id": "sys-11-04-text-1",
+              "type": "text",
+              "markdown": "A behavioral patch can change how work is admitted, scheduled, transported or observed without intentionally changing the numerical function. In this repository, routing, retries, time budgets and telemetry are deliberate engineering choices. Computed activations, gradients, optimizer state, pseudo-gradients and merged weights still require numerical equivalence. “Different from upstream” is therefore a question about which contract changed, not an automatic reason to revert every patch.\n\nThe inspected fixset documents a return-aware router, queue-lock release and a structured event journal, among other changes. Read these as versioned implementation evidence. A patch file establishes the proposed or packaged code change; it does not independently establish that the matching artifact was installed, selected at runtime or successful in a live run. The named package's hashes narrow the code claim, while dated observations support only their recorded scope.\n\nThe journal patch emits typed events near selected log sites. Records include a schema version, wall time, monotonic time, event name and event-specific fields. The source distinguishes registration start, registration success, heartbeat response, reset and forward/backward completion. A heartbeat HTTP response is logged even when its body describes a semantic failure, so HTTP 200 alone cannot establish continued training admission.\n\nPredict the error in reconstructing state using only the last message containing “training.” A stale progress event from a previous session or epoch can arrive after a reset. A robust interpretation associates events with the relevant session/run/layer context and respects the ordering information available within a process. Wall clocks can move or differ between hosts; monotonic elapsed time is useful only within its own clock domain.",
+              "sourceRefs": [
+                "sys-src-fixset",
+                "sys-src-journal-patch",
+                "sys-src-journal-source",
+                "sys-src-head-record",
+                "sys-src-rules",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-11-04-text-2",
+              "type": "text",
+              "markdown": "Use an invented trace with monotonic times: registration started at zero, registered at four, first forward complete at seven and first backward complete at fifteen. Admission waiting took four seconds; post-admission time to that backward was eleven seconds. Neither interval is a pure GPU duration. If a reset occurs at sixteen and an older progress event from time twelve is ingested later, it must not revive the old session as currently training.\n\n```python\ntrace = [('registration_started',0),('registered',4),\n         ('forward_complete',7),('backward_complete',15),('reset',16)]\nassert trace[1][1]-trace[0][1] == 4\nassert trace[3][1]-trace[1][1] == 11\n```\n\nA similarly careful ledger separates an acknowledged activation, completed local backward, attempted upload, submitted descriptor and accepted merge. Some transitions are absent from the structured events in a particular patch revision and remain recorded elsewhere. Absence from one stream is not proof of absence from the system; use the source's emission sites to understand exactly what each stream can observe.\n\nFor the lab, join the pinned source map with the explicitly synthetic training trace and the separately dated archived benchmark record. Label every inference as source-supported, observed in that record, simulated or unknown. The recorded artifact is not an end-to-end live admission-to-merge trace; supplying such a trace later requires its own redacted snapshot and provenance. This distinction is part of the exercise rather than permission to invent missing events.\n\nThe independent checks ask for elapsed time and reject a false-success interpretation. They assess operational reasoning and evidence discipline. No observer is started, no control is sent and no current fleet health, contribution, credit or payment claim is made by completing this chapter.",
+              "sourceRefs": [
+                "sys-src-fixset",
+                "sys-src-journal-patch",
+                "sys-src-journal-source",
+                "sys-src-head-record",
+                "sys-src-rules",
+                "sys-src-original"
+              ]
+            },
+            {
+              "id": "sys-11-04-check-trace",
+              "type": "assessment",
+              "assessmentId": "sys-a11-04-trace"
+            },
+            {
+              "id": "sys-11-04-check-transfer",
+              "type": "assessment",
+              "assessmentId": "sys-a11-04-transfer"
+            }
+          ],
+          "gateId": "sys-g11-04"
+        }
+      ]
+    }
+  ],
+  "assessments": [
+    {
+      "id": "sys-a09-01-trace",
+      "objectiveIds": [
+        "sys-o09-01"
+      ],
+      "familyId": "sys-family-dispatch-coverage",
+      "prompt": "Independent check. A uniform dispatch assigns eight logical threads per group to cover 19 input elements. It rounds up to whole groups and masks out-of-range slots. How many slots must contribute the reduction identity rather than read an input?",
+      "type": "numeric",
+      "grading": {
+        "expected": 5,
+        "absoluteTolerance": 0,
+        "explanation": "Ceiling division gives three groups and 24 slots. The last 24-19=5 slots are outside the input. Ignoring the final partial group would lose valid values."
+      }
+    },
+    {
+      "id": "sys-a09-01-transfer",
+      "objectiveIds": [
+        "sys-o09-01"
+      ],
+      "familyId": "sys-family-barrier-scope",
+      "prompt": "Independent transfer check. A uniform threadgroup reduction requires every thread to reach a shared-memory barrier. Some edge threads have no valid input. What is the appropriate design?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Let edge threads return before the barrier while others wait."
+        },
+        {
+          "id": "b",
+          "text": "Have all participating threads reach the required barrier, with invalid input slots contributing the correct identity."
+        },
+        {
+          "id": "c",
+          "text": "Assume a threadgroup barrier synchronizes all groups in the grid."
+        },
+        {
+          "id": "d",
+          "text": "Use the first SIMD group result as the total for every group."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "A cooperative group algorithm must preserve barrier participation. Identity padding handles absent elements without dropping participants. Threadgroup and SIMD-group scopes do not imply whole-grid synchronization."
+      }
+    },
+    {
+      "id": "sys-a09-02-trace",
+      "objectiveIds": [
+        "sys-o09-02"
+      ],
+      "familyId": "sys-family-tile-traffic",
+      "prompt": "Independent check. Multiply two 6x6 FP32 matrices using 3x3 output tiles and inner chunks of 3. For each output tile and inner chunk, load each needed A/B tile once. Ignore caches across output tiles and write each C element once, with no C read. What is total logical traffic in bytes?",
+      "type": "numeric",
+      "grading": {
+        "expected": 720,
+        "absoluteTolerance": 0,
+        "explanation": "There are four output tiles and two inner chunks per tile. Each chunk loads 9+9=18 elements: 144 reads total. Add 36 output writes and multiply 180 elements by four bytes to get 720."
+      }
+    },
+    {
+      "id": "sys-a09-02-transfer",
+      "objectiveIds": [
+        "sys-o09-02"
+      ],
+      "familyId": "sys-family-tile-resource-tradeoff",
+      "prompt": "Independent transfer check. A larger tile halves counted device-memory traffic but triples register use and reduces resident groups. What follows?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Runtime must halve because traffic determines all performance."
+        },
+        {
+          "id": "b",
+          "text": "The larger tile is numerically incorrect merely because it uses more registers."
+        },
+        {
+          "id": "c",
+          "text": "Occupancy cannot affect a tiled kernel."
+        },
+        {
+          "id": "d",
+          "text": "Traffic improved under that accounting model, but latency hiding and other limits require a controlled completed-work measurement."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "d",
+        "explanation": "Tiling can improve reuse while increasing resource pressure. The traffic count is useful evidence, but it does not determine scheduling, occupancy, launch overhead or actual elapsed time by itself."
+      }
+    },
+    {
+      "id": "sys-a09-03-trace",
+      "objectiveIds": [
+        "sys-o09-03"
+      ],
+      "familyId": "sys-family-fusion-bytes",
+      "prompt": "Independent check. An unfused path writes a 3x5 FP32 intermediate and a second pass reads it once. Fusion retains that intermediate without either device-memory transfer. Count only those removed transfers. How many logical bytes are saved?",
+      "type": "numeric",
+      "grading": {
+        "expected": 120,
+        "absoluteTolerance": 0,
+        "explanation": "The intermediate has 15 four-byte values. Eliminating one write and one read saves 15*4*2=120 bytes. Input loads and the final output write are outside this requested saving."
+      }
+    },
+    {
+      "id": "sys-a09-03-transfer",
+      "objectiveIds": [
+        "sys-o09-03"
+      ],
+      "familyId": "sys-family-hardware-attribution",
+      "prompt": "Independent transfer check. An application calls a framework tensor operation. Which additional claim is justified without inspecting its selected implementation or execution evidence?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "The operation name alone does not establish use of TensorOps, GPU neural accelerators or the separate Neural Engine."
+        },
+        {
+          "id": "b",
+          "text": "Every tensor operation necessarily uses the Apple Neural Engine."
+        },
+        {
+          "id": "c",
+          "text": "Any PyTorch MPS call necessarily selects the application's custom TensorOps kernel."
+        },
+        {
+          "id": "d",
+          "text": "If the API exists on two chips, one chip's custom-kernel test qualifies both."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "Tensor API, framework dispatch, selected implementation and hardware target are different levels. An API name or availability does not identify the selected path or prove numerical qualification on another chip."
+      }
+    },
+    {
+      "id": "sys-a09-04-trace",
+      "objectiveIds": [
+        "sys-o09-04"
+      ],
+      "familyId": "sys-family-memory-budget",
+      "prompt": "Independent check. A fictional machine has 32 GiB physical memory with 8 GiB reserved for other activity. The workload needs 6 GiB parameters, 6 GiB gradients, 12 GiB optimizer state and 4 GiB live activations. What is its deficit against the planned available budget, in GiB?",
+      "type": "numeric",
+      "grading": {
+        "expected": 4,
+        "absoluteTolerance": 0,
+        "explanation": "Available memory is 32-8=24 GiB. The workload totals 6+6+12+4=28 GiB, exceeding the planned budget by four GiB. Unified memory does not make those allocations free."
+      }
+    },
+    {
+      "id": "sys-a09-04-transfer",
+      "objectiveIds": [
+        "sys-o09-04"
+      ],
+      "familyId": "sys-family-end-to-end-bound",
+      "prompt": "Independent transfer check. A serial ten-second workload spends two seconds in a GPU kernel and eight seconds waiting. The kernel becomes twice as fast; all other work and overlap remain unchanged. Which prediction is correct?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Total time becomes five seconds."
+        },
+        {
+          "id": "b",
+          "text": "Total time becomes eight seconds immediately."
+        },
+        {
+          "id": "c",
+          "text": "Total time becomes nine seconds; a twofold kernel gain is not a twofold end-to-end gain."
+        },
+        {
+          "id": "d",
+          "text": "Total time cannot change because waiting dominates."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "The compute portion drops from two seconds to one, while the eight seconds remain: nine seconds total. This is an idealized bound calculation with explicit assumptions, not a device measurement."
+      }
+    },
+    {
+      "id": "sys-a10-01-trace",
+      "objectiveIds": [
+        "sys-o10-01"
+      ],
+      "familyId": "sys-family-weighted-replica-gradient",
+      "prompt": "Independent check. Two replicas compute gradients at the same parameters. Replica A has two equally weighted examples with mean gradient 4. Replica B has three examples with mean gradient -1. What is the mean gradient over all five examples?",
+      "type": "numeric",
+      "grading": {
+        "expected": 1,
+        "absoluteTolerance": 0,
+        "explanation": "Total gradient sum is 2*4+3*(-1)=5 across five examples, giving 1. Averaging replica means equally would give 1.5 and overweight the smaller replica."
+      }
+    },
+    {
+      "id": "sys-a10-01-transfer",
+      "objectiveIds": [
+        "sys-o10-01"
+      ],
+      "familyId": "sys-family-partition-message-contract",
+      "prompt": "Independent transfer check. A pipeline downstream stage sends a tensor back to the preceding stage after backward. Which semantic quantity does the preceding stage generally require?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "The loss sensitivity with respect to the preceding stage's output activation, bound to the corresponding execution context."
+        },
+        {
+          "id": "b",
+          "text": "The downstream parameter gradient, regardless of its shape."
+        },
+        {
+          "id": "c",
+          "text": "The downstream parameter values, because backward replaces earlier weights."
+        },
+        {
+          "id": "d",
+          "text": "The next text token chosen by sampling."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "Backpropagation across a stage boundary carries the derivative with respect to the boundary activation. Downstream parameter gradients and token outputs answer different questions even if some dimensions happen to coincide."
+      }
+    },
+    {
+      "id": "sys-a10-02-trace",
+      "objectiveIds": [
+        "sys-o10-02"
+      ],
+      "familyId": "sys-family-pipeline-fill-drain",
+      "prompt": "Independent check. An ideal forward-only pipeline has four equal stages, five microbatches and three time units per stage. There is no communication or other stall. What time does the final microbatch finish when the first begins at zero?",
+      "type": "numeric",
+      "grading": {
+        "expected": 24,
+        "absoluteTolerance": 0,
+        "explanation": "The first finishes after four stage durations, and the remaining four finish one duration apart. Total is (5+4-1)*3=24. This formula is restricted to the stated equal-stage forward-only schedule."
+      }
+    },
+    {
+      "id": "sys-a10-02-transfer",
+      "objectiveIds": [
+        "sys-o10-02"
+      ],
+      "familyId": "sys-family-stale-work-lifetime",
+      "prompt": "Independent transfer check. A cached activation is evicted and its storage reused for a different sample. A late gradient for the old activation arrives with matching shape. What should happen?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Apply it to the new sample because the allocation size matches."
+        },
+        {
+          "id": "b",
+          "text": "Average it with the next incoming gradient without checking identity."
+        },
+        {
+          "id": "c",
+          "text": "Follow the explicit stale-work policy; never reinterpret it as the new sample's gradient solely because shapes match."
+        },
+        {
+          "id": "d",
+          "text": "Treat it as fresh because it arrived most recently."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "The derivative belongs to a particular forward execution. Cache-slot reuse and tensor shape do not transfer that meaning to a new activation. Expiry or rejection must remain an explicit outcome."
+      }
+    },
+    {
+      "id": "sys-a10-03-trace",
+      "objectiveIds": [
+        "sys-o10-03"
+      ],
+      "familyId": "sys-family-return-score",
+      "prompt": "Independent check. An established peer has enough observations to use the pinned scoring component clamp((reference/cost)^1.5,0.2,4.0). Reference cost is 40 seconds and peer cost is 160 seconds. What factor results?",
+      "type": "numeric",
+      "grading": {
+        "expected": 0.2,
+        "absoluteTolerance": 1e-09,
+        "explanation": "The raw factor is (1/4)^1.5=1/8=0.125. Applying the 0.2 floor gives 0.2. This floor preserves some sampling instead of dropping the peer to zero."
+      }
+    },
+    {
+      "id": "sys-a10-03-transfer",
+      "objectiveIds": [
+        "sys-o10-03"
+      ],
+      "familyId": "sys-family-retry-evidence",
+      "prompt": "Independent transfer check. A forward activation is sent three times because acknowledgements are uncertain. One backward carrying the matching logical identity arrives. Which accounting interpretation is supported by this trace alone?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "The first timeout proves no peer received the activation."
+        },
+        {
+          "id": "b",
+          "text": "Three successful activations are proved because three send calls returned."
+        },
+        {
+          "id": "c",
+          "text": "Payment is proved by the backward tensor."
+        },
+        {
+          "id": "d",
+          "text": "One matching return is evidenced; attempts must not be counted as three unique successful activations."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "d",
+        "explanation": "Attempts and unique work identities are separate. An acknowledgement can be lost after delivery. A matching backward supports one returned activation, while remote acceptance and accounting need their own evidence."
+      }
+    },
+    {
+      "id": "sys-a10-04-trace",
+      "objectiveIds": [
+        "sys-o10-04"
+      ],
+      "familyId": "sys-family-outer-optimizer",
+      "prompt": "Independent check. In exact arithmetic, old scalar weight is 8, and local final weights are 7 and 5. Average their previous-minus-current pseudo-gradients equally. Old outer momentum is 1, coefficient is 0.5, and learning rate is 0.2. Use buffer=0.5*old_buffer+g and new_weight=old_weight-0.2*(g+0.5*buffer). What new weight results?",
+      "type": "numeric",
+      "grading": {
+        "expected": 7.35,
+        "absoluteTolerance": 1e-09,
+        "explanation": "The pseudo-gradients are 1 and 3, averaging to 2. Buffer becomes 2.5; direction is 2+0.5*2.5=3.25. New weight is 8-0.2*3.25=7.35. This is an exact-arithmetic fixture, not BF16 qualification."
+      }
+    },
+    {
+      "id": "sys-a10-04-transfer",
+      "objectiveIds": [
+        "sys-o10-04"
+      ],
+      "familyId": "sys-family-chunking-semantics",
+      "prompt": "Independent transfer check. The pinned phase-worker code sets chunk_size=ceil(numel/pseudo_gradient_batch_count), subtracts previous-current per chunk and stores the resulting vector. A rewrite also divides every difference by pseudo_gradient_batch_count. What is the consequence?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "It preserves the code because any variable containing batch must be a mean denominator."
+        },
+        {
+          "id": "b",
+          "text": "It changes the pseudo-gradient; the inspected count controls chunking and is not a normalization divisor."
+        },
+        {
+          "id": "c",
+          "text": "It changes only upload speed, never values."
+        },
+        {
+          "id": "d",
+          "text": "It is necessary whenever the final chunk is shorter."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "Processing chunks partition the vector without changing each element's subtraction. Introducing a divisor alters the update. Names cannot override the actual arithmetic in the source."
+      }
+    },
+    {
+      "id": "sys-a11-01-trace",
+      "objectiveIds": [
+        "sys-o11-01"
+      ],
+      "familyId": "sys-family-readiness-margin",
+      "prompt": "Independent check. A hypothetical readiness deadline is 12 seconds after host launch at zero. Worker launch occurs at 2, control binding at 6, welcome at 7 and readiness at 9. What readiness margin remains in seconds?",
+      "type": "numeric",
+      "grading": {
+        "expected": 3,
+        "absoluteTolerance": 0,
+        "explanation": "Readiness is established at time 9, leaving 12-9=3 seconds. Earlier process creation or control binding does not move the readiness milestone backward."
+      }
+    },
+    {
+      "id": "sys-a11-01-transfer",
+      "objectiveIds": [
+        "sys-o11-01"
+      ],
+      "familyId": "sys-family-process-evidence",
+      "prompt": "Independent transfer check. An observer records a created worker process but has no control handshake or host-ready event. Which conclusion is justified?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "The worker is definitely registered and training."
+        },
+        {
+          "id": "b",
+          "text": "No process can exist before the host-ready event."
+        },
+        {
+          "id": "c",
+          "text": "Process existence is evidenced; readiness and admission remain unestablished."
+        },
+        {
+          "id": "d",
+          "text": "The GUI must itself be computing all tensor operations."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "Creation, handshake, readiness and admission are separate transitions. A process can exist while initialization is incomplete or failing. The trace does not establish later milestones."
+      }
+    },
+    {
+      "id": "sys-a11-02-trace",
+      "objectiveIds": [
+        "sys-o11-02"
+      ],
+      "familyId": "sys-family-split-block-count",
+      "prompt": "Independent check. For the pinned head/body/tail constructor pattern, an invented model has 16 transformer blocks. The head ends at 5 and the body covers start 5 to end 11. How many transformer blocks does the body contain, counting its final ordinary or bottleneck block?",
+      "type": "numeric",
+      "grading": {
+        "expected": 6,
+        "absoluteTolerance": 0,
+        "explanation": "The body constructs end-start-1 ordinary blocks and appends one final block. That is 11-5-1+1=6. The head has five and the tail has five, totaling sixteen."
+      }
+    },
+    {
+      "id": "sys-a11-02-transfer",
+      "objectiveIds": [
+        "sys-o11-02"
+      ],
+      "familyId": "sys-family-split-state-contract",
+      "prompt": "Independent transfer check. A rewrite assumes every split returns an empty state and that the tail forward method already includes training loss. What does the pinned source show?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Both assumptions are always true for every configuration."
+        },
+        {
+          "id": "b",
+          "text": "Head/body quantization can retain original activations in state, and the tail forward returns logits with loss computed by the training path."
+        },
+        {
+          "id": "c",
+          "text": "A head necessarily outputs vocabulary logits."
+        },
+        {
+          "id": "d",
+          "text": "Only the output tensor shape matters; state is unrelated to backward."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "Conditional quantization preserves original activations for backward. The tail's normalization/projection produces logits; the surrounding training code supplies targets and loss. These method boundaries cannot be collapsed by assumption."
+      }
+    },
+    {
+      "id": "sys-a11-03-trace",
+      "objectiveIds": [
+        "sys-o11-03"
+      ],
+      "familyId": "sys-family-optimizer-window-trace",
+      "prompt": "Independent check. In a teaching ledger, each unique successful backward contributes once. The optimizer threshold is four. Events are success A, success B, rejected C, success D, success E, duplicate E, success F, success G. After stepping and clearing at each full window, how many contributions remain pending?",
+      "type": "numeric",
+      "grading": {
+        "expected": 2,
+        "absoluteTolerance": 0,
+        "explanation": "The six unique successful activations are A,B,D,E,F,G. Four fill one update window, leaving F and G: two contributions. Rejected C and duplicate E do not count under the stated policy."
+      }
+    },
+    {
+      "id": "sys-a11-03-transfer",
+      "objectiveIds": [
+        "sys-o11-03"
+      ],
+      "familyId": "sys-family-cache-versus-queue",
+      "prompt": "Independent transfer check. A backward item has been removed from the ready queue, but the cached input for its forward execution has expired. Which response preserves the numerical meaning?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Use the explicit missing-cache/stale-work path rather than substitute an unrelated activation; queue removal alone never proves that required forward state exists."
+        },
+        {
+          "id": "b",
+          "text": "Recompute using the next queued sample because it has the same shape."
+        },
+        {
+          "id": "c",
+          "text": "Count a successful backward immediately at queue pop."
+        },
+        {
+          "id": "d",
+          "text": "Increment the optimizer counter twice to compensate for the missing entry."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "The pinned training path relies on corresponding cached input for recomputation. A selected queue item and a valid numerical execution context are separate requirements; fabricated substitution or success counts change the computation."
+      }
+    },
+    {
+      "id": "sys-a11-04-trace",
+      "objectiveIds": [
+        "sys-o11-04"
+      ],
+      "familyId": "sys-family-event-interval",
+      "prompt": "Independent check. An invented monotonic trace records registered at 3 seconds, first forward_complete at 8 and first backward_complete at 23. How many seconds elapsed from registration to that backward event? Do not label the interval as pure GPU time.",
+      "type": "numeric",
+      "grading": {
+        "expected": 20,
+        "absoluteTolerance": 0,
+        "explanation": "The interval is 23-3=20 seconds. It can contain queueing, transfers, recomputation and other work; subtracting timestamps does not isolate a GPU duration."
+      }
+    },
+    {
+      "id": "sys-a11-04-transfer",
+      "objectiveIds": [
+        "sys-o11-04"
+      ],
+      "familyId": "sys-family-semantic-heartbeat",
+      "prompt": "Independent transfer check. The journal records heartbeat_response with HTTP 200, but the response body indicates a semantic failure. An older training_progress record is also present. What is the defensible conclusion?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "HTTP 200 proves current training admission regardless of the body."
+        },
+        {
+          "id": "b",
+          "text": "The old progress record overrides all newer lifecycle evidence."
+        },
+        {
+          "id": "c",
+          "text": "The worker must have performed a successful optimizer update."
+        },
+        {
+          "id": "d",
+          "text": "The HTTP exchange succeeded, but the body and current session/phase context must determine admission; old progress does not prove current training."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "d",
+        "explanation": "The journal source records successful HTTP responses even when their body describes a failure. Transport success, lifecycle state and numerical work require separate interpretation with the relevant context."
+      }
+    }
+  ],
+  "gates": [
+    {
+      "id": "sys-g09-01",
+      "objectiveIds": [
+        "sys-o09-01"
+      ],
+      "assessmentIds": [
+        "sys-a09-01-trace",
+        "sys-a09-01-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "sys-g09-02",
+      "objectiveIds": [
+        "sys-o09-02"
+      ],
+      "assessmentIds": [
+        "sys-a09-02-trace",
+        "sys-a09-02-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "sys-g09-03",
+      "objectiveIds": [
+        "sys-o09-03"
+      ],
+      "assessmentIds": [
+        "sys-a09-03-trace",
+        "sys-a09-03-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "sys-g09-04",
+      "objectiveIds": [
+        "sys-o09-04"
+      ],
+      "assessmentIds": [
+        "sys-a09-04-trace",
+        "sys-a09-04-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "sys-g10-01",
+      "objectiveIds": [
+        "sys-o10-01"
+      ],
+      "assessmentIds": [
+        "sys-a10-01-trace",
+        "sys-a10-01-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "sys-g10-02",
+      "objectiveIds": [
+        "sys-o10-02"
+      ],
+      "assessmentIds": [
+        "sys-a10-02-trace",
+        "sys-a10-02-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "sys-g10-03",
+      "objectiveIds": [
+        "sys-o10-03"
+      ],
+      "assessmentIds": [
+        "sys-a10-03-trace",
+        "sys-a10-03-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "sys-g10-04",
+      "objectiveIds": [
+        "sys-o10-04"
+      ],
+      "assessmentIds": [
+        "sys-a10-04-trace",
+        "sys-a10-04-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "sys-g11-01",
+      "objectiveIds": [
+        "sys-o11-01"
+      ],
+      "assessmentIds": [
+        "sys-a11-01-trace",
+        "sys-a11-01-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "sys-g11-02",
+      "objectiveIds": [
+        "sys-o11-02"
+      ],
+      "assessmentIds": [
+        "sys-a11-02-trace",
+        "sys-a11-02-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "sys-g11-03",
+      "objectiveIds": [
+        "sys-o11-03"
+      ],
+      "assessmentIds": [
+        "sys-a11-03-trace",
+        "sys-a11-03-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "sys-g11-04",
+      "objectiveIds": [
+        "sys-o11-04"
+      ],
+      "assessmentIds": [
+        "sys-a11-04-trace",
+        "sys-a11-04-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    }
+  ],
+  "sources": [
+    {
+      "id": "sys-src-threads",
+      "title": "Apple: Calculating threadgroup and grid sizes",
+      "url": "https://developer.apple.com/documentation/metal/calculating-threadgroup-and-grid-sizes",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-groups",
+      "title": "Apple: Creating threads and threadgroups",
+      "url": "https://developer.apple.com/documentation/metal/creating-threads-and-threadgroups",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-tensorops",
+      "title": "Apple: Accelerate machine learning workloads with M5 and A19 GPUs",
+      "url": "https://developer.apple.com/videos/play/tech-talks/111432/",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-roofline",
+      "title": "NERSC: Roofline Performance Model",
+      "url": "https://docs.nersc.gov/tools/performance/roofline/",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-mps",
+      "title": "Apple: Metal Performance Shaders",
+      "url": "https://developer.apple.com/documentation/metalperformanceshaders",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-mpsgraph",
+      "title": "Apple: Metal Performance Shaders Graph",
+      "url": "https://developer.apple.com/documentation/metalperformanceshadersgraph",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-inline",
+      "title": "Apple: Running inline ML operations in a shader with Metal 4",
+      "url": "https://developer.apple.com/documentation/metal/running-inline-ml-operations-in-a-shader-with-metal-4",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-storage",
+      "title": "Apple: Choosing a resource storage mode for Apple GPUs",
+      "url": "https://developer.apple.com/documentation/metal/choosing-a-resource-storage-mode-for-apple-gpus",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-gpipe",
+      "title": "Huang et al.: GPipe, microbatch pipeline parallelism",
+      "url": "https://arxiv.org/html/1811.06965v5",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-diloco",
+      "title": "Douillard et al.: Distributed Low-Communication Training of Language Models",
+      "url": "https://arxiv.org/abs/2311.08105",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-iota",
+      "title": "Macrocosmos: Subnet 9 IOTA architecture overview",
+      "url": "https://docs.macrocosmos.ai/subnets/subnet-9-iota.md",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-tah-guide",
+      "title": "Macrocosmos: TAH User Guide, application roles",
+      "url": "https://docs.macrocosmos.ai/product-and-services/tah/tah-user-guide",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-up-splits",
+      "title": "up-splits: pinned private source; immutable upstream Git blob; working-tree contents deliberately not substituted",
+      "url": "urn:private:course-llms-and-models:sys-src-up-splits:sha256:8fc9aa978300f2df81d9ecb81c877bfe76e9e0f27968ab28dbd6724505a014fe",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-up-queue",
+      "title": "up-queue: pinned private source; immutable upstream Git blob; working-tree contents deliberately not substituted",
+      "url": "urn:private:course-llms-and-models:sys-src-up-queue:sha256:cf61083bbe7eb6f00f0e18605d2fd597bb660afdd399ed97320b9327313b6b0f",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-patched-training",
+      "title": "patched-training: pinned private source; historical patched package file; not a live installation observation",
+      "url": "urn:private:course-llms-and-models:sys-src-patched-training:sha256:7ddce6af76a6815ccafee56ce0b44fadfded9ec9fd0b0e31372cd71e70009e7d",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-patched-router",
+      "title": "patched-router: pinned private source; historical patched package file; not a live installation observation",
+      "url": "urn:private:course-llms-and-models:sys-src-patched-router:sha256:4020b92fac9a79d7ae71b4b56a427d6d39ab45fa2e4277e98140824647e6f398",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-patched-mesh",
+      "title": "patched-mesh: pinned private source; historical patched package file; not a live installation observation",
+      "url": "urn:private:course-llms-and-models:sys-src-patched-mesh:sha256:2a55a5a9788c9da573333f74219005bb5475a551af6c5586a8de1f4cbb83ecb4",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-patched-phase",
+      "title": "patched-phase: pinned private source; historical patched package file; not a live installation observation",
+      "url": "urn:private:course-llms-and-models:sys-src-patched-phase:sha256:f1c3e4ac1a90fbd611eb39b98e497c563d9ba41028025bb7cc64f16e53bc601d",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-patched-merge",
+      "title": "patched-merge: pinned private source; historical patched package file; not a live installation observation",
+      "url": "urn:private:course-llms-and-models:sys-src-patched-merge:sha256:0fc817650c60ce606490bf21f16f519a6767e94ad863b1e3d959961896b47ec6",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-patched-model",
+      "title": "patched-model: pinned private source; historical patched package file; not a live installation observation",
+      "url": "urn:private:course-llms-and-models:sys-src-patched-model:sha256:888e1fb7787e00e4a776a52a3a1cb4f550c4c84fff7e4b75dafe8ce2fd38d177",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-patched-queue",
+      "title": "patched-queue: pinned private source; historical patched package file; not a live installation observation",
+      "url": "urn:private:course-llms-and-models:sys-src-patched-queue:sha256:b25a5d30065898b4b430a83e9aa1a5e2b8da1ac576b484d2b2899a2510d0e517",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-patched-cache",
+      "title": "patched-cache: pinned private source; historical patched package file; not a live installation observation",
+      "url": "urn:private:course-llms-and-models:sys-src-patched-cache:sha256:f0c8186794a94f32fc6ef9aef4184b5c7b11e9b2ec48ea284576f8aa8eeff2a6",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-journal-source",
+      "title": "journal-source: pinned private source; historical patched package file; not a live installation observation",
+      "url": "urn:private:course-llms-and-models:sys-src-journal-source:sha256:872e4cf10ecac7560e7f9ef147bd03d0da074eff7f2ba3d54e1512f9130f7a4d",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-entrypoint",
+      "title": "entrypoint: pinned private source; local control source snapshot; hash is authoritative, not deployment status",
+      "url": "urn:private:course-llms-and-models:sys-src-entrypoint:sha256:fa5a82aa4948865b36053c4f22a13a844e6456ec540db8b4a2b4eaf69acdf41e",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-local-readme",
+      "title": "local-readme: pinned private source; dated explanatory history; source statements are not fresh fleet observations",
+      "url": "urn:private:course-llms-and-models:sys-src-local-readme:sha256:1be8e8c9e970ac5ad2522421b6ae4e73fce6b731c3358a4cd6b9036b66e700de",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-fixset",
+      "title": "fixset: pinned private source; patch history read as versioned documentation",
+      "url": "urn:private:course-llms-and-models:sys-src-fixset:sha256:a6765866993c3edc13d1406f714d3d764dd673f582a7868a638332d71550ef50",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-journal-patch",
+      "title": "journal-patch: pinned private source; historical patch, not evidence of live execution",
+      "url": "urn:private:course-llms-and-models:sys-src-journal-patch:sha256:fc67837c33d4f8b6154aac1d81825d39a05c562ff496e02e17e5cf0e0a4fff13",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-head-record",
+      "title": "head-record: pinned private source; archived local benchmark, not network training/journal acceptance",
+      "url": "urn:private:course-llms-and-models:sys-src-head-record:sha256:ef23f38a86ab4156a5a2d98571adf97f5af5460ef98c2d12fa75e70951ea9a2f",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-rules",
+      "title": "rules: pinned private source; repository computed-work equivalence and operational constraints",
+      "url": "urn:private:course-llms-and-models:sys-src-rules:sha256:60da4971318cd8c3e8c2735255d4e526e48e12427c20555488c7c5a9b35f1743",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-package-manifest",
+      "title": "package-manifest: pinned private source; historical artifact metadata; no deployment assertion",
+      "url": "urn:private:course-llms-and-models:sys-src-package-manifest:sha256:cf502aafa3304cb4bf291ade7360b62f7a737ba7dd87b90d13efcf07352f14cd",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    },
+    {
+      "id": "sys-src-original",
+      "title": "Original CPU calculations, simulations and instructor verification",
+      "url": "urn:private:course-llms-and-models:systems-and-distribution-review:2026-10-12",
+      "reviewedAt": "2026-10-12T16:10:35Z"
+    }
+  ],
+  "visuals": [],
+  "media": [],
+  "extensions": []
+}

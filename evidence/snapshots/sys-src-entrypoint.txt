@@ -1,0 +1,345 @@
+#!/usr/bin/env python3
+"""Entrypoint for the explicitly authorized mounted-attestation bridge.
+
+This file keeps the audited upstream pool CLI intact.  Its runtime
+adaptations are selecting the node-control port supplied by the bridge
+supervisor before the private pool miner is constructed, and turning on the
+upstream loopback health endpoint on a free port (the official host leaves it
+off, and the sealed environment cannot carry LAUNCH_HEALTH).
+"""
+
+from __future__ import annotations
+
+import importlib.util
+from functools import partial
+import hashlib
+import hmac
+import json
+import multiprocessing
+import os
+from pathlib import Path
+import socket
+import stat
+import sys
+from typing import Any
+
+
+EX_CONFIG = 78
+MIN_CONTROL_PORT = 1024
+MAX_CONTROL_PORT = 65535
+MAX_RECEIPT_BYTES = 16 * 1024 * 1024
+WORKER_SESSION_PREFIX = "strata-mounted-"
+WORKER_SESSION_HEX_BYTES = 32
+# Upstream's health endpoint (GET /health, JSON status and work progress) binds
+# loopback only. A worker uses upstream's default port 9000 (MINER_HEALTH_PORT)
+# when it is free, so a Mac with one worker behaves like upstream; only a second
+# worker on the same Mac falls back to the first free port in 19100-19199.
+# The miner logs the URL it bound.
+HEALTH_HOST = "127.0.0.1"
+DEFAULT_HEALTH_PORT = 9000
+HEALTH_FALLBACK_PORTS = range(19100, 19200)
+
+
+def _free_health_port() -> int | None:
+    for port in (DEFAULT_HEALTH_PORT, *HEALTH_FALLBACK_PORTS):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+            try:
+                probe.bind((HEALTH_HOST, port))
+            except OSError:
+                continue
+            return port
+    return None
+
+
+def _with_health_endpoint(kwargs: dict[str, Any]) -> dict[str, Any]:
+    """Turn on the loopback health endpoint unless no port in range is free."""
+
+    port = _free_health_port()
+    if port is None:
+        return kwargs
+    return {**kwargs, "launch_health": True, "health_host": HEALTH_HOST, "health_port": port}
+
+
+def _runtime_root() -> Path:
+    return Path(__file__).resolve().parent / "runtime"
+
+
+def _prepare_import_path(runtime_root: Path) -> None:
+    roots = (
+        runtime_root / "src/miner/src",
+        runtime_root / "shared/common/src",
+        runtime_root / "shared/subnet/src",
+    )
+    missing = [str(path) for path in roots if not path.is_dir()]
+    if missing:
+        raise SystemExit(f"Mounted runtime source roots are missing: {missing}")
+    sys.path[:0] = [str(path) for path in roots]
+
+
+def _validated_control_port() -> int:
+    raw = os.environ.get("STRATA_IOTA_NODE_CONTROL_PORT", "")
+    try:
+        port = int(raw)
+    except ValueError as exc:
+        raise SystemExit(EX_CONFIG) from exc
+    if not MIN_CONTROL_PORT <= port <= MAX_CONTROL_PORT or port == 8010:
+        raise SystemExit(EX_CONFIG)
+    return port
+
+
+def _validated_worker_session_id() -> str:
+    value = os.environ.get("STRATA_IOTA_WORKER_SESSION_ID", "")
+    suffix = value.removeprefix(WORKER_SESSION_PREFIX)
+    if (
+        not value.startswith(WORKER_SESSION_PREFIX)
+        or len(suffix) != WORKER_SESSION_HEX_BYTES * 2
+        or any(character not in "0123456789abcdef" for character in suffix)
+    ):
+        raise SystemExit(EX_CONFIG)
+    return value
+
+
+def _validate_provenance_receipt(package_root: Path) -> None:
+    raw_path = os.environ.get("STRATA_IOTA_PROXY_PROVENANCE_RECEIPT", "")
+    if not raw_path:
+        raise SystemExit(EX_CONFIG)
+    receipt_path = Path(raw_path).expanduser().absolute()
+    try:
+        metadata = receipt_path.lstat()
+    except OSError as exc:
+        raise SystemExit(EX_CONFIG) from exc
+    if (
+        stat.S_ISLNK(metadata.st_mode)
+        or not stat.S_ISREG(metadata.st_mode)
+        or metadata.st_uid != os.getuid()
+        or metadata.st_nlink != 1
+        or stat.S_IMODE(metadata.st_mode) != 0o600
+        or metadata.st_size > MAX_RECEIPT_BYTES
+    ):
+        raise SystemExit(EX_CONFIG)
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        descriptor = os.open(receipt_path, flags)
+        try:
+            opened = os.fstat(descriptor)
+            if (opened.st_dev, opened.st_ino) != (metadata.st_dev, metadata.st_ino):
+                raise SystemExit(EX_CONFIG)
+            with os.fdopen(descriptor, "r", encoding="utf-8", closefd=True) as handle:
+                descriptor = -1
+                receipt = json.load(handle)
+        finally:
+            if descriptor >= 0:
+                os.close(descriptor)
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise SystemExit(EX_CONFIG) from exc
+    if not isinstance(receipt, dict):
+        raise SystemExit(EX_CONFIG)
+    unsigned = {key: value for key, value in receipt.items() if key != "receipt_sha256"}
+    calculated = hashlib.sha256(
+        b"strata-mounted-proxy-receipt-v1\0"
+        + json.dumps(unsigned, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    patched = receipt.get("patched")
+    if (
+        receipt.get("kind") != "strata-iota-mounted-proxy-authorization"
+        or receipt.get("host_claim_mismatch_acknowledged") is not True
+        or not isinstance(receipt.get("receipt_sha256"), str)
+        or not hmac.compare_digest(receipt["receipt_sha256"], calculated)
+        or not isinstance(patched, dict)
+        or Path(str(patched.get("package_root", ""))).resolve() != package_root.resolve()
+    ):
+        raise SystemExit(EX_CONFIG)
+
+
+def _validate_mounted_context(package_root: Path) -> None:
+    required = {
+        "STRATA_IOTA_AUTHORIZED_MOUNTED_PROXY": "1",
+        "IS_MOUNTED": "true",
+    }
+    for key, expected in required.items():
+        if os.environ.get(key) != expected:
+            raise SystemExit(EX_CONFIG)
+    for key in ("NODE_CONTROL_TOKEN", "ELECTRON_HOST_PID", "ELECTRON_VERSION"):
+        if not os.environ.get(key):
+            raise SystemExit(EX_CONFIG)
+    if os.environ["ELECTRON_VERSION"] != "3.7.0":
+        raise SystemExit(EX_CONFIG)
+    token = os.environ["NODE_CONTROL_TOKEN"]
+    if len(token) != 48 or any(character not in "0123456789abcdef" for character in token):
+        raise SystemExit(EX_CONFIG)
+    try:
+        host_pid = int(os.environ["ELECTRON_HOST_PID"])
+    except ValueError as exc:
+        raise SystemExit(EX_CONFIG) from exc
+    if host_pid <= 1:
+        raise SystemExit(EX_CONFIG)
+    try:
+        supervisor_pid = int(os.environ.get("STRATA_IOTA_PROXY_SUPERVISOR_PID", ""))
+    except ValueError as exc:
+        raise SystemExit(EX_CONFIG) from exc
+    if supervisor_pid <= 1 or os.getppid() != supervisor_pid:
+        raise SystemExit(EX_CONFIG)
+    _validated_worker_session_id()
+    _validate_provenance_receipt(package_root)
+
+
+def _validate_protocol_child_context(
+    package_root: Path,
+    *,
+    expected_worker_pid: int,
+    control_port: int,
+) -> str:
+    """Revalidate the inherited mounted identity inside the spawned server.
+
+    macOS uses the ``spawn`` multiprocessing start method.  The protocol server
+    therefore starts in a fresh interpreter and must not rely on a parent-only
+    monkeypatch for its session binding.
+    """
+
+    if expected_worker_pid <= 1 or os.getppid() != expected_worker_pid:
+        raise SystemExit(EX_CONFIG)
+    if os.environ.get("STRATA_IOTA_AUTHORIZED_MOUNTED_PROXY") != "1":
+        raise SystemExit(EX_CONFIG)
+    if os.environ.get("IS_MOUNTED") != "true":
+        raise SystemExit(EX_CONFIG)
+    if os.environ.get("ELECTRON_VERSION") != "3.7.0":
+        raise SystemExit(EX_CONFIG)
+    token = os.environ.get("NODE_CONTROL_TOKEN", "")
+    if len(token) != 48 or any(character not in "0123456789abcdef" for character in token):
+        raise SystemExit(EX_CONFIG)
+    try:
+        host_pid = int(os.environ.get("ELECTRON_HOST_PID", ""))
+    except ValueError as exc:
+        raise SystemExit(EX_CONFIG) from exc
+    if host_pid <= 1 or _validated_control_port() != control_port:
+        raise SystemExit(EX_CONFIG)
+    worker_session_id = _validated_worker_session_id()
+    _validate_provenance_receipt(package_root)
+    return worker_session_id
+
+
+class _SessionBoundWebSocket:
+    """Rewrite only the protocol welcome to a supervisor-provisioned session id."""
+
+    def __init__(self, delegate: Any, protocol: Any, expected_session_id: str):
+        self._delegate = delegate
+        self._protocol = protocol
+        self._expected_session_id = expected_session_id
+        self._welcome_sent = False
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._delegate, name)
+
+    async def send_json(self, value: Any) -> Any:
+        if isinstance(value, dict) and value.get("kind") == "welcome" and value.get("name") == "welcome":
+            if self._welcome_sent:
+                raise RuntimeError("Protocol attempted more than one welcome")
+            data = value.get("data")
+            client = getattr(self._protocol, "_client", None)
+            if not isinstance(data, dict) or client is None:
+                raise RuntimeError("Protocol welcome lacked an active client")
+            client.session_id = self._expected_session_id
+            value = {**value, "data": {**data, "sessionId": self._expected_session_id}}
+            self._welcome_sent = True
+        return await self._delegate.send_json(value)
+
+
+def _install_worker_session_binding(control_api: Any, expected_session_id: str) -> None:
+    """Bind the worker's welcome to a secret unavailable to other loopback services."""
+
+    protocol = control_api.protocol
+    previous = getattr(protocol, "_strata_expected_session_id", None)
+    if previous is not None:
+        if previous != expected_session_id:
+            raise SystemExit(EX_CONFIG)
+        return
+    original = protocol.websocket_session
+
+    async def bound_session(websocket: Any, token: str | None) -> None:
+        wrapped = _SessionBoundWebSocket(websocket, protocol, expected_session_id)
+        await original(wrapped, token)
+
+    protocol.websocket_session = bound_session
+    protocol._strata_expected_session_id = expected_session_id
+
+
+def _start_session_bound_protocol_server(expected_worker_pid: int, control_port: int) -> None:
+    """Spawn-safe target that installs the binding in the server process."""
+
+    runtime_root = _runtime_root()
+    _prepare_import_path(runtime_root)
+    worker_session_id = _validate_protocol_child_context(
+        runtime_root.parent,
+        expected_worker_pid=expected_worker_pid,
+        control_port=control_port,
+    )
+    from miner.utils import node_protocol_control_api
+
+    _install_worker_session_binding(node_protocol_control_api, worker_session_id)
+    node_protocol_control_api.start_protocol_server(control_port)
+
+
+def _load_upstream_entrypoint(runtime_root: Path):
+    entrypoint_path = runtime_root / "src/miner/main_pool.py"
+    spec = importlib.util.spec_from_file_location(
+        "_strata_iota_mounted_upstream_main_pool",
+        entrypoint_path,
+    )
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Unable to load upstream entrypoint: {entrypoint_path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def main() -> None:
+    runtime_root = _runtime_root()
+    _prepare_import_path(runtime_root)
+    _validate_mounted_context(runtime_root.parent)
+    control_port = _validated_control_port()
+    worker_session_id = _validated_worker_session_id()
+
+    # Import only after the mounted environment has been validated: the
+    # upstream settings module snapshots IS_MOUNTED, host PID, and token.
+    from miner.utils import node_protocol_control_api
+
+    _install_worker_session_binding(node_protocol_control_api, worker_session_id)
+    from miner.standalone_pool import HeadlessPoolMiner
+    from miner.utils import node_control_mixin
+
+    # NodeControlMixin launches this target in a multiprocessing child.  Patch
+    # the mixin's module global to a top-level, pickleable target so the fresh
+    # macOS spawn interpreter installs the same session binding before serving.
+    node_control_mixin.start_protocol_server = partial(
+        _start_session_bound_protocol_server,
+        os.getpid(),
+    )
+
+    class AuthorizedMountedPoolMiner(HeadlessPoolMiner):
+        def __init__(self, *args, **kwargs):
+            configured = kwargs.get("node_control_port")
+            if configured is not None and configured != control_port:
+                raise RuntimeError("Conflicting mounted node-control port")
+            kwargs["node_control_port"] = control_port
+            super().__init__(*args, **_with_health_endpoint(kwargs))
+
+        async def _start_health_server(self):
+            # Upstream re-raises a bind failure, which would stop the miner.
+            # The port was free a moment ago; if another process took it, run
+            # without the endpoint rather than not at all.
+            try:
+                await super()._start_health_server()
+            except OSError as exc:
+                from loguru import logger
+
+                logger.warning(f"Health endpoint not started ({type(exc).__name__}: {exc}); continuing without it")
+
+    pool_entrypoint = _load_upstream_entrypoint(runtime_root)
+    pool_entrypoint.Miner = AuthorizedMountedPoolMiner
+    pool_entrypoint.main()
+
+
+if __name__ == "__main__":
+    multiprocessing.freeze_support()
+    main()

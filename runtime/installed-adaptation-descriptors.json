@@ -1,0 +1,16 @@
+{
+  "adapters": [
+    {
+      "id": "bounded-numeric-v1",
+      "implementationDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "kind": "numeric",
+      "authorization": "release_registry_approval_required"
+    },
+    {
+      "id": "authored-bank-v1",
+      "implementationDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "kind": "bank",
+      "authorization": "release_registry_approval_required"
+    }
+  ]
+}

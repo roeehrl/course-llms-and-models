@@ -1,0 +1,413 @@
+"""Feature-gated health-aware routing for forward activation delivery.
+
+Eligibility and receiver capacity remain authoritative.  This policy only
+reweights already eligible peers, bounds repeated failures, and prevents an
+activation whose delivery became ambiguous from being replayed to a different
+peer.
+"""
+
+from __future__ import annotations
+
+import math
+import random
+import time
+from collections import deque
+from dataclasses import dataclass, field
+from enum import Enum
+
+from loguru import logger
+
+
+class DeliveryOutcome(str, Enum):
+    ACKED = "acked"
+    EXPLICIT_NACK = "explicit_nack"
+    PRE_DISPATCH_FAILURE = "pre_dispatch_failure"
+    AMBIGUOUS_FAILURE = "ambiguous_failure"
+    LOCAL_SENDER_UNAVAILABLE = "local_sender_unavailable"
+
+
+def may_reroute(outcome: DeliveryOutcome) -> bool:
+    return outcome in {
+        DeliveryOutcome.EXPLICIT_NACK,
+        DeliveryOutcome.PRE_DISPATCH_FAILURE,
+    }
+
+
+def classify_generic_failure(timings, exc: BaseException | None = None) -> DeliveryOutcome:
+    """Classify conservatively from the sender's completed transport phases."""
+
+    error_text = str(exc).lower() if exc is not None else ""
+    if "read timeout" in error_text or "receive timeout" in error_text:
+        return DeliveryOutcome.AMBIGUOUS_FAILURE
+    if "connect timeout" in error_text or "connection timeout" in error_text:
+        return DeliveryOutcome.PRE_DISPATCH_FAILURE
+    if timings is None:
+        return DeliveryOutcome.AMBIGUOUS_FAILURE
+    if getattr(timings, "send_duration", None) is not None:
+        return DeliveryOutcome.AMBIGUOUS_FAILURE
+    connection_duration = getattr(timings, "connection_duration", None)
+    stream_open_duration = getattr(timings, "stream_open_duration", None)
+    # Failed Rust calls may return no phase timings at all. Empty therefore
+    # means unknown, not proof that dispatch never happened.
+    if connection_duration is None and stream_open_duration is None:
+        return DeliveryOutcome.AMBIGUOUS_FAILURE
+    if connection_duration is None or stream_open_duration is None:
+        return DeliveryOutcome.PRE_DISPATCH_FAILURE
+    return DeliveryOutcome.AMBIGUOUS_FAILURE
+
+
+@dataclass
+class PeerHealth:
+    success_ewma: float = 0.5
+    latency_ewma_s: float | None = None
+    observations: int = 0
+    consecutive_failures: int = 0
+    circuit_open_count: int = 0
+    open_until: float = 0.0
+    half_open_probe_in_flight: bool = False
+    updated_at: float = 0.0
+    # End-to-end cost of a forward sent to this peer: seconds until its
+    # backward came back, or the local cache hold time when it never did.
+    return_ewma_s: float | None = None
+    return_observations: int = 0
+    return_expiries: int = 0
+    # Patch 39: monotonic times of the latest returned backwards.
+    recent_returns: deque = field(default_factory=lambda: deque(maxlen=8))
+
+
+# Return-aware weighting, chosen by replaying three weeks of Studio routing
+# logs (2026-09-03..27): factor = clamp((reference / peer_cost) ** POWER),
+# where reference is the median cost among the current candidates. Peers with
+# fewer than MIN_OBSERVATIONS resolved sends stay neutral so new peers are
+# still tried, and the floor keeps slow peers sampled so recovery is noticed.
+RETURN_FACTOR_FLOOR = 0.2
+RETURN_FACTOR_CEILING = 4.0
+RETURN_FACTOR_POWER = 1.5
+RETURN_EWMA_ALPHA = 0.2
+RETURN_MIN_OBSERVATIONS = 3
+MAX_PENDING_RETURNS = 8192
+
+
+class TransportHealthRouter:
+    def __init__(
+        self,
+        *,
+        rng=None,
+        clock=None,
+        max_peers: int = 2048,
+        ttl_s: float = 3600.0,
+        failure_threshold: int = 3,
+        circuit_base_s: float = 5.0,
+        circuit_max_s: float = 60.0,
+        return_aware: bool = False,
+        wall_clock=None,
+        status_freshness_s: float = 0.0,
+        fresh_return_window_s: float = 300.0,
+        fresh_min_recent_returns: int = 2,
+    ):
+        if max_peers < 1 or ttl_s <= 0 or failure_threshold < 1:
+            raise ValueError("max_peers, ttl_s, and failure_threshold must be positive")
+        if circuit_base_s <= 0 or circuit_max_s < circuit_base_s:
+            raise ValueError("circuit durations are invalid")
+        self.rng = rng or random.Random()
+        self.clock = clock or time.monotonic
+        self.max_peers = max_peers
+        self.ttl_s = ttl_s
+        self.failure_threshold = failure_threshold
+        self.circuit_base_s = circuit_base_s
+        self.circuit_max_s = circuit_max_s
+        self.peers: dict[str, PeerHealth] = {}
+        self.return_aware = return_aware
+        # activation_id -> (peer_id, dispatch time). Bounded; entries that are
+        # never resolved (an epoch reset clears the cache) age out unscored.
+        self._pending_returns: dict[str, tuple[str, float]] = {}
+        # Patch 39: status freshness gate and the return-time sample used by
+        # layer 0's stale-slot reclaim.
+        self.wall_clock = wall_clock or time.time
+        self.status_freshness_s = status_freshness_s
+        self.fresh_return_window_s = fresh_return_window_s
+        self.fresh_min_recent_returns = fresh_min_recent_returns
+        self.stale_excluded_total = 0
+        self.stale_fallback_total = 0
+        self._freshness_logged_at = 0.0
+
+    def note_forward_dispatched(self, activation_id: str, peer_id: str) -> None:
+        """Remember which peer an acknowledged forward went to."""
+
+        if not self.return_aware or not activation_id or not peer_id:
+            return
+        now = self.clock()
+        self._pending_returns.pop(activation_id, None)
+        self._pending_returns[activation_id] = (peer_id, now)
+        if len(self._pending_returns) > MAX_PENDING_RETURNS:
+            horizon = now - self.ttl_s
+            for key in [k for k, (_p, t) in self._pending_returns.items() if t < horizon]:
+                del self._pending_returns[key]
+            while len(self._pending_returns) > MAX_PENDING_RETURNS:
+                del self._pending_returns[next(iter(self._pending_returns))]
+
+    def record_return(self, activation_id: str) -> None:
+        """A backward for a forward we sent has arrived."""
+
+        if not self.return_aware:
+            return
+        pending = self._pending_returns.pop(activation_id, None)
+        if pending is None:
+            return
+        peer_id, dispatched_at = pending
+        self._observe_return(peer_id, max(0.0, self.clock() - dispatched_at), expired=False)
+
+    def record_expiry(self, activation_id: str, held_s: float) -> None:
+        """A forward we sent timed out in the local cache without a backward."""
+
+        if not self.return_aware:
+            return
+        pending = self._pending_returns.pop(activation_id, None)
+        if pending is None:
+            return
+        self._observe_return(pending[0], max(0.0, float(held_s)), expired=True)
+
+    def forget_pending_returns(self) -> int:
+        """Drop every unresolved forward without scoring it; return how many.
+
+        Used after our own P2P endpoint was rebuilt: backwards that could not
+        reach us while it was dead measure our outage, not the peers. Learned
+        per-peer costs are kept. A backward or cache expiry that arrives later
+        for a forgotten id finds nothing pending and is dropped unscored.
+        """
+
+        count = len(self._pending_returns)
+        self._pending_returns.clear()
+        return count
+
+    def _observe_return(self, peer_id: str, cost_s: float, *, expired: bool) -> None:
+        now = self.clock()
+        state = self._state(peer_id, now)
+        if state is None:
+            return
+        state.return_ewma_s = (
+            cost_s
+            if state.return_ewma_s is None
+            else RETURN_EWMA_ALPHA * cost_s + (1 - RETURN_EWMA_ALPHA) * state.return_ewma_s
+        )
+        state.return_observations += 1
+        if expired:
+            state.return_expiries += 1
+        else:
+            state.recent_returns.append(now)
+        state.updated_at = now
+
+    def _is_fresh(self, peer, now_wall: float, now: float) -> bool:
+        age = now_wall - peer.runtime_metrics.last_status_received
+        if age <= self.status_freshness_s:
+            return True
+        state = self.peers.get(peer.node_id)
+        if state is None:
+            return False
+        horizon = now - self.fresh_return_window_s
+        return sum(1 for t in state.recent_returns if t >= horizon) >= self.fresh_min_recent_returns
+
+    def _return_factor(self, state: PeerHealth, reference: float | None) -> float:
+        if (
+            not self.return_aware
+            or reference is None
+            or state.return_ewma_s is None
+            or state.return_observations < RETURN_MIN_OBSERVATIONS
+        ):
+            return 1.0
+        ratio = reference / max(0.001, state.return_ewma_s)
+        return min(RETURN_FACTOR_CEILING, max(RETURN_FACTOR_FLOOR, ratio ** RETURN_FACTOR_POWER))
+
+    def _prune(self, now: float) -> None:
+        stale = [
+            peer_id
+            for peer_id, state in self.peers.items()
+            if not state.half_open_probe_in_flight
+            and now - state.updated_at > self.ttl_s
+        ]
+        for peer_id in stale:
+            self.peers.pop(peer_id, None)
+        while len(self.peers) >= self.max_peers:
+            # Never discard an outstanding half-open probe: forgetting it could
+            # schedule a second probe to the same uncertain peer.  If every
+            # tracked peer is probing, fail open without persisting a new peer
+            # until one of those bounded probes resolves.
+            evictable = [
+                peer_id
+                for peer_id, state in self.peers.items()
+                if not state.half_open_probe_in_flight
+            ]
+            if not evictable:
+                break
+            self.peers.pop(
+                min(evictable, key=lambda key: self.peers[key].updated_at),
+                None,
+            )
+
+    def _state(self, peer_id: str, now: float) -> PeerHealth | None:
+        state = self.peers.get(peer_id)
+        if state is None:
+            self._prune(now)
+            if len(self.peers) < self.max_peers:
+                state = PeerHealth(updated_at=now)
+                self.peers[peer_id] = state
+        return state
+
+    def record(
+        self,
+        peer_id: str,
+        outcome: DeliveryOutcome,
+        latency_s: float | None = None,
+    ) -> None:
+        now = self.clock()
+        if outcome == DeliveryOutcome.LOCAL_SENDER_UNAVAILABLE:
+            state = self.peers.get(peer_id)
+            if state is not None:
+                state.half_open_probe_in_flight = False
+                state.updated_at = now
+            return
+
+        state = self._state(peer_id, now)
+        if state is None:
+            return
+        if outcome == DeliveryOutcome.ACKED:
+            state.success_ewma = 0.25 + 0.75 * state.success_ewma
+            if latency_s is not None:
+                latency_s = max(0.0, latency_s)
+                state.latency_ewma_s = (
+                    latency_s
+                    if state.latency_ewma_s is None
+                    else 0.2 * latency_s + 0.8 * state.latency_ewma_s
+                )
+            state.observations += 1
+            state.consecutive_failures = 0
+            state.circuit_open_count = 0
+            state.open_until = 0.0
+            state.half_open_probe_in_flight = False
+        else:
+            state.success_ewma *= 0.75
+            state.observations += 1
+            state.consecutive_failures += 1
+            state.half_open_probe_in_flight = False
+            if (
+                outcome
+                in {DeliveryOutcome.EXPLICIT_NACK, DeliveryOutcome.AMBIGUOUS_FAILURE}
+                or state.consecutive_failures >= self.failure_threshold
+            ):
+                state.circuit_open_count += 1
+                duration = min(
+                    self.circuit_base_s * (2 ** (state.circuit_open_count - 1)),
+                    self.circuit_max_s,
+                )
+                state.open_until = now + duration
+        state.updated_at = now
+
+    def choose(self, weighted_peers: list[tuple[object, float]]):
+        now = self.clock()
+        positive = [(peer, weight) for peer, weight in weighted_peers if weight > 0]
+        candidate_ids = {peer.node_id for peer, _ in positive}
+        known_latencies = [
+            state.latency_ewma_s
+            for peer_id, state in self.peers.items()
+            if peer_id in candidate_ids and state.latency_ewma_s is not None
+        ]
+        latency_reference = (
+            sorted(known_latencies)[len(known_latencies) // 2]
+            if known_latencies
+            else 1.0
+        )
+        known_returns = sorted(
+            state.return_ewma_s
+            for peer_id, state in self.peers.items()
+            if peer_id in candidate_ids
+            and state.return_ewma_s is not None
+            and state.return_observations >= RETURN_MIN_OBSERVATIONS
+        )
+        return_reference = known_returns[len(known_returns) // 2] if known_returns else None
+        candidates: list[tuple[object, float, PeerHealth, bool]] = []
+        for peer, capacity_weight in positive:
+            state = self._state(peer.node_id, now)
+            if state is None:
+                continue
+            half_open = state.open_until > 0.0
+            if now < state.open_until or (
+                half_open and state.half_open_probe_in_flight
+            ):
+                continue
+            latency_factor = (
+                1.0
+                if state.latency_ewma_s is None
+                else min(
+                    2.0,
+                    max(
+                        0.25,
+                        latency_reference / max(0.001, state.latency_ewma_s),
+                    ),
+                )
+            )
+            score = (
+                capacity_weight
+                * max(0.1, state.success_ewma)
+                * latency_factor
+                * self._return_factor(state, return_reference)
+            )
+            if half_open:
+                score *= 0.1
+            candidates.append((peer, score, state, half_open))
+        if not candidates:
+            return None
+        peer, _, state, half_open = self.rng.choices(
+            candidates,
+            weights=[item[1] for item in candidates],
+            k=1,
+        )[0]
+        if half_open:
+            state.half_open_probe_in_flight = True
+        return peer
+
+    def select_by_capacity(self, eligible):
+        """Preserve the existing phase/status/capacity gate before reweighting."""
+
+        scored = []
+        any_status = False
+        for peer in eligible:
+            metrics = peer.runtime_metrics
+            if metrics.last_status_received:
+                any_status = True
+            if (
+                not metrics.last_status_received
+                or metrics.layer_phase != "training"
+                or metrics.miner_status != "training"
+            ):
+                continue
+            free_cache = metrics.cache_capacity - metrics.cache_size
+            if free_cache <= 0:
+                continue
+            weight = math.log1p(free_cache) / (1 + metrics.forward_queue_size)
+            scored.append((peer, weight))
+        if scored and self.status_freshness_s > 0:
+            now_wall = self.wall_clock()
+            now = self.clock()
+            fresh = [(peer, weight) for peer, weight in scored if self._is_fresh(peer, now_wall, now)]
+            if now - self._freshness_logged_at >= 60.0:
+                self._freshness_logged_at = now
+                logger.info(
+                    f"FORWARD_ROUTING_FRESHNESS candidates={len(scored)} fresh={len(fresh)} "
+                    f"stale_excluded_total={self.stale_excluded_total} fallback_total={self.stale_fallback_total}"
+                )
+            if fresh:
+                self.stale_excluded_total += len(scored) - len(fresh)
+                chosen = self.choose(fresh)
+                if chosen is not None:
+                    return chosen
+            else:
+                # Nobody has spoken to us recently (cold start, our own outage):
+                # keep today's choice rather than stall routing.
+                self.stale_fallback_total += 1
+        if scored:
+            return self.choose(scored)
+        if any_status:
+            return None
+        from miner.training.peer_selection import select_random
+
+        return select_random(eligible)

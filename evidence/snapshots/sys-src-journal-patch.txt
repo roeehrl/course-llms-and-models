@@ -1,0 +1,284 @@
+diff --git a/shared/common/src/common/utils/strata_event_journal.py b/shared/common/src/common/utils/strata_event_journal.py
+new file mode 100644
+index 0000000..72b6c30
+--- /dev/null
++++ b/shared/common/src/common/utils/strata_event_journal.py
+@@ -0,0 +1,86 @@
++"""Owner-only structured event journal for the local STRATA app.
++
++The mounted proxy creates ``events-<session>.jsonl`` (0600) and passes its
++path in ``STRATA_IOTA_EVENT_JOURNAL``. The worker appends one JSON object per
++domain event at the exact code sites that also log the event, so the app can
++read typed fields instead of scraping free-text log lines whose wording and
++truncation can change. When the variable is unset (upstream behaviour,
++standalone runs) every call is a no-op.
++
++Records: ``schema_version`` (1), ``wall_time`` (UTC ISO 8601),
++``monotonic_seconds``, ``event`` and the event's fields. Values are JSON
++primitives; strings are bounded. Appends use one ``os.write`` on an
++``O_APPEND`` descriptor, like the registration journal. A journal failure is
++logged at most once a minute and never changes worker behaviour.
++"""
++
++from __future__ import annotations
++
++import json
++import os
++import time
++from datetime import datetime, timezone
++
++from loguru import logger
++
++SCHEMA_VERSION = 1
++ENVIRONMENT_VARIABLE = "STRATA_IOTA_EVENT_JOURNAL"
++MAX_STRING_LENGTH = 2048
++MAX_RECORD_BYTES = 64 * 1024
++
++_last_failure_log = 0.0
++
++
++def _bounded(value, depth: int = 0):
++    if value is None or isinstance(value, (bool, int)):
++        return value
++    if isinstance(value, float):
++        return value if value == value and value not in (float("inf"), float("-inf")) else None
++    if isinstance(value, str):
++        return value[:MAX_STRING_LENGTH]
++    if depth < 3 and isinstance(value, dict):
++        return {str(key)[:128]: _bounded(item, depth + 1) for key, item in list(value.items())[:64]}
++    if depth < 3 and isinstance(value, (list, tuple)):
++        return [_bounded(item, depth + 1) for item in list(value)[:64]]
++    return str(value)[:MAX_STRING_LENGTH]
++
++
++def _emit_unchecked(event: str, fields: dict) -> None:
++    path = os.environ.get(ENVIRONMENT_VARIABLE)
++    if not path:
++        return
++    record = {
++        "schema_version": SCHEMA_VERSION,
++        "wall_time": datetime.now(timezone.utc).isoformat(),
++        "monotonic_seconds": time.monotonic(),
++        "event": event,
++    }
++    for key, value in fields.items():
++        if key not in record:
++            record[key] = _bounded(value)
++    payload = (json.dumps(record, sort_keys=True, separators=(",", ":"), allow_nan=False) + "\n").encode("utf-8")
++    if len(payload) > MAX_RECORD_BYTES:
++        return
++    flags = os.O_WRONLY | os.O_APPEND | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0)
++    descriptor = os.open(path, flags, 0o600)
++    try:
++        os.fchmod(descriptor, 0o600)
++        os.write(descriptor, payload)
++    finally:
++        os.close(descriptor)
++
++
++def emit(event: str, **fields) -> None:
++    """Append one event; best effort, never raises."""
++    global _last_failure_log
++    try:
++        _emit_unchecked(event, fields)
++    except Exception as exc:  # noqa: BLE001 - diagnostics must not affect training
++        now = time.monotonic()
++        if now - _last_failure_log >= 60:
++            _last_failure_log = now
++            logger.warning(
++                "Local event journal append failed (event={}, error_type={})",
++                event,
++                type(exc).__name__,
++            )
+diff --git a/shared/subnet/src/subnet/common_api_client.py b/shared/subnet/src/subnet/common_api_client.py
+index 51a3f37..024846b 100644
+--- a/shared/subnet/src/subnet/common_api_client.py
++++ b/shared/subnet/src/subnet/common_api_client.py
+@@ -16,6 +16,7 @@ from common.settings import ORCHESTRATOR_HOST, ORCHESTRATOR_PORT, ORCHESTRATOR_S
+ from common.utils.epistula import create_message_body, generate_header
+ from common.utils.exceptions import APIException, RateLimitException
+ from common.utils.partitions import MinerPartition
++from common.utils import strata_event_journal
+ 
+ HEADER_REQUEST_ID = "X-Request-Id"
+ _REGISTRATION_GENERATION = 0
+@@ -247,6 +248,13 @@ class CommonAPIClient:
+                                 f"Successfully completed request to {path}; response: "
+                                 f"{_response_log_summary(path, response_json)}"
+                             )
++                            if path.startswith("/miner/heartbeat"):
++                                # Every HTTP-200 heartbeat, including semantic
++                                # failures; the complete response (the log line
++                                # above truncates it to 100 characters).
++                                strata_event_journal.emit(
++                                    "heartbeat_response", path=path, response=response_json
++                                )
+                             _append_registration_journal(
+                                 method=method,
+                                 path=path,
+diff --git a/shared/subnet/tests/test_strata_event_journal.py b/shared/subnet/tests/test_strata_event_journal.py
+new file mode 100644
+index 0000000..2640b74
+--- /dev/null
++++ b/shared/subnet/tests/test_strata_event_journal.py
+@@ -0,0 +1,63 @@
++import json
++import os
++import stat
++
++from common.utils import strata_event_journal
++
++
++def test_emit_is_a_noop_without_the_environment_variable(tmp_path, monkeypatch):
++    monkeypatch.delenv(strata_event_journal.ENVIRONMENT_VARIABLE, raising=False)
++    strata_event_journal.emit("forward_complete", layer=1, activation_id="a")
++    assert list(tmp_path.iterdir()) == []
++
++
++def test_emit_appends_one_sorted_owner_only_record(tmp_path, monkeypatch):
++    journal = tmp_path / "events-x.jsonl"
++    monkeypatch.setenv(strata_event_journal.ENVIRONMENT_VARIABLE, str(journal))
++    strata_event_journal.emit("forward_complete", layer=2, activation_id="act-1")
++    strata_event_journal.emit(
++        "heartbeat_response",
++        path="/miner/heartbeat?expected_phase=training",
++        response={"run_id": "4.12.16.8-tah", "layer": 2, "epoch": 67, "phase": "training", "status": "idle"},
++    )
++    lines = journal.read_text().splitlines()
++    assert len(lines) == 2
++    first, second = (json.loads(line) for line in lines)
++    assert first["schema_version"] == 1
++    assert first["event"] == "forward_complete"
++    assert first["layer"] == 2 and first["activation_id"] == "act-1"
++    assert first["wall_time"].endswith("+00:00")
++    assert list(first) == sorted(first)
++    assert second["response"]["epoch"] == 67
++    assert stat.S_IMODE(os.stat(journal).st_mode) == 0o600
++
++
++def test_values_are_bounded_and_reserved_keys_cannot_be_overridden(tmp_path, monkeypatch):
++    journal = tmp_path / "events-y.jsonl"
++    monkeypatch.setenv(strata_event_journal.ENVIRONMENT_VARIABLE, str(journal))
++    strata_event_journal.emit(
++        "kicked",
++        error="x" * 10_000,
++        schema_version=99,
++        wall_time="1970-01-01T00:00:00",
++        ratio=float("nan"),
++        detail=object(),
++    )
++    record = json.loads(journal.read_text())
++    assert record["event"] == "kicked"
++    assert record["schema_version"] == 1
++    assert record["wall_time"] != "1970-01-01T00:00:00"
++    assert len(record["error"]) == strata_event_journal.MAX_STRING_LENGTH
++    assert record["ratio"] is None
++    assert isinstance(record["detail"], str)
++
++
++def test_a_broken_journal_never_raises(tmp_path, monkeypatch):
++    target = tmp_path / "real.jsonl"
++    target.write_text("")
++    link = tmp_path / "events-link.jsonl"
++    link.symlink_to(target)
++    monkeypatch.setenv(strata_event_journal.ENVIRONMENT_VARIABLE, str(link))
++    strata_event_journal.emit("reset")  # O_NOFOLLOW refuses the symlink
++    strata_event_journal.emit("reset")
++    assert target.read_text() == ""
+diff --git a/src/miner/src/miner/new_miner.py b/src/miner/src/miner/new_miner.py
+index 820ba26..2b33369 100644
+--- a/src/miner/src/miner/new_miner.py
++++ b/src/miner/src/miner/new_miner.py
+@@ -29,6 +29,7 @@ from loguru import logger
+ from bittensor import Wallet
+ 
+ from common.snowpipe.messages.lifecycle_events import LifecycleEvent
++from common.utils import strata_event_journal
+ from common.utils.location_utils import resolve_node_location
+ from common.utils.verify_enclave_signature import payload_base64_from_obj
+ from common.utils.epistula import sign_p2p_request
+@@ -1114,6 +1115,9 @@ class Miner(BaseNeuron, HealthServerMixin, NodeControlMixin):
+             f"Miner {self.hotkey[:8]} appears to have been kicked during active work "
+             f"(phase={phase}, run_id={run_id}, layer={layer}, source={source}): {exc}"
+         )
++        strata_event_journal.emit(
++            "kicked", phase=phase, run_id=run_id, layer=layer, source=source, error=str(exc)
++        )
+         await self.report_miner_kicked(
+             reason="miner_not_registered",
+             detail=str(exc),
+@@ -1950,6 +1954,7 @@ class Miner(BaseNeuron, HealthServerMixin, NodeControlMixin):
+         logger.success(
+             f"✅ Miner {self.hotkey[:8]} registered successfully in layer {assigned_layer} on training epoch {current_epoch}"
+         )
++        strata_event_journal.emit("registered", layer=assigned_layer, epoch=current_epoch)
+         logger.debug(f"Run flags for miner {self.hotkey[:8]}: {self.run_flags}")
+ 
+         try:
+@@ -2440,6 +2445,7 @@ class Miner(BaseNeuron, HealthServerMixin, NodeControlMixin):
+     async def register(self) -> tuple[dict, dict]:
+         """Single registration attempt. Raises on failure for caller to retry."""
+         logger.info(f"🔄 Attempting to join registration waitlist for miner {self.hotkey[:8]}...")
++        strata_event_journal.emit("registration_started")
+ 
+         # P2P node ID is required for registration
+         if not self.p2p_node_id:
+@@ -3354,6 +3360,7 @@ class Miner(BaseNeuron, HealthServerMixin, NodeControlMixin):
+         self._consecutive_reset_count += 1
+ 
+         logger.info("🔄 Resetting miner entire state!")
++        strata_event_journal.emit("reset")
+         # Re-registration creates a fresh registry entry seeded as
+         # ``initializing``. Reset the process-local status as well; otherwise
+         # a worker that was training before the reset can retain
+diff --git a/src/miner/src/miner/training/training.py b/src/miner/src/miner/training/training.py
+index 1c3c776..983d920 100644
+--- a/src/miner/src/miner/training/training.py
++++ b/src/miner/src/miner/training/training.py
+@@ -9,6 +9,7 @@ import time
+ from common.models.run_flags import RunFlags
+ from common import settings as common_settings
+ from common.utils.exceptions import NanInfException
++from common.utils import strata_event_journal
+ from subnet.utils.vector_utils import (
+     check_for_nans_and_infs,
+     require_safe_training_tensor,
+@@ -168,6 +169,14 @@ class TrainingPhase:
+                 logger.warning(message)
+             else:
+                 logger.info(message)
++            strata_event_journal.emit(
++                "training_progress",
++                level="WARNING" if progress["seconds_since_progress"] > 60 else "INFO",
++                message=message,
++                run_id=self._state_manager.run_id,
++                layer=self._state_manager.layer,
++                fields=progress,
++            )
+ 
+     def _record_forward_timing(self, activation_data: ActivationData, start_time: float, end_time: float) -> None:
+         if self._stats_tracker is None:
+@@ -402,6 +411,11 @@ class TrainingPhase:
+                 logger.success(
+                     f"✅ FORWARD complete | layer={self._state_manager.layer} activation={activation_data.activation_id} hotkey={self._hotkey[:8]}"
+                 )
++                strata_event_journal.emit(
++                    "forward_complete",
++                    layer=self._state_manager.layer,
++                    activation_id=activation_data.activation_id,
++                )
+                 logger.debug(
+                     f"Node registry in forward contains: {[m.node_id for m in self.node_registry.all_nodes()]}"
+                 )
+@@ -628,6 +642,11 @@ class TrainingPhase:
+                         logger.success(
+                             f"✅ BACKWARD complete | layer={self._state_manager.layer} activation={activation_data.activation_id} hotkey={self._hotkey[:8]}"
+                         )
++                        strata_event_journal.emit(
++                            "backward_complete",
++                            layer=self._state_manager.layer,
++                            activation_id=activation_data.activation_id,
++                        )
+ 
+                 if self._stats_tracker is not None:
+                     cached_epoch = self._model_manager.current_epoch

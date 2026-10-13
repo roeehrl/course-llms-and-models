@@ -1,0 +1,3201 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -4,
+        "w": -3,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 9,
+        "multiply-value": 12
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -4,
+        "w": -3,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 12,
+        "multiply-value": 12
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -4,
+        "w": -3,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 15,
+        "multiply-value": 12
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -4,
+        "w": 0,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -3,
+        "multiply-value": 0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -4,
+        "w": 0,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 0,
+        "multiply-value": 0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -4,
+        "w": 0,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 3,
+        "multiply-value": 0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -4,
+        "w": 0.5,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -5.0,
+        "multiply-value": -2.0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -4,
+        "w": 0.5,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -2.0,
+        "multiply-value": -2.0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -4,
+        "w": 0.5,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 1.0,
+        "multiply-value": -2.0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -4,
+        "w": 3,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -15,
+        "multiply-value": -12
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -4,
+        "w": 3,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -12,
+        "multiply-value": -12
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -4,
+        "w": 3,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -9,
+        "multiply-value": -12
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -0.5,
+        "w": -3,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -1.5,
+        "multiply-value": 1.5
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -0.5,
+        "w": -3,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 1.5,
+        "multiply-value": 1.5
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -0.5,
+        "w": -3,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 4.5,
+        "multiply-value": 1.5
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -0.5,
+        "w": 0,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -3.0,
+        "multiply-value": -0.0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -0.5,
+        "w": 0,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 0.0,
+        "multiply-value": -0.0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -0.5,
+        "w": 0,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 3.0,
+        "multiply-value": -0.0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -0.5,
+        "w": 0.5,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -3.25,
+        "multiply-value": -0.25
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -0.5,
+        "w": 0.5,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -0.25,
+        "multiply-value": -0.25
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -0.5,
+        "w": 0.5,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 2.75,
+        "multiply-value": -0.25
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -0.5,
+        "w": 3,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -4.5,
+        "multiply-value": -1.5
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -0.5,
+        "w": 3,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -1.5,
+        "multiply-value": -1.5
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": -0.5,
+        "w": 3,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 1.5,
+        "multiply-value": -1.5
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 0,
+        "w": -3,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -3,
+        "multiply-value": 0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 0,
+        "w": -3,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 0,
+        "multiply-value": 0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 0,
+        "w": -3,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 3,
+        "multiply-value": 0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 0,
+        "w": 0,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -3,
+        "multiply-value": 0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 0,
+        "w": 0,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 0,
+        "multiply-value": 0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 0,
+        "w": 0,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 3,
+        "multiply-value": 0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 0,
+        "w": 0.5,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -3.0,
+        "multiply-value": 0.0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 0,
+        "w": 0.5,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 0.0,
+        "multiply-value": 0.0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 0,
+        "w": 0.5,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 3.0,
+        "multiply-value": 0.0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 0,
+        "w": 3,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -3,
+        "multiply-value": 0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 0,
+        "w": 3,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 0,
+        "multiply-value": 0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 0,
+        "w": 3,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 3,
+        "multiply-value": 0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 2.5,
+        "w": -3,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -10.5,
+        "multiply-value": -7.5
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 2.5,
+        "w": -3,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -7.5,
+        "multiply-value": -7.5
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 2.5,
+        "w": -3,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -4.5,
+        "multiply-value": -7.5
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 2.5,
+        "w": 0,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -3.0,
+        "multiply-value": 0.0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 2.5,
+        "w": 0,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 0.0,
+        "multiply-value": 0.0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 2.5,
+        "w": 0,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 3.0,
+        "multiply-value": 0.0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 2.5,
+        "w": 0.5,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -1.75,
+        "multiply-value": 1.25
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 2.5,
+        "w": 0.5,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 1.25,
+        "multiply-value": 1.25
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 2.5,
+        "w": 0.5,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 4.25,
+        "multiply-value": 1.25
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 2.5,
+        "w": 3,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 4.5,
+        "multiply-value": 7.5
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 2.5,
+        "w": 3,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 7.5,
+        "multiply-value": 7.5
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 2.5,
+        "w": 3,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 10.5,
+        "multiply-value": 7.5
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 4,
+        "w": -3,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -15,
+        "multiply-value": -12
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 4,
+        "w": -3,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -12,
+        "multiply-value": -12
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 4,
+        "w": -3,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -9,
+        "multiply-value": -12
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 4,
+        "w": 0,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -3,
+        "multiply-value": 0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 4,
+        "w": 0,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 0,
+        "multiply-value": 0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 4,
+        "w": 0,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 3,
+        "multiply-value": 0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 4,
+        "w": 0.5,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": -1.0,
+        "multiply-value": 2.0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 4,
+        "w": 0.5,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 2.0,
+        "multiply-value": 2.0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 4,
+        "w": 0.5,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 5.0,
+        "multiply-value": 2.0
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 4,
+        "w": 3,
+        "b": -3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 9,
+        "multiply-value": 12
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 4,
+        "w": 3,
+        "b": 0
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 12,
+        "multiply-value": 12
+      }
+    },
+    {
+      "scene": "ml-affine-forward",
+      "state": {
+        "x": 4,
+        "w": 3,
+        "b": 3
+      },
+      "time": 1100,
+      "numericText": {
+        "affine-output": 15,
+        "multiply-value": 12
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": -3.0,
+        "next-loss": 50.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 49.285714285714285,
+          "y": 128.57142857142856
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": -3.0,
+        "next-loss": 50.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 49.285714285714285,
+          "y": 128.57142857142856
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": -3.0,
+        "next-loss": 50.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 49.285714285714285,
+          "y": 128.57142857142856
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": -3.0,
+        "next-loss": 50.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 49.285714285714285,
+          "y": 128.57142857142856
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": -3.0,
+        "next-loss": 50.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 49.285714285714285,
+          "y": 128.57142857142856
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0.1
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": -1.0000000000757154,
+        "next-loss": 18.000000000908585
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 49.285714285714285,
+          "y": 128.57142857142856
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0.1
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": -1.0000000000757154,
+        "next-loss": 18.000000000908585
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 49.285714285714285,
+          "y": 128.57142857142856
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0.1
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": -1.0000000000757154,
+        "next-loss": 18.000000000908585
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 98.57142856956273,
+          "y": 154.28571428484898
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0.1
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": -1.0000000000757154,
+        "next-loss": 18.000000000908585
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 147.85714285341118,
+          "y": 174.28571428441631
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0.1
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": -1.0000000000757154,
+        "next-loss": 18.000000000908585
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 147.85714285341118,
+          "y": 174.28571428441631
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0.25
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": 1.9999999998107114,
+        "next-loss": 7.166033667608804e-20
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 49.285714285714285,
+          "y": 128.57142857142856
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0.25
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": 1.9999999998107114,
+        "next-loss": 7.166033667608804e-20
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 49.285714285714285,
+          "y": 128.57142857142856
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0.25
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": 1.9999999998107114,
+        "next-loss": 7.166033667608804e-20
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 172.49999999533537,
+          "y": 182.1428571415051
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0.25
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": 1.9999999998107114,
+        "next-loss": 7.166033667608804e-20
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857049565,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0.25
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": 1.9999999998107114,
+        "next-loss": 7.166033667608804e-20
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857049565,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0.6
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": 8.999999999545707,
+        "next-loss": 97.9999999872798
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 49.285714285714285,
+          "y": 128.57142857142856
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0.6
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": 8.999999999545707,
+        "next-loss": 97.9999999872798
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 49.285714285714285,
+          "y": 128.57142857142856
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0.6
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": 8.999999999545707,
+        "next-loss": 97.9999999872798
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 344.9999999888049,
+          "y": 197.14285714415513
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0.6
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": 8.999999999545707,
+        "next-loss": 97.9999999872798
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 640.7142856918956,
+          "y": 60.000000018171704
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -3,
+        "rate": 0.6
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 50.0,
+        "gradient-value": -19.999999999242846,
+        "next-weight": 8.999999999545707,
+        "next-loss": 97.9999999872798
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 640.7142856918956,
+          "y": 60.000000018171704
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": -1.5,
+        "next-loss": 24.5
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 123.21428571428572,
+          "y": 165.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": -1.5,
+        "next-loss": 24.5
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 123.21428571428572,
+          "y": 165.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": -1.5,
+        "next-loss": 24.5
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 123.21428571428572,
+          "y": 165.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": -1.5,
+        "next-loss": 24.5
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 123.21428571428572,
+          "y": 165.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": -1.5,
+        "next-loss": 24.5
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 123.21428571428572,
+          "y": 165.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0.1
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": -0.09999999998194653,
+        "next-loss": 8.819999999848351
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 123.21428571428572,
+          "y": 165.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0.1
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": -0.09999999998194653,
+        "next-loss": 8.819999999848351
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 123.21428571428572,
+          "y": 165.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0.1
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": -0.09999999998194653,
+        "next-loss": 8.819999999848351
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 157.7142857147306,
+          "y": 177.60000000014443
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0.1
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": -0.09999999998194653,
+        "next-loss": 8.819999999848351
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 192.2142857151755,
+          "y": 187.40000000021664
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0.1
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": -0.09999999998194653,
+        "next-loss": 8.819999999848351
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 192.2142857151755,
+          "y": 187.40000000021664
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0.25
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": 2.0000000000451332,
+        "next-loss": 4.074016988253853e-21
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 123.21428571428572,
+          "y": 165.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0.25
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": 2.0000000000451332,
+        "next-loss": 4.074016988253853e-21
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 123.21428571428572,
+          "y": 165.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0.25
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": 2.0000000000451332,
+        "next-loss": 4.074016988253853e-21
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 209.46428571539792,
+          "y": 191.25000000022567
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0.25
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": 2.0000000000451332,
+        "next-loss": 4.074016988253853e-21
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857165102,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0.25
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": 2.0000000000451332,
+        "next-loss": 4.074016988253853e-21
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857165102,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0.6
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": 6.900000000108319,
+        "next-loss": 48.020000002123055
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 123.21428571428572,
+          "y": 165.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0.6
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": 6.900000000108319,
+        "next-loss": 48.020000002123055
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 123.21428571428572,
+          "y": 165.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0.6
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": 6.900000000108319,
+        "next-loss": 48.020000002123055
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 330.21428571695503,
+          "y": 198.59999999978336
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0.6
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": 6.900000000108319,
+        "next-loss": 48.020000002123055
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 537.2142857196243,
+          "y": 131.39999999696707
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": -1.5,
+        "rate": 0.6
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 24.5,
+        "gradient-value": -14.000000000180533,
+        "next-weight": 6.900000000108319,
+        "next-loss": 48.020000002123055
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 537.2142857196243,
+          "y": 131.39999999696707
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 0.0,
+        "next-loss": 8.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 197.14285714285714,
+          "y": 188.57142857142858
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 0.0,
+        "next-loss": 8.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 197.14285714285714,
+          "y": 188.57142857142858
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 0.0,
+        "next-loss": 8.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 197.14285714285714,
+          "y": 188.57142857142858
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 0.0,
+        "next-loss": 8.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 197.14285714285714,
+          "y": 188.57142857142858
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 0.0,
+        "next-loss": 8.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 197.14285714285714,
+          "y": 188.57142857142858
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0.1
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 0.800000000005241,
+        "next-loss": 2.8799999999748436
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 197.14285714285714,
+          "y": 188.57142857142858
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0.1
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 0.800000000005241,
+        "next-loss": 2.8799999999748436
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 197.14285714285714,
+          "y": 188.57142857142858
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0.1
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 0.800000000005241,
+        "next-loss": 2.8799999999748436
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 216.857142857272,
+          "y": 192.68571428573824
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0.1
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 0.800000000005241,
+        "next-loss": 2.8799999999748436
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 236.57142857168688,
+          "y": 195.88571428575023
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0.1
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 0.800000000005241,
+        "next-loss": 2.8799999999748436
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 236.57142857168688,
+          "y": 195.88571428575023
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0.25
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 2.0000000000131024,
+        "next-loss": 3.433461932819961e-22
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 197.14285714285714,
+          "y": 188.57142857142858
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0.25
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 2.0000000000131024,
+        "next-loss": 3.433461932819961e-22
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 197.14285714285714,
+          "y": 188.57142857142858
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0.25
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 2.0000000000131024,
+        "next-loss": 3.433461932819961e-22
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 246.42857142889432,
+          "y": 197.14285714289457
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0.25
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 2.0000000000131024,
+        "next-loss": 3.433461932819961e-22
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.71428571493146,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0.25
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 2.0000000000131024,
+        "next-loss": 3.433461932819961e-22
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.71428571493146,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0.6
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 4.800000000031446,
+        "next-loss": 15.680000000352193
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 197.14285714285714,
+          "y": 188.57142857142858
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0.6
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 4.800000000031446,
+        "next-loss": 15.680000000352193
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 197.14285714285714,
+          "y": 188.57142857142858
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0.6
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 4.800000000031446,
+        "next-loss": 15.680000000352193
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 315.42857142934633,
+          "y": 199.5428571428212
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0.6
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 4.800000000031446,
+        "next-loss": 15.680000000352193
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 433.7142857158355,
+          "y": 177.59999999949687
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 0,
+        "rate": 0.6
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 8.0,
+        "gradient-value": -8.00000000005241,
+        "next-weight": 4.800000000031446,
+        "next-loss": 15.680000000352193
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 433.7142857158355,
+          "y": 177.59999999949687
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0.1
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0.1
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0.1
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0.1
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0.1
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0.25
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0.25
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0.25
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0.25
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0.25
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0.6
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0.6
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0.6
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0.6
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 2,
+        "rate": 0.6
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 0.0,
+        "gradient-value": 0.0,
+        "next-weight": 2.0,
+        "next-loss": 0.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.7142857142857,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 3.0,
+        "next-loss": 2.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 345.0,
+          "y": 197.14285714285714
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 3.0,
+        "next-loss": 2.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 345.0,
+          "y": 197.14285714285714
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 3.0,
+        "next-loss": 2.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 345.0,
+          "y": 197.14285714285714
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 3.0,
+        "next-loss": 2.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 345.0,
+          "y": 197.14285714285714
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 3.0,
+        "next-loss": 2.0
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 345.0,
+          "y": 197.14285714285714
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0.1
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 2.5999999999973795,
+        "next-loss": 0.7199999999937109
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 345.0,
+          "y": 197.14285714285714
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0.1
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 2.5999999999973795,
+        "next-loss": 0.7199999999937109
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 345.0,
+          "y": 197.14285714285714
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0.1
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 2.5999999999973795,
+        "next-loss": 0.7199999999937109
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 335.14285714279254,
+          "y": 198.17142857143457
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0.1
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 2.5999999999973795,
+        "next-loss": 0.7199999999937109
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 325.28571428558513,
+          "y": 198.97142857143754
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0.1
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 2.5999999999973795,
+        "next-loss": 0.7199999999937109
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 325.28571428558513,
+          "y": 198.97142857143754
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0.25
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 1.9999999999934488,
+        "next-loss": 8.583654832049902e-23
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 345.0,
+          "y": 197.14285714285714
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0.25
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 1.9999999999934488,
+        "next-loss": 8.583654832049902e-23
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 345.0,
+          "y": 197.14285714285714
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0.25
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 1.9999999999934488,
+        "next-loss": 8.583654832049902e-23
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 320.3571428569814,
+          "y": 199.28571428572366
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0.25
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 1.9999999999934488,
+        "next-loss": 8.583654832049902e-23
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.71428571396285,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0.25
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 1.9999999999934488,
+        "next-loss": 8.583654832049902e-23
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 295.71428571396285,
+          "y": 200.0
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0.6
+      },
+      "time": 0,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 0.5999999999842771,
+        "next-loss": 3.920000000088048
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 345.0,
+          "y": 197.14285714285714
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0.6
+      },
+      "time": 500,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 0.5999999999842771,
+        "next-loss": 3.920000000088048
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 345.0,
+          "y": 197.14285714285714
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0.6
+      },
+      "time": 1600,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 0.5999999999842771,
+        "next-loss": 3.920000000088048
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 285.8571428567554,
+          "y": 199.8857142857053
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0.6
+      },
+      "time": 2700,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 0.5999999999842771,
+        "next-loss": 3.920000000088048
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 226.7142857135108,
+          "y": 194.3999999998742
+        }
+      }
+    },
+    {
+      "scene": "ml-gradient-update",
+      "state": {
+        "w": 3,
+        "rate": 0.6
+      },
+      "time": 3000,
+      "numericText": {
+        "loss-value": 2.0,
+        "gradient-value": 4.000000000026205,
+        "next-weight": 0.5999999999842771,
+        "next-loss": 3.920000000088048
+      },
+      "coordinates": {
+        "next-dot": {
+          "x": 226.7142857135108,
+          "y": 194.3999999998742
+        }
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 0,
+        "column": 0,
+        "transpose": false
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 0,
+        "tensor-bytes": 0
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 0,
+        "column": 1,
+        "transpose": false
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 1,
+        "tensor-bytes": 4
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 0,
+        "column": 2,
+        "transpose": false
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 2,
+        "tensor-bytes": 8
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 0,
+        "column": 3,
+        "transpose": false
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 3,
+        "tensor-bytes": 12
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 1,
+        "column": 0,
+        "transpose": false
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 4,
+        "tensor-bytes": 16
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 1,
+        "column": 1,
+        "transpose": false
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 5,
+        "tensor-bytes": 20
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 1,
+        "column": 2,
+        "transpose": false
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 6,
+        "tensor-bytes": 24
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 1,
+        "column": 3,
+        "transpose": false
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 7,
+        "tensor-bytes": 28
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 2,
+        "column": 0,
+        "transpose": false
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 8,
+        "tensor-bytes": 32
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 2,
+        "column": 1,
+        "transpose": false
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 9,
+        "tensor-bytes": 36
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 2,
+        "column": 2,
+        "transpose": false
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 10,
+        "tensor-bytes": 40
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 2,
+        "column": 3,
+        "transpose": false
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 11,
+        "tensor-bytes": 44
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 3,
+        "column": 0,
+        "transpose": false
+      },
+      "time": 1000,
+      "exactText": {
+        "tensor-offset": "coordinate out of bounds",
+        "tensor-bytes": "No memory access is valid."
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 3,
+        "column": 1,
+        "transpose": false
+      },
+      "time": 1000,
+      "exactText": {
+        "tensor-offset": "coordinate out of bounds",
+        "tensor-bytes": "No memory access is valid."
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 3,
+        "column": 2,
+        "transpose": false
+      },
+      "time": 1000,
+      "exactText": {
+        "tensor-offset": "coordinate out of bounds",
+        "tensor-bytes": "No memory access is valid."
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 3,
+        "column": 3,
+        "transpose": false
+      },
+      "time": 1000,
+      "exactText": {
+        "tensor-offset": "coordinate out of bounds",
+        "tensor-bytes": "No memory access is valid."
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 0,
+        "column": 0,
+        "transpose": true
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 0,
+        "tensor-bytes": 0
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 0,
+        "column": 1,
+        "transpose": true
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 4,
+        "tensor-bytes": 16
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 0,
+        "column": 2,
+        "transpose": true
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 8,
+        "tensor-bytes": 32
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 0,
+        "column": 3,
+        "transpose": true
+      },
+      "time": 1000,
+      "exactText": {
+        "tensor-offset": "coordinate out of bounds",
+        "tensor-bytes": "No memory access is valid."
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 1,
+        "column": 0,
+        "transpose": true
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 1,
+        "tensor-bytes": 4
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 1,
+        "column": 1,
+        "transpose": true
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 5,
+        "tensor-bytes": 20
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 1,
+        "column": 2,
+        "transpose": true
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 9,
+        "tensor-bytes": 36
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 1,
+        "column": 3,
+        "transpose": true
+      },
+      "time": 1000,
+      "exactText": {
+        "tensor-offset": "coordinate out of bounds",
+        "tensor-bytes": "No memory access is valid."
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 2,
+        "column": 0,
+        "transpose": true
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 2,
+        "tensor-bytes": 8
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 2,
+        "column": 1,
+        "transpose": true
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 6,
+        "tensor-bytes": 24
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 2,
+        "column": 2,
+        "transpose": true
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 10,
+        "tensor-bytes": 40
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 2,
+        "column": 3,
+        "transpose": true
+      },
+      "time": 1000,
+      "exactText": {
+        "tensor-offset": "coordinate out of bounds",
+        "tensor-bytes": "No memory access is valid."
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 3,
+        "column": 0,
+        "transpose": true
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 3,
+        "tensor-bytes": 12
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 3,
+        "column": 1,
+        "transpose": true
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 7,
+        "tensor-bytes": 28
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 3,
+        "column": 2,
+        "transpose": true
+      },
+      "time": 1000,
+      "numericText": {
+        "tensor-offset": 11,
+        "tensor-bytes": 44
+      }
+    },
+    {
+      "scene": "ml-tensor-strides",
+      "state": {
+        "row": 3,
+        "column": 3,
+        "transpose": true
+      },
+      "time": 1000,
+      "exactText": {
+        "tensor-offset": "coordinate out of bounds",
+        "tensor-bytes": "No memory access is valid."
+      }
+    }
+  ]
+}

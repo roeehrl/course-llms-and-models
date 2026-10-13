@@ -1,0 +1,92 @@
+"""Stage probe 1: the forward's P.V matmul in isolation (kernels/probe_pv.metal).
+
+Prints one JSON line: relative error of each operand form vs an fp64 CPU
+reference, the compatibility flags the MPP API exposes, and whether the
+destination->left-input conversion preserved element coordinates.
+"""
+import sys
+
+import torch
+
+from labcommon import BUILD, dispatcher, host_info, jdump
+
+torch.manual_seed(7)
+dev = "mps"
+lib = str(BUILD / "probe_pv.metallib")
+
+p = torch.softmax(torch.randn(32, 32) * 2.0, dim=-1).float()
+p16 = p.to(torch.bfloat16)
+v = torch.randn(32, 64).to(torch.bfloat16)
+q = torch.randn(32, 64).to(torch.bfloat16)
+k = torch.randn(32, 64).to(torch.bfloat16)
+enc = (torch.arange(32).view(32, 1) * 32 + torch.arange(32).view(1, 32)).float()
+
+bufs = {
+    "p32": p.to(dev), "p16": p16.to(dev), "v": v.to(dev), "q": q.to(dev), "k": k.to(dev),
+    "out": torch.full((8, 32, 64), float("nan"), device=dev),
+    "out16": torch.full((2, 32, 64), float("nan"), dtype=torch.bfloat16, device=dev),
+    "scores": torch.full((32, 32), float("nan"), device=dev),
+    "flags": torch.full((32, 16), -7, dtype=torch.int32, device=dev),
+    "enc": enc.to(dev),
+    "coords": torch.full((32, 128, 8), -9, dtype=torch.int32, device=dev),
+}
+order = ["p32", "p16", "v", "q", "k", "out", "out16", "scores", "flags", "enc", "coords"]
+dispatcher().dispatch(lib, "probe_pv", [bufs[n] for n in order], [1, 1, 1], [32, 1, 1], 32 * 32 * 4)
+torch.mps.synchronize()
+r = {n: t.cpu() for n, t in bufs.items()}
+
+
+def rel(x, ref):
+    x = x.double(); ref = ref.double()
+    return float((x - ref).norm() / ref.norm()) if torch.isfinite(x).all() else float("nan")
+
+
+ref_p32 = p.double() @ v.double()
+ref_p16 = p16.double() @ v.double()
+s_ref = q.double() @ k.double().T
+ref_s = s_ref @ v.double()
+names = {0: "dev_fp32_left", 1: "coop_fp32_convert", 2: "coop_bf16_convert", 3: "tg_fp32_left",
+         4: "dev_bf16_left", 5: "qk_out_convert", 6: "tg_fp32_bf16pack_roundtrip"}
+refs = {0: ref_p32, 1: ref_p32, 2: ref_p16, 3: ref_p32, 4: ref_p16, 5: ref_s, 6: ref_p32}
+errors = {names[i]: rel(r["out"][i], refs[i]) for i in names}
+errors["packed_bf16_from_coop_convert"] = rel(r["out16"][0].float(), ref_p32)
+errors["packed_bf16_from_tg"] = rel(r["out16"][1].float(), ref_p32)
+errors["qk_scores_store"] = rel(r["scores"], s_ref)
+
+# Is the convert-path output a permutation of the right answer? Check P^T.V.
+errors["coop_fp32_convert_vs_PT_V"] = rel(r["out"][1], p.double().T @ v.double())
+
+flags = r["flags"]
+flag_summary = {
+    "is_compatible_as_left_input_fp32": sorted(set(flags[:, 0].tolist())),
+    "is_compatible_as_left_input_bf16": sorted(set(flags[:, 1].tolist())),
+    "dest_capacity": sorted(set(flags[:, 2].tolist())),
+    "left_input_capacity": sorted(set(flags[:, 3].tolist())),
+    "pv_dest_capacity": sorted(set(flags[:, 4].tolist())),
+    "dest_valid": sorted(set(flags[:, 5].tolist())),
+    "left_valid": sorted(set(flags[:, 6].tolist())),
+    "is_iterator_compatible_dest_rowred": sorted(set(flags[:, 7].tolist())),
+}
+
+# Coordinate audit of the conversion: for every valid left-input element the
+# value must equal enc at its coordinate (try both coordinate orders).
+c = r["coords"]
+bad_rc, bad_cr, checked = 0, 0, 0
+dest_bad = 0
+for lane in range(32):
+    for i in range(128):
+        c0, c1, val, valid = c[lane, i, 4:8].tolist()
+        if valid == 1:
+            checked += 1
+            if val != c1 * 32 + c0:
+                bad_cr += 1
+            if val != c0 * 32 + c1:
+                bad_rc += 1
+        d0, d1, dval, dvalid = c[lane, i, 0:4].tolist()
+        if dvalid == 1 and dval != d1 * 32 + d0:
+            dest_bad += 1
+layout = {"left_elements_checked": checked, "left_mismatch_if_coord=(col,row)": bad_cr,
+          "left_mismatch_if_coord=(row,col)": bad_rc, "dest_load_mismatch(col,row)": dest_bad}
+print(jdump({"probe": "pv", **host_info(), "rel_err": errors, "flags": flag_summary, "layout": layout}))
+if "--dump" in sys.argv:
+    print(jdump({"lane0_coords": c[0, :40].tolist()}))

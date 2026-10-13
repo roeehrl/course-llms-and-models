@@ -1,0 +1,172 @@
+#include <metal_stdlib>
+#include <MetalPerformancePrimitives/MetalPerformancePrimitives.h>
+
+using namespace metal;
+using namespace mpp::tensor_ops;
+
+// Micro probe for the forward's P.V stage. One SIMD group (32 threads), one
+// 32x32 P tile, one 32x64 V tile. Uses exactly the production descriptors:
+//   qk: matmul2d_descriptor(32, 32, 64, false, true)          (scores / P layout)
+//   pv: matmul2d_descriptor(32, 64, 32, ..., multiply_accumulate)
+// and runs P.V in several operand forms so the host can see which form is
+// wrong on a given GPU.
+//
+// out slots ([8][32 rows][64 cols] fp32):
+//   0  left = device fp32 P tensor                         (no cooperative conversion)
+//   1  left = qk-destination fp32 coop -> left-input coop    (production forward/dQ form)
+//   2  left = qk-destination bf16 coop -> left-input coop    (bf16 x bf16 variant)
+//   3  left = threadgroup fp32 P tensor                    (production dK/dV form)
+//   4  left = device bf16 P tensor
+//   5  left = qk.run(Q,K) destination fp32 -> left-input  (real matmul output converted)
+//   6  left = threadgroup fp32 P, accumulator stored via bf16 packed coop (store check)
+// out16 ([2][32][64] bf16):
+//   0  slot-1 accumulator packed into a bf16 destination coop (production output write)
+//   1  slot-3 accumulator packed into a bf16 destination coop
+// flags ([32 lanes][16] int32), coords ([32 lanes][128 slots][4] int32), see host.
+kernel void probe_pv(
+    device float *p32 [[buffer(0)]],
+    device bfloat *p16 [[buffer(1)]],
+    device bfloat *v [[buffer(2)]],
+    device bfloat *q [[buffer(3)]],
+    device bfloat *k [[buffer(4)]],
+    device float *out [[buffer(5)]],
+    device bfloat *out16 [[buffer(6)]],
+    device float *scores_out [[buffer(7)]],
+    device int *flags [[buffer(8)]],
+    device float *enc [[buffer(9)]],
+    device int *coords [[buffer(10)]],
+    threadgroup float *scratch [[threadgroup(0)]],
+    ushort lane [[thread_index_in_simdgroup]]) {
+  auto tp32 = tensor(p32, dextents<int32_t, 2>{32, 32}, array<int32_t, 2>{1, 32});
+  auto tp16 = tensor(p16, dextents<int32_t, 2>{32, 32}, array<int32_t, 2>{1, 32});
+  auto tenc = tensor(enc, dextents<int32_t, 2>{32, 32}, array<int32_t, 2>{1, 32});
+  auto tv = tensor(v, dextents<int32_t, 2>{64, 32}, array<int32_t, 2>{1, 64});
+  auto tq = tensor(q, dextents<int32_t, 2>{64, 32}, array<int32_t, 2>{1, 64});
+  auto tk = tensor(k, dextents<int32_t, 2>{64, 32}, array<int32_t, 2>{1, 64});
+  auto tout = tensor(out, dextents<int32_t, 2>{64, 256}, array<int32_t, 2>{1, 64});
+  auto tout16 = tensor(out16, dextents<int32_t, 2>{64, 64}, array<int32_t, 2>{1, 64});
+  auto tscores = tensor(scores_out, dextents<int32_t, 2>{32, 32}, array<int32_t, 2>{1, 32});
+  auto tsc = tensor(scratch, dextents<int32_t, 2>{32, 32}, array<int32_t, 2>{1, 32});
+
+  auto qtile = tq.slice<64, 32>(0, 0);
+  auto ktile = tk.slice<64, 32>(0, 0);
+  auto vtile = tv.slice<64, 32>(0, 0);
+  auto p32tile = tp32.slice<32, 32>(0, 0);
+  auto p16tile = tp16.slice<32, 32>(0, 0);
+
+  constexpr auto qk_desc = matmul2d_descriptor(32, 32, 64, false, true);
+  matmul2d<qk_desc, execution_simdgroup> qk;
+  constexpr auto pv_desc = matmul2d_descriptor(32, 64, 32, false, false, false,
+                                               matmul2d_descriptor::mode::multiply_accumulate);
+  matmul2d<pv_desc, execution_simdgroup> pv;
+  device int *my_flags = flags + lane * 16;
+
+  // Slot 0: device fp32 left operand.
+  {
+    auto acc = pv.get_destination_cooperative_tensor<decltype(p32tile), decltype(vtile), float>();
+    for (auto it = acc.begin(); it != acc.end(); ++it) *it = 0.0f;
+    pv.run(p32tile, vtile, acc);
+    acc.store(tout.slice<64, 32>(0, 0 * 32));
+  }
+
+  // Slot 1: production form, fp32 destination coop converted to left input.
+  {
+    auto s = qk.get_destination_cooperative_tensor<decltype(qtile), decltype(ktile), float>();
+    s.load(p32tile);
+    my_flags[0] = pv.is_compatible_as_left_input<float, bfloat, float>(s) ? 1 : 0;
+    my_flags[2] = int(s.get_capacity());
+    int valid = 0;
+    for (uint i = 0; i < s.get_capacity(); ++i) valid += s.is_valid_element(i) ? 1 : 0;
+    my_flags[5] = valid;
+    auto lp = pv.get_left_input_cooperative_tensor<float, bfloat, float>(s);
+    my_flags[3] = int(lp.get_capacity());
+    valid = 0;
+    for (uint i = 0; i < lp.get_capacity(); ++i) valid += lp.is_valid_element(i) ? 1 : 0;
+    my_flags[6] = valid;
+    auto acc = pv.get_destination_cooperative_tensor<decltype(lp), decltype(vtile), float>();
+    my_flags[4] = int(acc.get_capacity());
+    for (auto it = acc.begin(); it != acc.end(); ++it) *it = 0.0f;
+    pv.run(lp, vtile, acc);
+    acc.store(tout.slice<64, 32>(0, 1 * 32));
+    auto packed = pv.get_destination_cooperative_tensor<decltype(lp), decltype(vtile), bfloat>();
+    for (uint i = 0; i < packed.get_capacity(); ++i) packed[i] = bfloat(acc[i]);
+    packed.store(tout16.slice<64, 32>(0, 0));
+    auto rowred = qk.get_row_reduction_destination_cooperative_tensor<decltype(qtile), decltype(ktile), float>();
+    my_flags[7] = is_iterator_compatible(s, rowred) ? 1 : 0;
+  }
+
+  // Slot 2: bf16 destination coop converted to bf16 left input.
+  {
+    auto s = qk.get_destination_cooperative_tensor<decltype(qtile), decltype(ktile), bfloat>();
+    s.load(p16tile);
+    my_flags[1] = pv.is_compatible_as_left_input<bfloat, bfloat, float>(s) ? 1 : 0;
+    auto lp = pv.get_left_input_cooperative_tensor<bfloat, bfloat, float>(s);
+    auto acc = pv.get_destination_cooperative_tensor<decltype(lp), decltype(vtile), float>();
+    for (auto it = acc.begin(); it != acc.end(); ++it) *it = 0.0f;
+    pv.run(lp, vtile, acc);
+    acc.store(tout.slice<64, 32>(0, 2 * 32));
+  }
+
+  // Slot 3 and 6: threadgroup fp32 left operand.
+  for (uint i = lane; i < 32 * 32; i += 32) scratch[i] = p32[i];
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  {
+    auto acc = pv.get_destination_cooperative_tensor<decltype(tsc), decltype(vtile), float>();
+    for (auto it = acc.begin(); it != acc.end(); ++it) *it = 0.0f;
+    pv.run(tsc, vtile, acc);
+    acc.store(tout.slice<64, 32>(0, 3 * 32));
+    auto packed = pv.get_destination_cooperative_tensor<decltype(tsc), decltype(vtile), bfloat>();
+    for (uint i = 0; i < packed.get_capacity(); ++i) packed[i] = bfloat(acc[i]);
+    packed.store(tout16.slice<64, 32>(0, 32));
+    for (uint i = 0; i < packed.get_capacity(); ++i) acc[i] = float(packed[i]);
+    acc.store(tout.slice<64, 32>(0, 6 * 32));
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+
+  // Slot 4: device bf16 left operand.
+  {
+    auto acc = pv.get_destination_cooperative_tensor<decltype(p16tile), decltype(vtile), float>();
+    for (auto it = acc.begin(); it != acc.end(); ++it) *it = 0.0f;
+    pv.run(p16tile, vtile, acc);
+    acc.store(tout.slice<64, 32>(0, 4 * 32));
+  }
+
+  // Slot 5: real QK^T destination converted to left input.
+  {
+    auto s = qk.get_destination_cooperative_tensor<decltype(qtile), decltype(ktile), float>();
+    qk.run(qtile, ktile, s);
+    s.store(tscores);
+    auto lp = pv.get_left_input_cooperative_tensor<float, bfloat, float>(s);
+    auto acc = pv.get_destination_cooperative_tensor<decltype(lp), decltype(vtile), float>();
+    for (auto it = acc.begin(); it != acc.end(); ++it) *it = 0.0f;
+    pv.run(lp, vtile, acc);
+    acc.store(tout.slice<64, 32>(0, 5 * 32));
+  }
+
+  // Layout dump: encoded matrix enc[r][c] = r*32+c loaded into the qk
+  // destination layout, converted to the pv left-input layout; per element we
+  // record (coord0, coord1, value) on both sides.
+  {
+    auto s = qk.get_destination_cooperative_tensor<decltype(qtile), decltype(ktile), float>();
+    s.load(tenc.slice<32, 32>(0, 0));
+    auto lp = pv.get_left_input_cooperative_tensor<float, bfloat, float>(s);
+    device int *mine = coords + lane * 128 * 8;
+    for (uint i = 0; i < 128; ++i) {
+      for (uint j = 0; j < 8; ++j) mine[i * 8 + j] = -1;
+    }
+    for (uint i = 0; i < s.get_capacity() && i < 128; ++i) {
+      auto c = s.get_multidimensional_index(i);
+      mine[i * 8 + 0] = c[0];
+      mine[i * 8 + 1] = c[1];
+      mine[i * 8 + 2] = int(s[i]);
+      mine[i * 8 + 3] = s.is_valid_element(i) ? 1 : 0;
+    }
+    for (uint i = 0; i < lp.get_capacity() && i < 128; ++i) {
+      auto c = lp.get_multidimensional_index(i);
+      mine[i * 8 + 4] = c[0];
+      mine[i * 8 + 5] = c[1];
+      mine[i * 8 + 6] = int(lp[i]);
+      mine[i * 8 + 7] = lp.is_valid_element(i) ? 1 : 0;
+    }
+  }
+}

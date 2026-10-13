@@ -1,0 +1,38 @@
+"""Stage probe 3: is the backward's precision gap on peaked softmax caused by
+D = rowsum(dO * O) being computed from the bf16-rounded forward output?
+
+For each distribution, the tgP backward kernels are run with D from
+  ownO      the kernel's bf16 O (production behaviour)
+  fp32O     an fp32 O (oracle O rounded to fp32)
+  bf16O     the oracle O rounded to bf16 (rounding alone, no kernel error)
+and dq/dk errors vs the float64 oracle are printed next to SDPA's.
+"""
+import sys
+
+import torch
+
+from labcommon import BUILD, Variant, host_info, jdump, sdpa_upstream
+sys.path.insert(0, str(BUILD.parent / "qualify"))
+import distributions  # noqa: E402
+from oracle import oracle  # noqa: E402
+from qualify_attention import run  # noqa: E402
+
+dev = "mps"
+var = Variant("tgP", BUILD / "tgP.metallib", fwd_tg=4096, dq_tg=4096)
+rows = {"probe": "drow", **host_info()}
+for dist in (sys.argv[1:] or ["sharp", "large", "sink_outlier"]):
+    q, k, v, do = distributions.make(dist, 1234)
+    ref = oracle(q, k, v, do)
+    sd = run(sdpa_upstream, q, k, v, do)
+    qd, kd, vd, dod = (t.to(dev) for t in (q, k, v, do))
+    out, lse = var.forward(qd, kd, vd)
+    res = {"sdpa": {"dq": sd[1], "dk": sd[2]}}
+    o32 = ref["out"].float().to(dev)
+    for label, drow in (("ownO", None), ("fp32O", (dod.float() * o32).sum(-1).contiguous()),
+                        ("bf16O", (dod.float() * o32.to(torch.bfloat16).float()).sum(-1).contiguous())):
+        dq, dk, dv = var.backward(dod, qd, kd, vd, out, lse, drow=drow)
+        torch.mps.synchronize()
+        res[label] = {"dq": dq.float().cpu(), "dk": dk.float().cpu()}
+    rows[dist] = {lab: {n: round(float((x[n].double() - ref[n]).norm() / ref[n].norm()), 5) for n in ("dq", "dk")}
+                  for lab, x in res.items()}
+print(jdump(rows))

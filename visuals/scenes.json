@@ -1,0 +1,4394 @@
+{
+  "schemaVersion": 1,
+  "scenes": [
+    {
+      "version": 1,
+      "id": "ml-affine-forward",
+      "title": "A parameterized program, made visible",
+      "description": "Change the input or parameters. Play the forward trace. Playing moves values through the operations; it does not update the parameters.",
+      "state": {
+        "x": {
+          "kind": "number",
+          "label": "Input x",
+          "initial": 3,
+          "min": -4,
+          "max": 4,
+          "step": 0.5
+        },
+        "w": {
+          "kind": "number",
+          "label": "Weight w",
+          "initial": 2,
+          "min": -3,
+          "max": 3,
+          "step": 0.5
+        },
+        "b": {
+          "kind": "number",
+          "label": "Bias b",
+          "initial": 1,
+          "min": -3,
+          "max": 3,
+          "step": 0.5
+        }
+      },
+      "controls": [
+        "x",
+        "w",
+        "b"
+      ],
+      "nodes": [
+        {
+          "kind": "rect",
+          "id": "affine-stage",
+          "x": 0,
+          "y": 0,
+          "width": 880,
+          "height": 350,
+          "fill": "#F8FAF7",
+          "cornerRadius": 24
+        },
+        {
+          "kind": "text",
+          "id": "affine-eyebrow",
+          "text": "FORWARD · VALUES FLOW, PARAMETERS STAY PUT",
+          "x": 28,
+          "y": 38,
+          "fontSize": 13,
+          "fill": "#087B69",
+          "weight": "bold"
+        },
+        {
+          "kind": "group",
+          "id": "input-card",
+          "x": 34,
+          "y": 110,
+          "children": [
+            {
+              "kind": "rect",
+              "id": "input-bg",
+              "x": 0,
+              "y": 0,
+              "width": 180,
+              "height": 110,
+              "fill": "#E8F6ED",
+              "cornerRadius": 16
+            },
+            {
+              "kind": "text",
+              "id": "input-label",
+              "text": "INPUT",
+              "x": 18,
+              "y": 27,
+              "fontSize": 13,
+              "fill": "#087B69"
+            },
+            {
+              "kind": "text",
+              "id": "input-value",
+              "text": {
+                "op": "concat",
+                "args": [
+                  "x = ",
+                  {
+                    "state": "x"
+                  }
+                ]
+              },
+              "x": 18,
+              "y": 72,
+              "fontSize": 28,
+              "fill": "#19383E",
+              "weight": "bold"
+            }
+          ]
+        },
+        {
+          "kind": "group",
+          "id": "multiply-card",
+          "x": 286,
+          "y": 110,
+          "children": [
+            {
+              "kind": "rect",
+              "id": "multiply-bg",
+              "x": 0,
+              "y": 0,
+              "width": 215,
+              "height": 110,
+              "fill": "#F2EDFB",
+              "cornerRadius": 16
+            },
+            {
+              "kind": "text",
+              "id": "multiply-label",
+              "text": {
+                "op": "concat",
+                "args": [
+                  "MULTIPLY BY w = ",
+                  {
+                    "state": "w"
+                  }
+                ]
+              },
+              "x": 18,
+              "y": 27,
+              "fontSize": 13,
+              "fill": "#7050A4"
+            },
+            {
+              "kind": "text",
+              "id": "multiply-value",
+              "text": {
+                "op": "concat",
+                "args": [
+                  "w × x = ",
+                  {
+                    "op": "div",
+                    "args": [
+                      {
+                        "op": "round",
+                        "args": [
+                          {
+                            "op": "mul",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  {
+                                    "state": "w"
+                                  },
+                                  {
+                                    "state": "x"
+                                  }
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      },
+                      1000
+                    ]
+                  }
+                ]
+              },
+              "x": 18,
+              "y": 72,
+              "fontSize": 24,
+              "fill": "#19383E",
+              "weight": "bold"
+            }
+          ]
+        },
+        {
+          "kind": "group",
+          "id": "output-card",
+          "x": 574,
+          "y": 110,
+          "children": [
+            {
+              "kind": "rect",
+              "id": "output-bg",
+              "x": 0,
+              "y": 0,
+              "width": 264,
+              "height": 110,
+              "fill": "#FCF3DF",
+              "cornerRadius": 16
+            },
+            {
+              "kind": "text",
+              "id": "output-label",
+              "text": {
+                "op": "concat",
+                "args": [
+                  "ADD b = ",
+                  {
+                    "state": "b"
+                  }
+                ]
+              },
+              "x": 18,
+              "y": 27,
+              "fontSize": 13,
+              "fill": "#80601E"
+            },
+            {
+              "kind": "text",
+              "id": "affine-output",
+              "text": {
+                "op": "concat",
+                "args": [
+                  "prediction = ",
+                  {
+                    "op": "div",
+                    "args": [
+                      {
+                        "op": "round",
+                        "args": [
+                          {
+                            "op": "mul",
+                            "args": [
+                              {
+                                "op": "add",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "w"
+                                      },
+                                      {
+                                        "state": "x"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "state": "b"
+                                  }
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      },
+                      1000
+                    ]
+                  }
+                ]
+              },
+              "x": 18,
+              "y": 72,
+              "fontSize": 24,
+              "fill": "#19383E",
+              "weight": "bold"
+            }
+          ]
+        },
+        {
+          "kind": "link",
+          "id": "input-to-product",
+          "from": {
+            "node": "input-bg",
+            "anchor": "auto"
+          },
+          "to": {
+            "node": "multiply-bg",
+            "anchor": "auto"
+          },
+          "arrow": true,
+          "stroke": "#087B69",
+          "strokeWidth": 3,
+          "progress": {
+            "op": "clamp",
+            "args": [
+              {
+                "op": "div",
+                "args": [
+                  {
+                    "op": "sub",
+                    "args": [
+                      {
+                        "time": true
+                      },
+                      0
+                    ]
+                  },
+                  700
+                ]
+              },
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "kind": "link",
+          "id": "product-to-output",
+          "from": {
+            "node": "multiply-bg",
+            "anchor": "auto"
+          },
+          "to": {
+            "node": "output-bg",
+            "anchor": "auto"
+          },
+          "arrow": true,
+          "stroke": "#087B69",
+          "strokeWidth": 3,
+          "progress": {
+            "op": "clamp",
+            "args": [
+              {
+                "op": "div",
+                "args": [
+                  {
+                    "op": "sub",
+                    "args": [
+                      {
+                        "time": true
+                      },
+                      850
+                    ]
+                  },
+                  700
+                ]
+              },
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "kind": "text",
+          "id": "affine-equation",
+          "text": "prediction = w × x + b",
+          "x": 34,
+          "y": 283,
+          "fontSize": 24,
+          "fill": "#19383E"
+        },
+        {
+          "kind": "text",
+          "id": "affine-note",
+          "text": "The result changes. The parameter buffer changes only if another operation writes it.",
+          "x": 34,
+          "y": 319,
+          "fontSize": 15,
+          "fill": "#526A70"
+        },
+        {
+          "kind": "text",
+          "id": "affine-mobile-heading",
+          "text": "FORWARD",
+          "x": 18,
+          "y": 28,
+          "fontSize": 15,
+          "fill": "#087B69",
+          "opacity": 0,
+          "weight": "bold"
+        },
+        {
+          "kind": "text",
+          "id": "affine-mobile-subtitle",
+          "text": "Values flow. Parameters stay put.",
+          "x": 18,
+          "y": 49,
+          "fontSize": 14,
+          "fill": "#19383E",
+          "opacity": 0
+        },
+        {
+          "kind": "text",
+          "id": "affine-mobile-note-a",
+          "text": "Forward produces values.",
+          "x": 20,
+          "y": 590,
+          "fontSize": 16,
+          "fill": "#19383E",
+          "opacity": 0
+        },
+        {
+          "kind": "text",
+          "id": "affine-mobile-note-b",
+          "text": "Only an update writes parameters.",
+          "x": 20,
+          "y": 615,
+          "fontSize": 15,
+          "fill": "#19383E",
+          "opacity": 0
+        }
+      ],
+      "layouts": {
+        "compact": {
+          "width": 350,
+          "height": 635,
+          "overrides": {
+            "affine-stage": {
+              "width": 350,
+              "height": 635
+            },
+            "affine-eyebrow": {
+              "opacity": 0
+            },
+            "affine-mobile-heading": {
+              "opacity": 1
+            },
+            "affine-mobile-subtitle": {
+              "opacity": 1
+            },
+            "input-card": {
+              "x": 40,
+              "y": 65
+            },
+            "input-bg": {
+              "width": 268
+            },
+            "multiply-card": {
+              "x": 40,
+              "y": 230
+            },
+            "multiply-bg": {
+              "width": 268
+            },
+            "output-card": {
+              "x": 40,
+              "y": 395
+            },
+            "output-bg": {
+              "width": 268
+            },
+            "affine-equation": {
+              "x": 20,
+              "y": 557,
+              "fontSize": 22
+            },
+            "affine-note": {
+              "opacity": 0
+            },
+            "affine-mobile-note-a": {
+              "opacity": 1
+            },
+            "affine-mobile-note-b": {
+              "opacity": 1
+            }
+          }
+        },
+        "expanded": {
+          "width": 880,
+          "height": 350
+        },
+        "breakpoint": 640
+      },
+      "timeline": {
+        "durationMs": 2200,
+        "tracks": [],
+        "cues": [
+          {
+            "atMs": 0,
+            "text": "Read the input and the current parameter values."
+          },
+          {
+            "atMs": 800,
+            "text": "Multiplication creates the intermediate value w × x."
+          },
+          {
+            "atMs": 1600,
+            "text": "Add the bias to obtain the prediction. No optimizer ran."
+          }
+        ]
+      },
+      "accessibility": {
+        "text": "Compute prediction = w times x plus b. The initial example gives 2 times 3 plus 1 = 7. Forward evaluation computes values; it does not change w or b.",
+        "reducedMotion": {
+          "atMs": 2200,
+          "description": "Compute prediction = w times x plus b. The initial example gives 2 times 3 plus 1 = 7. Forward evaluation computes values; it does not change w or b."
+        }
+      },
+      "referenceChecks": []
+    },
+    {
+      "version": 1,
+      "id": "ml-gradient-update",
+      "title": "Forward, backward, then update",
+      "description": "One training example has x = 2 and target = 4. The loss is half the squared error. Adjust w and the learning rate, then play exactly one proposed update.",
+      "state": {
+        "w": {
+          "kind": "number",
+          "label": "Starting weight w",
+          "initial": 0,
+          "min": -3,
+          "max": 3,
+          "step": 0.25
+        },
+        "rate": {
+          "kind": "number",
+          "label": "Learning rate",
+          "initial": 0.1,
+          "min": 0,
+          "max": 0.6,
+          "step": 0.05
+        }
+      },
+      "controls": [
+        "w",
+        "rate"
+      ],
+      "nodes": [
+        {
+          "kind": "rect",
+          "id": "gradient-stage",
+          "x": 0,
+          "y": 0,
+          "width": 880,
+          "height": 590,
+          "fill": "#F8FAF7",
+          "cornerRadius": 24
+        },
+        {
+          "kind": "text",
+          "id": "gradient-title",
+          "text": "ONE EXAMPLE · x = 2 · target = 4",
+          "x": 32,
+          "y": 40,
+          "fontSize": 15,
+          "fill": "#087B69",
+          "weight": "bold"
+        },
+        {
+          "kind": "group",
+          "id": "loss-plot",
+          "x": 100,
+          "y": 82,
+          "children": [
+            {
+              "kind": "plot",
+              "id": "loss-curve",
+              "x": 0,
+              "y": 0,
+              "width": 690,
+              "height": 200,
+              "domainX": [
+                -4,
+                10
+              ],
+              "domainY": [
+                0,
+                140
+              ],
+              "points": [
+                {
+                  "x": -4,
+                  "y": 72
+                },
+                {
+                  "x": -3.75,
+                  "y": 66.125
+                },
+                {
+                  "x": -3.5,
+                  "y": 60.5
+                },
+                {
+                  "x": -3.25,
+                  "y": 55.125
+                },
+                {
+                  "x": -3,
+                  "y": 50
+                },
+                {
+                  "x": -2.75,
+                  "y": 45.125
+                },
+                {
+                  "x": -2.5,
+                  "y": 40.5
+                },
+                {
+                  "x": -2.25,
+                  "y": 36.125
+                },
+                {
+                  "x": -2,
+                  "y": 32
+                },
+                {
+                  "x": -1.75,
+                  "y": 28.125
+                },
+                {
+                  "x": -1.5,
+                  "y": 24.5
+                },
+                {
+                  "x": -1.25,
+                  "y": 21.125
+                },
+                {
+                  "x": -1,
+                  "y": 18
+                },
+                {
+                  "x": -0.75,
+                  "y": 15.125
+                },
+                {
+                  "x": -0.5,
+                  "y": 12.5
+                },
+                {
+                  "x": -0.25,
+                  "y": 10.125
+                },
+                {
+                  "x": 0,
+                  "y": 8
+                },
+                {
+                  "x": 0.25,
+                  "y": 6.125
+                },
+                {
+                  "x": 0.5,
+                  "y": 4.5
+                },
+                {
+                  "x": 0.75,
+                  "y": 3.125
+                },
+                {
+                  "x": 1,
+                  "y": 2
+                },
+                {
+                  "x": 1.25,
+                  "y": 1.125
+                },
+                {
+                  "x": 1.5,
+                  "y": 0.5
+                },
+                {
+                  "x": 1.75,
+                  "y": 0.125
+                },
+                {
+                  "x": 2,
+                  "y": 0
+                },
+                {
+                  "x": 2.25,
+                  "y": 0.125
+                },
+                {
+                  "x": 2.5,
+                  "y": 0.5
+                },
+                {
+                  "x": 2.75,
+                  "y": 1.125
+                },
+                {
+                  "x": 3,
+                  "y": 2
+                },
+                {
+                  "x": 3.25,
+                  "y": 3.125
+                },
+                {
+                  "x": 3.5,
+                  "y": 4.5
+                },
+                {
+                  "x": 3.75,
+                  "y": 6.125
+                },
+                {
+                  "x": 4,
+                  "y": 8
+                },
+                {
+                  "x": 4.25,
+                  "y": 10.125
+                },
+                {
+                  "x": 4.5,
+                  "y": 12.5
+                },
+                {
+                  "x": 4.75,
+                  "y": 15.125
+                },
+                {
+                  "x": 5,
+                  "y": 18
+                },
+                {
+                  "x": 5.25,
+                  "y": 21.125
+                },
+                {
+                  "x": 5.5,
+                  "y": 24.5
+                },
+                {
+                  "x": 5.75,
+                  "y": 28.125
+                },
+                {
+                  "x": 6,
+                  "y": 32
+                },
+                {
+                  "x": 6.25,
+                  "y": 36.125
+                },
+                {
+                  "x": 6.5,
+                  "y": 40.5
+                },
+                {
+                  "x": 6.75,
+                  "y": 45.125
+                },
+                {
+                  "x": 7,
+                  "y": 50
+                },
+                {
+                  "x": 7.25,
+                  "y": 55.125
+                },
+                {
+                  "x": 7.5,
+                  "y": 60.5
+                },
+                {
+                  "x": 7.75,
+                  "y": 66.125
+                },
+                {
+                  "x": 8,
+                  "y": 72
+                },
+                {
+                  "x": 8.25,
+                  "y": 78.125
+                },
+                {
+                  "x": 8.5,
+                  "y": 84.5
+                },
+                {
+                  "x": 8.75,
+                  "y": 91.125
+                },
+                {
+                  "x": 9,
+                  "y": 98
+                },
+                {
+                  "x": 9.25,
+                  "y": 105.125
+                },
+                {
+                  "x": 9.5,
+                  "y": 112.5
+                },
+                {
+                  "x": 9.75,
+                  "y": 120.125
+                },
+                {
+                  "x": 10,
+                  "y": 128
+                }
+              ],
+              "stroke": "#88AEB0",
+              "strokeWidth": 3,
+              "fill": "none"
+            },
+            {
+              "kind": "line",
+              "id": "loss-axis",
+              "x": 0,
+              "y": 200,
+              "x2": 690,
+              "y2": 0,
+              "stroke": "#C3D4D0",
+              "strokeWidth": 2
+            },
+            {
+              "kind": "circle",
+              "id": "current-dot",
+              "x": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "div",
+                    "args": [
+                      {
+                        "op": "add",
+                        "args": [
+                          {
+                            "state": "w"
+                          },
+                          4
+                        ]
+                      },
+                      14
+                    ]
+                  },
+                  690
+                ]
+              },
+              "y": {
+                "op": "sub",
+                "args": [
+                  200,
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "div",
+                        "args": [
+                          {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  {
+                                    "op": "sub",
+                                    "args": [
+                                      {
+                                        "op": "mul",
+                                        "args": [
+                                          {
+                                            "state": "w"
+                                          },
+                                          2
+                                        ]
+                                      },
+                                      4
+                                    ]
+                                  },
+                                  {
+                                    "op": "sub",
+                                    "args": [
+                                      {
+                                        "op": "mul",
+                                        "args": [
+                                          {
+                                            "state": "w"
+                                          },
+                                          2
+                                        ]
+                                      },
+                                      4
+                                    ]
+                                  }
+                                ]
+                              },
+                              2
+                            ]
+                          },
+                          140
+                        ]
+                      },
+                      200
+                    ]
+                  }
+                ]
+              },
+              "radius": 8,
+              "fill": "#7050A4"
+            },
+            {
+              "kind": "circle",
+              "id": "next-dot",
+              "x": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "div",
+                    "args": [
+                      {
+                        "op": "add",
+                        "args": [
+                          {
+                            "op": "lerp",
+                            "args": [
+                              {
+                                "state": "w"
+                              },
+                              {
+                                "op": "sub",
+                                "args": [
+                                  {
+                                    "state": "w"
+                                  },
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "rate"
+                                      },
+                                      {
+                                        "op": "mul",
+                                        "args": [
+                                          {
+                                            "op": "sub",
+                                            "args": [
+                                              {
+                                                "op": "mul",
+                                                "args": [
+                                                  {
+                                                    "state": "w"
+                                                  },
+                                                  2
+                                                ]
+                                              },
+                                              4
+                                            ]
+                                          },
+                                          2
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "clamp",
+                                "args": [
+                                  {
+                                    "op": "div",
+                                    "args": [
+                                      {
+                                        "op": "sub",
+                                        "args": [
+                                          {
+                                            "time": true
+                                          },
+                                          500
+                                        ]
+                                      },
+                                      2200
+                                    ]
+                                  },
+                                  0,
+                                  1
+                                ]
+                              }
+                            ]
+                          },
+                          4
+                        ]
+                      },
+                      14
+                    ]
+                  },
+                  690
+                ]
+              },
+              "y": {
+                "op": "sub",
+                "args": [
+                  200,
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "div",
+                        "args": [
+                          {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  {
+                                    "op": "sub",
+                                    "args": [
+                                      {
+                                        "op": "mul",
+                                        "args": [
+                                          {
+                                            "op": "lerp",
+                                            "args": [
+                                              {
+                                                "state": "w"
+                                              },
+                                              {
+                                                "op": "sub",
+                                                "args": [
+                                                  {
+                                                    "state": "w"
+                                                  },
+                                                  {
+                                                    "op": "mul",
+                                                    "args": [
+                                                      {
+                                                        "state": "rate"
+                                                      },
+                                                      {
+                                                        "op": "mul",
+                                                        "args": [
+                                                          {
+                                                            "op": "sub",
+                                                            "args": [
+                                                              {
+                                                                "op": "mul",
+                                                                "args": [
+                                                                  {
+                                                                    "state": "w"
+                                                                  },
+                                                                  2
+                                                                ]
+                                                              },
+                                                              4
+                                                            ]
+                                                          },
+                                                          2
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "op": "clamp",
+                                                "args": [
+                                                  {
+                                                    "op": "div",
+                                                    "args": [
+                                                      {
+                                                        "op": "sub",
+                                                        "args": [
+                                                          {
+                                                            "time": true
+                                                          },
+                                                          500
+                                                        ]
+                                                      },
+                                                      2200
+                                                    ]
+                                                  },
+                                                  0,
+                                                  1
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          2
+                                        ]
+                                      },
+                                      4
+                                    ]
+                                  },
+                                  {
+                                    "op": "sub",
+                                    "args": [
+                                      {
+                                        "op": "mul",
+                                        "args": [
+                                          {
+                                            "op": "lerp",
+                                            "args": [
+                                              {
+                                                "state": "w"
+                                              },
+                                              {
+                                                "op": "sub",
+                                                "args": [
+                                                  {
+                                                    "state": "w"
+                                                  },
+                                                  {
+                                                    "op": "mul",
+                                                    "args": [
+                                                      {
+                                                        "state": "rate"
+                                                      },
+                                                      {
+                                                        "op": "mul",
+                                                        "args": [
+                                                          {
+                                                            "op": "sub",
+                                                            "args": [
+                                                              {
+                                                                "op": "mul",
+                                                                "args": [
+                                                                  {
+                                                                    "state": "w"
+                                                                  },
+                                                                  2
+                                                                ]
+                                                              },
+                                                              4
+                                                            ]
+                                                          },
+                                                          2
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "op": "clamp",
+                                                "args": [
+                                                  {
+                                                    "op": "div",
+                                                    "args": [
+                                                      {
+                                                        "op": "sub",
+                                                        "args": [
+                                                          {
+                                                            "time": true
+                                                          },
+                                                          500
+                                                        ]
+                                                      },
+                                                      2200
+                                                    ]
+                                                  },
+                                                  0,
+                                                  1
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          2
+                                        ]
+                                      },
+                                      4
+                                    ]
+                                  }
+                                ]
+                              },
+                              2
+                            ]
+                          },
+                          140
+                        ]
+                      },
+                      200
+                    ]
+                  }
+                ]
+              },
+              "radius": 8,
+              "fill": "#087B69"
+            },
+            {
+              "kind": "text",
+              "id": "weight-min",
+              "text": "−4",
+              "x": 0,
+              "y": 231,
+              "fontSize": 14,
+              "fill": "#526A70"
+            },
+            {
+              "kind": "text",
+              "id": "weight-optimal",
+              "text": "best w = 2",
+              "x": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "div",
+                    "args": [
+                      {
+                        "op": "add",
+                        "args": [
+                          2,
+                          4
+                        ]
+                      },
+                      14
+                    ]
+                  },
+                  690
+                ]
+              },
+              "y": 231,
+              "fontSize": 14,
+              "fill": "#087B69"
+            },
+            {
+              "kind": "text",
+              "id": "weight-max",
+              "text": "10",
+              "x": 673,
+              "y": 231,
+              "fontSize": 14,
+              "fill": "#526A70"
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "id": "loss-label",
+          "text": "LOSS",
+          "x": 28,
+          "y": 110,
+          "fontSize": 13,
+          "fill": "#526A70"
+        },
+        {
+          "kind": "group",
+          "id": "forward-tile",
+          "x": 32,
+          "y": 367,
+          "children": [
+            {
+              "kind": "rect",
+              "id": "forward-tile-bg",
+              "x": 0,
+              "y": 0,
+              "width": 245,
+              "height": 124,
+              "fill": "#E8F6ED",
+              "cornerRadius": 16
+            },
+            {
+              "kind": "text",
+              "id": "forward-step",
+              "text": "01 · FORWARD",
+              "x": 18,
+              "y": 28,
+              "fontSize": 13,
+              "fill": "#087B69"
+            },
+            {
+              "kind": "text",
+              "id": "loss-value",
+              "text": {
+                "op": "concat",
+                "args": [
+                  "loss = ",
+                  {
+                    "op": "div",
+                    "args": [
+                      {
+                        "op": "round",
+                        "args": [
+                          {
+                            "op": "mul",
+                            "args": [
+                              {
+                                "op": "div",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "op": "sub",
+                                        "args": [
+                                          {
+                                            "op": "mul",
+                                            "args": [
+                                              {
+                                                "state": "w"
+                                              },
+                                              2
+                                            ]
+                                          },
+                                          4
+                                        ]
+                                      },
+                                      {
+                                        "op": "sub",
+                                        "args": [
+                                          {
+                                            "op": "mul",
+                                            "args": [
+                                              {
+                                                "state": "w"
+                                              },
+                                              2
+                                            ]
+                                          },
+                                          4
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  2
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      },
+                      1000
+                    ]
+                  }
+                ]
+              },
+              "x": 18,
+              "y": 67,
+              "fontSize": 23,
+              "fill": "#19383E"
+            },
+            {
+              "kind": "text",
+              "id": "residual-value",
+              "text": {
+                "op": "concat",
+                "args": [
+                  "error = ",
+                  {
+                    "op": "div",
+                    "args": [
+                      {
+                        "op": "round",
+                        "args": [
+                          {
+                            "op": "mul",
+                            "args": [
+                              {
+                                "op": "sub",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "w"
+                                      },
+                                      2
+                                    ]
+                                  },
+                                  4
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      },
+                      1000
+                    ]
+                  }
+                ]
+              },
+              "x": 18,
+              "y": 98,
+              "fontSize": 16,
+              "fill": "#526A70"
+            }
+          ]
+        },
+        {
+          "kind": "group",
+          "id": "backward-tile",
+          "x": 317,
+          "y": 367,
+          "children": [
+            {
+              "kind": "rect",
+              "id": "backward-tile-bg",
+              "x": 0,
+              "y": 0,
+              "width": 245,
+              "height": 124,
+              "fill": "#F2EDFB",
+              "cornerRadius": 16
+            },
+            {
+              "kind": "text",
+              "id": "backward-step",
+              "text": "02 · BACKWARD",
+              "x": 18,
+              "y": 28,
+              "fontSize": 13,
+              "fill": "#7050A4"
+            },
+            {
+              "kind": "text",
+              "id": "gradient-value",
+              "text": {
+                "op": "concat",
+                "args": [
+                  "gradient = ",
+                  {
+                    "op": "div",
+                    "args": [
+                      {
+                        "op": "round",
+                        "args": [
+                          {
+                            "op": "mul",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  {
+                                    "op": "sub",
+                                    "args": [
+                                      {
+                                        "op": "mul",
+                                        "args": [
+                                          {
+                                            "state": "w"
+                                          },
+                                          2
+                                        ]
+                                      },
+                                      4
+                                    ]
+                                  },
+                                  2
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      },
+                      1000
+                    ]
+                  }
+                ]
+              },
+              "x": 18,
+              "y": 67,
+              "fontSize": 23,
+              "fill": "#19383E"
+            },
+            {
+              "kind": "text",
+              "id": "backward-note",
+              "text": "w has not changed yet.",
+              "x": 18,
+              "y": 98,
+              "fontSize": 16,
+              "fill": "#526A70"
+            }
+          ]
+        },
+        {
+          "kind": "group",
+          "id": "update-tile",
+          "x": 602,
+          "y": 367,
+          "children": [
+            {
+              "kind": "rect",
+              "id": "update-tile-bg",
+              "x": 0,
+              "y": 0,
+              "width": 245,
+              "height": 124,
+              "fill": "#FCF3DF",
+              "cornerRadius": 16
+            },
+            {
+              "kind": "text",
+              "id": "update-step",
+              "text": "03 · UPDATE",
+              "x": 18,
+              "y": 28,
+              "fontSize": 13,
+              "fill": "#80601E"
+            },
+            {
+              "kind": "text",
+              "id": "next-weight",
+              "text": {
+                "op": "concat",
+                "args": [
+                  "new w = ",
+                  {
+                    "op": "div",
+                    "args": [
+                      {
+                        "op": "round",
+                        "args": [
+                          {
+                            "op": "mul",
+                            "args": [
+                              {
+                                "op": "sub",
+                                "args": [
+                                  {
+                                    "state": "w"
+                                  },
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "rate"
+                                      },
+                                      {
+                                        "op": "mul",
+                                        "args": [
+                                          {
+                                            "op": "sub",
+                                            "args": [
+                                              {
+                                                "op": "mul",
+                                                "args": [
+                                                  {
+                                                    "state": "w"
+                                                  },
+                                                  2
+                                                ]
+                                              },
+                                              4
+                                            ]
+                                          },
+                                          2
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      },
+                      1000
+                    ]
+                  }
+                ]
+              },
+              "x": 18,
+              "y": 67,
+              "fontSize": 23,
+              "fill": "#19383E"
+            },
+            {
+              "kind": "text",
+              "id": "next-loss",
+              "text": {
+                "op": "concat",
+                "args": [
+                  "new loss = ",
+                  {
+                    "op": "div",
+                    "args": [
+                      {
+                        "op": "round",
+                        "args": [
+                          {
+                            "op": "mul",
+                            "args": [
+                              {
+                                "op": "div",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "op": "sub",
+                                        "args": [
+                                          {
+                                            "op": "mul",
+                                            "args": [
+                                              {
+                                                "op": "sub",
+                                                "args": [
+                                                  {
+                                                    "state": "w"
+                                                  },
+                                                  {
+                                                    "op": "mul",
+                                                    "args": [
+                                                      {
+                                                        "state": "rate"
+                                                      },
+                                                      {
+                                                        "op": "mul",
+                                                        "args": [
+                                                          {
+                                                            "op": "sub",
+                                                            "args": [
+                                                              {
+                                                                "op": "mul",
+                                                                "args": [
+                                                                  {
+                                                                    "state": "w"
+                                                                  },
+                                                                  2
+                                                                ]
+                                                              },
+                                                              4
+                                                            ]
+                                                          },
+                                                          2
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              2
+                                            ]
+                                          },
+                                          4
+                                        ]
+                                      },
+                                      {
+                                        "op": "sub",
+                                        "args": [
+                                          {
+                                            "op": "mul",
+                                            "args": [
+                                              {
+                                                "op": "sub",
+                                                "args": [
+                                                  {
+                                                    "state": "w"
+                                                  },
+                                                  {
+                                                    "op": "mul",
+                                                    "args": [
+                                                      {
+                                                        "state": "rate"
+                                                      },
+                                                      {
+                                                        "op": "mul",
+                                                        "args": [
+                                                          {
+                                                            "op": "sub",
+                                                            "args": [
+                                                              {
+                                                                "op": "mul",
+                                                                "args": [
+                                                                  {
+                                                                    "state": "w"
+                                                                  },
+                                                                  2
+                                                                ]
+                                                              },
+                                                              4
+                                                            ]
+                                                          },
+                                                          2
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              2
+                                            ]
+                                          },
+                                          4
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  2
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      },
+                      1000
+                    ]
+                  }
+                ]
+              },
+              "x": 18,
+              "y": 98,
+              "fontSize": 16,
+              "fill": "#526A70"
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "id": "update-equation",
+          "text": "new w = old w − learning rate × gradient",
+          "x": 32,
+          "y": 543,
+          "fontSize": 21,
+          "fill": "#19383E"
+        },
+        {
+          "kind": "text",
+          "id": "update-caption",
+          "text": "The moving point shows the proposed update; playing does not commit repeated training steps.",
+          "x": 32,
+          "y": 576,
+          "fontSize": 14,
+          "fill": "#526A70"
+        },
+        {
+          "kind": "text",
+          "id": "mobile-weight-min",
+          "text": "w = −4",
+          "x": 38,
+          "y": 191,
+          "fontSize": 14,
+          "fill": "#19383E",
+          "opacity": 0
+        },
+        {
+          "kind": "text",
+          "id": "mobile-weight-opt",
+          "text": "best w = 2",
+          "x": 138,
+          "y": 191,
+          "fontSize": 14,
+          "fill": "#087B69",
+          "opacity": 0
+        },
+        {
+          "kind": "text",
+          "id": "mobile-weight-max",
+          "text": "10",
+          "x": 294,
+          "y": 191,
+          "fontSize": 14,
+          "fill": "#19383E",
+          "opacity": 0
+        },
+        {
+          "kind": "text",
+          "id": "mobile-update-note-a",
+          "text": "Playing shows one proposed step.",
+          "x": 20,
+          "y": 730,
+          "fontSize": 15,
+          "fill": "#19383E",
+          "opacity": 0
+        },
+        {
+          "kind": "text",
+          "id": "mobile-update-note-b",
+          "text": "It does not keep training the model.",
+          "x": 20,
+          "y": 753,
+          "fontSize": 14.5,
+          "fill": "#19383E",
+          "opacity": 0
+        }
+      ],
+      "layouts": {
+        "compact": {
+          "width": 350,
+          "height": 770,
+          "overrides": {
+            "gradient-stage": {
+              "width": 350,
+              "height": 770
+            },
+            "gradient-title": {
+              "x": 16,
+              "fontSize": 13
+            },
+            "loss-plot": {
+              "x": 38,
+              "y": 85,
+              "scale": 0.4
+            },
+            "loss-label": {
+              "x": 12,
+              "y": 73,
+              "fontSize": 10
+            },
+            "weight-min": {
+              "opacity": 0
+            },
+            "weight-optimal": {
+              "opacity": 0
+            },
+            "weight-max": {
+              "opacity": 0
+            },
+            "mobile-weight-min": {
+              "opacity": 1
+            },
+            "mobile-weight-opt": {
+              "opacity": 1
+            },
+            "mobile-weight-max": {
+              "opacity": 1
+            },
+            "current-dot": {
+              "radius": 18
+            },
+            "next-dot": {
+              "radius": 18
+            },
+            "forward-tile": {
+              "x": 30,
+              "y": 222
+            },
+            "forward-tile-bg": {
+              "width": 290
+            },
+            "backward-tile": {
+              "x": 30,
+              "y": 370
+            },
+            "backward-tile-bg": {
+              "width": 290
+            },
+            "update-tile": {
+              "x": 30,
+              "y": 518
+            },
+            "update-tile-bg": {
+              "width": 290
+            },
+            "update-equation": {
+              "x": 20,
+              "y": 697,
+              "fontSize": 13
+            },
+            "update-caption": {
+              "opacity": 0
+            },
+            "mobile-update-note-a": {
+              "opacity": 1
+            },
+            "mobile-update-note-b": {
+              "opacity": 1
+            }
+          }
+        },
+        "expanded": {
+          "width": 880,
+          "height": 590
+        },
+        "breakpoint": 640
+      },
+      "timeline": {
+        "durationMs": 3000,
+        "tracks": [],
+        "cues": [
+          {
+            "atMs": 0,
+            "text": "Forward computes the prediction and loss using the starting weight."
+          },
+          {
+            "atMs": 500,
+            "text": "Backward computes the gradient. It has not changed w."
+          },
+          {
+            "atMs": 2700,
+            "text": "The proposed optimizer update subtracts learning rate times gradient."
+          }
+        ]
+      },
+      "accessibility": {
+        "text": "For x=2 and target=4, loss=(2w−4)²/2 and gradient=(2w−4)×2. The optimizer proposes new w=w−rate×gradient. At w=0, rate=0.1, loss=8, gradient=−8 and new w=0.8. A large learning rate can overshoot and increase loss.",
+        "reducedMotion": {
+          "atMs": 3000,
+          "description": "For x=2 and target=4, loss=(2w−4)²/2 and gradient=(2w−4)×2. The optimizer proposes new w=w−rate×gradient. At w=0, rate=0.1, loss=8, gradient=−8 and new w=0.8. A large learning rate can overshoot and increase loss."
+        }
+      },
+      "referenceChecks": []
+    },
+    {
+      "version": 1,
+      "id": "ml-tensor-strides",
+      "title": "A view changes the map, not the buffer",
+      "description": "Select a logical row and column. Toggle a transpose view and watch the same twelve values move. An invalid logical coordinate is reported instead of indexing memory.",
+      "state": {
+        "row": {
+          "kind": "number",
+          "label": "Logical row",
+          "initial": 1,
+          "min": 0,
+          "max": 3,
+          "step": 1
+        },
+        "column": {
+          "kind": "number",
+          "label": "Logical column",
+          "initial": 2,
+          "min": 0,
+          "max": 3,
+          "step": 1
+        },
+        "transpose": {
+          "kind": "boolean",
+          "label": "Transpose view",
+          "initial": false
+        }
+      },
+      "controls": [
+        "row",
+        "column",
+        "transpose"
+      ],
+      "nodes": [
+        {
+          "kind": "rect",
+          "id": "tensor-stage",
+          "x": 0,
+          "y": 0,
+          "width": 880,
+          "height": 500,
+          "fill": "#F8FAF7",
+          "cornerRadius": 24
+        },
+        {
+          "kind": "text",
+          "id": "tensor-title",
+          "text": "LOGICAL COORDINATES → PHYSICAL OFFSET",
+          "x": 28,
+          "y": 39,
+          "fontSize": 14,
+          "fill": "#087B69",
+          "weight": "bold"
+        },
+        {
+          "kind": "group",
+          "id": "tensor-grid",
+          "x": 52,
+          "y": 95,
+          "children": [
+            {
+              "kind": "group",
+              "id": "cell-0",
+              "x": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      0,
+                      0
+                    ]
+                  },
+                  69
+                ]
+              },
+              "y": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      0,
+                      0
+                    ]
+                  },
+                  69
+                ]
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "cell-bg-0",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#E6EFEC",
+                  "cornerRadius": 12
+                },
+                {
+                  "kind": "rect",
+                  "id": "cell-selected-0",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#B3DDCA",
+                  "cornerRadius": 12,
+                  "opacity": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "and",
+                        "args": [
+                          {
+                            "op": "and",
+                            "args": [
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "row"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      4,
+                                      3
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "column"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      3,
+                                      4
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "op": "add",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "row"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          1,
+                                          4
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "column"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          4,
+                                          1
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              0
+                            ]
+                          }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "cell-value-0",
+                  "text": "0",
+                  "x": 29,
+                  "y": 38,
+                  "fontSize": 24,
+                  "fill": "#19383E",
+                  "align": "middle",
+                  "weight": "bold"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "cell-1",
+              "x": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      0,
+                      1
+                    ]
+                  },
+                  69
+                ]
+              },
+              "y": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      1,
+                      0
+                    ]
+                  },
+                  69
+                ]
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "cell-bg-1",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#E6EFEC",
+                  "cornerRadius": 12
+                },
+                {
+                  "kind": "rect",
+                  "id": "cell-selected-1",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#B3DDCA",
+                  "cornerRadius": 12,
+                  "opacity": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "and",
+                        "args": [
+                          {
+                            "op": "and",
+                            "args": [
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "row"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      4,
+                                      3
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "column"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      3,
+                                      4
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "op": "add",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "row"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          1,
+                                          4
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "column"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          4,
+                                          1
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              1
+                            ]
+                          }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "cell-value-1",
+                  "text": "1",
+                  "x": 29,
+                  "y": 38,
+                  "fontSize": 24,
+                  "fill": "#19383E",
+                  "align": "middle",
+                  "weight": "bold"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "cell-2",
+              "x": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      0,
+                      2
+                    ]
+                  },
+                  69
+                ]
+              },
+              "y": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      2,
+                      0
+                    ]
+                  },
+                  69
+                ]
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "cell-bg-2",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#E6EFEC",
+                  "cornerRadius": 12
+                },
+                {
+                  "kind": "rect",
+                  "id": "cell-selected-2",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#B3DDCA",
+                  "cornerRadius": 12,
+                  "opacity": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "and",
+                        "args": [
+                          {
+                            "op": "and",
+                            "args": [
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "row"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      4,
+                                      3
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "column"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      3,
+                                      4
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "op": "add",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "row"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          1,
+                                          4
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "column"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          4,
+                                          1
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              2
+                            ]
+                          }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "cell-value-2",
+                  "text": "2",
+                  "x": 29,
+                  "y": 38,
+                  "fontSize": 24,
+                  "fill": "#19383E",
+                  "align": "middle",
+                  "weight": "bold"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "cell-3",
+              "x": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      0,
+                      3
+                    ]
+                  },
+                  69
+                ]
+              },
+              "y": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      3,
+                      0
+                    ]
+                  },
+                  69
+                ]
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "cell-bg-3",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#E6EFEC",
+                  "cornerRadius": 12
+                },
+                {
+                  "kind": "rect",
+                  "id": "cell-selected-3",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#B3DDCA",
+                  "cornerRadius": 12,
+                  "opacity": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "and",
+                        "args": [
+                          {
+                            "op": "and",
+                            "args": [
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "row"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      4,
+                                      3
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "column"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      3,
+                                      4
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "op": "add",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "row"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          1,
+                                          4
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "column"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          4,
+                                          1
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              3
+                            ]
+                          }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "cell-value-3",
+                  "text": "3",
+                  "x": 29,
+                  "y": 38,
+                  "fontSize": 24,
+                  "fill": "#19383E",
+                  "align": "middle",
+                  "weight": "bold"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "cell-4",
+              "x": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      1,
+                      0
+                    ]
+                  },
+                  69
+                ]
+              },
+              "y": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      0,
+                      1
+                    ]
+                  },
+                  69
+                ]
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "cell-bg-4",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#E6EFEC",
+                  "cornerRadius": 12
+                },
+                {
+                  "kind": "rect",
+                  "id": "cell-selected-4",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#B3DDCA",
+                  "cornerRadius": 12,
+                  "opacity": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "and",
+                        "args": [
+                          {
+                            "op": "and",
+                            "args": [
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "row"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      4,
+                                      3
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "column"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      3,
+                                      4
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "op": "add",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "row"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          1,
+                                          4
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "column"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          4,
+                                          1
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              4
+                            ]
+                          }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "cell-value-4",
+                  "text": "4",
+                  "x": 29,
+                  "y": 38,
+                  "fontSize": 24,
+                  "fill": "#19383E",
+                  "align": "middle",
+                  "weight": "bold"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "cell-5",
+              "x": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      1,
+                      1
+                    ]
+                  },
+                  69
+                ]
+              },
+              "y": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      1,
+                      1
+                    ]
+                  },
+                  69
+                ]
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "cell-bg-5",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#E6EFEC",
+                  "cornerRadius": 12
+                },
+                {
+                  "kind": "rect",
+                  "id": "cell-selected-5",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#B3DDCA",
+                  "cornerRadius": 12,
+                  "opacity": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "and",
+                        "args": [
+                          {
+                            "op": "and",
+                            "args": [
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "row"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      4,
+                                      3
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "column"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      3,
+                                      4
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "op": "add",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "row"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          1,
+                                          4
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "column"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          4,
+                                          1
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              5
+                            ]
+                          }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "cell-value-5",
+                  "text": "5",
+                  "x": 29,
+                  "y": 38,
+                  "fontSize": 24,
+                  "fill": "#19383E",
+                  "align": "middle",
+                  "weight": "bold"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "cell-6",
+              "x": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      1,
+                      2
+                    ]
+                  },
+                  69
+                ]
+              },
+              "y": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      2,
+                      1
+                    ]
+                  },
+                  69
+                ]
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "cell-bg-6",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#E6EFEC",
+                  "cornerRadius": 12
+                },
+                {
+                  "kind": "rect",
+                  "id": "cell-selected-6",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#B3DDCA",
+                  "cornerRadius": 12,
+                  "opacity": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "and",
+                        "args": [
+                          {
+                            "op": "and",
+                            "args": [
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "row"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      4,
+                                      3
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "column"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      3,
+                                      4
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "op": "add",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "row"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          1,
+                                          4
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "column"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          4,
+                                          1
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              6
+                            ]
+                          }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "cell-value-6",
+                  "text": "6",
+                  "x": 29,
+                  "y": 38,
+                  "fontSize": 24,
+                  "fill": "#19383E",
+                  "align": "middle",
+                  "weight": "bold"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "cell-7",
+              "x": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      1,
+                      3
+                    ]
+                  },
+                  69
+                ]
+              },
+              "y": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      3,
+                      1
+                    ]
+                  },
+                  69
+                ]
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "cell-bg-7",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#E6EFEC",
+                  "cornerRadius": 12
+                },
+                {
+                  "kind": "rect",
+                  "id": "cell-selected-7",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#B3DDCA",
+                  "cornerRadius": 12,
+                  "opacity": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "and",
+                        "args": [
+                          {
+                            "op": "and",
+                            "args": [
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "row"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      4,
+                                      3
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "column"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      3,
+                                      4
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "op": "add",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "row"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          1,
+                                          4
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "column"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          4,
+                                          1
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              7
+                            ]
+                          }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "cell-value-7",
+                  "text": "7",
+                  "x": 29,
+                  "y": 38,
+                  "fontSize": 24,
+                  "fill": "#19383E",
+                  "align": "middle",
+                  "weight": "bold"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "cell-8",
+              "x": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      2,
+                      0
+                    ]
+                  },
+                  69
+                ]
+              },
+              "y": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      0,
+                      2
+                    ]
+                  },
+                  69
+                ]
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "cell-bg-8",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#E6EFEC",
+                  "cornerRadius": 12
+                },
+                {
+                  "kind": "rect",
+                  "id": "cell-selected-8",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#B3DDCA",
+                  "cornerRadius": 12,
+                  "opacity": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "and",
+                        "args": [
+                          {
+                            "op": "and",
+                            "args": [
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "row"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      4,
+                                      3
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "column"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      3,
+                                      4
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "op": "add",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "row"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          1,
+                                          4
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "column"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          4,
+                                          1
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              8
+                            ]
+                          }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "cell-value-8",
+                  "text": "8",
+                  "x": 29,
+                  "y": 38,
+                  "fontSize": 24,
+                  "fill": "#19383E",
+                  "align": "middle",
+                  "weight": "bold"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "cell-9",
+              "x": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      2,
+                      1
+                    ]
+                  },
+                  69
+                ]
+              },
+              "y": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      1,
+                      2
+                    ]
+                  },
+                  69
+                ]
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "cell-bg-9",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#E6EFEC",
+                  "cornerRadius": 12
+                },
+                {
+                  "kind": "rect",
+                  "id": "cell-selected-9",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#B3DDCA",
+                  "cornerRadius": 12,
+                  "opacity": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "and",
+                        "args": [
+                          {
+                            "op": "and",
+                            "args": [
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "row"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      4,
+                                      3
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "column"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      3,
+                                      4
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "op": "add",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "row"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          1,
+                                          4
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "column"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          4,
+                                          1
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              9
+                            ]
+                          }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "cell-value-9",
+                  "text": "9",
+                  "x": 29,
+                  "y": 38,
+                  "fontSize": 24,
+                  "fill": "#19383E",
+                  "align": "middle",
+                  "weight": "bold"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "cell-10",
+              "x": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      2,
+                      2
+                    ]
+                  },
+                  69
+                ]
+              },
+              "y": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      2,
+                      2
+                    ]
+                  },
+                  69
+                ]
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "cell-bg-10",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#E6EFEC",
+                  "cornerRadius": 12
+                },
+                {
+                  "kind": "rect",
+                  "id": "cell-selected-10",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#B3DDCA",
+                  "cornerRadius": 12,
+                  "opacity": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "and",
+                        "args": [
+                          {
+                            "op": "and",
+                            "args": [
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "row"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      4,
+                                      3
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "column"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      3,
+                                      4
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "op": "add",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "row"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          1,
+                                          4
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "column"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          4,
+                                          1
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              10
+                            ]
+                          }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "cell-value-10",
+                  "text": "10",
+                  "x": 29,
+                  "y": 38,
+                  "fontSize": 24,
+                  "fill": "#19383E",
+                  "align": "middle",
+                  "weight": "bold"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "cell-11",
+              "x": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      2,
+                      3
+                    ]
+                  },
+                  69
+                ]
+              },
+              "y": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      3,
+                      2
+                    ]
+                  },
+                  69
+                ]
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "cell-bg-11",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#E6EFEC",
+                  "cornerRadius": 12
+                },
+                {
+                  "kind": "rect",
+                  "id": "cell-selected-11",
+                  "x": 0,
+                  "y": 0,
+                  "width": 58,
+                  "height": 58,
+                  "fill": "#B3DDCA",
+                  "cornerRadius": 12,
+                  "opacity": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "and",
+                        "args": [
+                          {
+                            "op": "and",
+                            "args": [
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "row"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      4,
+                                      3
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "lt",
+                                "args": [
+                                  {
+                                    "state": "column"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      3,
+                                      4
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "op": "add",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "row"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          1,
+                                          4
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "state": "column"
+                                      },
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "state": "transpose"
+                                          },
+                                          4,
+                                          1
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              11
+                            ]
+                          }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "cell-value-11",
+                  "text": "11",
+                  "x": 29,
+                  "y": 38,
+                  "fontSize": 24,
+                  "fill": "#19383E",
+                  "align": "middle",
+                  "weight": "bold"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "group",
+          "id": "tensor-readout",
+          "x": 407,
+          "y": 95,
+          "children": [
+            {
+              "kind": "rect",
+              "id": "tensor-readout-bg",
+              "x": 0,
+              "y": 0,
+              "width": 427,
+              "height": 295,
+              "fill": "#F2EDFB",
+              "cornerRadius": 16
+            },
+            {
+              "kind": "text",
+              "id": "tensor-shape",
+              "text": {
+                "op": "concat",
+                "args": [
+                  "shape = (",
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      4,
+                      3
+                    ]
+                  },
+                  ", ",
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "state": "transpose"
+                      },
+                      3,
+                      4
+                    ]
+                  },
+                  ")"
+                ]
+              },
+              "x": 22,
+              "y": 45,
+              "fontSize": 26,
+              "fill": "#19383E"
+            },
+            {
+              "kind": "text",
+              "id": "tensor-strides",
+              "text": {
+                "op": "if",
+                "args": [
+                  {
+                    "state": "transpose"
+                  },
+                  "strides = (1, 4)",
+                  "strides = (4, 1)"
+                ]
+              },
+              "x": 22,
+              "y": 94,
+              "fontSize": 23,
+              "fill": "#19383E"
+            },
+            {
+              "kind": "text",
+              "id": "tensor-offset",
+              "text": {
+                "op": "if",
+                "args": [
+                  {
+                    "op": "and",
+                    "args": [
+                      {
+                        "op": "lt",
+                        "args": [
+                          {
+                            "state": "row"
+                          },
+                          {
+                            "op": "if",
+                            "args": [
+                              {
+                                "state": "transpose"
+                              },
+                              4,
+                              3
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "op": "lt",
+                        "args": [
+                          {
+                            "state": "column"
+                          },
+                          {
+                            "op": "if",
+                            "args": [
+                              {
+                                "state": "transpose"
+                              },
+                              3,
+                              4
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "op": "concat",
+                    "args": [
+                      "element offset = ",
+                      {
+                        "op": "add",
+                        "args": [
+                          {
+                            "op": "mul",
+                            "args": [
+                              {
+                                "state": "row"
+                              },
+                              {
+                                "op": "if",
+                                "args": [
+                                  {
+                                    "state": "transpose"
+                                  },
+                                  1,
+                                  4
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "op": "mul",
+                            "args": [
+                              {
+                                "state": "column"
+                              },
+                              {
+                                "op": "if",
+                                "args": [
+                                  {
+                                    "state": "transpose"
+                                  },
+                                  4,
+                                  1
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "coordinate out of bounds"
+                ]
+              },
+              "x": 22,
+              "y": 148,
+              "fontSize": 22,
+              "fill": "#19383E"
+            },
+            {
+              "kind": "text",
+              "id": "tensor-bytes",
+              "text": {
+                "op": "if",
+                "args": [
+                  {
+                    "op": "and",
+                    "args": [
+                      {
+                        "op": "lt",
+                        "args": [
+                          {
+                            "state": "row"
+                          },
+                          {
+                            "op": "if",
+                            "args": [
+                              {
+                                "state": "transpose"
+                              },
+                              4,
+                              3
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "op": "lt",
+                        "args": [
+                          {
+                            "state": "column"
+                          },
+                          {
+                            "op": "if",
+                            "args": [
+                              {
+                                "state": "transpose"
+                              },
+                              3,
+                              4
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "op": "concat",
+                    "args": [
+                      "FP32 byte offset = ",
+                      {
+                        "op": "mul",
+                        "args": [
+                          {
+                            "op": "add",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  {
+                                    "state": "row"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      1,
+                                      4
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "op": "mul",
+                                "args": [
+                                  {
+                                    "state": "column"
+                                  },
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "state": "transpose"
+                                      },
+                                      4,
+                                      1
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          4
+                        ]
+                      }
+                    ]
+                  },
+                  "No memory access is valid."
+                ]
+              },
+              "x": 22,
+              "y": 192,
+              "fontSize": 20,
+              "fill": "#19383E"
+            },
+            {
+              "kind": "text",
+              "id": "tensor-storage",
+              "text": "Same backing allocation",
+              "x": 22,
+              "y": 247,
+              "fontSize": 17,
+              "fill": "#7050A4"
+            },
+            {
+              "kind": "text",
+              "id": "tensor-storage-value",
+              "text": "12 × 4 = 48 bytes",
+              "x": 22,
+              "y": 273,
+              "fontSize": 17,
+              "fill": "#7050A4"
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "id": "tensor-note",
+          "text": "A transpose view changes shape and strides. It does not allocate twelve new values.",
+          "x": 28,
+          "y": 459,
+          "fontSize": 18,
+          "fill": "#19383E"
+        },
+        {
+          "kind": "text",
+          "id": "tensor-mobile-note-a",
+          "text": "The view changes shape and strides.",
+          "x": 18,
+          "y": 749,
+          "fontSize": 15,
+          "fill": "#19383E",
+          "opacity": 0
+        },
+        {
+          "kind": "text",
+          "id": "tensor-mobile-note-b",
+          "text": "The buffer is not copied.",
+          "x": 18,
+          "y": 775,
+          "fontSize": 16,
+          "fill": "#19383E",
+          "opacity": 0
+        }
+      ],
+      "layouts": {
+        "compact": {
+          "width": 350,
+          "height": 800,
+          "overrides": {
+            "tensor-stage": {
+              "width": 350,
+              "height": 800
+            },
+            "tensor-title": {
+              "x": 16,
+              "fontSize": 10
+            },
+            "tensor-grid": {
+              "x": 41,
+              "y": 83
+            },
+            "tensor-readout": {
+              "x": 20,
+              "y": 411
+            },
+            "tensor-readout-bg": {
+              "width": 310,
+              "height": 300
+            },
+            "tensor-shape": {
+              "fontSize": 24
+            },
+            "tensor-strides": {
+              "fontSize": 22
+            },
+            "tensor-offset": {
+              "fontSize": 17
+            },
+            "tensor-bytes": {
+              "fontSize": 17
+            },
+            "tensor-note": {
+              "opacity": 0
+            },
+            "tensor-mobile-note-a": {
+              "opacity": 1
+            },
+            "tensor-mobile-note-b": {
+              "opacity": 1
+            }
+          }
+        },
+        "expanded": {
+          "width": 880,
+          "height": 500
+        },
+        "breakpoint": 640
+      },
+      "timeline": {
+        "durationMs": 1000,
+        "tracks": [],
+        "cues": [
+          {
+            "atMs": 0,
+            "text": "The values are one flat allocation. Shape and strides define a view."
+          },
+          {
+            "atMs": 1000,
+            "text": "Changing the view does not copy the underlying values."
+          }
+        ]
+      },
+      "accessibility": {
+        "text": "A 3×4 row-major FP32 tensor has strides (4,1). Logical (row,column) maps to element offset row×4+column and byte offset four times that. The transposed 4×3 view uses strides (1,4), with the same 48-byte allocation. Out-of-range coordinates are invalid.",
+        "reducedMotion": {
+          "atMs": 1000,
+          "description": "A 3×4 row-major FP32 tensor has strides (4,1). Logical (row,column) maps to element offset row×4+column and byte offset four times that. The transposed 4×3 view uses strides (1,4), with the same 48-byte allocation. Out-of-range coordinates are invalid."
+        }
+      },
+      "referenceChecks": []
+    }
+  ],
+  "bindings": [
+    {
+      "visualId": "ml-affine-forward",
+      "episodeId": "fnd-e01-01",
+      "afterBlockId": "fnd-01-01-text-1"
+    },
+    {
+      "visualId": "ml-gradient-update",
+      "episodeId": "fnd-e03-03",
+      "afterBlockId": "fnd-03-03-text-1"
+    },
+    {
+      "visualId": "ml-tensor-strides",
+      "episodeId": "fnd-e02-02",
+      "afterBlockId": "fnd-02-02-text-1"
+    }
+  ]
+}

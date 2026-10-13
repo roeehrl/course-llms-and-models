@@ -1,0 +1,21 @@
+{
+  "shape": [
+    128256,
+    2048
+  ],
+  "elements": 262668288,
+  "bitwise_values": false,
+  "candidate_relative_l2": 0.5816488215901757,
+  "reference_relative_l2": 0.38332527896750956,
+  "ratio": 1.5173766341652515,
+  "candidate_max_abs": 3.399528577574529e-05,
+  "reference_max_abs": 3.4125845559174195e-05,
+  "band_factor": 1.5,
+  "relative_floor": 1e-07,
+  "passed": false,
+  "inputs": {
+    "candidate": "/Users/roee/sn9-equivalence-suite-tmp/work/results/drift-raw-v2-20261011/embedding-exp-avg-sq.pt",
+    "reference": "/Users/roee/sn9-equivalence-suite-tmp/work/results/drift-raw-upstream-20261011/embedding-exp-avg-sq.pt",
+    "oracle": "/Users/roee/sn9-equivalence-suite-tmp/work/results/drift-raw-fp32-20261011/embedding-exp-avg-sq.pt"
+  }
+}

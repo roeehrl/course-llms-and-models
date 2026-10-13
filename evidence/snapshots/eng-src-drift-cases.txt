@@ -1,0 +1,103 @@
+[
+  {
+    "case": "M5Pro-lowmem-v2L1",
+    "checks": 50,
+    "bitwise": 6,
+    "failed_keys": []
+  },
+  {
+    "case": "M5Pro-lowmem-v2L1-nativeback",
+    "checks": 50,
+    "bitwise": 6,
+    "failed_keys": [
+      "pipeline/L2/final_exp_avg_sq/attn_k"
+    ]
+  },
+  {
+    "case": "drift-20261011-rerun",
+    "checks": 50,
+    "bitwise": 50,
+    "failed_keys": []
+  },
+  {
+    "case": "drift-current-upstream-attention-20261011",
+    "checks": 50,
+    "bitwise": 50,
+    "failed_keys": []
+  },
+  {
+    "case": "drift-original-command6-20261011",
+    "checks": 50,
+    "bitwise": 50,
+    "failed_keys": []
+  },
+  {
+    "case": "drift-plain6-20261011",
+    "checks": 50,
+    "bitwise": 50,
+    "failed_keys": []
+  },
+  {
+    "case": "drift-saved-off-20261011",
+    "checks": 50,
+    "bitwise": 50,
+    "failed_keys": []
+  },
+  {
+    "case": "drift-v2-L1-upstream-backward-20261011",
+    "checks": 50,
+    "bitwise": 6,
+    "failed_keys": []
+  },
+  {
+    "case": "drift-v2-all-upstream-backward-20261011",
+    "checks": 50,
+    "bitwise": 6,
+    "failed_keys": []
+  },
+  {
+    "case": "drift-v2-onlyL0-20261011",
+    "checks": 50,
+    "bitwise": 6,
+    "failed_keys": []
+  },
+  {
+    "case": "drift-v2-onlyL1-20261011",
+    "checks": 50,
+    "bitwise": 6,
+    "failed_keys": [
+      "pipeline/L0/final_exp_avg_sq/embedding",
+      "pipeline/L1/final_exp_avg_sq/attn_q",
+      "pipeline/L1/final_exp_avg_sq/attn_k"
+    ]
+  },
+  {
+    "case": "drift-v2-onlyL2-20261011",
+    "checks": 50,
+    "bitwise": 6,
+    "failed_keys": [
+      "pipeline/L0/final_exp_avg_sq/embedding",
+      "pipeline/L0/final_exp_avg_sq/attn_v",
+      "pipeline/L0/final_exp_avg_sq/norms",
+      "pipeline/L1/final_exp_avg_sq/attn_k",
+      "pipeline/L2/final_exp_avg_sq/attn_q",
+      "pipeline/L2/final_exp_avg_sq/attn_k"
+    ]
+  },
+  {
+    "case": "drift-v2-preloaded-20261011",
+    "checks": 50,
+    "bitwise": 6,
+    "failed_keys": [
+      "pipeline/L0/final_exp_avg_sq/embedding"
+    ]
+  },
+  {
+    "case": "drift-v2-selftest-isolated-20261011",
+    "checks": 50,
+    "bitwise": 6,
+    "failed_keys": [
+      "pipeline/L0/final_exp_avg_sq/embedding"
+    ]
+  }
+]

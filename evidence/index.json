@@ -1,0 +1,501 @@
+{
+  "schemaVersion": 1,
+  "visibility": "private",
+  "records": [
+    {
+      "sourceId": "sys-src-up-splits",
+      "sha256": "8fc9aa978300f2df81d9ecb81c877bfe76e9e0f27968ab28dbd6724505a014fe",
+      "bytes": 7622,
+      "snapshot": "evidence/snapshots/sys-src-up-splits.txt",
+      "origin": {
+        "id": "sys-src-up-splits",
+        "gitRepository": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/source",
+        "gitCommit": "22d702acd07453dabb187abedfad185826091341",
+        "gitPath": "shared/subnet/src/subnet/model/llama3/splits.py",
+        "sha256": "8fc9aa978300f2df81d9ecb81c877bfe76e9e0f27968ab28dbd6724505a014fe",
+        "bytes": 7622,
+        "scope": "immutable upstream Git blob; working-tree contents deliberately not substituted",
+        "lineRanges": "21-223",
+        "readAt": "2026-10-12T16:10:35Z"
+      }
+    },
+    {
+      "sourceId": "sys-src-up-queue",
+      "sha256": "cf61083bbe7eb6f00f0e18605d2fd597bb660afdd399ed97320b9327313b6b0f",
+      "bytes": 47715,
+      "snapshot": "evidence/snapshots/sys-src-up-queue.txt",
+      "origin": {
+        "id": "sys-src-up-queue",
+        "gitRepository": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/source",
+        "gitCommit": "22d702acd07453dabb187abedfad185826091341",
+        "gitPath": "src/miner/src/miner/training/activation_queue.py",
+        "sha256": "cf61083bbe7eb6f00f0e18605d2fd597bb660afdd399ed97320b9327313b6b0f",
+        "bytes": 47715,
+        "scope": "immutable upstream Git blob; working-tree contents deliberately not substituted",
+        "lineRanges": "122-173,609-669",
+        "readAt": "2026-10-12T16:10:35Z"
+      }
+    },
+    {
+      "sourceId": "sys-src-patched-training",
+      "sha256": "7ddce6af76a6815ccafee56ce0b44fadfded9ec9fd0b0e31372cd71e70009e7d",
+      "bytes": 60259,
+      "snapshot": "evidence/snapshots/sys-src-patched-training.txt",
+      "origin": {
+        "id": "sys-src-patched-training",
+        "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/training/training.py",
+        "sha256": "7ddce6af76a6815ccafee56ce0b44fadfded9ec9fd0b0e31372cd71e70009e7d",
+        "bytes": 60259,
+        "scope": "historical patched package file; not a live installation observation",
+        "lineRanges": "139-177,307-384,445-680,690-840,1183-1191",
+        "readAt": "2026-10-12T16:10:35Z",
+        "checkoutContextCommit": "3d73164655a5b06231cfeeb5499faaaad7b95b67",
+        "upstreamBaseCommit": "22d702acd07453dabb187abedfad185826091341",
+        "trackedAtCheckoutCommit": false,
+        "matchesCheckoutCommitBytes": null
+      }
+    },
+    {
+      "sourceId": "sys-src-patched-router",
+      "sha256": "4020b92fac9a79d7ae71b4b56a427d6d39ab45fa2e4277e98140824647e6f398",
+      "bytes": 16382,
+      "snapshot": "evidence/snapshots/sys-src-patched-router.txt",
+      "origin": {
+        "id": "sys-src-patched-router",
+        "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/training/transport_health.py",
+        "sha256": "4020b92fac9a79d7ae71b4b56a427d6d39ab45fa2e4277e98140824647e6f398",
+        "bytes": 16382,
+        "scope": "historical patched package file; not a live installation observation",
+        "lineRanges": "74-88,134-199",
+        "readAt": "2026-10-12T16:10:35Z",
+        "checkoutContextCommit": "3d73164655a5b06231cfeeb5499faaaad7b95b67",
+        "upstreamBaseCommit": "22d702acd07453dabb187abedfad185826091341",
+        "trackedAtCheckoutCommit": false,
+        "matchesCheckoutCommitBytes": null
+      }
+    },
+    {
+      "sourceId": "sys-src-patched-mesh",
+      "sha256": "2a55a5a9788c9da573333f74219005bb5475a551af6c5586a8de1f4cbb83ecb4",
+      "bytes": 26522,
+      "snapshot": "evidence/snapshots/sys-src-patched-mesh.txt",
+      "origin": {
+        "id": "sys-src-patched-mesh",
+        "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/sync_v2/elastic_device_mesh.py",
+        "sha256": "2a55a5a9788c9da573333f74219005bb5475a551af6c5586a8de1f4cbb83ecb4",
+        "bytes": 26522,
+        "scope": "historical patched package file; not a live installation observation",
+        "lineRanges": "1-50",
+        "readAt": "2026-10-12T16:10:35Z",
+        "checkoutContextCommit": "3d73164655a5b06231cfeeb5499faaaad7b95b67",
+        "upstreamBaseCommit": "22d702acd07453dabb187abedfad185826091341",
+        "trackedAtCheckoutCommit": false,
+        "matchesCheckoutCommitBytes": null
+      }
+    },
+    {
+      "sourceId": "sys-src-patched-phase",
+      "sha256": "f1c3e4ac1a90fbd611eb39b98e497c563d9ba41028025bb7cc64f16e53bc601d",
+      "bytes": 33251,
+      "snapshot": "evidence/snapshots/sys-src-patched-phase.txt",
+      "origin": {
+        "id": "sys-src-patched-phase",
+        "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/phase_worker.py",
+        "sha256": "f1c3e4ac1a90fbd611eb39b98e497c563d9ba41028025bb7cc64f16e53bc601d",
+        "bytes": 33251,
+        "scope": "historical patched package file; not a live installation observation",
+        "lineRanges": "52-98,287-328",
+        "readAt": "2026-10-12T16:10:35Z",
+        "checkoutContextCommit": "3d73164655a5b06231cfeeb5499faaaad7b95b67",
+        "upstreamBaseCommit": "22d702acd07453dabb187abedfad185826091341",
+        "trackedAtCheckoutCommit": false,
+        "matchesCheckoutCommitBytes": null
+      }
+    },
+    {
+      "sourceId": "sys-src-patched-merge",
+      "sha256": "0fc817650c60ce606490bf21f16f519a6767e94ad863b1e3d959961896b47ec6",
+      "bytes": 29547,
+      "snapshot": "evidence/snapshots/sys-src-patched-merge.txt",
+      "origin": {
+        "id": "sys-src-patched-merge",
+        "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/utils/partition_merging.py",
+        "sha256": "0fc817650c60ce606490bf21f16f519a6767e94ad863b1e3d959961896b47ec6",
+        "bytes": 29547,
+        "scope": "historical patched package file; not a live installation observation",
+        "lineRanges": "27-73,95-315",
+        "readAt": "2026-10-12T16:10:35Z",
+        "checkoutContextCommit": "3d73164655a5b06231cfeeb5499faaaad7b95b67",
+        "upstreamBaseCommit": "22d702acd07453dabb187abedfad185826091341",
+        "trackedAtCheckoutCommit": false,
+        "matchesCheckoutCommitBytes": null
+      }
+    },
+    {
+      "sourceId": "sys-src-patched-model",
+      "sha256": "888e1fb7787e00e4a776a52a3a1cb4f550c4c84fff7e4b75dafe8ce2fd38d177",
+      "bytes": 41274,
+      "snapshot": "evidence/snapshots/sys-src-patched-model.txt",
+      "origin": {
+        "id": "sys-src-patched-model",
+        "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/shared/subnet/src/subnet/model/model_mixin.py",
+        "sha256": "888e1fb7787e00e4a776a52a3a1cb4f550c4c84fff7e4b75dafe8ce2fd38d177",
+        "bytes": 41274,
+        "scope": "historical patched package file; not a live installation observation",
+        "lineRanges": "274-317,319-354,714-797",
+        "readAt": "2026-10-12T16:10:35Z",
+        "checkoutContextCommit": "3d73164655a5b06231cfeeb5499faaaad7b95b67",
+        "upstreamBaseCommit": "22d702acd07453dabb187abedfad185826091341",
+        "trackedAtCheckoutCommit": false,
+        "matchesCheckoutCommitBytes": null
+      }
+    },
+    {
+      "sourceId": "sys-src-patched-queue",
+      "sha256": "b25a5d30065898b4b430a83e9aa1a5e2b8da1ac576b484d2b2899a2510d0e517",
+      "bytes": 60771,
+      "snapshot": "evidence/snapshots/sys-src-patched-queue.txt",
+      "origin": {
+        "id": "sys-src-patched-queue",
+        "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/training/activation_queue.py",
+        "sha256": "b25a5d30065898b4b430a83e9aa1a5e2b8da1ac576b484d2b2899a2510d0e517",
+        "bytes": 60771,
+        "scope": "historical patched package file; not a live installation observation",
+        "lineRanges": "184-234",
+        "readAt": "2026-10-12T16:10:35Z",
+        "checkoutContextCommit": "3d73164655a5b06231cfeeb5499faaaad7b95b67",
+        "upstreamBaseCommit": "22d702acd07453dabb187abedfad185826091341",
+        "trackedAtCheckoutCommit": false,
+        "matchesCheckoutCommitBytes": null
+      }
+    },
+    {
+      "sourceId": "sys-src-patched-cache",
+      "sha256": "f0c8186794a94f32fc6ef9aef4184b5c7b11e9b2ec48ea284576f8aa8eeff2a6",
+      "bytes": 9517,
+      "snapshot": "evidence/snapshots/sys-src-patched-cache.txt",
+      "origin": {
+        "id": "sys-src-patched-cache",
+        "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/training/activation_cache.py",
+        "sha256": "f0c8186794a94f32fc6ef9aef4184b5c7b11e9b2ec48ea284576f8aa8eeff2a6",
+        "bytes": 9517,
+        "scope": "historical patched package file; not a live installation observation",
+        "lineRanges": "74-127,188-219",
+        "readAt": "2026-10-12T16:10:35Z",
+        "checkoutContextCommit": "3d73164655a5b06231cfeeb5499faaaad7b95b67",
+        "upstreamBaseCommit": "22d702acd07453dabb187abedfad185826091341",
+        "trackedAtCheckoutCommit": false,
+        "matchesCheckoutCommitBytes": null
+      }
+    },
+    {
+      "sourceId": "sys-src-journal-source",
+      "sha256": "872e4cf10ecac7560e7f9ef147bd03d0da074eff7f2ba3d54e1512f9130f7a4d",
+      "bytes": 3196,
+      "snapshot": "evidence/snapshots/sys-src-journal-source.txt",
+      "origin": {
+        "id": "sys-src-journal-source",
+        "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/shared/common/src/common/utils/strata_event_journal.py",
+        "sha256": "872e4cf10ecac7560e7f9ef147bd03d0da074eff7f2ba3d54e1512f9130f7a4d",
+        "bytes": 3196,
+        "scope": "historical patched package file; not a live installation observation",
+        "lineRanges": "1-86",
+        "readAt": "2026-10-12T16:10:35Z",
+        "checkoutContextCommit": "3d73164655a5b06231cfeeb5499faaaad7b95b67",
+        "upstreamBaseCommit": "22d702acd07453dabb187abedfad185826091341",
+        "trackedAtCheckoutCommit": false,
+        "matchesCheckoutCommitBytes": null
+      }
+    },
+    {
+      "sourceId": "sys-src-entrypoint",
+      "sha256": "fa5a82aa4948865b36053c4f22a13a844e6456ec540db8b4a2b4eaf69acdf41e",
+      "bytes": 13354,
+      "snapshot": "evidence/snapshots/sys-src-entrypoint.txt",
+      "origin": {
+        "id": "sys-src-entrypoint",
+        "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/mounted_worker_entrypoint.py",
+        "sha256": "fa5a82aa4948865b36053c4f22a13a844e6456ec540db8b4a2b4eaf69acdf41e",
+        "bytes": 13354,
+        "scope": "local control source snapshot; hash is authoritative, not deployment status",
+        "lineRanges": "1-61,282-345",
+        "readAt": "2026-10-12T16:10:35Z",
+        "checkoutContextCommit": "3d73164655a5b06231cfeeb5499faaaad7b95b67",
+        "upstreamBaseCommit": null,
+        "trackedAtCheckoutCommit": true,
+        "matchesCheckoutCommitBytes": true
+      }
+    },
+    {
+      "sourceId": "sys-src-local-readme",
+      "sha256": "1be8e8c9e970ac5ad2522421b6ae4e73fce6b731c3358a4cd6b9036b66e700de",
+      "bytes": 44635,
+      "snapshot": "evidence/snapshots/sys-src-local-readme.txt",
+      "origin": {
+        "id": "sys-src-local-readme",
+        "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/README.md",
+        "sha256": "1be8e8c9e970ac5ad2522421b6ae4e73fce6b731c3358a4cd6b9036b66e700de",
+        "bytes": 44635,
+        "scope": "dated explanatory history; source statements are not fresh fleet observations",
+        "lineRanges": "1-115,291-315",
+        "readAt": "2026-10-12T16:10:35Z",
+        "checkoutContextCommit": "3d73164655a5b06231cfeeb5499faaaad7b95b67",
+        "upstreamBaseCommit": null,
+        "trackedAtCheckoutCommit": true,
+        "matchesCheckoutCommitBytes": true
+      }
+    },
+    {
+      "sourceId": "sys-src-fixset",
+      "sha256": "a6765866993c3edc13d1406f714d3d764dd673f582a7868a638332d71550ef50",
+      "bytes": 103940,
+      "snapshot": "evidence/snapshots/sys-src-fixset.txt",
+      "origin": {
+        "id": "sys-src-fixset",
+        "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-fixset/README.md",
+        "sha256": "a6765866993c3edc13d1406f714d3d764dd673f582a7868a638332d71550ef50",
+        "bytes": 103940,
+        "scope": "patch history read as versioned documentation",
+        "lineRanges": "350-401,793-837,929-943",
+        "readAt": "2026-10-12T16:10:35Z",
+        "checkoutContextCommit": "3d73164655a5b06231cfeeb5499faaaad7b95b67",
+        "upstreamBaseCommit": null,
+        "trackedAtCheckoutCommit": true,
+        "matchesCheckoutCommitBytes": true
+      }
+    },
+    {
+      "sourceId": "sys-src-journal-patch",
+      "sha256": "fc67837c33d4f8b6154aac1d81825d39a05c562ff496e02e17e5cf0e0a4fff13",
+      "bytes": 12863,
+      "snapshot": "evidence/snapshots/sys-src-journal-patch.txt",
+      "origin": {
+        "id": "sys-src-journal-patch",
+        "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-fixset/iota-v4.12.10-structured-event-journal.patch",
+        "sha256": "fc67837c33d4f8b6154aac1d81825d39a05c562ff496e02e17e5cf0e0a4fff13",
+        "bytes": 12863,
+        "scope": "historical patch, not evidence of live execution",
+        "lineRanges": "7-114,204-278",
+        "readAt": "2026-10-12T16:10:35Z",
+        "checkoutContextCommit": "3d73164655a5b06231cfeeb5499faaaad7b95b67",
+        "upstreamBaseCommit": null,
+        "trackedAtCheckoutCommit": true,
+        "matchesCheckoutCommitBytes": true
+      }
+    },
+    {
+      "sourceId": "sys-src-head-record",
+      "sha256": "ef23f38a86ab4156a5a2d98571adf97f5af5460ef98c2d12fa75e70951ea9a2f",
+      "bytes": 55797,
+      "snapshot": "evidence/snapshots/sys-src-head-record.txt",
+      "origin": {
+        "id": "sys-src-head-record",
+        "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/evidence/sn9-mps-studio-2026-09-02/head-b4-s800-10.jsonl",
+        "sha256": "ef23f38a86ab4156a5a2d98571adf97f5af5460ef98c2d12fa75e70951ea9a2f",
+        "bytes": 55797,
+        "scope": "archived local benchmark, not network training/journal acceptance",
+        "lineRanges": "JSONL line 3: warmup; selected shape, dtype, loss and timestamp only",
+        "readAt": "2026-10-12T16:10:35Z",
+        "checkoutContextCommit": "3d73164655a5b06231cfeeb5499faaaad7b95b67",
+        "upstreamBaseCommit": null,
+        "trackedAtCheckoutCommit": true,
+        "matchesCheckoutCommitBytes": true
+      }
+    },
+    {
+      "sourceId": "sys-src-rules",
+      "sha256": "60da4971318cd8c3e8c2735255d4e526e48e12427c20555488c7c5a9b35f1743",
+      "bytes": 3733,
+      "snapshot": "evidence/snapshots/sys-src-rules.txt",
+      "origin": {
+        "id": "sys-src-rules",
+        "path": "/Users/tnt/git/mine/CLAUDE.md",
+        "sha256": "60da4971318cd8c3e8c2735255d4e526e48e12427c20555488c7c5a9b35f1743",
+        "bytes": 3733,
+        "scope": "repository computed-work equivalence and operational constraints",
+        "lineRanges": "SN9 computed-work versus behavior rules",
+        "readAt": "2026-10-12T16:10:35Z",
+        "checkoutContextCommit": "3d73164655a5b06231cfeeb5499faaaad7b95b67",
+        "upstreamBaseCommit": null,
+        "trackedAtCheckoutCommit": true,
+        "matchesCheckoutCommitBytes": true
+      }
+    },
+    {
+      "sourceId": "sys-src-package-manifest",
+      "sha256": "cf502aafa3304cb4bf291ade7360b62f7a737ba7dd87b90d13efcf07352f14cd",
+      "bytes": 31565,
+      "snapshot": "evidence/snapshots/sys-src-package-manifest.txt",
+      "origin": {
+        "id": "sys-src-package-manifest",
+        "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/manifest.json",
+        "sha256": "cf502aafa3304cb4bf291ade7360b62f7a737ba7dd87b90d13efcf07352f14cd",
+        "bytes": 31565,
+        "scope": "historical artifact metadata; no deployment assertion",
+        "lineRanges": "artifact_id, upstream_commit, upstream_tag, generated_at",
+        "readAt": "2026-10-12T16:10:35Z",
+        "checkoutContextCommit": "3d73164655a5b06231cfeeb5499faaaad7b95b67",
+        "upstreamBaseCommit": null,
+        "trackedAtCheckoutCommit": false,
+        "matchesCheckoutCommitBytes": null
+      }
+    },
+    {
+      "sourceId": "eng-src-rules",
+      "sha256": "60da4971318cd8c3e8c2735255d4e526e48e12427c20555488c7c5a9b35f1743",
+      "bytes": 3733,
+      "snapshot": "evidence/snapshots/eng-src-rules.txt",
+      "origin": {
+        "sourceId": "eng-src-rules",
+        "path": "CLAUDE.md",
+        "sha256": "60da4971318cd8c3e8c2735255d4e526e48e12427c20555488c7c5a9b35f1743",
+        "bytes": 3733
+      }
+    },
+    {
+      "sourceId": "eng-src-incident",
+      "sha256": "ab1508a9b8767d6477f1c662251aff7e9add6285ed44e01fcaba89058eb6f174",
+      "bytes": 9278,
+      "snapshot": "evidence/snapshots/eng-src-incident.txt",
+      "origin": {
+        "sourceId": "eng-src-incident",
+        "path": "macos/StrataMiner/Research/SN9_RUN24_CORRUPTION_INCIDENT_2026-10-11.md",
+        "sha256": "ab1508a9b8767d6477f1c662251aff7e9add6285ed44e01fcaba89058eb6f174",
+        "bytes": 9278
+      }
+    },
+    {
+      "sourceId": "eng-src-pv-host",
+      "sha256": "e88766e8af0d36606c31577c27be7463a2b495ca6e43303a5670ba26a525367a",
+      "bytes": 4003,
+      "snapshot": "evidence/snapshots/eng-src-pv-host.txt",
+      "origin": {
+        "sourceId": "eng-src-pv-host",
+        "path": "macos/StrataMiner/Research/sn9-gqa-kernel-lab/requalify-2026-10-11/probe_pv.py",
+        "sha256": "e88766e8af0d36606c31577c27be7463a2b495ca6e43303a5670ba26a525367a",
+        "bytes": 4003
+      }
+    },
+    {
+      "sourceId": "eng-src-pv-metal",
+      "sha256": "c1f4458eb0ce3c4cff3c77e958ef5389a3193e0795aff92edb03cf7e000f8aa9",
+      "bytes": 8394,
+      "snapshot": "evidence/snapshots/eng-src-pv-metal.txt",
+      "origin": {
+        "sourceId": "eng-src-pv-metal",
+        "path": "macos/StrataMiner/Research/sn9-gqa-kernel-lab/requalify-2026-10-11/kernels/probe_pv.metal",
+        "sha256": "c1f4458eb0ce3c4cff3c77e958ef5389a3193e0795aff92edb03cf7e000f8aa9",
+        "bytes": 8394
+      }
+    },
+    {
+      "sourceId": "eng-src-pv-a",
+      "sha256": "48035246087ace071cf8900500f86e7ea3b4649718ea447e81e5b7b7f3316c50",
+      "bytes": 1155,
+      "snapshot": "evidence/snapshots/eng-src-pv-a.txt",
+      "origin": {
+        "sourceId": "eng-src-pv-a",
+        "path": "macos/StrataMiner/Research/sn9-gqa-kernel-lab/requalify-2026-10-11/results/guru-mini-probe_pv.json",
+        "sha256": "48035246087ace071cf8900500f86e7ea3b4649718ea447e81e5b7b7f3316c50",
+        "bytes": 1155
+      }
+    },
+    {
+      "sourceId": "eng-src-pv-b",
+      "sha256": "2f0c5b7f2a563bca586344755b68bf7b8b789f9a94a460f1a1c69138d15c7889",
+      "bytes": 1159,
+      "snapshot": "evidence/snapshots/eng-src-pv-b.txt",
+      "origin": {
+        "sourceId": "eng-src-pv-b",
+        "path": "macos/StrataMiner/Research/sn9-gqa-kernel-lab/requalify-2026-10-11/results/lurus-mini-probe_pv.json",
+        "sha256": "2f0c5b7f2a563bca586344755b68bf7b8b789f9a94a460f1a1c69138d15c7889",
+        "bytes": 1159
+      }
+    },
+    {
+      "sourceId": "eng-src-drow",
+      "sha256": "9cd63f0ecef1480af194cba37c591cc82d0f026fc1ceb85de8f67c1e145a2def",
+      "bytes": 1778,
+      "snapshot": "evidence/snapshots/eng-src-drow.txt",
+      "origin": {
+        "sourceId": "eng-src-drow",
+        "path": "macos/StrataMiner/Research/sn9-gqa-kernel-lab/requalify-2026-10-11/probe_drow.py",
+        "sha256": "9cd63f0ecef1480af194cba37c591cc82d0f026fc1ceb85de8f67c1e145a2def",
+        "bytes": 1778
+      }
+    },
+    {
+      "sourceId": "eng-src-oracle-source",
+      "sha256": "7a9d95dedb7e8aaf5d7d736228f825a828c9b3d22422174ab6637c48f64f8152",
+      "bytes": 1714,
+      "snapshot": "evidence/snapshots/eng-src-oracle-source.txt",
+      "origin": {
+        "sourceId": "eng-src-oracle-source",
+        "path": "macos/StrataMiner/Research/sn9-gqa-kernel-lab/requalify-2026-10-11/qualify/oracle.py",
+        "sha256": "7a9d95dedb7e8aaf5d7d736228f825a828c9b3d22422174ab6637c48f64f8152",
+        "bytes": 1714
+      }
+    },
+    {
+      "sourceId": "eng-src-drift-note",
+      "sha256": "146c862ad7ed63fe00d505f4f099d808e52df265f50e74524e35f9bd038a9698",
+      "bytes": 14686,
+      "snapshot": "evidence/snapshots/eng-src-drift-note.txt",
+      "origin": {
+        "sourceId": "eng-src-drift-note",
+        "path": "macos/StrataMiner/Research/sn9-equivalence-suite/results/m5-max-drift-2026-10-11/INVESTIGATION.md",
+        "sha256": "146c862ad7ed63fe00d505f4f099d808e52df265f50e74524e35f9bd038a9698",
+        "bytes": 14686
+      }
+    },
+    {
+      "sourceId": "eng-src-drift-cases",
+      "sha256": "1567849ad8ccd1e601eb40dc5f819b9eefc397138f0f5e03b5db1ae26deecb5b",
+      "bytes": 2135,
+      "snapshot": "evidence/snapshots/eng-src-drift-cases.txt",
+      "origin": {
+        "sourceId": "eng-src-drift-cases",
+        "path": "macos/StrataMiner/Research/sn9-equivalence-suite/results/m5-max-drift-2026-10-11/case-summary.json",
+        "sha256": "1567849ad8ccd1e601eb40dc5f819b9eefc397138f0f5e03b5db1ae26deecb5b",
+        "bytes": 2135
+      }
+    },
+    {
+      "sourceId": "eng-src-drift-exact",
+      "sha256": "ebaa9a4d3c3b4bbe42465ee5c2c9a35e0e73fdf1f280ff14dcac787b39da30fc",
+      "bytes": 755,
+      "snapshot": "evidence/snapshots/eng-src-drift-exact.txt",
+      "origin": {
+        "sourceId": "eng-src-drift-exact",
+        "path": "macos/StrataMiner/Research/sn9-equivalence-suite/results/m5-max-drift-2026-10-11/drift-exact-embedding-20261011.json",
+        "sha256": "ebaa9a4d3c3b4bbe42465ee5c2c9a35e0e73fdf1f280ff14dcac787b39da30fc",
+        "bytes": 755
+      }
+    },
+    {
+      "sourceId": "eng-src-original-forward",
+      "sha256": "0d261149786b2472a120ffe60b3a289a83410f437be951f11001900c2ee0e92e",
+      "bytes": 5998,
+      "snapshot": "evidence/snapshots/eng-src-original-forward.txt",
+      "origin": {
+        "sourceId": "eng-src-original-forward",
+        "path": "macos/StrataMiner/Research/sn9-gqa-kernel-lab/requalify-2026-10-11/proposed/orig/Research/sn9-gqa-kernel-lab/tensorops_attention_s800_forward.metal",
+        "sha256": "0d261149786b2472a120ffe60b3a289a83410f437be951f11001900c2ee0e92e",
+        "bytes": 5998
+      }
+    },
+    {
+      "sourceId": "eng-src-original-backward",
+      "sha256": "cb95a20da60019a5e9409851a45f06996a323a1de67ffa3faf7c750236be6910",
+      "bytes": 11212,
+      "snapshot": "evidence/snapshots/eng-src-original-backward.txt",
+      "origin": {
+        "sourceId": "eng-src-original-backward",
+        "path": "macos/StrataMiner/Research/sn9-gqa-kernel-lab/requalify-2026-10-11/proposed/orig/Research/sn9-gqa-kernel-lab/tensorops_attention_s800_backward.metal",
+        "sha256": "cb95a20da60019a5e9409851a45f06996a323a1de67ffa3faf7c750236be6910",
+        "bytes": 11212
+      }
+    }
+  ],
+  "missing": []
+}

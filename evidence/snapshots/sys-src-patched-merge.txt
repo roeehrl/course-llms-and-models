@@ -1,0 +1,648 @@
+import asyncio
+import math
+from bittensor_wallet import Keypair
+from common import settings as common_settings
+from common.models.api_models import SubmittedWeightsAndOptimizerPresigned
+from common.utils.exceptions import WeightPartitionException
+from common.utils.partitions import MinerPartition
+from common.utils.partitions import get_start_and_end_indices
+from common.utils.blob_format import download_blob_trailer
+from subnet.utils.blob_format import (
+    download_blob_region,
+    tensor_region_nbytes,
+    tensor_region_response_limit,
+)
+from loguru import logger
+from miner import settings as miner_settings
+from common.models.run_flags import RUN_FLAGS, RunFlags
+from miner.utils.utils import upload_partition_blob
+
+from subnet.miner_api_client import MinerAPIClient
+from subnet.utils.partition_utils import (
+    MergingPartition,
+    download_partition_optimizer,
+    require_matching_partition_layer,
+)
+from subnet.utils.vector_utils import require_finite_tensor
+import torch
+
+
+async def get_weight_partition_info(
+    layer: int,
+    miner_api_client: MinerAPIClient,
+) -> tuple[list[SubmittedWeightsAndOptimizerPresigned], list[MinerPartition]]:
+    """
+    Get the weight partition info from the orchestrator. This calls two different API endpoints:
+    - /miner/get_weight_path_per_layer (weight path for the model layer)
+    - /miner/get_partition_indices_by_hotkey (partition indices for the miner)
+
+    Returns:
+        tuple[list[SubmittedWeightsPresigned], list[int]]: The weight partition info and the partition ids
+    """
+    weight_path_per_layer: list[
+        SubmittedWeightsAndOptimizerPresigned
+    ] | dict = await miner_api_client.get_weight_path_per_layer()
+
+    if not weight_path_per_layer:
+        raise WeightPartitionException("Unknown error getting weight path per layer")
+    if not isinstance(weight_path_per_layer, list):
+        raise WeightPartitionException("Invalid weight-source descriptor response")
+    for source_index, source in enumerate(weight_path_per_layer):
+        require_matching_partition_layer(
+            source.layer,
+            layer,
+            context=f"weight source descriptor index {source_index}",
+        )
+
+    logger.debug(f"layer {layer} getting partitions")
+    partitions: dict = await miner_api_client.get_partitions()
+
+    if not partitions:
+        logger.warning(f"No partitions found for layer {layer}")
+        return weight_path_per_layer, []
+
+    parsed_partitions = [MinerPartition(**p) for p in partitions]
+    for descriptor_index, partition in enumerate(parsed_partitions):
+        require_matching_partition_layer(
+            partition.layer,
+            layer,
+            context=f"assigned merge partition index {descriptor_index}",
+        )
+    return weight_path_per_layer, parsed_partitions
+
+
+def get_outer_optimizer_warmup_momentum(epoch: int) -> float:
+    """Compute outer optimizer momentum with linear warmup.
+
+    Linearly interpolates from NESTEROV_MOMENTUM_WARMUP_START to NESTEROV_MOMENTUM
+    over the first NESTEROV_MOMENTUM_WARMUP_EPOCHS epochs.
+    """
+    warmup_epochs = common_settings.NESTEROV_MOMENTUM_WARMUP_EPOCHS
+    if warmup_epochs <= 0 or epoch >= warmup_epochs:
+        return common_settings.NESTEROV_MOMENTUM
+
+    start = common_settings.NESTEROV_MOMENTUM_WARMUP_START
+    end = common_settings.NESTEROV_MOMENTUM
+    progress = epoch / warmup_epochs
+    return start + (end - start) * progress
+
+
+async def merge_partition_batch(
+    partition_batch: list[MergingPartition],
+    submitted_weights_list: list[SubmittedWeightsAndOptimizerPresigned],
+    old_weights: torch.Tensor,
+    num_partitions: int,
+    run_flags: RunFlags = RUN_FLAGS,
+    epoch: int = 0,
+    expected_layer: int | None = None,
+) -> list[MergingPartition]:
+    """Merge each partition's averaged pseudograds into the old weights.
+
+    The outer optimizer (SGD + Nesterov momentum, no weight decay/dampening) is
+    elementwise, so we run the exact op sequence torch.optim.SGD uses directly
+    on the chunk slice instead of rebuilding a full model copy + optimizer per
+    partition (which cost O(model size) per chunk):
+
+        buf   = momentum * old_buf + grad          # buf.mul_(momentum).add_(grad)
+        new_w = old_w - lr * (grad + momentum*buf) # nesterov update
+
+    `old_weights` is the full flat bf16 weight vector; everything else here is
+    chunk-sized and stays on CPU.
+    """
+    if not partition_batch:
+        raise WeightPartitionException("No partitions available for merge; refusing empty partition upload")
+
+    first_partition = partition_batch[0].new_partition
+    if first_partition is None:
+        raise WeightPartitionException("Merge partition is missing its new-partition descriptor")
+    assigned_layer = first_partition.layer if expected_layer is None else expected_layer
+    for descriptor_index, partition in enumerate(partition_batch):
+        if partition.new_partition is None:
+            raise WeightPartitionException(
+                f"Merge partition at index {descriptor_index} is missing its new-partition descriptor"
+            )
+        require_matching_partition_layer(
+            partition.new_partition.layer,
+            assigned_layer,
+            context=f"merge partition index {descriptor_index}",
+        )
+        if partition.old_partition is not None:
+            require_matching_partition_layer(
+                partition.old_partition.layer,
+                assigned_layer,
+                context=f"previous merge partition index {descriptor_index}",
+            )
+    for source_index, source in enumerate(submitted_weights_list):
+        require_matching_partition_layer(
+            source.layer,
+            assigned_layer,
+            context=f"merge source descriptor index {source_index}",
+        )
+
+    momentum = get_outer_optimizer_warmup_momentum(epoch)
+    lr = common_settings.NESTEROV_LEARNING_RATE
+    valid_partitions = []
+
+    for partition in partition_batch:
+        try:
+            chunk_number = partition.new_partition.chunk_number
+            logger.debug(f"merging partition {chunk_number}")
+
+            start_idx, end_idx = await get_start_and_end_indices(
+                tensor_length=old_weights.numel(),
+                num_sections=num_partitions,
+                target_section=chunk_number,
+            )
+            expected_numel = end_idx - start_idx
+            old_weight_shard = old_weights[start_idx:end_idx]
+            require_finite_tensor(
+                old_weight_shard,
+                "merge_old_weights",
+                stage="partition_merge",
+                direction="weights",
+                layer=partition.new_partition.layer,
+            )
+
+            weight_average = None
+            weight_counter = 0.0
+            accepted_contributors = 0
+
+            pseudograds = partition.pseudograds or []
+            if len(pseudograds) != len(submitted_weights_list):
+                raise WeightPartitionException(
+                    f"Contributor alignment mismatch for chunk {chunk_number}: "
+                    f"sources={len(submitted_weights_list)} tensors={len(pseudograds)}"
+                )
+
+            for source_index, (source, weights) in enumerate(zip(submitted_weights_list, pseudograds)):
+                try:
+                    if weights is None:
+                        raise ValueError("missing tensor")
+                    if not weights.is_floating_point():
+                        raise TypeError(f"expected floating pseudograd, got {weights.dtype}")
+                    if weights.numel() != expected_numel:
+                        raise ValueError(
+                            f"wrong tensor size: expected_numel={expected_numel} actual_numel={weights.numel()}"
+                        )
+
+                    contributor_id = f"source-{source_index}"
+                    require_finite_tensor(
+                        weights,
+                        "merge_peer_pseudograd",
+                        peer_id=contributor_id,
+                        stage="partition_merge",
+                        direction="pseudograd",
+                        layer=partition.new_partition.layer,
+                    )
+
+                    weight_factor = source.weighting_factor if run_flags.weighted_partition_averaging.isOn() else 1.0
+                    if isinstance(weight_factor, bool) or not isinstance(weight_factor, (int, float)):
+                        raise TypeError(f"invalid weighting-factor type {type(weight_factor).__name__}")
+                    weight_factor = float(weight_factor)
+                    if not math.isfinite(weight_factor) or weight_factor <= 0:
+                        raise ValueError("weighting factor must be finite and positive")
+
+                    prepared_weights = weights.reshape(-1).to(torch.float32)
+                    require_finite_tensor(
+                        prepared_weights,
+                        "cast_peer_pseudograd",
+                        peer_id=contributor_id,
+                        stage="partition_merge",
+                        direction="pseudograd",
+                        layer=partition.new_partition.layer,
+                    )
+                    weighted_weights = prepared_weights * weight_factor
+                    require_finite_tensor(
+                        weighted_weights,
+                        "weighted_peer_pseudograd",
+                        peer_id=contributor_id,
+                        stage="partition_merge",
+                        direction="pseudograd",
+                        layer=partition.new_partition.layer,
+                    )
+
+                    candidate_average = (
+                        weighted_weights if weight_average is None else weight_average + weighted_weights
+                    )
+                    candidate_counter = weight_counter + weight_factor
+                    require_finite_tensor(
+                        candidate_average,
+                        "accumulated_peer_pseudograd",
+                        peer_id=contributor_id,
+                        stage="partition_merge",
+                        direction="pseudograd",
+                        layer=partition.new_partition.layer,
+                    )
+                    if not math.isfinite(candidate_counter) or candidate_counter <= 0:
+                        raise ValueError("accumulated weighting factor is non-finite or non-positive")
+
+                    weight_average = candidate_average
+                    weight_counter = candidate_counter
+                    accepted_contributors += 1
+
+                except Exception as e:
+                    logger.error(
+                        f"Rejected merge contributor | stage=partition_merge direction=pseudograd "
+                        f"layer={partition.new_partition.layer} chunk={chunk_number} "
+                        f"contributor_index={source_index} reason={type(e).__name__}: {e}"
+                    )
+
+            if weight_average is None or accepted_contributors == 0 or weight_counter <= 0:
+                raise WeightPartitionException(
+                    f"No valid pseudograd contributors for chunk {chunk_number}; refusing empty merge"
+                )
+
+            # Average the weights
+            weight_average = weight_average / weight_counter
+            require_finite_tensor(
+                weight_average,
+                "averaged_pseudograd",
+                stage="partition_merge",
+                direction="pseudograd",
+                layer=partition.new_partition.layer,
+            )
+            weight_average = weight_average.to(torch.bfloat16)
+            require_finite_tensor(
+                weight_average,
+                "cast_averaged_pseudograd",
+                stage="partition_merge",
+                direction="pseudograd",
+                layer=partition.new_partition.layer,
+            )
+
+            if partition.old_optimizer_state is not None:
+                if partition.old_optimizer_state.numel() != expected_numel:
+                    raise WeightPartitionException(
+                        f"Old optimizer state size mismatch for chunk {chunk_number}: "
+                        f"expected_numel={expected_numel} actual_numel={partition.old_optimizer_state.numel()}"
+                    )
+                require_finite_tensor(
+                    partition.old_optimizer_state,
+                    "merge_old_optimizer_state",
+                    stage="partition_merge",
+                    direction="optimizer_state",
+                    layer=partition.new_partition.layer,
+                )
+                old_optimizer_state = partition.old_optimizer_state.reshape(-1).to(torch.bfloat16)
+                require_finite_tensor(
+                    old_optimizer_state,
+                    "cast_old_optimizer_state",
+                    stage="partition_merge",
+                    direction="optimizer_state",
+                    layer=partition.new_partition.layer,
+                )
+                buf = old_optimizer_state.clone().mul_(momentum).add_(weight_average)
+            else:
+                # First epoch: SGD seeds the momentum buffer with the gradient.
+                logger.warning(f"No old optimizer state found for partition {chunk_number}")
+                buf = weight_average.clone()
+
+            require_finite_tensor(
+                buf,
+                "new_optimizer_state",
+                stage="partition_merge",
+                direction="optimizer_state",
+                layer=partition.new_partition.layer,
+            )
+            update = weight_average.add(buf, alpha=momentum)
+            require_finite_tensor(
+                update,
+                "partition_update",
+                stage="partition_merge",
+                direction="weights",
+                layer=partition.new_partition.layer,
+            )
+            partition.new_weights = old_weight_shard.add(update, alpha=-lr)
+            require_finite_tensor(
+                partition.new_weights,
+                "new_partition_weights",
+                stage="partition_merge",
+                direction="weights",
+                layer=partition.new_partition.layer,
+            )
+            partition.new_optimizer_state = buf
+            valid_partitions.append(partition)
+
+        except Exception as e:
+            logger.error(
+                f"Failed to merge partition | stage=partition_merge layer={partition.new_partition.layer} "
+                f"chunk={partition.new_partition.chunk_number} reason={type(e).__name__}: {e}"
+            )
+
+    logger.debug(f"Number of valid partitions: {len(valid_partitions)}")
+    logger.debug(f"Number of invalid partitions: {len(partition_batch) - len(valid_partitions)}")
+    if len(valid_partitions) != len(partition_batch):
+        valid_count = len(valid_partitions)
+        total_count = len(partition_batch)
+        # Do not leave a caller with a usable-looking subset. The upload path
+        # must receive a complete batch or nothing, otherwise a poisoned chunk
+        # silently becomes a missing partition in the submitted epoch.
+        for partition in partition_batch:
+            partition.new_weights = None
+            partition.new_optimizer_state = None
+        if valid_count == 0:
+            raise WeightPartitionException("No valid partitions remained after numerical merge validation")
+        raise WeightPartitionException(
+            f"Incomplete numerical merge batch: valid_partitions={valid_count}/{total_count}; "
+            "refusing partial partition upload"
+        )
+    return valid_partitions
+
+
+def get_partition_batch(batch_index: int, partitions: list[MinerPartition]) -> list[MergingPartition]:
+    """
+    Returns a batch of partitions as a list, i.e.
+    [
+        MergingPartition(new_partition=MinerPartition(chunk_number=0), old_partition=None, weights=None),
+        MergingPartition(new_partition=MinerPartition(chunk_number=1), old_partition=None, weights=None),
+        MergingPartition(new_partition=MinerPartition(chunk_number=2), old_partition=None, weights=None),
+        ...
+    ]
+    """
+    start_index = batch_index * len(partitions) // min(miner_settings.N_PARTITION_BATCHES, len(partitions))
+    end_index = (batch_index + 1) * len(partitions) // min(miner_settings.N_PARTITION_BATCHES, len(partitions))
+    batch_partitions = partitions[start_index:end_index]
+    batch_partitions = [
+        MergingPartition(new_partition=partition, old_partition=None, pseudograds=None)
+        for partition in batch_partitions
+    ]
+    return batch_partitions
+
+
+async def download_previous_optimizer_state_for_partition_batch(
+    batch_partitions: list[MergingPartition],
+    *,
+    target_tensor_numel: int,
+    num_partitions: int,
+    run_flags: RunFlags,
+    expected_layer: int | None = None,
+) -> list[MergingPartition]:
+    if not batch_partitions:
+        return []
+    # Run flags are refreshed in place.  Every range belonging to this batch
+    # must agree on the wire encoding even if a refresh lands while requests
+    # are in flight.
+    effective_run_flags = run_flags.model_copy(deep=True)
+    first_partition = batch_partitions[0].new_partition
+    if first_partition is None:
+        raise WeightPartitionException("Optimizer batch is missing its new-partition descriptor")
+    assigned_layer = first_partition.layer if expected_layer is None else expected_layer
+    for descriptor_index, partition in enumerate(batch_partitions):
+        if partition.new_partition is None:
+            raise WeightPartitionException(
+                f"Optimizer batch partition at index {descriptor_index} is missing its new descriptor"
+            )
+        require_matching_partition_layer(
+            partition.new_partition.layer,
+            assigned_layer,
+            context=f"optimizer target partition index {descriptor_index}",
+        )
+        if partition.old_partition is not None:
+            require_matching_partition_layer(
+                partition.old_partition.layer,
+                assigned_layer,
+                context=f"previous optimizer partition index {descriptor_index}",
+            )
+    n_with_old = sum(1 for p in batch_partitions if p.old_partition is not None)
+    logger.info(
+        f"download_optimizer_state: {n_with_old}/{len(batch_partitions)} partitions have a previous optimizer state to download"
+    )
+
+    async def download_previous_optimizer_state_for_partition(partition: MergingPartition) -> MergingPartition:
+        if partition.old_partition is None:
+            logger.warning(f"No old partition found for partition {partition.new_partition.chunk_number}")
+            partition.old_partition = MinerPartition(
+                chunk_number=partition.new_partition.chunk_number,
+                layer=partition.new_partition.layer,
+                miner_hotkey=partition.new_partition.miner_hotkey,
+            )
+            return partition
+        start_idx, end_idx = await get_start_and_end_indices(
+            tensor_length=target_tensor_numel,
+            num_sections=num_partitions,
+            target_section=partition.old_partition.chunk_number,
+        )
+        partition.old_optimizer_state = await download_partition_optimizer(
+            partition=partition.old_partition,
+            expected_numel=end_idx - start_idx,
+            run_flags=effective_run_flags,
+            expected_layer=assigned_layer,
+        )
+        return partition
+
+    downloaded_partitions = await asyncio.gather(
+        *[download_previous_optimizer_state_for_partition(partition=partition) for partition in batch_partitions]
+    )
+    return downloaded_partitions
+
+
+async def download_pseudograds_for_partition_batch(
+    batch_partitions: list[MergingPartition],
+    submitted_weights_list: list[SubmittedWeightsAndOptimizerPresigned],
+    *,
+    target_tensor_numel: int,
+    num_partitions: int,
+    run_flags: RunFlags,
+    expected_layer: int | None = None,
+) -> tuple[list[MergingPartition], list[SubmittedWeightsAndOptimizerPresigned]]:
+    """Lazily fetch each source miner's blob trailer (cached per-URL) then range-
+    download the requested chunk's weights region. Source miners whose trailer
+    cannot be fetched (or whose local_optimization_steps is below threshold)
+    are filtered out — the returned `submitted_weights_list` is the surviving
+    subset and is positionally aligned with each `partition.pseudograds`."""
+
+    # Freeze before the first await: the miner's live RunFlags instance is
+    # intentionally mutated by the background config-refresh loop.
+    effective_run_flags = run_flags.model_copy(deep=True)
+    if not batch_partitions:
+        raise WeightPartitionException("No target partitions supplied for pseudograd download")
+    first_partition = batch_partitions[0].new_partition
+    if first_partition is None:
+        raise WeightPartitionException("Pseudograd batch is missing its target descriptor")
+    assigned_layer = first_partition.layer if expected_layer is None else expected_layer
+    for descriptor_index, partition in enumerate(batch_partitions):
+        if partition.new_partition is None:
+            raise WeightPartitionException(
+                f"Pseudograd target at index {descriptor_index} is missing its partition descriptor"
+            )
+        require_matching_partition_layer(
+            partition.new_partition.layer,
+            assigned_layer,
+            context=f"pseudograd target partition index {descriptor_index}",
+        )
+    for source_index, source in enumerate(submitted_weights_list):
+        require_matching_partition_layer(
+            source.layer,
+            assigned_layer,
+            context=f"pseudograd source descriptor index {source_index}",
+        )
+
+    # Weight blobs predate partition-blob provenance and their trailer schema
+    # has no layer field. Bind each blob to the required layer using the API's
+    # required SubmittedWeightsAndOptimizerPresigned.layer descriptor instead
+    # of inventing an unversioned trailer field.
+    # Step 1: fetch all trailers in parallel. async_lru on download_blob_trailer
+    # dedupes repeat hits within and across batches.
+    trailer_results = await asyncio.gather(
+        *[download_blob_trailer(s.weights_path_presigned) for s in submitted_weights_list],
+        return_exceptions=True,
+    )
+
+    valid_sources: list[SubmittedWeightsAndOptimizerPresigned] = []
+    valid_trailers: list[dict] = []
+    for source_index, (source, trailer) in enumerate(zip(submitted_weights_list, trailer_results)):
+        if isinstance(trailer, Exception):
+            logger.warning(
+                f"Failed to fetch pseudograd trailer | source_index={source_index} "
+                f"reason={type(trailer).__name__}; dropping source"
+            )
+            continue
+        if effective_run_flags.enforce_min_local_optimizer_steps.isOn():
+            if trailer.get("local_optimization_steps", 0) < miner_settings.MIN_LOCAL_OPTIMIZER_STEPS:
+                logger.info(
+                    f"Dropping pseudograd source_index={source_index}: "
+                    "local_optimization_steps below threshold"
+                )
+                continue
+        valid_sources.append(source)
+        valid_trailers.append(trailer)
+
+    if not valid_sources:
+        raise WeightPartitionException(
+            "No valid source miners after trailer validation; refusing contributor-free merge"
+        )
+
+    n_downloads = len(batch_partitions) * len(valid_sources)
+    logger.info(
+        f"download_pseudograds: {len(batch_partitions)} partitions × {len(valid_sources)} miners "
+        f"= {n_downloads} S3 range downloads"
+    )
+
+    async def fetch_weights_region(
+        source: SubmittedWeightsAndOptimizerPresigned,
+        trailer: dict,
+        chunk_number: int,
+    ) -> torch.Tensor:
+        section = trailer["sections"][str(chunk_number)]
+        offset = section["start_byte"]
+        length = section["end_byte"] - offset
+        start_idx, end_idx = await get_start_and_end_indices(
+            tensor_length=target_tensor_numel,
+            num_sections=num_partitions,
+            target_section=chunk_number,
+        )
+        expected_output_bytes = tensor_region_nbytes(
+            trailer["dtype"],
+            end_idx - start_idx,
+        )
+        max_response_bytes = tensor_region_response_limit(
+            expected_output_bytes,
+            compressed=effective_run_flags.compress_s3_files.isOn(),
+        )
+        return await download_blob_region(
+            source.weights_path_presigned,
+            offset=offset,
+            length=length,
+            dtype=trailer["dtype"],
+            expected_output_bytes=expected_output_bytes,
+            max_response_bytes=max_response_bytes,
+            run_flags=effective_run_flags,
+        )
+
+    async def download_weights_for_partition(partition: MergingPartition) -> MergingPartition:
+        weights: list[torch.Tensor] = await asyncio.gather(
+            *[
+                fetch_weights_region(s, t, partition.new_partition.chunk_number)
+                for s, t in zip(valid_sources, valid_trailers)
+            ]
+        )
+        partition.pseudograds = weights
+        return partition
+
+    downloaded_results = await asyncio.gather(
+        *[download_weights_for_partition(partition=partition) for partition in batch_partitions],
+        return_exceptions=True,
+    )
+    failed_partitions = sum(isinstance(result, Exception) for result in downloaded_results)
+    if failed_partitions:
+        raise WeightPartitionException(
+            f"Incomplete pseudograd download batch: failed_partitions={failed_partitions}/"
+            f"{len(batch_partitions)}; refusing partial partition merge"
+        )
+    downloaded_partitions: list[MergingPartition] = downloaded_results
+    logger.info(
+        f"download_pseudograds: {len(downloaded_partitions)}/{len(batch_partitions)} partitions downloaded successfully"
+    )
+    return downloaded_partitions, valid_sources
+
+
+async def upload_partition_batch(
+    miner_api_client: MinerAPIClient,
+    merged_partitions: list[MergingPartition],
+    hotkey: Keypair,
+    run_flags: RunFlags = RUN_FLAGS,
+    expected_layer: int | None = None,
+) -> list[MinerPartition]:
+    final_partitions: list[MinerPartition] = []
+    try:
+        if not merged_partitions:
+            raise WeightPartitionException("No merged partitions supplied; refusing empty partition upload")
+        first_partition = merged_partitions[0].new_partition
+        if first_partition is None:
+            raise WeightPartitionException("Merged partition is missing its upload descriptor")
+        assigned_layer = first_partition.layer if expected_layer is None else expected_layer
+        for descriptor_index, partition in enumerate(merged_partitions):
+            if partition.new_partition is None:
+                raise WeightPartitionException(
+                    f"Merged partition at index {descriptor_index} is missing its upload descriptor"
+                )
+            require_matching_partition_layer(
+                partition.new_partition.layer,
+                assigned_layer,
+                context=f"partition upload descriptor index {descriptor_index}",
+            )
+        upload_coros = []
+        for partition in merged_partitions:
+            if partition.new_weights is None or partition.new_optimizer_state is None:
+                raise WeightPartitionException("Incomplete merged partition; refusing partition batch upload")
+            if len(partition.new_weights) == 0 or len(partition.new_optimizer_state) == 0:
+                raise WeightPartitionException("Empty merged partition tensor; refusing partition batch upload")
+            upload_coros.append(
+                upload_partition_blob(
+                    weights=partition.new_weights.detach().cpu(),
+                    optimizer_state=partition.new_optimizer_state.detach().cpu(),
+                    chunk_number=partition.new_partition.chunk_number,
+                    layer=partition.new_partition.layer,
+                    miner_api_client=miner_api_client,
+                    hotkey=hotkey,
+                    run_flags=run_flags,
+                )
+            )
+
+        logger.info(
+            f"upload_partition_batch: uploading {len(merged_partitions)} partitions "
+            f"= {len(upload_coros)} blob S3 uploads"
+        )
+
+        results = await asyncio.gather(*upload_coros, return_exceptions=True)
+        failed_uploads = sum(isinstance(result, Exception) for result in results)
+        if failed_uploads:
+            logger.error(
+                f"Partition batch upload failed closed | stage=partition_upload "
+                f"failed_uploads={failed_uploads}/{len(merged_partitions)}"
+            )
+            raise WeightPartitionException(
+                f"Incomplete partition upload batch: failed_uploads={failed_uploads}/"
+                f"{len(merged_partitions)}; refusing partial submission"
+            )
+        for upload_result, partition in zip(results, merged_partitions):
+            partition.new_partition.blob_path = upload_result.object_path
+            final_partitions.append(partition.new_partition)
+    except Exception as e:
+        logger.exception(f"Error uploading partition batch: {e}")
+        raise
+    if len(final_partitions) != len(merged_partitions) or not all(
+        partition.is_valid() for partition in final_partitions
+    ):
+        raise WeightPartitionException("Partition upload batch validation failed; refusing partial submission")
+    return final_partitions

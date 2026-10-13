@@ -1,0 +1,109 @@
+#include <metal_stdlib>
+#include <MetalPerformancePrimitives/MetalPerformancePrimitives.h>
+
+using namespace metal;
+using namespace mpp::tensor_ops;
+
+// Exact S800/D64 forward foundation. One SIMD group owns 32 query rows and
+// serially traverses the 25 key tiles. The three-pass form favors a simple,
+// auditable numerical contract before conversion to one-pass online softmax.
+kernel void tensorops_attention_s800_forward(
+    device bfloat *q [[buffer(0)]],
+    device bfloat *k [[buffer(1)]],
+    device bfloat *v [[buffer(2)]],
+    device float *mask [[buffer(3)]],
+    device bfloat *output [[buffer(4)]],
+    device float *lse [[buffer(5)]],
+    uint3 group [[threadgroup_position_in_grid]]) {
+  const uint q_block = group.x;
+  const uint query_head = group.y;
+  const uint batch = group.z;
+  const uint kv_head = query_head / 4;
+  constexpr ulong head_elements = 800ul * 64ul;
+  q += (batch * 32ul + query_head) * head_elements;
+  k += (batch * 8ul + kv_head) * head_elements;
+  v += (batch * 8ul + kv_head) * head_elements;
+  output += (batch * 32ul + query_head) * head_elements;
+  lse += (batch * 32ul + query_head) * 800ul;
+  auto tq = tensor(q, dextents<int32_t, 2>{64, 800}, array<int32_t, 2>{1, 64});
+  auto tk = tensor(k, dextents<int32_t, 2>{64, 800}, array<int32_t, 2>{1, 64});
+  auto tv = tensor(v, dextents<int32_t, 2>{64, 800}, array<int32_t, 2>{1, 64});
+  auto tm = tensor(mask, dextents<int32_t, 2>{800, 800}, array<int32_t, 2>{1, 800});
+  auto tout = tensor(output, dextents<int32_t, 2>{64, 800}, array<int32_t, 2>{1, 64});
+  auto qtile = tq.slice<64, 32>(0, q_block * 32);
+  constexpr auto qk_desc = matmul2d_descriptor(32, 32, 64, false, true);
+  matmul2d<qk_desc, execution_simdgroup> qk;
+  auto global_max = qk.get_row_reduction_destination_cooperative_tensor<
+      decltype(qtile), decltype(tk.slice<64, 32>(0, 0)), float>();
+  for (auto it = global_max.begin(); it != global_max.end(); it++) *it = -INFINITY;
+
+  // Pass 1: exact global row maximum, including additive causal mask.
+  for (uint kb = 0; kb < 25; ++kb) {
+    auto ktile = tk.slice<64, 32>(0, kb * 32);
+    auto scores = qk.get_destination_cooperative_tensor<decltype(qtile), decltype(ktile), float>();
+    qk.run(qtile, ktile, scores);
+    auto mtile = tm.slice<32, 32>(kb * 32, q_block * 32);
+    auto cmask = qk.get_destination_cooperative_tensor<decltype(qtile), decltype(ktile), float>();
+    cmask.load(mtile);
+    for (uint i = 0; i < scores.get_capacity(); ++i) scores[i] = scores[i] * 0.125f + cmask[i];
+    auto tile_max = qk.get_row_reduction_destination_cooperative_tensor<decltype(qtile), decltype(ktile), float>();
+    reduce_rows(scores, tile_max, reduction_operation::max, -INFINITY);
+    for (uint i = 0; i < global_max.get_capacity(); ++i) global_max[i] = max(global_max[i], tile_max[i]);
+  }
+
+  // Pass 2: exact denominator against the stable global maximum.
+  auto global_sum = qk.get_row_reduction_destination_cooperative_tensor<
+      decltype(qtile), decltype(tk.slice<64, 32>(0, 0)), float>();
+  for (auto it = global_sum.begin(); it != global_sum.end(); it++) *it = 0.0f;
+  for (uint kb = 0; kb < 25; ++kb) {
+    auto ktile = tk.slice<64, 32>(0, kb * 32);
+    auto scores = qk.get_destination_cooperative_tensor<decltype(qtile), decltype(ktile), float>();
+    qk.run(qtile, ktile, scores);
+    auto mtile = tm.slice<32, 32>(kb * 32, q_block * 32);
+    auto cmask = qk.get_destination_cooperative_tensor<decltype(qtile), decltype(ktile), float>();
+    cmask.load(mtile);
+    for (auto it = scores.begin(); it != scores.end(); it++) {
+      auto row = global_max.map_iterator(it);
+      *it = exp(*it * 0.125f + cmask[it - scores.begin()] - *row);
+    }
+    auto tile_sum = qk.get_row_reduction_destination_cooperative_tensor<decltype(qtile), decltype(ktile), float>();
+    reduce_rows(scores, tile_sum, reduction_operation::sum, 0.0f);
+    for (uint i = 0; i < global_sum.get_capacity(); ++i) global_sum[i] += tile_sum[i];
+  }
+
+  // Pass 3: normalized probabilities feed PV directly; accumulate output.
+  constexpr auto pv_desc = matmul2d_descriptor(32, 64, 32, false, false, false,
+                                               matmul2d_descriptor::mode::multiply_accumulate);
+  matmul2d<pv_desc, execution_simdgroup> pv;
+  auto first_v = tv.slice<64, 32>(0, 0);
+  auto first_k = tk.slice<64, 32>(0, 0);
+  auto score_shape = qk.get_destination_cooperative_tensor<decltype(qtile), decltype(first_k), float>();
+  auto p_shape = pv.get_left_input_cooperative_tensor<float, bfloat, float>(score_shape);
+  auto accum = pv.get_destination_cooperative_tensor<decltype(p_shape), decltype(first_v), float>();
+  for (auto it = accum.begin(); it != accum.end(); it++) *it = 0.0f;
+  for (uint kb = 0; kb < 25; ++kb) {
+    auto ktile = tk.slice<64, 32>(0, kb * 32);
+    auto vtile = tv.slice<64, 32>(0, kb * 32);
+    auto scores = qk.get_destination_cooperative_tensor<decltype(qtile), decltype(ktile), float>();
+    qk.run(qtile, ktile, scores);
+    auto mtile = tm.slice<32, 32>(kb * 32, q_block * 32);
+    auto cmask = qk.get_destination_cooperative_tensor<decltype(qtile), decltype(ktile), float>();
+    cmask.load(mtile);
+    for (auto it = scores.begin(); it != scores.end(); it++) {
+      auto row_max = global_max.map_iterator(it);
+      auto row_sum = global_sum.map_iterator(it);
+      *it = exp(*it * 0.125f + cmask[it - scores.begin()] - *row_max) / *row_sum;
+    }
+    auto probabilities = pv.get_left_input_cooperative_tensor<float, bfloat, float>(scores);
+    pv.run(probabilities, vtile, accum);
+  }
+  for (uint i = 0; i < global_max.get_capacity(); ++i) {
+    const auto coordinate = global_max.get_multidimensional_index(i);
+    lse[q_block * 32 + coordinate[0]] = global_max[i] + log(global_sum[i]);
+  }
+  auto packed = pv.get_destination_cooperative_tensor<
+      decltype(p_shape), decltype(first_v), bfloat>();
+  for (uint i = 0; i < packed.get_capacity(); ++i) packed[i] = bfloat(accum[i]);
+  auto otile = tout.slice<64, 32>(0, q_block * 32);
+  packed.store(otile);
+}

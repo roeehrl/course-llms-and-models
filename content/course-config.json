@@ -1,16 +1,33 @@
 {
   "schemaVersion": 1,
   "id": "llms-and-models",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "title": "From dummy to professional: LLMs and models",
-  "summary": "A systems programmer’s guided path from parameterized programs to model training, GPU kernels and evidence-based optimization. Practical competence requires the labs and independent reviews; completion is not professional certification.",
+  "summary": "A systems programmer\u2019s guided path from parameterized programs to model training, GPU kernels and evidence-based optimization. Practical competence requires the labs and independent reviews; completion is not professional certification.",
   "locale": "en",
-  "platforms": ["web"],
+  "platforms": [
+    "web"
+  ],
   "policy": {
     "mode": "bounded",
-    "window": { "calendarDays": 90, "timeZone": "UTC", "anchor": "enrollment_started", "pauseRule": "approved_only" },
-    "work": { "additionalEpisodes": 20, "additionalMinutes": 300, "remediationCyclesPerConcept": 3 },
-    "extensions": { "enabled": true, "calendarDays": 30, "maxGrants": 3, "maxDaysPerGrant": 10, "learnerAcceptanceRequired": true },
+    "window": {
+      "calendarDays": 90,
+      "timeZone": "UTC",
+      "anchor": "enrollment_started",
+      "pauseRule": "approved_only"
+    },
+    "work": {
+      "additionalEpisodes": 20,
+      "additionalMinutes": 300,
+      "remediationCyclesPerConcept": 3
+    },
+    "extensions": {
+      "enabled": true,
+      "calendarDays": 30,
+      "maxGrants": 3,
+      "maxDaysPerGrant": 10,
+      "learnerAcceptanceRequired": true
+    },
     "existingMaterialAccess": "read_only"
   }
 }

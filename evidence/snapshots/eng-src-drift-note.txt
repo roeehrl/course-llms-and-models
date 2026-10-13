@@ -1,0 +1,248 @@
+# M5 Max pipeline drift investigation — 2026-10-11
+
+**Safety hold:** the MacBook was stopped through `mounted-canaryctl.sh stop
+--reason manual` around 23:16 local, after the v2 full-pipeline failure below.
+Its GUI `manualStopRequested` is true. It had remained queued with zero
+production backward passes on build 150. Do not restart it until the numerical
+gate failure is resolved and a qualified production configuration is enforced.
+
+Lurus was also stopped through the normal control around 23:27 local, with
+manual resume disabled, after the layer-1-only M5 Max case failed three checks.
+That was a precaution pending a direct M5 Pro comparison, not a claim that the
+M5 Max test alone proves the result on M5 Pro. Studio and guru remain on upstream
+attention. Both stopped workers' active session files disappeared and their
+receipts record `stage=stopped`; no live worker entrypoint remained.
+
+## Scope and original evidence
+
+The historical failure tested release `ea4acb77`, **with TensorOps and grouped
+attention both disabled**, at local batch 4. It did not test kernel v2.
+The upstream reference was commit `22d702acd07453dabb187abedfad185826091341`.
+The original artifacts remain on the MacBook under
+`~/sn9-equivalence-suite-tmp/work/results/Apple-M5-Max/`.
+
+The chained pipeline ran 40 mini-batches, producing 20 AdamW steps on each of
+three model splits. The first differing loss was at zero-based mini-batch 6:
+10.7532930374 upstream versus 10.7534952164 patched (relative difference
+1.88e-5). **That was the first difference, not the worst one.** The maximum
+absolute loss difference over the complete run was approximately 0.0365.
+
+Two of the pipeline's **50 total checks** failed (not 50 optimizer-only checks):
+
+- L1 final `exp_avg_sq`, attention-query group: relative-error ratio 1.7476
+  against the fp32 reference; the permitted factor is 1.5.
+- L2 final `exp_avg_sq`, MLP group: full sketch ratio 0.9463 passed, but the
+  fixed probe error 3.0472 exceeded 1.5 times upstream's 1.8124.
+
+The original upstream repeat was bitwise identical. The saved four-step
+instrumented run (`trace-M5`) was also bitwise identical between upstream and
+patched, including all 44 trace entries. Tracing copies/hashes gradients and
+state, so it changes synchronization and tensor lifetimes; it cannot establish
+the reason for the difference by itself.
+
+## Reproduction results
+
+All cases below use the original inputs and weights. The new upstream result
+matches the original upstream losses and final tensor hashes exactly.
+
+| Case | Settings | Result |
+|---|---|---|
+| `drift-20261011-rerun` | Original patched source, attention off, four CPU threads | 50/50 bitwise |
+| `drift-plain6-20261011` | Original patched source, attention off, six threads, isolated child runner | 50/50 bitwise |
+| `drift-original-command6-20261011` | Original runner, original release Python, six threads | 50/50 bitwise |
+| `drift-saved-off-20261011` | Six threads, outbound saved-tensor optimization disabled only in the test process | 50/50 bitwise |
+
+The old and current Python environments use the same Python and torch versions;
+SHA-256 values of libtorch_cpu.dylib, AdamW implementation, and gradient-clipping
+implementation also match. The remote upstream model-manager and training
+sources match `git show` of the upstream commit.
+
+**The historical numerical discrepancy has not reproduced in these reruns.
+Its cause is still unproven.** Neither CPU thread count nor the saved-tensor
+optimization can be blamed from these results. No tolerance has been relaxed.
+Passing reruns do not erase the saved failure or establish equivalence for every
+input or chip. At that point the full pipeline had not been rerun on M4 Max or
+M5 Pro; subsequent Pro results are recorded below.
+
+## Separate reproducible startup-validation defect
+
+The first full-pipeline attempt with build 150's v2 enabled
+(`drift-current-v2-20261011`) latched the kernel off during its self-test:
+
+> detached outbound forward attempted to unpack a discarded autograd saved tensor
+
+The first layer's outbound forward installs saved-tensor hooks that intentionally
+discard tensors, because its graph will not be used for backward. If the runtime
+loads for the first time there, its self-test inherits those hooks. Its reference
+backward then fails. The runtime correctly falls back to upstream. A successful
+pipeline process exit in this situation **is not kernel-v2 validation**.
+
+Production calibration can load the kernel earlier, outside those hooks; lurus
+already has a passing production self-test. This is an initialization-context
+bug, not evidence of incorrect kernel arithmetic and not the cause of the
+historical attention-off drift.
+
+The proposed runtime source now gives the self-test its own retaining
+saved-tensor hooks, then restores the outer hooks. Its regression test fails on
+the original source and passes on the proposed source. The evidence is in
+`guard-regression/`. This change is currently **research source only**; no
+installed worker or shipping fixset has been changed.
+The nested-hook behavior is documented in
+[PyTorch 2.7's saved-tensor hook API](https://docs.pytorch.org/docs/2.7/autograd.html#torch.autograd.graph.saved_tensors_hooks).
+
+The diagnostic runner `../../diagnose_pipeline.py` now records the actual
+runtime status and rejects a requested v2 test unless the self-test passed,
+the kernel remained loaded without a disable reason, and actual forward and
+backward kernel hits occurred. It can compare the full pipeline against the
+original upstream and fp32 reference, including starting-weight and length
+checks. Diagnostic overrides exist only in the child process.
+
+## Remaining checks
+
+- Repeat the v2 full pipeline using the unmodified installed runtime, preloading
+  its self-test outside the outbound hooks as production calibration can do:
+  **done, same numerical failure reproduced**.
+- Single-split v2 ablations and the current build with upstream attention:
+  **done**, using the same full-model inputs and gate (results below).
+- Preserve the unresolved historical drift as an open finding until a failing
+  run can be reproduced and its first divergent operation isolated.
+- Continue the separate production three-epoch loss watch. It does not replace
+  offline numerical equivalence or justify a cross-layer throughput comparison.
+
+## New full-pipeline v2 result
+
+`drift-v2-selftest-isolated-20261011` exercised the real shipped assets on M5
+Max, macOS build 26A428, torch 2.7.1, with only the self-test hook isolation
+applied in the diagnostic process. It completed 20 optimizer steps per split:
+
+- 1,120 kernel forwards and 640 backwards; no fallback or dispatch failures.
+- Startup self-test passed (worst ratio 1.0); five shadow checks, no mismatches.
+- **49/50 full-pipeline comparisons passed; one failed.** L0 embedding final
+  `exp_avg_sq` had sketch error ratio **1.527223**, above the unchanged 1.5 gate.
+  Its probe ratio passed. The loss-series gate passed, with maximum absolute
+  difference 0.0517416 versus upstream and RMS error ratio 1.015165 against fp32.
+
+This is distinct from the historical attention-off finding. It establishes a
+failure of the full pipeline's M5 Max gate despite passing startup and shadow
+checks. It does not establish shared-run harm or establish the result on M5 Pro.
+The tolerance has not been loosened. The MacBook safety hold follows this result.
+
+The unmodified runtime, with the self-test preloaded outside the outbound hooks,
+produced identical losses and the same failing result in
+`drift-v2-preloaded-20261011`. This rules out the proposed hook fix as the cause.
+
+The full embedding second-moment tensors were then saved for upstream, v2, and
+an independently regenerated fp32 reference. `compare_full_state.py` measures
+all **262,668,288 values** in CPU float64 chunks. The exact relative L2 errors
+are 0.581648822 (v2) and 0.383325279 (upstream), ratio **1.517376634**:
+**FAIL** at the unchanged 1.5 factor plus 1e-7 floor. See
+`drift-exact-embedding-20261011.json`. The raw tensors stay in the MacBook's
+research directory; they are not added to Git.
+
+The raw upstream and v2 captures match the previous tensor hashes and losses.
+The regenerated fp32 reference is not bitwise identical (maximum loss difference
+0.0003299713), despite identical initial weights. Re-running the sketch/probe
+checks against that fresh reference still fails the same embedding group (ratio
+1.5269747). This reference variability does not clear the observed v2 failure;
+it is additional evidence to retain when investigating repeatability.
+
+The earlier 150-step kernel qualification uses two transformer blocks and a
+512-token vocabulary (`requalify-2026-10-11/qualify/train_equivalence.py`). It is
+useful kernel evidence but does not cover this three-split model's 128,256-token
+embedding and optimizer state. All-v2 tests here enable v2 on every split;
+individual workers each supply only one split. Single-split ablations are needed
+to avoid equating those configurations.
+
+The proposed runtime's complete regression suite passed **31 tests**, including
+the real kernel integration test on the MacBook and the new outer-hook test.
+Those runtime tests do not supersede the failed full-pipeline numerical check.
+
+## Split ablations and a candidate mitigation (M5 Max)
+
+Every row below uses the same 20-step pipeline, initial state, upstream reference,
+and fp32 oracle. These are diagnostic process overrides, not installed changes.
+
+| Attention configuration | Passing checks |
+|---|---:|
+| Current build 150, upstream attention everywhere | 50/50, bitwise |
+| v2 forward/backward on L0 only | 50/50 |
+| v2 forward/backward on L1 only | 47/50 |
+| v2 forward/backward on L2 only | 44/50 |
+| v2 forward/backward everywhere | 49/50 |
+| v2 forward on L1, upstream backward | 50/50 |
+| v2 forward everywhere, upstream backward | 50/50 |
+
+L1-only failures: L0 embedding second moment (ratio 2.4342), L1 query second
+moment (2.8074), and L1 key second moment (3.0642). The L1-only loss series and
+final-weight checks passed; these failures were in optimizer state. Substituting upstream backward
+removes these failures for this case, implicating the custom backward path in
+the accumulated discrepancy. It does not prove a specific erroneous Metal
+instruction or clear every input, hardware combination, or epoch-boundary path.
+
+The all-forward/native-backward candidate trained this pipeline in 49.92 seconds
+versus 52.64 seconds for upstream and 41.60 seconds for full v2. These are single
+observations on M5 Max, not a performance qualification or a production
+throughput claim. No numerical threshold was relaxed.
+
+Direct M5 Pro runs use their own upstream baseline and the shared M5 Max fp32
+reference; that reference provenance must remain explicit. The first baseline
+completed, but the v2 case exceeded the comfortable memory budget of the 24 GB
+machine. That research child was stopped, and all cases were rerun with
+`--low-memory`: setup-only CPU copies are released, unused MPS allocations are
+released between mini-batches, and the allocator's low watermark is 0.8. The same
+policy applies to both reference and candidate. This does not modify production
+or alter model/optimizer tensor values. The baseline comparison below verifies
+the adjustment; memory changes are not accepted as a numerical fix.
+
+The reduced-memory M5 Pro upstream baseline matches the original M5 Pro
+baseline **50/50 bitwise**. The direct **M5 Pro / 26A434 / batch 4 / L1 v2**
+case then **passed 50/50** against that machine's own bf16 upstream baseline
+and the explicitly shared fp32 reference. Its worst ratio was 1.3751843;
+640 custom forwards and 320 custom backwards ran, with a passing self-test,
+two shadow checks and no mismatches or fallback.
+
+Therefore the M5 Max failure must not be presented as a demonstrated M5 Pro
+failure. The tested identities also differ in macOS build (26A428 versus
+26A434), so this experiment does not isolate hardware from OS as the sole
+cause. The precautionary hold remains recorded separately from the test result.
+These tests pin batch 4; production's MPS calibration can still select other
+batch sizes, an already documented qualification gap that must be controlled
+before treating a tested configuration as an enforced production profile.
+
+The final M5 Pro L1 forward-only/native-backward case **failed 1/50 checks**:
+L2 key second moment passed its global error comparison (ratio 1.242877), but
+its fixed-probe relative error 0.0160083 exceeded the limit derived from
+upstream's 0.00908129 (probe ratio approximately 1.7628). This must not be
+silently overridden by the passing global metric. Thus the forward-only change
+is a promising M5 Max candidate, **not a universal correction**.
+
+All research children had exited at the final check. Both held workers had
+`manualStopRequested=1` and no active session. Studio and guru had active
+sessions, in .17 layer 2 and .29 layer 0 respectively. No app build/install or
+worker artifact deployment was performed during this investigation.
+
+## Outcome of this investigation pass
+
+- The historical attention-off discrepancy remains unexplained and has not
+  reproduced in three unmodified fresh M5 Max runs. The saved failure is retained.
+- Current full v2 fails the M5 Max full-model gate reproducibly, including an
+  exact full-tensor confirmation. Clean runtime self-tests/shadow checks did not
+  detect this accumulated discrepancy.
+- The tested M5 Pro L1 full-v2 configuration passes. The M5 Max failure cannot
+  be attributed to all M5 hardware or to production run corruption.
+- The startup saved-tensor-hook defect is reproduced and fixed in proposed
+  source with a red/green regression and 31 passing runtime tests. It is not
+  deployed. The shipping fixset, allowlist, worker artifacts, and GPU binaries
+  are unchanged.
+- Forward-only v2 passes the tested M5 Max cases but regresses the tested M5 Pro
+  case. Any subsequent implementation must select a qualified configuration for
+  the exact chip/macOS/torch/assets and enforce the batch-size condition.
+- MacBook remains stopped because of its failed gate. Lurus remains in the
+  precautionary hold; its pass is for explicitly pinned batch 4 and layer 1,
+  while production can recalibrate/reassign. Neither is automatically resumed.
+  Studio and guru continue using upstream attention.
+
+Next work is to integrate batch-4 enforcement and self-test isolation, qualify
+the proposed per-platform backward policy over the relevant split configurations,
+and only then prepare a controlled release. The exact low-level source of the
+platform-dependent accumulation differences is not established by these tests.

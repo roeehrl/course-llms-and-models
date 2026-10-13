@@ -1,0 +1,4088 @@
+{
+  "authorizationMinutes": 30,
+  "verifiers": [
+    {
+      "id": "course-numeric-verifier",
+      "version": "1.0.0",
+      "implementationDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "sourceRefs": [
+        "ada-src-reviewed-bank"
+      ],
+      "artifactKinds": [
+        "assessment_variant"
+      ],
+      "checkIds": [
+        "independent-answer"
+      ]
+    },
+    {
+      "id": "course-bank-verifier",
+      "version": "1.0.0",
+      "implementationDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "sourceRefs": [
+        "ada-src-reviewed-bank"
+      ],
+      "artifactKinds": [
+        "assessment_variant"
+      ],
+      "checkIds": [
+        "authored-bank-match"
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "id": "profile-ada-01-01-numeric-0",
+      "episodeId": "fnd-e01-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "fnd-a01-01-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-01-01"
+    },
+    {
+      "id": "profile-ada-01-01-choice-0",
+      "episodeId": "fnd-e01-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "fnd-a01-01-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-01-01-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-01-01-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "fnd-o01-01"
+            ],
+            "familyId": "fnd-family-artifact-boundary",
+            "prompt": "A translation service gives different answers after a deploy. The checkpoint hash and tokenizer are unchanged, but the prompt now contains a glossary fetched from a database. What experiment best isolates the cause?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Compare only the size of the checkpoint files; identical sizes imply identical computations."
+              },
+              {
+                "id": "option-1",
+                "text": "Delete the glossary and infer that any remaining difference must be a weight update."
+              },
+              {
+                "id": "option-2",
+                "text": "Run both application versions with the same checkpoint, tokenized input and decoding settings; vary the glossary input separately."
+              },
+              {
+                "id": "option-3",
+                "text": "Treat the new answer as proof that the checkpoint learned the glossary."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-2",
+              "explanation": "Control input and decoding as well as parameter state. File size and an output difference do not identify a training event."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-01-02-numeric-0",
+      "episodeId": "fnd-e01-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "fnd-a01-02-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-01-02"
+    },
+    {
+      "id": "profile-ada-01-02-choice-0",
+      "episodeId": "fnd-e01-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "fnd-a01-02-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-01-02-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-01-02-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "fnd-o01-02"
+            ],
+            "familyId": "fnd-family-frozen-stage-transfer",
+            "prompt": "An encoder is frozen but a small classifier on top is trained. Its optimizer checkpoint contains classifier momentum. After training, the team discards only momentum and runs predictions with the saved classifier weights. Which description is accurate?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Inference has to perform a backward pass to reconstruct momentum."
+              },
+              {
+                "id": "option-1",
+                "text": "The classifier was trained; ordinary inference can use its learned weights without the training momentum, although exact training resume would need that state."
+              },
+              {
+                "id": "option-2",
+                "text": "Discarding momentum restores the untrained classifier."
+              },
+              {
+                "id": "option-3",
+                "text": "The frozen encoder must have changed because the classifier learned."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-1",
+              "explanation": "Training state and learned parameter state serve different purposes. A frozen submodule does not prevent another submodule from learning."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-01-03-numeric-0",
+      "episodeId": "fnd-e01-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "fnd-a01-03-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-01-03-numeric-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-01-03-numeric-0",
+            "type": "numeric",
+            "objectiveIds": [
+              "fnd-o01-03"
+            ],
+            "familyId": "fnd-family-token-pipeline",
+            "prompt": "Token IDs are cedar=0, birch=1, stop=2. A model returns probability rows [[0.05,0.90,0.05],[0.70,0.20,0.10]] for input IDs [0,1]. Greedy generation must read the LAST row, append its winning ID, then stop without another model call. Return the sum of IDs in the resulting three-token sequence.",
+            "grading": {
+              "expected": 1,
+              "absoluteTolerance": 0,
+              "explanation": "The last row selects ID 0; the sequence is [0,1,0]. Reading the first row would append 1."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-01-03-choice-0",
+      "episodeId": "fnd-e01-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "fnd-a01-03-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-01-03-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-01-03-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "fnd-o01-03"
+            ],
+            "familyId": "fnd-family-tokenizer-abi",
+            "prompt": "A tokenizer upgrade maps two token strings to swapped IDs. A model reuses the old embedding AND output vocabulary ordering. Which proposed test is most informative before declaring compatibility?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Round-trip representative strings through the tokenizer and verify that each resulting ID still indexes the intended embedding and output-token row."
+              },
+              {
+                "id": "option-1",
+                "text": "Check only that every ID remains below the vocabulary size."
+              },
+              {
+                "id": "option-2",
+                "text": "Check only that the embedding matrix has the old shape."
+              },
+              {
+                "id": "option-3",
+                "text": "Accept the upgrade if generated text is valid UTF-8."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-0",
+              "explanation": "Valid ranges, shapes and byte encoding do not establish semantic ID-to-row compatibility on either side of the model."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-01-04-numeric-0",
+      "episodeId": "fnd-e01-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "fnd-a01-04-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-01-04"
+    },
+    {
+      "id": "profile-ada-01-04-choice-0",
+      "episodeId": "fnd-e01-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "fnd-a01-04-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-01-04-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-01-04-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "fnd-o01-04"
+            ],
+            "familyId": "fnd-family-distributed-evidence",
+            "prompt": "A hypothetical run log shows forward completion, backward completion, and a later signed receipt that names the same work ID as accepted. No accounting or payment record is available. What is the strongest supported statement?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Payment is established because acceptance follows backward."
+              },
+              {
+                "id": "option-1",
+                "text": "The receipt proves every future job on the machine will be accepted."
+              },
+              {
+                "id": "option-2",
+                "text": "Nothing beyond process creation is supported, even with the matching receipt."
+              },
+              {
+                "id": "option-3",
+                "text": "This work was computed and accepted according to the receipt; credit and payment remain unestablished."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-3",
+              "explanation": "Each evidence stage has its own scope. A matching acceptance receipt adds acceptance evidence but cannot establish absent accounting stages."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-02-01-numeric-0",
+      "episodeId": "fnd-e02-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "fnd-a02-01-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-02-01"
+    },
+    {
+      "id": "profile-ada-02-01-choice-0",
+      "episodeId": "fnd-e02-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "fnd-a02-01-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-02-01-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-02-01-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "fnd-o02-01"
+            ],
+            "familyId": "fnd-family-semantic-axis-transfer",
+            "prompt": "An operation expects [batch,time,feature]. A fixture uses batch=2,time=3,feature=1, with value 10*b+t. A port treats the first two axes as [time,batch]. Which check most directly detects the semantic error?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Use a fixture filled with one constant so shape differences cannot distract."
+              },
+              {
+                "id": "option-1",
+                "text": "Compare the value associated with each named (batch,time) coordinate and verify the output axis contract, using the unequal dimensions."
+              },
+              {
+                "id": "option-2",
+                "text": "Compare only the number of elements, which is six in either interpretation."
+              },
+              {
+                "id": "option-3",
+                "text": "Flatten both arrays and compare their sums."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-1",
+              "explanation": "Coordinate identity and unequal dimensions expose axis swaps; element counts, sums and constant values discard that information."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-02-02-numeric-0",
+      "episodeId": "fnd-e02-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "fnd-a02-02-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-02-02"
+    },
+    {
+      "id": "profile-ada-02-02-choice-0",
+      "episodeId": "fnd-e02-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "fnd-a02-02-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-02-02-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-02-02-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "fnd-o02-02"
+            ],
+            "familyId": "fnd-family-transpose-counterexample",
+            "prompt": "A transposed tensor view shares storage with its base. A consumer promises to accept arbitrary strides but produces correct output only after callers materialize a contiguous copy. Which conclusion is justified?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "The copy is a useful discriminator: the consumer may be ignoring view strides, so test its promised contract on noncontiguous inputs."
+              },
+              {
+                "id": "option-1",
+                "text": "The transpose operation must have changed every stored scalar incorrectly."
+              },
+              {
+                "id": "option-2",
+                "text": "The copy proves the original view owned a separate corrupted allocation."
+              },
+              {
+                "id": "option-3",
+                "text": "Correct contiguous results establish correctness for all strides."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-0",
+              "explanation": "A view changes indexing metadata without necessarily copying. Success after materialization narrows the likely defect but does not certify the general stride path."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-02-03-numeric-0",
+      "episodeId": "fnd-e02-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "fnd-a02-03-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-02-03"
+    },
+    {
+      "id": "profile-ada-02-03-choice-0",
+      "episodeId": "fnd-e02-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "fnd-a02-03-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-02-03-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-02-03-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "fnd-o02-03"
+            ],
+            "familyId": "fnd-family-reduction-contract",
+            "prompt": "For X shaped [batch,feature], a layer subtracts each example's feature mean. Batch and feature lengths happen to be equal in a smoke test. Which fixture better distinguishes the intended reduction?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Use a square all-zero matrix and compare output shape only."
+              },
+              {
+                "id": "option-1",
+                "text": "Subtract one global mean and accept any result whose global sum is zero."
+              },
+              {
+                "id": "option-2",
+                "text": "Reduce over batch and broadcast the result as long as broadcasting succeeds."
+              },
+              {
+                "id": "option-3",
+                "text": "Use unequal axis lengths and rows with different means; check that each output row sums to zero."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-3",
+              "explanation": "Row-wise centering constrains each example separately. Global sums and shape compatibility do not identify the reduced semantic axis."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-02-04-numeric-0",
+      "episodeId": "fnd-e02-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "fnd-a02-04-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-02-04-numeric-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-02-04-numeric-0",
+            "type": "numeric",
+            "objectiveIds": [
+              "fnd-o02-04"
+            ],
+            "familyId": "fnd-family-fp32-rounding",
+            "prompt": "All additions below round immediately to IEEE binary32, round-to-nearest ties-to-even. Let A=2^24. Compare left=(A+1)+1 with right=A+(1+1). Enter right-left as an exact integer; no compiler reassociation is allowed.",
+            "grading": {
+              "expected": 2,
+              "absoluteTolerance": 0,
+              "explanation": "Each left-hand increment ties and rounds back to the even representable A. The right-hand inner sum is 2, so the final value is A+2."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-02-04-choice-0",
+      "episodeId": "fnd-e02-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "fnd-a02-04-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-02-04-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-02-04-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "fnd-o02-04"
+            ],
+            "familyId": "fnd-family-precision-transfer",
+            "prompt": "A computation accumulates thousands of small terms. Converting only the final low-precision sum to float32 makes its displayed value look more precise. Which next test addresses the likely error source?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Convert the final value twice to recover one lost bit per cast."
+              },
+              {
+                "id": "option-1",
+                "text": "Assume accumulation error is impossible because each input is exactly representable."
+              },
+              {
+                "id": "option-2",
+                "text": "Compare against a reference that accumulates in higher precision from the start; a final cast cannot recover increments already rounded away."
+              },
+              {
+                "id": "option-3",
+                "text": "Count printed decimal digits and accept if enough are present."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-2",
+              "explanation": "Representable inputs can still lose contributions during repeated additions. Casting after the loss changes representation, not the lost arithmetic history."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-03-01-numeric-0",
+      "episodeId": "fnd-e03-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "fnd-a03-01-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-03-01"
+    },
+    {
+      "id": "profile-ada-03-01-choice-0",
+      "episodeId": "fnd-e03-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "fnd-a03-01-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-03-01-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-03-01-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "fnd-o03-01"
+            ],
+            "familyId": "fnd-family-objective-proxy",
+            "prompt": "Model A has validation squared errors [0,0,0,16]; model B has [5,5,5,5]. The objective is mean squared error, while an operator also cares about the worst example. Which report respects both criteria?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "A has lower mean error (4 versus 5), while B has lower maximum error (5 versus 16); the preferred deployment needs the stated criterion."
+              },
+              {
+                "id": "option-1",
+                "text": "A is better under every possible error criterion because its mean is lower."
+              },
+              {
+                "id": "option-2",
+                "text": "B has lower mean error because its results are more consistent."
+              },
+              {
+                "id": "option-3",
+                "text": "The mean objective guarantees an upper bound of 4 on every A error."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-0",
+              "explanation": "Averages and tails describe different properties. Optimizing the stated objective does not settle an unstated operational tradeoff."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-03-02-numeric-0",
+      "episodeId": "fnd-e03-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "fnd-a03-02-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-03-02"
+    },
+    {
+      "id": "profile-ada-03-02-choice-0",
+      "episodeId": "fnd-e03-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "fnd-a03-02-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-03-02-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-03-02-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "fnd-o03-02"
+            ],
+            "familyId": "fnd-family-gradient-discriminator",
+            "prompt": "A derivative routine for L=(w*x-y)^2/2 accidentally uses abs(x) instead of x. Positive-x tests all pass. Which single new test most directly distinguishes the bug?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Use x=2,w=1,y=1 again with more printed digits."
+              },
+              {
+                "id": "option-1",
+                "text": "Use x=0, so the wrong factor and the right factor agree."
+              },
+              {
+                "id": "option-2",
+                "text": "Use any example with residual zero, so both routines return zero."
+              },
+              {
+                "id": "option-3",
+                "text": "Use x=-2,w=1,y=1 and compare the analytic derivative with a centered finite difference in w."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-3",
+              "explanation": "A negative input and nonzero residual isolate the missing sign: the correct gradient is 6 and the bug returns -6."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-03-03-numeric-0",
+      "episodeId": "fnd-e03-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "fnd-a03-03-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-03-03"
+    },
+    {
+      "id": "profile-ada-03-03-choice-0",
+      "episodeId": "fnd-e03-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "fnd-a03-03-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-03-03-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-03-03-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "fnd-o03-03"
+            ],
+            "familyId": "fnd-family-loss-scale-transfer",
+            "prompt": "A training implementation changes from summed loss to mean loss over a fixed batch of eight, while retaining the same learning rate and no other optimizer state. What happens to a plain descent update computed at the same parameters?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Its direction always reverses because averaging changes signs."
+              },
+              {
+                "id": "option-1",
+                "text": "It is unchanged because sums and means rank examples identically."
+              },
+              {
+                "id": "option-2",
+                "text": "Its magnitude becomes one eighth; multiplying the learning rate by eight restores that one-step update."
+              },
+              {
+                "id": "option-3",
+                "text": "Its magnitude grows eightfold; divide the rate by eight."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-2",
+              "explanation": "Mean gradients divide summed gradients by the count. Matching a one-step scale does not imply equivalence for every stateful optimizer."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-03-04-numeric-0",
+      "episodeId": "fnd-e03-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "fnd-a03-04-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-03-04"
+    },
+    {
+      "id": "profile-ada-03-04-choice-0",
+      "episodeId": "fnd-e03-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "fnd-a03-04-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-03-04-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-03-04-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "fnd-o03-04"
+            ],
+            "familyId": "fnd-family-evaluation-leakage",
+            "prompt": "A team fits a standardizer using training plus validation examples, chooses a model on validation, and evaluates once on untouched test examples. Which repair best preserves validation as a model-selection estimate?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Report the validation score as test performance because the test was untouched."
+              },
+              {
+                "id": "option-1",
+                "text": "Refit preprocessing using training data alone and redo selection using the untouched validation transforms from that fit."
+              },
+              {
+                "id": "option-2",
+                "text": "Keep the leaked standardizer because it did not use labels."
+              },
+              {
+                "id": "option-3",
+                "text": "Move the best validation examples into training after inspecting their losses."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-1",
+              "explanation": "Data-dependent preprocessing can leak validation distribution information even without labels. Refit the entire selection pipeline at the proper boundary."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-04-01-numeric-0",
+      "episodeId": "fnd-e04-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "fnd-a04-01-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-04-01-numeric-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-04-01-numeric-0",
+            "type": "numeric",
+            "objectiveIds": [
+              "fnd-o04-01"
+            ],
+            "familyId": "fnd-family-dag-identity",
+            "prompt": "A tape creates separate leaves x and y, then u=x*y, v=x*y as a SECOND multiplication node, z=u+v, and r=z+u. Even if x and y have equal values, identities remain separate. How many distinct nodes are reachable from r, including leaves and r?",
+            "grading": {
+              "expected": 6,
+              "absoluteTolerance": 0,
+              "explanation": "The reachable identities are x,y,u,v,z,r. Repeated edges to u do not create nodes; the separately executed multiplication v does."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-04-01-choice-0",
+      "episodeId": "fnd-e04-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "fnd-a04-01-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-04-01-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-04-01-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "fnd-o04-01"
+            ],
+            "familyId": "fnd-family-saved-forward-state",
+            "prompt": "An autodiff engine stores visited nodes in a set keyed by their numeric value. Two distinct leaves both equal 2 and feed different branches. What is the correct repair?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Add random noise to one leaf so the values differ."
+              },
+              {
+                "id": "option-1",
+                "text": "Merge equal-valued leaves and split their gradient equally afterward."
+              },
+              {
+                "id": "option-2",
+                "text": "Sort the leaves numerically before backward."
+              },
+              {
+                "id": "option-3",
+                "text": "Key traversal by node identity, preserving separate leaves and operand edges even when values are equal."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-3",
+              "explanation": "Equal values do not make two independent variables identical. Identity governs graph structure; randomness and sorting do not repair the dependency graph."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-04-02-numeric-0",
+      "episodeId": "fnd-e04-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "fnd-a04-02-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-04-02"
+    },
+    {
+      "id": "profile-ada-04-02-choice-0",
+      "episodeId": "fnd-e04-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "fnd-a04-02-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-04-02-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-04-02-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "fnd-o04-02"
+            ],
+            "familyId": "fnd-family-optimizer-boundary",
+            "prompt": "A trainer calls backward, logs the gradient, calls zero_grad, then calls step using that now-cleared buffer. The loss had been nonzero. Which diagnosis follows from these boundaries?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Clearing gradients must reset the parameter to its initialization."
+              },
+              {
+                "id": "option-1",
+                "text": "The correct repair is to call backward after every individual multiply during forward."
+              },
+              {
+                "id": "option-2",
+                "text": "The step no longer has the logged gradient; preserve it until the optimizer consumes it, then clear for the next accumulation window."
+              },
+              {
+                "id": "option-3",
+                "text": "A nonzero loss guarantees the optimizer will reconstruct the gradient automatically."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-2",
+              "explanation": "Backward creates gradient state and step consumes it. Clearing at the wrong boundary can erase valid work without changing the preceding loss."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-04-03-numeric-0",
+      "episodeId": "fnd-e04-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "fnd-a04-03-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-04-03"
+    },
+    {
+      "id": "profile-ada-04-03-choice-0",
+      "episodeId": "fnd-e04-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "fnd-a04-03-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-04-03-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-04-03-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "fnd-o04-03"
+            ],
+            "familyId": "fnd-family-recompute-contract",
+            "prompt": "A checkpointed block recomputes exactly the saved activation but its replay increments a running-statistics buffer a second time. Outputs and local gradients match the reference for this batch. Is the replay contract satisfied?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "No: checkpointing is invalid whenever it saves any memory."
+              },
+              {
+                "id": "option-1",
+                "text": "No: replay also changed persistent side effects twice; preserve or suppress those effects so the later training state matches the original execution."
+              },
+              {
+                "id": "option-2",
+                "text": "Yes: identical local gradients prove every later optimizer and model state will match."
+              },
+              {
+                "id": "option-3",
+                "text": "Yes: persistent buffers are never part of training state."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-1",
+              "explanation": "Recomputation equivalence includes observable state transitions, not just one activation tensor. This is a side-effect failure even with matching local math."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-04-04-numeric-0",
+      "episodeId": "fnd-e04-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "fnd-a04-04-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-04-04"
+    },
+    {
+      "id": "profile-ada-04-04-choice-0",
+      "episodeId": "fnd-e04-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "fnd-a04-04-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-04-04-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-04-04-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "fnd-o04-04"
+            ],
+            "familyId": "fnd-family-engine-repair-suite",
+            "prompt": "A repaired scalar engine passes a single-root test but fails when the same node appears twice in a seeded roots list with seeds 2 and -1. Which test/repair pair is appropriate?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Accumulate both seed contributions at that node, and compare a fresh reverse pass with finite differences of the explicitly weighted root sum."
+              },
+              {
+                "id": "option-1",
+                "text": "Deduplicate roots by keeping only the first seed and test an unweighted root sum."
+              },
+              {
+                "id": "option-2",
+                "text": "Take the absolute value of seeds so cancellation cannot occur."
+              },
+              {
+                "id": "option-3",
+                "text": "Cache the first backward result forever because the forward values did not change."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-0",
+              "explanation": "Root multiplicity contributes algebraically just like operand multiplicity. A weighted scalar objective supplies an independent numerical oracle."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-05-01-numeric-0",
+      "episodeId": "ttf-e05-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "ttf-a05-01-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-05-01"
+    },
+    {
+      "id": "profile-ada-05-01-choice-0",
+      "episodeId": "ttf-e05-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "ttf-a05-01-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-05-01-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-05-01-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "ttf-o05-01"
+            ],
+            "familyId": "ttf-family-composition-transfer",
+            "prompt": "A two-layer bias-free network has an elementwise square between its linear maps. A port replaces both maps and the square with their matrix product. Why can matching output shapes not justify this?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Any two same-shaped functions must agree on every input."
+              },
+              {
+                "id": "option-1",
+                "text": "Bias-free layers cannot represent any nonlinear function."
+              },
+              {
+                "id": "option-2",
+                "text": "The square is nonlinear; composing the matrices alone loses input-dependent nonlinear behavior even when dimensions agree."
+              },
+              {
+                "id": "option-3",
+                "text": "All elementwise operations commute with arbitrary matrix multiplication."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-2",
+              "explanation": "Only consecutive affine maps without an intervening nonlinearity collapse this way. Shape checking is necessary but does not establish functional equivalence."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-05-02-numeric-0",
+      "episodeId": "ttf-e05-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "ttf-a05-02-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-05-02"
+    },
+    {
+      "id": "profile-ada-05-02-choice-0",
+      "episodeId": "ttf-e05-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "ttf-a05-02-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-05-02-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-05-02-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "ttf-o05-02"
+            ],
+            "familyId": "ttf-family-normalization-isolation",
+            "prompt": "A per-token feature normalization is evaluated on one sequence, then on a longer sequence with extra tokens appended. Earlier token vectors are unchanged. Which observation contradicts the claimed normalization axes?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Two features of the same token interact through its normalization denominator."
+              },
+              {
+                "id": "option-1",
+                "text": "Earlier normalized token values change solely because the appended tokens alter the statistics."
+              },
+              {
+                "id": "option-2",
+                "text": "Earlier normalized values remain the same within the declared numerical tolerance."
+              },
+              {
+                "id": "option-3",
+                "text": "The output has one normalized vector per input token."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-1",
+              "explanation": "Statistics for per-token normalization may depend on that token's features, not on added tokens. Causal attention is not part of this isolated normalization test."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-05-03-numeric-0",
+      "episodeId": "ttf-e05-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "ttf-a05-03-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-05-03"
+    },
+    {
+      "id": "profile-ada-05-03-choice-0",
+      "episodeId": "ttf-e05-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "ttf-a05-03-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-05-03-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-05-03-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "ttf-o05-03"
+            ],
+            "familyId": "ttf-family-optimizer-state-transfer",
+            "prompt": "Two adaptive-optimizer runs load identical weights and first/second moment arrays. One resumes the saved step counter; the other resets it to zero while keeping moments. Their next gradients match. Can next-step equality be assumed?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "No; step-dependent bias correction or schedules can differ, so restore the counter and all update-relevant state."
+              },
+              {
+                "id": "option-1",
+                "text": "Yes; only the weight array affects every optimizer update."
+              },
+              {
+                "id": "option-2",
+                "text": "Yes; equal moments make the step counter mathematically irrelevant to all adaptive optimizers."
+              },
+              {
+                "id": "option-3",
+                "text": "No; identical weights prove the checkpoint was corrupt."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-0",
+              "explanation": "Counters can enter bias correction and schedules. Equal arrays alone are insufficient for a full optimizer-state transition contract."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-05-04-numeric-0",
+      "episodeId": "ttf-e05-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "ttf-a05-04-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-05-04"
+    },
+    {
+      "id": "profile-ada-05-04-choice-0",
+      "episodeId": "ttf-e05-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "ttf-a05-04-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-05-04-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-05-04-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "ttf-o05-04"
+            ],
+            "familyId": "ttf-family-resume-counterexample",
+            "prompt": "A resumed training run restores weights, optimizer state and random-generator state but starts its data iterator at the beginning. The uninterrupted run continues mid-epoch. What should an exact-resume test do?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Compare only the first saved weight tensor and declare exact resume."
+              },
+              {
+                "id": "option-1",
+                "text": "Shuffle until a similar final loss appears, without matching inputs."
+              },
+              {
+                "id": "option-2",
+                "text": "Discard optimizer state because new data makes it unnecessary."
+              },
+              {
+                "id": "option-3",
+                "text": "Restore the data position/order too, then compare the next inputs and state transitions against the uninterrupted branch."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-3",
+              "explanation": "Exact continuation requires the same next work, as well as computation state. Similar loss is weaker evidence than a matched trajectory."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-06-01-numeric-0",
+      "episodeId": "ttf-e06-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "ttf-a06-01-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-06-01-numeric-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-06-01-numeric-0",
+            "type": "numeric",
+            "objectiveIds": [
+              "ttf-o06-01"
+            ],
+            "familyId": "ttf-family-embedding-scatter",
+            "prompt": "Embedding lookup IDs are [2,0,2]. The scalar coordinate under inspection receives upstream derivatives [3,-2,5]. The embedding gradient buffer starts at zero. How much larger is the correct derivative for row 2 than a buggy last-write-wins scatter's derivative? IDs 2 and 0 are distinct.",
+            "grading": {
+              "expected": 3,
+              "absoluteTolerance": 0,
+              "explanation": "The repeated row receives 3+5; last-write-wins keeps only 5. Their difference identifies the lost occurrence."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-06-01-choice-0",
+      "episodeId": "ttf-e06-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "ttf-a06-01-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-06-01-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-06-01-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "ttf-o06-01"
+            ],
+            "familyId": "ttf-family-embedding-identity",
+            "prompt": "A vocabulary row appears at positions 0 and 3. A gather-based embedding forward is correct, but backward writes one gradient per row using assignment. Which held-out test best exposes the error?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Check only that the vocabulary gradient array has the right shape."
+              },
+              {
+                "id": "option-1",
+                "text": "Give the repeated positions unequal, nonzero upstream vectors and compare their row sum with an independent scatter-add reference."
+              },
+              {
+                "id": "option-2",
+                "text": "Use each token ID exactly once, so no row needs accumulation."
+              },
+              {
+                "id": "option-3",
+                "text": "Set all upstream vectors to zero and compare the zero gradients."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-1",
+              "explanation": "Repeated indices require summation. Unequal contributions reveal overwriting more reliably than unique or zero-gradient fixtures."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-06-02-numeric-0",
+      "episodeId": "ttf-e06-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "ttf-a06-02-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-06-02-numeric-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-06-02-numeric-0",
+            "type": "numeric",
+            "objectiveIds": [
+              "ttf-o06-02"
+            ],
+            "familyId": "ttf-family-stable-token-loss",
+            "prompt": "Vocabulary logits are [1000+ln(2),1000+ln(3),1000+ln(5)]. The target is ID 2, zero based. Return the natural-log cross-entropy WITHOUT exponentiating the large common offset. Enter a decimal accurate to 1e-6.",
+            "grading": {
+              "expected": 0.6931471805599453,
+              "absoluteTolerance": 1e-9,
+              "explanation": "Subtracting the common offset leaves masses 2,3,5. Target probability is 5/10; loss is ln(2)."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-06-02-choice-0",
+      "episodeId": "ttf-e06-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "ttf-a06-02-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-06-02-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-06-02-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "ttf-o06-02"
+            ],
+            "familyId": "ttf-family-loss-interface",
+            "prompt": "A cross-entropy implementation returns different loss after adding the same large constant to EVERY logit. The target ID is unchanged. What is the most relevant diagnosis?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "It violates the required shift invariance; inspect stable log-sum-exp and target-logit subtraction together."
+              },
+              {
+                "id": "option-1",
+                "text": "The target probability should intentionally depend on an arbitrary common offset."
+              },
+              {
+                "id": "option-2",
+                "text": "The tokenizer must have changed its vocabulary solely because logits were shifted."
+              },
+              {
+                "id": "option-3",
+                "text": "The correct repair is to normalize each logit independently into a probability."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-0",
+              "explanation": "A common logit shift cancels in softmax probabilities and cross-entropy. Stable evaluation preserves that mathematical invariance."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-06-03-numeric-0",
+      "episodeId": "ttf-e06-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "ttf-a06-03-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-06-03"
+    },
+    {
+      "id": "profile-ada-06-03-choice-0",
+      "episodeId": "ttf-e06-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "ttf-a06-03-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-06-03-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-06-03-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "ttf-o06-03"
+            ],
+            "familyId": "ttf-family-future-leakage",
+            "prompt": "Packed training concatenates two unrelated documents with a separator. Targets are shifted correctly, but attention from the second document can see tokens in the first. The data contract treats each document as an independent sample. What additional condition is needed?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "A shifted target alone guarantees every attention edge is permitted."
+              },
+              {
+                "id": "option-1",
+                "text": "Removing padding automatically blocks every cross-document attention edge."
+              },
+              {
+                "id": "option-2",
+                "text": "The separator token physically prevents the attention matrix from containing cross-document scores."
+              },
+              {
+                "id": "option-3",
+                "text": "An attention mask must respect document boundaries as well as causal position, unless cross-document context is explicitly part of the objective."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-3",
+              "explanation": "Target shifting and attention visibility are distinct contracts. A token can signal a boundary semantically without enforcing a mask."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-06-04-numeric-0",
+      "episodeId": "ttf-e06-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "ttf-a06-04-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-06-04"
+    },
+    {
+      "id": "profile-ada-06-04-choice-0",
+      "episodeId": "ttf-e06-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "ttf-a06-04-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-06-04-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-06-04-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "ttf-o06-04"
+            ],
+            "familyId": "ttf-family-cache-reuse-contract",
+            "prompt": "A service reuses a cached prefix after changing only the position indices assigned to that prefix, with model weights and token IDs unchanged. Can matching shapes justify reuse?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Yes; cache reuse is safe whenever head width matches."
+              },
+              {
+                "id": "option-1",
+                "text": "No; caches are invalid even for an identical prefix under identical state."
+              },
+              {
+                "id": "option-2",
+                "text": "No; position-dependent transformations can change the cached keys/values, so cache identity must include the relevant positional convention."
+              },
+              {
+                "id": "option-3",
+                "text": "Yes; token IDs alone determine every possible cache tensor."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-2",
+              "explanation": "Cache validity is a semantic identity question. Relevant positions, weights, tokens and conventions must match, not only tensor dimensions."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-07-01-numeric-0",
+      "episodeId": "ttf-e07-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "ttf-a07-01-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-07-01"
+    },
+    {
+      "id": "profile-ada-07-01-choice-0",
+      "episodeId": "ttf-e07-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "ttf-a07-01-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-07-01-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-07-01-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "ttf-o07-01"
+            ],
+            "familyId": "ttf-family-projection-gradient-path",
+            "prompt": "A shared input X feeds Q=XWq, K=XWk and V=XWv. A backward port returns only the Q branch contribution to dX but all three weight gradients look plausible. Which repair is required?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Sum the three input-adjoint contributions at X; verify the combined result with a scalar-loss input perturbation."
+              },
+              {
+                "id": "option-1",
+                "text": "Average the three branch derivatives because there are three projections."
+              },
+              {
+                "id": "option-2",
+                "text": "Use whichever branch has the largest gradient norm."
+              },
+              {
+                "id": "option-3",
+                "text": "Leave dX unchanged because the separate weight gradients determine it automatically."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-0",
+              "explanation": "The shared input has three downstream consumers; the chain rule adds their contributions. Independent weight gradients do not repair missing input paths."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-07-02-numeric-0",
+      "episodeId": "ttf-e07-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "ttf-a07-02-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-07-02-numeric-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-07-02-numeric-0",
+            "type": "numeric",
+            "objectiveIds": [
+              "ttf-o07-02"
+            ],
+            "familyId": "ttf-family-attention-mixture",
+            "prompt": "An attention row has unnormalized masses [2,3,5] and scalar values [4,-2,100]. The third key is masked BEFORE softmax. Enter the output minus the output from a bug that normalizes all three masses but then zeros the third contribution without renormalizing.",
+            "grading": {
+              "expected": 0.2,
+              "absoluteTolerance": 1e-9,
+              "explanation": "Correct weights are [2/5,3/5,0] and output 2/5. The bug uses [2/10,3/10,0] and output 1/5."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-07-02-choice-0",
+      "episodeId": "ttf-e07-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "ttf-a07-02-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-07-02-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-07-02-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "ttf-o07-02"
+            ],
+            "familyId": "ttf-family-attention-gradient-oracle",
+            "prompt": "An attention backward test sets every value vector equal. Q/K gradients are zero and both candidate and reference agree. What should a stronger next fixture change?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Keep equal values and compare more zero Q/K gradients."
+              },
+              {
+                "id": "option-1",
+                "text": "Mask all but one key, which forces the mixture to one value."
+              },
+              {
+                "id": "option-2",
+                "text": "Remove the loss dependency on the attention output."
+              },
+              {
+                "id": "option-3",
+                "text": "Use unequal values and a loss sensitive to their mixture, with nonuniform scores and at least two unmasked keys."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-3",
+              "explanation": "Equal values make the output insensitive to probability redistribution. A discriminating fixture must create that dependency before judging score gradients."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-07-03-numeric-0",
+      "episodeId": "ttf-e07-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "ttf-a07-03-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-07-03"
+    },
+    {
+      "id": "profile-ada-07-03-choice-0",
+      "episodeId": "ttf-e07-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "ttf-a07-03-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-07-03-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-07-03-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "ttf-o07-03"
+            ],
+            "familyId": "ttf-family-norm-position-conventions",
+            "prompt": "A rotary-position port rotates Q at position p but rotates every K using position zero. A same-position smoke test at p=0 passes. Which test targets the missing convention?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Check that rotation preserves the length of each vector and stop there."
+              },
+              {
+                "id": "option-1",
+                "text": "Replace every Q and K with zeros to avoid floating-point error."
+              },
+              {
+                "id": "option-2",
+                "text": "Use nonzero, differing query/key positions and compare dot products with an explicit paired-rotation reference."
+              },
+              {
+                "id": "option-3",
+                "text": "Test only position zero on longer vectors."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-2",
+              "explanation": "Norm preservation alone does not establish the relative-position dot products. Nonzero, distinct positions expose an omitted K rotation."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-07-04-numeric-0",
+      "episodeId": "ttf-e07-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "ttf-a07-04-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-07-04"
+    },
+    {
+      "id": "profile-ada-07-04-choice-0",
+      "episodeId": "ttf-e07-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "ttf-a07-04-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-07-04-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-07-04-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "ttf-o07-04"
+            ],
+            "familyId": "ttf-family-decoder-causality",
+            "prompt": "A tiny decoder passes a test that changing a future token leaves earlier logits unchanged. It also produces identical logits for every possible prefix. What additional check prevents a vacuous causality pass?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Check only that the logits array has the requested length."
+              },
+              {
+                "id": "option-1",
+                "text": "Require a chosen earlier-token perturbation to affect a later logit in a reference-matched fixture, while future-to-past changes remain blocked."
+              },
+              {
+                "id": "option-2",
+                "text": "Declare the constant-output decoder correct because causality passed."
+              },
+              {
+                "id": "option-3",
+                "text": "Require future tokens to change earlier logits, reversing the causal contract."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-1",
+              "explanation": "Causality forbids a dependency; a complementary sensitivity test establishes intended allowed dependencies and rejects a disconnected model."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-08-01-numeric-0",
+      "episodeId": "ttf-e08-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "ttf-a08-01-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-08-01"
+    },
+    {
+      "id": "profile-ada-08-01-choice-0",
+      "episodeId": "ttf-e08-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "ttf-a08-01-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-08-01-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-08-01-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "ttf-o08-01"
+            ],
+            "familyId": "ttf-family-registration-boundary",
+            "prompt": "A module replaces a registered parameter with a new parameter object AFTER constructing an optimizer. Forward uses the new object, but step still updates the old one. What should the diagnostic inspect?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Compare only parameter names, since names guarantee object identity."
+              },
+              {
+                "id": "option-1",
+                "text": "Increase the learning rate until the new parameter moves indirectly."
+              },
+              {
+                "id": "option-2",
+                "text": "Call forward twice so the optimizer discovers replacement objects automatically."
+              },
+              {
+                "id": "option-3",
+                "text": "Compare parameter object identities in the module and optimizer groups, then rebuild or update groups to match the intended trainable objects."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-3",
+              "explanation": "Registration and optimizer membership are separate stateful contracts. Replacing an object can leave a stale optimizer reference despite matching names."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-08-02-numeric-0",
+      "episodeId": "ttf-e08-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "ttf-a08-02-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-08-02"
+    },
+    {
+      "id": "profile-ada-08-02-choice-0",
+      "episodeId": "ttf-e08-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "ttf-a08-02-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-08-02-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-08-02-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "ttf-o08-02"
+            ],
+            "familyId": "ttf-family-benchmark-contract",
+            "prompt": "Benchmark A warms up outside the timer and synchronizes the measured call. Benchmark B includes compilation and allocation in its first measured call. Both numbers are correct for their timers. What comparison is defensible?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Subtract an arbitrary constant for compilation until the rankings agree."
+              },
+              {
+                "id": "option-1",
+                "text": "Treat synchronization as unnecessary because both programs eventually finish."
+              },
+              {
+                "id": "option-2",
+                "text": "Label the different measured scopes; run a matched warm or cold protocol before attributing their difference to execution speed."
+              },
+              {
+                "id": "option-3",
+                "text": "Choose the smaller number and call it a universal hardware speedup."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-2",
+              "explanation": "Timing correctness and scope comparability are separate. A cold-start cost may matter, but it must be compared under a stated common protocol."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-08-03-numeric-0",
+      "episodeId": "ttf-e08-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "ttf-a08-03-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-08-03"
+    },
+    {
+      "id": "profile-ada-08-03-choice-0",
+      "episodeId": "ttf-e08-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "ttf-a08-03-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-08-03-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-08-03-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "ttf-o08-03"
+            ],
+            "familyId": "ttf-family-lazy-evaluation-contract",
+            "prompt": "A lazy training loop constructs several update expressions but only evaluates a loss node that depends on the OLD parameters. Its timer ends there. What evidence is missing?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Nothing: evaluating any node necessarily evaluates every graph ever constructed."
+              },
+              {
+                "id": "option-1",
+                "text": "Materialization of the updated parameters and any required optimizer state on the measured dependency path."
+              },
+              {
+                "id": "option-2",
+                "text": "Proof that constructing an expression consumed exactly as much time as executing it."
+              },
+              {
+                "id": "option-3",
+                "text": "A second variable name for the old loss, which would force every unrelated node."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-1",
+              "explanation": "Demand-driven execution follows dependencies, not all created expressions. The measured output must require the work whose completion is claimed."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-08-04-numeric-0",
+      "episodeId": "ttf-e08-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "ttf-a08-04-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-08-04"
+    },
+    {
+      "id": "profile-ada-08-04-choice-0",
+      "episodeId": "ttf-e08-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "ttf-a08-04-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-08-04-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-08-04-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "ttf-o08-04"
+            ],
+            "familyId": "ttf-family-adapter-initialization",
+            "prompt": "An adapter uses deltaW=B*A. A is initialized nonzero and B to zero. On the first data-gradient step, which statement follows for ordinary matrix differentiation, assuming a nonzero relevant upstream gradient?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "B can receive a nonzero gradient immediately, while A's data gradient is zero until B moves."
+              },
+              {
+                "id": "option-1",
+                "text": "Both factors must always receive zero gradients because the initial deltaW is zero."
+              },
+              {
+                "id": "option-2",
+                "text": "A alone can move because it started nonzero."
+              },
+              {
+                "id": "option-3",
+                "text": "The frozen base matrix must be unfrozen before B can receive any derivative."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-0",
+              "explanation": "The pullback to A contains B, whereas the pullback to B contains A. A zero product need not imply zero gradients for both factors."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-09-01-numeric-0",
+      "episodeId": "sys-e09-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "sys-a09-01-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-09-01-numeric-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-09-01-numeric-0",
+            "type": "numeric",
+            "objectiveIds": [
+              "sys-o09-01"
+            ],
+            "familyId": "sys-family-dispatch-coverage",
+            "prompt": "A one-dimensional dispatch rounds a length-25 array up to full threadgroups of width 8 and guards accesses with i<n. If a bug removes the guard, how many launched threads would index outside the array? N is positive and is not a multiple of eight.",
+            "grading": {
+              "expected": 7,
+              "absoluteTolerance": 0,
+              "explanation": "Four groups launch 32 threads; indices 25 through 31 are invalid."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-09-01-choice-0",
+      "episodeId": "sys-e09-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "sys-a09-01-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-09-01-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-09-01-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "sys-o09-01"
+            ],
+            "familyId": "sys-family-barrier-scope",
+            "prompt": "A threadgroup reduction has a barrier after loading shared memory. An out-of-range lane returns before the barrier; other lanes in the SAME group continue. What is the appropriate repair under a group-wide barrier contract?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Assume invalid lanes cannot affect valid lanes because they produce no output."
+              },
+              {
+                "id": "option-1",
+                "text": "Have active lanes skip the barrier too while still reading shared memory written by peers."
+              },
+              {
+                "id": "option-2",
+                "text": "Let every lane reach the barrier, and have inactive lanes contribute the operation's neutral value without accessing invalid input."
+              },
+              {
+                "id": "option-3",
+                "text": "Replace the bounds predicate with a device-wide barrier inside only the active lanes."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-2",
+              "explanation": "Control flow around a collective barrier must preserve participating-lane agreement. Neutral values separate data validity from synchronization participation."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-09-02-numeric-0",
+      "episodeId": "sys-e09-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "sys-a09-02-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-09-02-numeric-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-09-02-numeric-0",
+            "type": "numeric",
+            "objectiveIds": [
+              "sys-o09-02"
+            ],
+            "familyId": "sys-family-tile-traffic",
+            "prompt": "Synthetic square matrix multiply uses N=8, float32 elements, no cross-tile reuse, and exact divisibility. Every output tile loads an A and B tile for every K tile and writes C once. Compare output tile widths 2 and 4. How many payload bytes does width 4 SAVE? Ignore caches, transaction overhead and partial tiles.",
+            "grading": {
+              "expected": 1024,
+              "absoluteTolerance": 0,
+              "explanation": "Width 2 reads 512 scalars and width 4 reads 256; both write 64. The saved 256 reads occupy 1024 bytes."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-09-02-choice-0",
+      "episodeId": "sys-e09-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "sys-a09-02-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-09-02-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-09-02-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "sys-o09-02"
+            ],
+            "familyId": "sys-family-tile-resource-tradeoff",
+            "prompt": "A tile change reduces modeled global loads, but a measured matched kernel becomes slower. A register report rises and occupancy drops. What conclusion respects both observations?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Claim a full-training speedup from the reduced load count alone."
+              },
+              {
+                "id": "option-1",
+                "text": "The traffic saving is real within its model, but another resource cost may dominate; inspect the resource/performance tradeoff under the same workload."
+              },
+              {
+                "id": "option-2",
+                "text": "The runtime must be wrong because fewer modeled loads mathematically guarantee lower time."
+              },
+              {
+                "id": "option-3",
+                "text": "Discard the traffic model as false solely because speed did not improve."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-1",
+              "explanation": "A byte count is not a complete timing model. Resource pressure can counteract a traffic benefit without invalidating the original count."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-09-03-numeric-0",
+      "episodeId": "sys-e09-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "sys-a09-03-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-09-03"
+    },
+    {
+      "id": "profile-ada-09-03-choice-0",
+      "episodeId": "sys-e09-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "sys-a09-03-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-09-03-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-09-03-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "sys-o09-03"
+            ],
+            "familyId": "sys-family-hardware-attribution",
+            "prompt": "A report says an operation used a high-level tensor API and therefore executed on a specific accelerator unit. No trace or selected-kernel record is included. What would substantiate that narrower hardware claim?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Evidence of the actual dispatched implementation and execution path for the measured device/configuration, using an appropriate supported trace or diagnostic."
+              },
+              {
+                "id": "option-1",
+                "text": "The tensor API's name alone, because every backend must choose the same unit."
+              },
+              {
+                "id": "option-2",
+                "text": "The machine's total memory capacity, which identifies the dispatched unit."
+              },
+              {
+                "id": "option-3",
+                "text": "A timing result from a different workload on a different device."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-0",
+              "explanation": "An API describes an interface, not necessarily the selected lowering or physical unit. Attribute the observed path at the measured configuration."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-09-04-numeric-0",
+      "episodeId": "sys-e09-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "sys-a09-04-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-09-04"
+    },
+    {
+      "id": "profile-ada-09-04-choice-0",
+      "episodeId": "sys-e09-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "sys-a09-04-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-09-04-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-09-04-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "sys-o09-04"
+            ],
+            "familyId": "sys-family-end-to-end-bound",
+            "prompt": "A unified-memory machine has enough nominal capacity for model weights. Training still fails when gradients, optimizer state and temporary activations become live. Which capacity estimate was missing?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Only the checkpoint file's compressed byte size."
+              },
+              {
+                "id": "option-1",
+                "text": "Only the largest single parameter tensor."
+              },
+              {
+                "id": "option-2",
+                "text": "A guarantee that shared physical memory automatically eliminates all allocation limits."
+              },
+              {
+                "id": "option-3",
+                "text": "The peak simultaneous live set, including other system use, optimizer/gradient state, temporaries and allocation overhead."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-3",
+              "explanation": "Unified memory does not make the peak live set equal to saved weights or remove finite capacity. Estimate coexisting allocations at the peak."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-10-01-numeric-0",
+      "episodeId": "sys-e10-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "sys-a10-01-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-10-01"
+    },
+    {
+      "id": "profile-ada-10-01-choice-0",
+      "episodeId": "sys-e10-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "sys-a10-01-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-10-01-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-10-01-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "sys-o10-01"
+            ],
+            "familyId": "sys-family-partition-message-contract",
+            "prompt": "Two data-parallel replicas have equal parameter shapes but process unequal numbers of valid tokens because of padding. The objective is mean loss per VALID token. Which merge preserves that objective?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Concatenate parameter gradients as if replicas held different model stages."
+              },
+              {
+                "id": "option-1",
+                "text": "Weight each replica's mean gradient by its valid-token count, then divide their sum by the total valid-token count."
+              },
+              {
+                "id": "option-2",
+                "text": "Average the two means equally solely because there are two replicas."
+              },
+              {
+                "id": "option-3",
+                "text": "Weight by padded tensor element count even when padding is excluded from loss."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-1",
+              "explanation": "The reduction weight must match the loss denominator. Replica count, padding capacity and pipeline partitioning describe different contracts."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-10-02-numeric-0",
+      "episodeId": "sys-e10-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "sys-a10-02-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-10-02"
+    },
+    {
+      "id": "profile-ada-10-02-choice-0",
+      "episodeId": "sys-e10-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "sys-a10-02-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-10-02-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-10-02-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "sys-o10-02"
+            ],
+            "familyId": "sys-family-stale-work-lifetime",
+            "prompt": "A delayed backward message names an activation-cache key from model version V1. The process has moved to V2, whose tensors have identical shapes. What should route/cache handling establish before using it?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "The exact work/version identity and saved-forward-state contract; reject or route stale work according to the explicit protocol rather than shape matching."
+              },
+              {
+                "id": "option-1",
+                "text": "Reuse any same-shaped activation in V2 because dimensions identify the sample."
+              },
+              {
+                "id": "option-2",
+                "text": "Apply the gradient to the newest parameters and label it as V1 work."
+              },
+              {
+                "id": "option-3",
+                "text": "Erase the work ID so downstream processes cannot detect the mismatch."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-0",
+              "explanation": "Shapes do not bind gradients to their forward sample or parameter version. Staleness handling is a protocol decision with explicit identity."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-10-03-numeric-0",
+      "episodeId": "sys-e10-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "sys-a10-03-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-10-03-numeric-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-10-03-numeric-0",
+            "type": "numeric",
+            "objectiveIds": [
+              "sys-o10-03"
+            ],
+            "familyId": "sys-family-return-score",
+            "prompt": "Historical-rule exercise only: score(r)=clamp(r^1.5,0.2,4). Compare ratios r=4 and r=1. Return the larger-ratio score minus the smaller-ratio score after clamping. This is not a current fleet reward claim.",
+            "grading": {
+              "expected": 3,
+              "absoluteTolerance": 0,
+              "explanation": "The raw scores are 8 and 1; the upper bound changes 8 to 4. Their clamped difference is 3."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-10-03-choice-0",
+      "episodeId": "sys-e10-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "sys-a10-03-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-10-03-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-10-03-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "sys-o10-03"
+            ],
+            "familyId": "sys-family-retry-evidence",
+            "prompt": "A receiver deduplicates retries by logical backward ID. One sender retries the same ID with identical payload three times and receives one acceptance receipt. Which counter is appropriate for unique accepted work?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Three, since every transmission is a new accepted computation."
+              },
+              {
+                "id": "option-1",
+                "text": "Zero, since any retry invalidates the original computation."
+              },
+              {
+                "id": "option-2",
+                "text": "One paid result, since acceptance necessarily includes payment."
+              },
+              {
+                "id": "option-3",
+                "text": "One; transmission attempts may be three, but deduplication and the receipt identify one accepted logical result."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-3",
+              "explanation": "Logical identity, attempt count and downstream accounting are separate. The receipt supports one acceptance only."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-10-04-numeric-0",
+      "episodeId": "sys-e10-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "sys-a10-04-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-10-04"
+    },
+    {
+      "id": "profile-ada-10-04-choice-0",
+      "episodeId": "sys-e10-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "sys-a10-04-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-10-04-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-10-04-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "sys-o10-04"
+            ],
+            "familyId": "sys-family-chunking-semantics",
+            "prompt": "A vector merge streams parameters in chunks to limit memory. One port divides each chunk's gradient by the number of chunks in addition to the intended replica normalization. What invariant should expose the defect?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Only the first chunk matters because all chunks share a dtype."
+              },
+              {
+                "id": "option-1",
+                "text": "Matching the total number of bytes read proves the optimizer update matches."
+              },
+              {
+                "id": "option-2",
+                "text": "The merged mathematical update should be independent of chunk size for the same inputs and stated reduction order/tolerance."
+              },
+              {
+                "id": "option-3",
+                "text": "Smaller chunks should intentionally shrink the full-vector update."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-2",
+              "explanation": "Chunking partitions implementation work; it is not an additional sample-count normalization unless explicitly defined as such."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-11-01-numeric-0",
+      "episodeId": "sys-e11-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "sys-a11-01-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-11-01"
+    },
+    {
+      "id": "profile-ada-11-01-choice-0",
+      "episodeId": "sys-e11-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "sys-a11-01-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-11-01-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-11-01-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "sys-o11-01"
+            ],
+            "familyId": "sys-family-process-evidence",
+            "prompt": "A synthetic launch log contains a child PID and an open listening socket, but its readiness response says dependencies are still loading. Which status is warranted?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "The process exists and listens, but application readiness has not yet been established."
+              },
+              {
+                "id": "option-1",
+                "text": "The worker is admitted and accepted by the remote coordinator."
+              },
+              {
+                "id": "option-2",
+                "text": "An open socket proves every dependency and model partition is usable."
+              },
+              {
+                "id": "option-3",
+                "text": "No process exists because readiness is pending."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-0",
+              "explanation": "Process existence, transport availability, application readiness and remote admission are distinct lifecycle observations."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-11-02-numeric-0",
+      "episodeId": "sys-e11-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "sys-a11-02-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-11-02"
+    },
+    {
+      "id": "profile-ada-11-02-choice-0",
+      "episodeId": "sys-e11-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "sys-a11-02-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-11-02-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-11-02-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "sys-o11-02"
+            ],
+            "familyId": "sys-family-split-state-contract",
+            "prompt": "A partition boundary serializes a compressed activation for transport while keeping a local saved tensor for backward. An optimization deletes the saved tensor and later substitutes the decompressed transport approximation. What needs qualification?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Nothing, because any tensor with the same shape has identical derivatives."
+              },
+              {
+                "id": "option-1",
+                "text": "Only network throughput, since the change cannot affect local math."
+              },
+              {
+                "id": "option-2",
+                "text": "The number of log lines, which proves the saved values are equivalent."
+              },
+              {
+                "id": "option-3",
+                "text": "Whether backward now uses exactly the required forward state and numerical convention; transport suitability alone does not establish backward equivalence."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-3",
+              "explanation": "The locally saved state and transport representation can serve different contracts. Replacing one with the other changes a numerical dependency."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-11-03-numeric-0",
+      "episodeId": "sys-e11-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "sys-a11-03-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-11-03-numeric-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-11-03-numeric-0",
+            "type": "numeric",
+            "objectiveIds": [
+              "sys-o11-03"
+            ],
+            "familyId": "sys-family-optimizer-window-trace",
+            "prompt": "Synthetic trace contract: accept unique successful backward IDs, update after every THREE, and clear the pending count after each update. Rejected IDs and duplicates never count. Events: accept A, accept B, reject C, duplicate A, accept D, accept E, accept F, duplicate F, accept G, accept H. How many optimizer updates occur?",
+            "grading": {
+              "expected": 2,
+              "absoluteTolerance": 0,
+              "explanation": "Unique accepted IDs are A,B,D,E,F,G,H: seven successes form two complete windows and leave one pending."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-11-03-choice-0",
+      "episodeId": "sys-e11-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "sys-a11-03-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-11-03-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-11-03-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "sys-o11-03"
+            ],
+            "familyId": "sys-family-cache-versus-queue",
+            "prompt": "A backward queue entry is popped for processing, but a retry can still request the forward state associated with its work ID. The cache entry is deleted immediately on pop. What failure can this cause?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "The deleted activation must automatically reappear from the gradient shape."
+              },
+              {
+                "id": "option-1",
+                "text": "Keeping the ID string alone reproduces the original activation values."
+              },
+              {
+                "id": "option-2",
+                "text": "The work item's scheduling lifetime may end before the saved activation's required lifetime, leaving a valid retry without its forward state."
+              },
+              {
+                "id": "option-3",
+                "text": "No failure: every queue pop proves all consumers have finished forever."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-2",
+              "explanation": "Queue ownership and cache lifetime are related but not identical. Release must follow the complete consumer/retry contract."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-11-04-numeric-0",
+      "episodeId": "sys-e11-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "sys-a11-04-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-11-04"
+    },
+    {
+      "id": "profile-ada-11-04-choice-0",
+      "episodeId": "sys-e11-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "sys-a11-04-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-11-04-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-11-04-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "sys-o11-04"
+            ],
+            "familyId": "sys-family-semantic-heartbeat",
+            "prompt": "A synthetic health endpoint returns HTTP 200 with body {\"registered\":false,\"last_completed_work\":null}. The client records only status=200 and displays active contribution. What is the defect?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "The correct repair is to label every response a computation failure regardless of its body."
+              },
+              {
+                "id": "option-1",
+                "text": "Transport success is being mistaken for semantic readiness/progress; inspect the body and stage-specific evidence before assigning that status."
+              },
+              {
+                "id": "option-2",
+                "text": "HTTP 200 itself proves a backward result was accepted."
+              },
+              {
+                "id": "option-3",
+                "text": "The empty progress field proves a payment already arrived."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-1",
+              "explanation": "A successful HTTP exchange can report an unhealthy or idle application. Parse the declared semantics without inventing later-stage evidence."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-12-01-numeric-0",
+      "episodeId": "eng-e12-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "eng-a12-01-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-12-01"
+    },
+    {
+      "id": "profile-ada-12-01-choice-0",
+      "episodeId": "eng-e12-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "eng-a12-01-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-12-01-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-12-01-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "eng-o12-01"
+            ],
+            "familyId": "eng-family-qualification-counterexample",
+            "prompt": "A candidate attention gradient agrees with reference on the sum of every tensor, but one coordinate differs outside the fixed envelope. A downstream loss happens to match on this seed. What disposition follows?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Pass because tensor sums are a stronger test than coordinates."
+              },
+              {
+                "id": "option-1",
+                "text": "Pass because one downstream scalar erases all gradient differences."
+              },
+              {
+                "id": "option-2",
+                "text": "Increase the envelope until this candidate passes, then describe it as preregistered."
+              },
+              {
+                "id": "option-3",
+                "text": "Keep the coordinate failure as a failed qualification result for this configuration; investigate the defect without replacing the fixed criterion with a sum test."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-3",
+              "explanation": "Aggregate agreement can hide cancellation or nullspace differences. A failed required check is not overruled by a weaker coincidentally matching observable."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-12-02-numeric-0",
+      "episodeId": "eng-e12-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "eng-a12-02-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-12-02-numeric-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-12-02-numeric-0",
+            "type": "numeric",
+            "objectiveIds": [
+              "eng-o12-02"
+            ],
+            "familyId": "eng-family-layout-coordinate-audit",
+            "prompt": "A row-major 2 by 3 tensor contains [0,1,2,3,4,5]. Its correct transpose, flattened row-major as shape 3 by 2, is [0,3,1,4,2,5]. A bug changes only the shape metadata and returns the original flat order. How many output coordinates disagree?",
+            "grading": {
+              "expected": 4,
+              "absoluteTolerance": 0,
+              "explanation": "Only the first and last coordinates match; comparing explicit coordinates exposes the missing permutation."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-12-02-choice-0",
+      "episodeId": "eng-e12-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "eng-a12-02-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-12-02-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-12-02-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "eng-o12-02"
+            ],
+            "familyId": "eng-family-gradient-identifiability",
+            "prompt": "For a fixed value matrix V, two probability matrices P and P+Delta produce the same attention output because Delta*V=0. What follows about testing a probability implementation only through that output?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "The equality proves all Q/K gradients agree for every loss."
+              },
+              {
+                "id": "option-1",
+                "text": "Increasing output print precision necessarily eliminates the nullspace."
+              },
+              {
+                "id": "option-2",
+                "text": "The output test cannot identify all errors in P; inspect P directly or use additional discriminating V probes and backward checks."
+              },
+              {
+                "id": "option-3",
+                "text": "The two probability matrices must be identical because their products agree."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-2",
+              "explanation": "A linear observation can lose information. Identical products for one V do not uniquely determine the factor or its derivative path."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-12-03-numeric-0",
+      "episodeId": "eng-e12-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "eng-a12-03-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-12-03"
+    },
+    {
+      "id": "profile-ada-12-03-choice-0",
+      "episodeId": "eng-e12-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "eng-a12-03-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-12-03-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-12-03-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "eng-o12-03"
+            ],
+            "familyId": "eng-family-path-coverage",
+            "prompt": "A candidate requests the optimized path, but a startup check falls back before any optimized invocation. All subsequent comparisons pass. What should the evidence record?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "A candidate speedup using the fallback timings under the candidate label."
+              },
+              {
+                "id": "option-1",
+                "text": "A successful reference/fallback run with zero candidate coverage; the candidate path remains unqualified."
+              },
+              {
+                "id": "option-2",
+                "text": "A passed candidate qualification because the request flag was true."
+              },
+              {
+                "id": "option-3",
+                "text": "A failed reference implementation despite its matching results."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-1",
+              "explanation": "Requested selection is not observed execution. Coverage evidence must establish the path actually tested."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-12-04-numeric-0",
+      "episodeId": "eng-e12-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "eng-a12-04-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-12-04-numeric-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-12-04-numeric-0",
+            "type": "numeric",
+            "objectiveIds": [
+              "eng-o12-04"
+            ],
+            "familyId": "eng-family-containment-timeline",
+            "prompt": "A wholly synthetic incident log uses UTC: failed check at 2030-04-02T23:59:40Z; submission was disabled at 2030-04-03T00:01:10Z. How many seconds elapsed between those events? The date rollover is part of the question.",
+            "grading": {
+              "expected": 90,
+              "absoluteTolerance": 0,
+              "explanation": "Twenty seconds remain before midnight, followed by seventy seconds after midnight."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-12-04-choice-0",
+      "episodeId": "eng-e12-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "eng-a12-04-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-12-04-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-12-04-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "eng-o12-04"
+            ],
+            "familyId": "eng-family-causal-disclosure",
+            "prompt": "Two historical snapshots differ in both kernel code and optimizer-state layout. Snapshot A fails a gradient check; snapshot B fails a resume check. What is the best incident account?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Report each failure with its exact snapshot and check, preserve uncertainty about their causal relation, and design a controlled follow-up to separate the changes."
+              },
+              {
+                "id": "option-1",
+                "text": "Describe both as one proven hardware defect without isolating either change."
+              },
+              {
+                "id": "option-2",
+                "text": "Hide A because a later snapshot exists."
+              },
+              {
+                "id": "option-3",
+                "text": "Treat a healthy average loss in B as retroactive proof that A's gradients were correct."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-0",
+              "explanation": "Multiple changed variables prevent a unique causal attribution. Preserve versioned observations rather than merge distinct failures into one story."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-13-01-numeric-0",
+      "episodeId": "eng-e13-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "eng-a13-01-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-13-01-numeric-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-13-01-numeric-0",
+            "type": "numeric",
+            "objectiveIds": [
+              "eng-o13-01"
+            ],
+            "familyId": "eng-family-global-log-partition",
+            "prompt": "Two logit tiles represent masses [1,3] and [2,4]. A target has mass 3 in the first tile. Enter the true full-vocabulary negative log-likelihood MINUS the incorrect loss obtained by normalizing only the target's tile. Use natural logarithms.",
+            "grading": {
+              "expected": 0.9162907318741551,
+              "absoluteTolerance": 1e-9,
+              "explanation": "The full target probability is 3/10; the tile-local probability is 3/4. The loss difference is ln(10/4)."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-13-01-choice-0",
+      "episodeId": "eng-e13-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "eng-a13-01-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-13-01-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-13-01-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "eng-o13-01"
+            ],
+            "familyId": "eng-family-finite-check-boundary",
+            "prompt": "A tiled vocabulary loss computes a valid maximum for each tile but normalizes each tile separately before combining target loss. Which reference test addresses the missing global dependency?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Verify only that each tile's probabilities sum to one."
+              },
+              {
+                "id": "option-1",
+                "text": "Keep all non-target logits at negative infinity so no other tile contributes."
+              },
+              {
+                "id": "option-2",
+                "text": "Move a large non-target logit into another tile and require the target loss to change according to one full-vocabulary log-sum-exp."
+              },
+              {
+                "id": "option-3",
+                "text": "Test only examples where every other tile is empty."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-2",
+              "explanation": "Other tiles contribute to the global denominator even when the target lies elsewhere. Tile-local normalization can pass local invariants while failing the objective."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-13-02-numeric-0",
+      "episodeId": "eng-e13-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "eng-a13-02-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-13-02-numeric-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-13-02-numeric-0",
+            "type": "numeric",
+            "objectiveIds": [
+              "eng-o13-02"
+            ],
+            "familyId": "eng-family-rms-pullback",
+            "prompt": "RMS normalization y=x/r uses r=sqrt(mean(x_i^2)+epsilon), gamma=[1,1], x=[1,2], epsilon=0.5. For scalar objective L=y0+2*y1, return dL/dx0. Include the derivative through r; enter a decimal accurate to 1e-9.",
+            "grading": {
+              "expected": 0.09622504486493763,
+              "absoluteTolerance": 1e-9,
+              "explanation": "r=sqrt(3), sum(dy*x)=5, so dx0=1/r-5/(2*r^3)=1/(6*sqrt(3)). Nonzero epsilon prevents complete radial cancellation."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-13-02-choice-0",
+      "episodeId": "eng-e13-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "eng-a13-02-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-13-02-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-13-02-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "eng-o13-02"
+            ],
+            "familyId": "eng-family-recompute-lifetime",
+            "prompt": "A memory-saving implementation retains a small view of a large activation allocation and reports only the view's element count as retained memory. What should the memory audit check?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Assume recomputation always frees all activations immediately."
+              },
+              {
+                "id": "option-1",
+                "text": "Whether the view keeps the whole backing allocation alive, plus the peak lifetime of recomputation temporaries."
+              },
+              {
+                "id": "option-2",
+                "text": "Only the view's logical shape; backing storage is never retained by views."
+              },
+              {
+                "id": "option-3",
+                "text": "Only the checkpoint file size on disk."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-1",
+              "explanation": "Logical tensor size is not necessarily owned or retained storage. Peak allocation lifetimes determine the actual memory effect."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-13-03-numeric-0",
+      "episodeId": "eng-e13-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "eng-a13-03-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-13-03-numeric-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-13-03-numeric-0",
+            "type": "numeric",
+            "objectiveIds": [
+              "eng-o13-03"
+            ],
+            "familyId": "eng-family-comparison-envelope",
+            "prompt": "A preregistered comparison permits candidate error <= 2*upstream_error+0.001. Observed candidate error is 0.012, upstream error 0.003. Enter candidate error minus its allowed bound. A positive number is a failure margin; a nonpositive number satisfies this one rule only.",
+            "grading": {
+              "expected": 0.005,
+              "absoluteTolerance": 1e-9,
+              "explanation": "Compute the permitted bound before subtracting; do not retune it after seeing the candidate."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-13-03-choice-0",
+      "episodeId": "eng-e13-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "eng-a13-03-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-13-03-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-13-03-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "eng-o13-03"
+            ],
+            "familyId": "eng-family-artifact-and-probe-gate",
+            "prompt": "A qualification report is signed for artifact hash H1. A rebuild yields H2 after a compiler-flag change, with unchanged source and a passing quick smoke test. Can H1's full qualification be assigned to H2?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "No; retain the H1 result and run the required H2 qualification or a explicitly authorized equivalence process tied to the new artifact."
+              },
+              {
+                "id": "option-1",
+                "text": "Yes, because source equality guarantees identical executable behavior under every compiler flag."
+              },
+              {
+                "id": "option-2",
+                "text": "Yes, because any smoke test is interchangeable with the full required suite."
+              },
+              {
+                "id": "option-3",
+                "text": "Yes, if the report filename is changed to H2 without rerunning anything."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-0",
+              "explanation": "Qualification attaches to the tested artifact and configuration. Compiler changes can change behavior despite unchanged source."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-13-04-numeric-0",
+      "episodeId": "eng-e13-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "eng-a13-04-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-13-04"
+    },
+    {
+      "id": "profile-ada-13-04-choice-0",
+      "episodeId": "eng-e13-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "eng-a13-04-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-13-04-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-13-04-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "eng-o13-04"
+            ],
+            "familyId": "eng-family-false-success-harness",
+            "prompt": "A benchmark harness is suspected of silently accepting fallback. Which negative control most directly checks that the harness can detect this false success?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Run only successful candidate cases and assume the failure path works."
+              },
+              {
+                "id": "option-1",
+                "text": "Remove candidate-hit counters so fallback cannot be seen."
+              },
+              {
+                "id": "option-2",
+                "text": "Increase the measured speedup threshold without checking execution identity."
+              },
+              {
+                "id": "option-3",
+                "text": "Deliberately force fallback in a local synthetic test and require the candidate-coverage assertion to fail while the fallback result remains correctly labeled."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-3",
+              "explanation": "A useful harness must fail when its required execution condition is deliberately violated. This tests the test rather than optimizing the kernel."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-14-01-numeric-0",
+      "episodeId": "eng-e14-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "eng-a14-01-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-14-01-numeric-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-14-01-numeric-0",
+            "type": "numeric",
+            "objectiveIds": [
+              "eng-o14-01"
+            ],
+            "familyId": "eng-family-spec-to-equation",
+            "prompt": "Read this specification literally: y_i=gamma_i*x_i/sqrt(mean(x_j*x_j)+epsilon)+beta_i. For x=[0,4],gamma=[2,3],beta=[1,-2],epsilon=1, return y1 (the second coordinate). Epsilon is INSIDE the square root.",
+            "grading": {
+              "expected": 2,
+              "absoluteTolerance": 0,
+              "explanation": "The mean square is 8, denominator 3, and second affine output is 3*4/3-2=2."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-14-01-choice-0",
+      "episodeId": "eng-e14-01",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "eng-a14-01-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-14-01-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-14-01-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "eng-o14-01"
+            ],
+            "familyId": "eng-family-paper-claim-scope",
+            "prompt": "A paper defines variance normalization by subtracting a mean; a port implements RMS normalization without centering. Both divide by a square root and produce the same shape. What should a source-to-code review do?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Cite the paper's speedup as proof that the port implements its equation."
+              },
+              {
+                "id": "option-1",
+                "text": "Write both equations, identify the missing centering operation, and test a nonzero-mean vector before claiming the paper's operator was reproduced."
+              },
+              {
+                "id": "option-2",
+                "text": "Treat both as identical because they contain a square root."
+              },
+              {
+                "id": "option-3",
+                "text": "Use only a zero-mean vector and declare equivalence for all inputs."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-1",
+              "explanation": "Similar names and shapes do not establish mathematical equivalence. A discriminating input follows directly from the equation difference."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-14-02-numeric-0",
+      "episodeId": "eng-e14-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "eng-a14-02-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-14-02-numeric-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-14-02-numeric-0",
+            "type": "numeric",
+            "objectiveIds": [
+              "eng-o14-02"
+            ],
+            "familyId": "eng-family-paired-experiment",
+            "prompt": "Matched benchmark pairs (reference,candidate), in milliseconds, are (80,72),(100,95),(120,96). Compute each pair's PERCENT reduction relative to its own reference, then report the median of those three percentages, as a number such as 12 for 12%.",
+            "grading": {
+              "expected": 10,
+              "absoluteTolerance": 0,
+              "explanation": "The paired reductions are 10%,5%,20%; their median is 10%. Do not ratio medians or mix reference runs."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-14-02-choice-0",
+      "episodeId": "eng-e14-02",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "eng-a14-02-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-14-02-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-14-02-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "eng-o14-02"
+            ],
+            "familyId": "eng-family-evidence-manifest",
+            "prompt": "Two benchmark conditions ran on different input sets and in opposite thermal states. A spreadsheet reports a favorable ratio of their average times. Which next experiment supports a causal comparison?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Use matched inputs and controlled conditions with paired/interleaved runs, retain raw pairs, and report the predefined statistic and variability."
+              },
+              {
+                "id": "option-1",
+                "text": "Drop slow candidate runs until the average stabilizes near the desired ratio."
+              },
+              {
+                "id": "option-2",
+                "text": "Pair arbitrary runs only after sorting by speed."
+              },
+              {
+                "id": "option-3",
+                "text": "Treat any ratio of means as proof that the implementation caused the difference."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-0",
+              "explanation": "Pairing and controlled conditions reduce confounding; retain the observations and prespecified analysis rather than selecting favorable samples."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-14-03-numeric-0",
+      "episodeId": "eng-e14-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "eng-a14-03-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-14-03"
+    },
+    {
+      "id": "profile-ada-14-03-choice-0",
+      "episodeId": "eng-e14-03",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "eng-a14-03-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-14-03-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-14-03-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "eng-o14-03"
+            ],
+            "familyId": "eng-family-operational-receipts",
+            "prompt": "A controlled synthetic run has matching numerical checks and an upload acknowledgment, but no coordinator acceptance or accounting receipt. Which portfolio label is justified?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Paid production contribution, because numerical equality implies payment."
+              },
+              {
+                "id": "option-1",
+                "text": "Accepted by the coordinator, because the network upload finished."
+              },
+              {
+                "id": "option-2",
+                "text": "No numerical evidence at all, because the accounting receipt is absent."
+              },
+              {
+                "id": "option-3",
+                "text": "Locally qualified for the tested configuration and uploaded; acceptance, credit and payment are not established by these records."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-3",
+              "explanation": "Preserve the useful local qualification evidence while leaving unsupported operational stages open."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile-ada-14-04-numeric-0",
+      "episodeId": "eng-e14-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-numeric-generator",
+      "verifierId": "course-numeric-verifier",
+      "adapterId": "bounded-numeric-v1",
+      "adapterDigest": "a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "canonicalAssessmentId": "eng-a14-04-trace",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "templateId": "ada-recipe-14-04"
+    },
+    {
+      "id": "profile-ada-14-04-choice-0",
+      "episodeId": "eng-e14-04",
+      "operation": "add_assessment_variant",
+      "generatorId": "course-bank-generator",
+      "verifierId": "course-bank-verifier",
+      "adapterId": "authored-bank-v1",
+      "adapterDigest": "5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "canonicalAssessmentId": "eng-a14-04-transfer",
+      "classification": "required",
+      "plannedMinutes": 2,
+      "additionalEpisodes": 1,
+      "bank": [
+        {
+          "id": "bank-ada-14-04-choice-0",
+          "sourceRefs": [
+            "ada-src-reviewed-bank"
+          ],
+          "assessment": {
+            "id": "ada-14-04-choice-0",
+            "type": "choice",
+            "objectiveIds": [
+              "eng-o14-04"
+            ],
+            "familyId": "eng-family-portfolio-evidence-boundary",
+            "prompt": "A portfolio contains a passed concept exam, a correct toy autodiff implementation, and a larger optimization with an unresolved optimizer-state mismatch. What should a defensible completion statement say?",
+            "options": [
+              {
+                "id": "option-0",
+                "text": "Erase the passed work because any later failure means nothing was learned."
+              },
+              {
+                "id": "option-1",
+                "text": "Rename the unresolved probe optional after seeing it fail."
+              },
+              {
+                "id": "option-2",
+                "text": "Credit the demonstrated concepts and toy implementation, and identify the larger optimization's unresolved qualification gate explicitly."
+              },
+              {
+                "id": "option-3",
+                "text": "Certify all production training paths because two unrelated checks passed."
+              }
+            ],
+            "grading": {
+              "correctOptionId": "option-2",
+              "explanation": "Evidence supports scoped claims. Independent achievements remain valid, but they do not satisfy an unpassed required gate elsewhere."
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,687 @@
+{
+  "activation_challenge_retry_patch_sha256": "7d19011a6196c50c2b62c161f4b2cd51bd45c0f632bc521e62baa4cabcaef6da",
+  "activation_status": "experimental-local-not-officially-signed",
+  "activation_transport_patch_sha256": "f3ddc7ba74ead125368fad3a110aba80a2e9a2be8bcb0c3adce0e401ce626f96",
+  "adaptive_upload_patch_sha256": "e87bf9453081fa472b1bf61b80b5920add47ce022983a32562a603a0446d3b29",
+  "artifact_id": "e667fcdcccb0523afbdd7d1867ed2c05bfb61b7b670f6f0822a4e736f74d5fc7",
+  "attestation_pipeline_patch_sha256": "b5b8ef1460b1bd40bb74527656f5947fe43304eefb694d28b79ec2c0a481b67e",
+  "bandwidth_best_server_patch_sha256": "2aa7b58d8feaef12df67f5218bb72ce2a424ce956878fd64c44b3d3637435359",
+  "bench_escape_patch_sha256": "ba57df1469e1ba0224f89ec48b1d50acb8074c06ea0380389fd86af01c6fae4d",
+  "build_recipe_sha256": "2c1a39abbfdf42fba39cea217fc424296fd608502b80d75282a9d05024eea2f4",
+  "control_surface_sha256": "8ad66bf5a92ec33b6fdf823d92668958ee421d2868fbddfbd61983194a80d06b",
+  "control_tests_sha256": "40312e84ec84ac29cdb2ae4cfc9282b1d1ca6e31a93f42115451e9577ca21b08",
+  "coordinator_liveness_patch_sha256": "81c89237a17c6c86bfb985b78f7f16ece5bbd55193dd5af4c61239757682031c",
+  "deadline_drop_notify_patch_sha256": "c5bf8014c0d6abc108a57d09ad6d372001901c187bcb2ba33cef779e7f6327a6",
+  "dependency_lock_sha256": "798369348181f80544c4e34b13ef9c7df85739a7517e08621b4f5a07cc654eb7",
+  "detached_forward_patch_sha256": "c72aed5b7085cb06563b1b9a0130c6a8db7b478534a285ac6f924947f97dbd69",
+  "dns_serve_stale_patch_sha256": "e35a9fef957fa95150425663908444a134a376e96d06f11e2e4f651a2bbaf247",
+  "files": [
+    {
+      "relative_path": "direct-doctor",
+      "role": "read-only-direct-route-doctor-launcher",
+      "sha256": "9d287c035460aafc85dc493748e0b0ceb145cc9614bcd13e2b453737a758ec86"
+    },
+    {
+      "relative_path": "direct-worker",
+      "role": "direct-worker-launcher",
+      "sha256": "3b643b65d34ce939ca725644024de71ea20d5603c3edd3f58119da584bc09f6b"
+    },
+    {
+      "relative_path": "direct_doctor.py",
+      "role": "read-only-direct-route-doctor",
+      "sha256": "535ec6a92b52f90c5337e8acd620be6a6c4a2d0c5c2d56139dcbc87203e555e5"
+    },
+    {
+      "relative_path": "direct_workerctl.py",
+      "role": "direct-worker-controller",
+      "sha256": "b36bfee9870653b2f852a309b8b52e1e17b91c87544e1f81584f210cbf9dcbf2"
+    },
+    {
+      "relative_path": "doctor.py",
+      "role": "offline-doctor",
+      "sha256": "1cac800dc9ea2ce5a0cb5ca7c38808b7087b2bcfc1db0392da2c6f6238741d3f"
+    },
+    {
+      "relative_path": "evidence/sn9-mps-studio-2026-09-02/body-b4-s800-10.jsonl",
+      "role": "canonical-mps-qualification-evidence",
+      "sha256": "84ad3db0c391555f423a88135b7a41727260b61a6df765acec9e4f40c9bc08db"
+    },
+    {
+      "relative_path": "evidence/sn9-mps-studio-2026-09-02/detached-forward-results-2026-09-03.md",
+      "role": "qualification-evidence-report",
+      "sha256": "d1ff81045b01300055daa40af6a90676ef5d70066ce676aae0b14d44813017bd"
+    },
+    {
+      "relative_path": "evidence/sn9-mps-studio-2026-09-02/evidence-manifest.json",
+      "role": "qualification-evidence-index",
+      "sha256": "7affac53217c41a4b01ec611ec15411cd9aa82a86c67abb2504eeba832f65ab6"
+    },
+    {
+      "relative_path": "evidence/sn9-mps-studio-2026-09-02/head-b4-s800-10.jsonl",
+      "role": "canonical-mps-qualification-evidence",
+      "sha256": "ef23f38a86ab4156a5a2d98571adf97f5af5460ef98c2d12fa75e70951ea9a2f"
+    },
+    {
+      "relative_path": "evidence/sn9-mps-studio-2026-09-02/parity.jsonl",
+      "role": "canonical-mps-qualification-evidence",
+      "sha256": "65ab0eca2b8d059b6d6f4abb364d21a9bcf22e15d70353961627f6d56721735d"
+    },
+    {
+      "relative_path": "evidence/sn9-mps-studio-2026-09-02/saved-tensor-drop-body-preflight-v1.json",
+      "role": "canonical-mps-qualification-evidence",
+      "sha256": "6207eb4ea18e28ca25e47d133f1d42b0c3c8197423e53c384ed54f1d70d682cf"
+    },
+    {
+      "relative_path": "evidence/sn9-mps-studio-2026-09-02/saved-tensor-drop-body-v1.jsonl",
+      "role": "canonical-mps-qualification-evidence",
+      "sha256": "72c1b966c5bf8bc713258438f8c6f73d98cdc901c3701258a02320984179ad90"
+    },
+    {
+      "relative_path": "evidence/sn9-mps-studio-2026-09-02/saved-tensor-drop-head-preflight-v1.json",
+      "role": "canonical-mps-qualification-evidence",
+      "sha256": "a9f21fbdf956da8a0d4ee17276c20d5fb81412ac49f67cd071a52b8325d4df93"
+    },
+    {
+      "relative_path": "evidence/sn9-mps-studio-2026-09-02/saved-tensor-drop-head-v1.jsonl",
+      "role": "canonical-mps-qualification-evidence",
+      "sha256": "5af1cdabdc48e5df477ce3aabbe366b7535e2a53d5c7f1d77d378a267b6ba75f"
+    },
+    {
+      "relative_path": "evidence/sn9-mps-studio-2026-09-02/saved-tensor-drop-tail-preflight-v1.json",
+      "role": "canonical-mps-qualification-evidence",
+      "sha256": "fedc89f51e41e8f7036c264550d5f60c8d2be5696edee328203f3c3caf77c567"
+    },
+    {
+      "relative_path": "evidence/sn9-mps-studio-2026-09-02/saved-tensor-drop-tail-v1.jsonl",
+      "role": "canonical-mps-qualification-evidence",
+      "sha256": "a7ae621d65e1c27dd3d599d2e4745a68fdd52266e4e507e5357fb8044c9914a1"
+    },
+    {
+      "relative_path": "evidence/sn9-mps-studio-2026-09-02/tail-b4-s800-10.jsonl",
+      "role": "canonical-mps-qualification-evidence",
+      "sha256": "83981cce9d4bf1df4c278709f04c6fa454b0c0a261a25aa421f03b2d75817f56"
+    },
+    {
+      "relative_path": "install.sh",
+      "role": "verified-staging-installer",
+      "sha256": "006498906e6996602db2cc31460a77f0580aa7a5c4e6005a73d8cdfa4ab7cd5d"
+    },
+    {
+      "relative_path": "logs.sh",
+      "role": "log-stream-helper",
+      "sha256": "26dfeb1c437aa6643246398be005c37c27435d7c4774e89ce413243dbe586436"
+    },
+    {
+      "relative_path": "main_pool",
+      "role": "launcher",
+      "sha256": "8de6c1096467e56580d13972b75bc1c7fe2e893cfc17f12c31054cd2b7cfd494"
+    },
+    {
+      "relative_path": "mounted-canaryctl.sh",
+      "role": "transactional-mounted-canary-controller",
+      "sha256": "ed3276408590eaad876b1fdc73561ba99b42a4cf447c4f08fd6fc5341310eb9e"
+    },
+    {
+      "relative_path": "mounted-proxy",
+      "role": "authorized-mounted-proxy-launcher",
+      "sha256": "3d659f2e734253965b42ba07a64bc4d681fe70ba86668d4eeea23a9c8d461e69"
+    },
+    {
+      "relative_path": "mounted_proxyctl.py",
+      "role": "authorized-mounted-proxy-controller",
+      "sha256": "77eed70273b2759770b76019c9312efa8e0c5cf7ff70e7a8117155036bf2da9a"
+    },
+    {
+      "relative_path": "mounted_worker_entrypoint.py",
+      "role": "authorized-mounted-worker-entrypoint",
+      "sha256": "fa5a82aa4948865b36053c4f22a13a844e6456ec540db8b4a2b4eaf69acdf41e"
+    },
+    {
+      "relative_path": "run.sh",
+      "role": "guarded-manual-launcher",
+      "sha256": "cbdf93556a297d97d20a069f38bcd4378dff56df7bce06274b6f18389d6af5e0"
+    },
+    {
+      "relative_path": "runtime/shared/common/src/common/attest.cpython-310-darwin.so",
+      "role": "official-signed-native-component",
+      "sha256": "0b2459372f1aea5ee7ea3aba5d241ec159edfda14880c710d82fee80a560c717"
+    },
+    {
+      "relative_path": "runtime/shared/common/src/common/utils/blob_format.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "55797570f2ca72b0de08857d30ef9b29ec7d9f28d1e163c03148a4ead614111a"
+    },
+    {
+      "relative_path": "runtime/shared/common/src/common/utils/s3_utils.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "af3a36a2266719986a92e5bca028c7c7925ba1653c3acf6260e3f51a890fd672"
+    },
+    {
+      "relative_path": "runtime/shared/common/src/libcrypto.3.dylib",
+      "role": "official-signed-native-component",
+      "sha256": "224c2b08ac0952b454afee528a09a3fe59a998a52051f82df45890c50c3c64ef"
+    },
+    {
+      "relative_path": "runtime/shared/common/src/libssl.3.dylib",
+      "role": "official-signed-native-component",
+      "sha256": "8bcc11eaada398c0471777f613bef5d0161f7872c60767c44d9d3c3a7e5b6a40"
+    },
+    {
+      "relative_path": "runtime/shared/subnet/src/subnet/base/base_neuron.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "996ea5197abe40f9845b18713f21264ca38999ba73ea77f2848cf5858e0c4410"
+    },
+    {
+      "relative_path": "runtime/shared/subnet/src/subnet/common_api_client.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "ad9f37c69b37e78c0e52c8823e297d1cde17b3862a454314cb905c14b200fa6d"
+    },
+    {
+      "relative_path": "runtime/shared/subnet/src/subnet/miner_api_client.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "24ba887594591cb4b795f24787367ec9483aa9012750ab344a52655e9dbea011"
+    },
+    {
+      "relative_path": "runtime/shared/subnet/src/subnet/model/gpu_device.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "d1a79177b0abcbe8e110c432eb4bff8d482f37ed14a0da4a3f892c2f3588f358"
+    },
+    {
+      "relative_path": "runtime/shared/subnet/src/subnet/model/llama3/modules.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "34c9e14c6e3bb873a5293bff257cb56d3521fa15b2d2f322bb39f390a82af0ea"
+    },
+    {
+      "relative_path": "runtime/shared/subnet/src/subnet/model/llama3/tensorops/strata_sn9_gqa_mps.so",
+      "role": "patched-public-runtime-source",
+      "sha256": "40965ede82189bd46fc9adcdbdd1ae9668fe74cf30ec380ad6c230cea9a01169"
+    },
+    {
+      "relative_path": "runtime/shared/subnet/src/subnet/model/llama3/tensorops/tensorops_attention_s800_training.metallib",
+      "role": "patched-public-runtime-source",
+      "sha256": "a917949ea0b175c3b646e36afd282d65a49360c6a7bbc138408ffc5e33b2fa8a"
+    },
+    {
+      "relative_path": "runtime/shared/subnet/src/subnet/model/llama3/tensorops_runtime.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "cbe0a62c03935d0303f87db6bf916947b62daec9eb384d58bfa082457793ef4e"
+    },
+    {
+      "relative_path": "runtime/shared/subnet/src/subnet/model/model_mixin.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "888e1fb7787e00e4a776a52a3a1cb4f550c4c84fff7e4b75dafe8ce2fd38d177"
+    },
+    {
+      "relative_path": "runtime/shared/subnet/src/subnet/model/utils.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "b801eaa5f30ced2e1168515ad53e7ecbde3f64c156b48a9458ebd780f88f4a54"
+    },
+    {
+      "relative_path": "runtime/shared/subnet/src/subnet/registration_run_avoid.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "5a82a8604d66f7e342a345e7e85d035690ddb68e67169d68560a8abb70c9215b"
+    },
+    {
+      "relative_path": "runtime/shared/subnet/src/subnet/utils/blob_format.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "d89e0ebf9d2cad496683f42d0d1244b7425361432d365c4ba2deddf8e12ec1d7"
+    },
+    {
+      "relative_path": "runtime/shared/subnet/src/subnet/utils/partition_utils.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "305b63bb30f327e4e589326a448b27b48c3b6b4d816a0443aa14c71a475954aa"
+    },
+    {
+      "relative_path": "runtime/shared/subnet/src/subnet/utils/vector_utils.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "70d25f62763719c08a7a1d86fc7c4a08fe1225aa802e81880f3f3f9fbd4f6670"
+    },
+    {
+      "relative_path": "runtime/src/miner/main.py",
+      "role": "direct-public-entrypoint",
+      "sha256": "09e872e3d57b37b6c70d69c3f6a0ceea228ee59c669fae9f3f3911c281bf5a1a"
+    },
+    {
+      "relative_path": "runtime/src/miner/pyproject.toml",
+      "role": "patched-public-runtime-metadata",
+      "sha256": "6891f005e3867f80bc0484fd2f020a4844dcf53539730003807a7c36a85514be"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/health_server.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "98c25430d508640a5eaa87d6efe4c59a79525e678e4e23403e3ad152a71e0137"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/new_miner.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "80a75cf868035ac4d1de0707b4cd93dc3ea67180060f670fb6d77fc28c90897d"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/p2p/stack.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "ff2273bad322e56404f8e258ed27b9443b07002d9c3d8d6651893a8b8a578e70"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/phase_worker.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "f1c3e4ac1a90fbd611eb39b98e497c563d9ba41028025bb7cc64f16e53bc601d"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/pool/__init__.pyc",
+      "role": "official-private-pool-bytecode",
+      "sha256": "5ad993278c2ec153625dd6e7451cbd774cb2b2275d9c9ee3415b7eadae7fc0bd"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/pool/dashboard/__init__.pyc",
+      "role": "official-private-pool-bytecode",
+      "sha256": "c70ad2ce1d60ba8cde082cd64f85e09b066407c4b0b48359744c326762386213"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/pool/dashboard/chart.pyc",
+      "role": "official-private-pool-bytecode",
+      "sha256": "9a1038baff209c278bb0259c769265b9cbc094473b8cda580ddc20d33b6ab5f3"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/pool/dashboard/dashboard.pyc",
+      "role": "official-private-pool-bytecode",
+      "sha256": "a0cce92d7155dc282d3ec0841f085c6f10bfc96c8e216dbce6749db633a8f210"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/pool/dashboard/lifecycle.pyc",
+      "role": "official-private-pool-bytecode",
+      "sha256": "f94cd0cbf3080052f4d966e0402336aa72634374040d8b76c6b14579597631f2"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/pool/dashboard/models.pyc",
+      "role": "official-private-pool-bytecode",
+      "sha256": "23ac4023d270227feef8a66af4049200027f76c536700fc6ea9ac6dba1bb1696"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/pool/dashboard/utils.pyc",
+      "role": "official-private-pool-bytecode",
+      "sha256": "b97f38b06a05ec34128f1b3f303ca51506c4b749c39fa372fc5f878a862002d5"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/pool/miner.pyc",
+      "role": "official-private-pool-bytecode",
+      "sha256": "daadae2129a765f0573fc98a8d952b0d6c0cc7a77e55ff4a6412eb5b1f749b51"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/pool/wallet_utils/__init__.pyc",
+      "role": "official-private-pool-bytecode",
+      "sha256": "c97cc13aa8a8778d0747ae27480593e04143004b17059bae9ed5d1d17469e82d"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/pool/wallet_utils/btcli.pyc",
+      "role": "official-private-pool-bytecode",
+      "sha256": "7dad69e1a3932405be9269530fefe34b9613d643c1e6e9644c442389bd3b353f"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/pool/wallet_utils/selection.pyc",
+      "role": "official-private-pool-bytecode",
+      "sha256": "5bad764649aacd9562f5cf33bb3a32c9067a0c40875cf307dee2c5a534f01c00"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/pool/wallet_utils/ui.pyc",
+      "role": "official-private-pool-bytecode",
+      "sha256": "e0890a9de79f9c641e72622b37607e852f7794bf2cb8a5f1f1ddc668584883fa"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/settings.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "a3b4b160029cf1f07896082aa3806f8426637edd6b059a1845df244f1179dfd6"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/standalone_pool.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "8c02c1c6fff97f3d91226e435018f2b291153610f49937dc8c775a4fa7bf3509"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/telemetry/resource_metrics.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "338a4add470f392addc39d50511a814af8d76c4d34fd99787a05f1cc3500054f"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/training/activation_publisher.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "fd4e69c4a1d2f556a0f3310e09b50a3d87794841870bb876060b81809766c179"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/training/activation_queue.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "b25a5d30065898b4b430a83e9aa1a5e2b8da1ac576b484d2b2899a2510d0e517"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/training/training.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "7ddce6af76a6815ccafee56ce0b44fadfded9ec9fd0b0e31372cd71e70009e7d"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/training/transport_health.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "4020b92fac9a79d7ae71b4b56a427d6d39ab45fa2e4277e98140824647e6f398"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/utils/dns_fallback.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "a32f176c4a4b7eac2d17b108bfa31211e6538b0d978db30687f8382bfe9ac3b1"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/utils/emergency_leave.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "c802a316b496b482a3115eee70490974a37dc50510bf8d7350a6479a69b402a3"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/utils/miner_dashboard_api.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "46724cebb5439df038b0d016e41c7fa688baef09e29f13ac30059085625a751d"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/utils/node_control_mixin.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "ce0079192016be8f1dfec1585a5f649c167ed99a7b53737ad48feb14c31163f2"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/utils/node_protocol_control_api.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "7cfe5504921d8e7d6bb0c9bf8014d3f17f8f81b2dbef0c8d332d6fabb965df00"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/utils/partition_merging.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "0fc817650c60ce606490bf21f16f519a6767e94ad863b1e3d959961896b47ec6"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/utils/progress_watchdog.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "eece64e56c67da84bdd2914e208f611ae8db9dd3836cd5647f751adfac9e0c94"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/utils/resource_cleanup.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "926228b45ade4d406962374e04634fd292be59c7ac0a0b09515fa5d49c9fb816"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/utils/timer_logger.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "9711daa21c6aaa07a5329357f8ba04ea8e22eabb484cfac0427a39c6e19c5324"
+    },
+    {
+      "relative_path": "runtime/src/miner/src/miner/utils/utils.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "7c5b14ea225ed00e958a26bdef068b30e9036b9c897aed2698a2fc10cd490911"
+    },
+    {
+      "relative_path": "runtime/src/miner/standalone_main_pool.py",
+      "role": "patched-public-runtime-source",
+      "sha256": "0345ce3eaf8a4177f1cbe2259c655154d6ce63359a513e4a9da970e166b8ca4e"
+    },
+    {
+      "relative_path": "runtime/uv.lock",
+      "role": "dependency-lock",
+      "sha256": "798369348181f80544c4e34b13ef9c7df85739a7517e08621b4f5a07cc654eb7"
+    },
+    {
+      "relative_path": "runtime_integrity.py",
+      "role": "installation-integrity-verifier",
+      "sha256": "6be4f67feef1ee01e5766c670e7111ccec76b7fd8046ec233e09c8cff233b25c"
+    },
+    {
+      "relative_path": "tensorops_doctor_probe.py",
+      "role": "offline-tensorops-production-shape-probe",
+      "sha256": "a6db93d52c39c72528a221ba11403d95f99d5a58588529a6661d050aa33aa5df"
+    },
+    {
+      "relative_path": "workerctl.py",
+      "role": "safe-command-controller",
+      "sha256": "e401df23c2cd1bd33140082a68048e7c6cd247be02efd06908e39944f8394e9f"
+    }
+  ],
+  "fixset_tests_sha256": "7d9f3d7abb9695aa61c4739f8c82e23a1736f4649aec3263125549968a51cf22",
+  "generated_at": "2026-10-11T11:15:22.829137+00:00",
+  "global_weight_liveness_patch_sha256": "f5f8c0ca78701045d5e4fc234adbfafcac38582b1fbe60c1410e39b7fac0540a",
+  "installation_integrity_receipt": {
+    "kind": "strata-iota-installation-integrity-v1",
+    "relative_path": "installation-integrity.json",
+    "schema_version": 1,
+    "tree_algorithm": "strata-installation-tree-v2"
+  },
+  "installation_layout_version": 15,
+  "journal_bandwidth_and_challenge_stats_patch_sha256": "a02b4a525f573bc1f9a0f19507c278267298ba7359e1f081171a51cf320b50f2",
+  "large_optimizer_state_patch_sha256": "e02209e97c3694be3dfa5355cdee4e7e3045783f5784a5c76cd4f45a0f1ef5ac",
+  "latency_patch_sha256": "e167a6f115e64c7a21e52af8160c3d18c7982dc2d2ad7cbb5d22da604ace338f",
+  "launcher_sha256": "8de6c1096467e56580d13972b75bc1c7fe2e893cfc17f12c31054cd2b7cfd494",
+  "merge_stall_bound_patch_sha256": "7d562b4a8857b530db7bdaa47e2482b49816d7b43da72393cbef6b925f6d984c",
+  "node_control_heartbeat_patch_sha256": "58219792c1f38f19e77f08676622f2523c08639869129b2ee813e650ce02ce1e",
+  "official_component_source_sha256": "7f2df2b3430e345a46dbbef364f842aba1249bc9fcbaeb222ae12fe6a90edce6",
+  "official_component_team_identifier": "H84767VH9T",
+  "official_entrypoint_comparison": "cpython-3.10-semantic-code-v1: match; official=f554461a62aa7467cb4c7c2372cc6f570451284b755e4918023cee03d8f11a3d public=f554461a62aa7467cb4c7c2372cc6f570451284b755e4918023cee03d8f11a3d",
+  "official_entrypoint_comparison_details": {
+    "compile_dont_inherit": true,
+    "compile_optimize": 0,
+    "first_mismatch": null,
+    "method": "cpython-3.10-semantic-code-v1",
+    "official_sha256": "f554461a62aa7467cb4c7c2372cc6f570451284b755e4918023cee03d8f11a3d",
+    "public_sha256": "f554461a62aa7467cb4c7c2372cc6f570451284b755e4918023cee03d8f11a3d"
+  },
+  "official_entrypoint_matches_public": true,
+  "optimizer_state_spool_patch_sha256": "3538de66841b5365f724e5222780e3d8294a6c2a2750b12c012afef42439efb8",
+  "p2p_endpoint_recovery_patch_sha256": "72c6ee549f9fdfc05502a900333d5f0d579814867a0bbfd5c3cc125da36ec0ff",
+  "patch_chain": [
+    {
+      "role": "safe-client-fixset",
+      "sha256": "0ba6120c7639089ef54e775596fdab033c80961dce66c2eb4373705dfd9be55c"
+    },
+    {
+      "role": "apple-mps-numerical-recovery-fixset",
+      "sha256": "b405ad4e69d73e89500a9f30ad2d54ef19977d59695e94add392f8eb383dcdf8"
+    },
+    {
+      "role": "activation-queue-lock-release",
+      "sha256": "e167a6f115e64c7a21e52af8160c3d18c7982dc2d2ad7cbb5d22da604ace338f"
+    },
+    {
+      "role": "detached-forward-saved-tensor-drop",
+      "sha256": "c72aed5b7085cb06563b1b9a0130c6a8db7b478534a285ac6f924947f97dbd69"
+    },
+    {
+      "role": "global-weight-liveness-hardening",
+      "sha256": "f5f8c0ca78701045d5e4fc234adbfafcac38582b1fbe60c1410e39b7fac0540a"
+    },
+    {
+      "role": "phase-worker-split",
+      "sha256": "7d43a22826e34e80c39909fff2bb17d940f19129e55ece2825fe5210db370635"
+    },
+    {
+      "role": "registration-reservation-recovery",
+      "sha256": "57aace37967df2136366eb470df7b4a5d85d72d448c29f2874e4da17273c7677"
+    },
+    {
+      "role": "apple-tensorops-gqa",
+      "sha256": "0e14e10f94358ceb1c904e48ccacb8abb857955ce9f7068e46b564479027e559"
+    },
+    {
+      "role": "activation-transport-health-routing",
+      "sha256": "608e6792aa0421ff5fe2cd8eab01ea500691d08d535842a3477ce8646b55e0b4"
+    },
+    {
+      "role": "host-scaled-optimizer-state",
+      "sha256": "e02209e97c3694be3dfa5355cdee4e7e3045783f5784a5c76cd4f45a0f1ef5ac"
+    },
+    {
+      "role": "post-ack-activation-dedup",
+      "sha256": "584067c17a664a275aa70f0a41e8c062245ae8e9cb2c30e82c6626a9710ece2a"
+    },
+    {
+      "role": "attestation-p2p-pipeline",
+      "sha256": "b5b8ef1460b1bd40bb74527656f5947fe43304eefb694d28b79ec2c0a481b67e"
+    },
+    {
+      "role": "activation-transport-budget",
+      "sha256": "f3ddc7ba74ead125368fad3a110aba80a2e9a2be8bcb0c3adce0e401ce626f96"
+    },
+    {
+      "role": "poisoned-global-generation-recovery",
+      "sha256": "d084d95ef7443f3fd8a4341039debc48c3c37d9b654b20363f1fa4d8ae4ce859"
+    },
+    {
+      "role": "coordinator-contract-liveness",
+      "sha256": "81c89237a17c6c86bfb985b78f7f16ece5bbd55193dd5af4c61239757682031c"
+    },
+    {
+      "role": "adaptive-upload-concurrency",
+      "sha256": "e87bf9453081fa472b1bf61b80b5920add47ce022983a32562a603a0446d3b29"
+    },
+    {
+      "role": "single-connection-peer-fanout",
+      "sha256": "f4bc49bb7d8de6355aec84090cd1933ab5e51eead859c0ca7124c1a33f9f2215"
+    },
+    {
+      "role": "upload-critical-path",
+      "sha256": "79941c88e6df80824b3370cb360048bfc97ad734d3d10dcb9372094ec4466088"
+    },
+    {
+      "role": "registry-entry-tolerance",
+      "sha256": "2af68e4923395a2d6a6c18b9fcb1541e6bd5a9d5ea351ff3822ec41d5d4c7805"
+    },
+    {
+      "role": "registration-run-hint",
+      "sha256": "ef9cd50eac427d7f81a696d0884f950dac7a98528e35f812f5abfc71c44b18e0"
+    },
+    {
+      "role": "return-aware-routing",
+      "sha256": "f5a8cb5a84c208286db766d0b3769660776ca1709f047986171574a9bd5ebad1"
+    },
+    {
+      "role": "p2p-endpoint-recovery",
+      "sha256": "72c6ee549f9fdfc05502a900333d5f0d579814867a0bbfd5c3cc125da36ec0ff"
+    },
+    {
+      "role": "upload-straggler-hedge",
+      "sha256": "56288c358da76ff35a72d9b368a01d35cec3b42a8ce42396b85f34d1f1f385ac"
+    },
+    {
+      "role": "registration-admission-recovery",
+      "sha256": "f00c639860537fd1a6ebd7b79db8c56fa57e870ae54e05819d58215b1ac221b3"
+    },
+    {
+      "role": "structured-event-journal",
+      "sha256": "fc67837c33d4f8b6154aac1d81825d39a05c562ff496e02e17e5cf0e0a4fff13"
+    },
+    {
+      "role": "weights-already-submitted",
+      "sha256": "67e551285833e3c75f1cfab3ddc0e02b08fa4b6b28614f4650a2ec24bfccc7d0"
+    },
+    {
+      "role": "upload-mmap-close",
+      "sha256": "de663eb2a8a6934f6b769a3f815a2a3539b87619ca6bb868116112c903342592"
+    },
+    {
+      "role": "registry-keyed-fallback",
+      "sha256": "c85bbd492b423a591ab7c26180b88cac7474b79cd4a203c1048a53d055661d8f"
+    },
+    {
+      "role": "upload-attestation-decoupled",
+      "sha256": "f5fb2c4a981a46c8a83a20792386fa0e84bb440dda46cdd191e11e15cc5e1f5c"
+    },
+    {
+      "role": "registry-dashboard-candidates",
+      "sha256": "ab00dd4859a67395e9e8f3346ae9c1d88bf5d4222cdf187009f614437a54b01a"
+    },
+    {
+      "role": "activation-challenge-retry",
+      "sha256": "7d19011a6196c50c2b62c161f4b2cd51bd45c0f632bc521e62baa4cabcaef6da"
+    },
+    {
+      "role": "bandwidth-best-server",
+      "sha256": "2aa7b58d8feaef12df67f5218bb72ce2a424ce956878fd64c44b3d3637435359"
+    },
+    {
+      "role": "journal-bandwidth-and-challenge-stats",
+      "sha256": "a02b4a525f573bc1f9a0f19507c278267298ba7359e1f081171a51cf320b50f2"
+    },
+    {
+      "role": "peer-visibility-journal",
+      "sha256": "8173fcc805168e7adf5f515ffd264a1b59a40351849243ed838693ae69b878f1"
+    },
+    {
+      "role": "merge-stall-bound",
+      "sha256": "7d562b4a8857b530db7bdaa47e2482b49816d7b43da72393cbef6b925f6d984c"
+    },
+    {
+      "role": "optimizer-state-spool",
+      "sha256": "3538de66841b5365f724e5222780e3d8294a6c2a2750b12c012afef42439efb8"
+    },
+    {
+      "role": "bench-escape",
+      "sha256": "ba57df1469e1ba0224f89ec48b1d50acb8074c06ea0380389fd86af01c6fae4d"
+    },
+    {
+      "role": "deadline-drop-notify",
+      "sha256": "c5bf8014c0d6abc108a57d09ad6d372001901c187bcb2ba33cef779e7f6327a6"
+    },
+    {
+      "role": "registration-confirm-retry",
+      "sha256": "1e04e4c46028bb7a08e197a898cd27b804d10ccd67195e00c71a73128f0fbba1"
+    },
+    {
+      "role": "status-freshness-and-slot-reclaim",
+      "sha256": "eab523b3d96f3eaefb8d0af6a52dc7e918562aecffcc3c9dee08fd4391ecf91a"
+    },
+    {
+      "role": "training-gate-grace",
+      "sha256": "861341eb85d6e7ae46f9e1bd9b32c38a24a2a92779e1f086dcd2e1604ebea072"
+    },
+    {
+      "role": "dns-serve-stale",
+      "sha256": "e35a9fef957fa95150425663908444a134a376e96d06f11e2e4f651a2bbaf247"
+    },
+    {
+      "role": "node-control-heartbeat",
+      "sha256": "58219792c1f38f19e77f08676622f2523c08639869129b2ee813e650ce02ce1e"
+    },
+    {
+      "role": "run-avoid",
+      "sha256": "6ddd6df434e9a4df8ade62e2156370b987acf656dd499ae0b97d1a7e45d7dedf"
+    },
+    {
+      "role": "tensorops-gqa-v2",
+      "sha256": "054f41988fd4745b030f77238788f731e36cd50e884ff7d47b27b7bbaaeb9010"
+    }
+  ],
+  "patch_sha256": "0ba6120c7639089ef54e775596fdab033c80961dce66c2eb4373705dfd9be55c",
+  "peer_fanout_patch_sha256": "f4bc49bb7d8de6355aec84090cd1933ab5e51eead859c0ca7124c1a33f9f2215",
+  "peer_visibility_journal_patch_sha256": "8173fcc805168e7adf5f515ffd264a1b59a40351849243ed838693ae69b878f1",
+  "phase_worker_patch_sha256": "7d43a22826e34e80c39909fff2bb17d940f19129e55ece2825fe5210db370635",
+  "poisoned_generation_patch_sha256": "d084d95ef7443f3fd8a4341039debc48c3c37d9b654b20363f1fa4d8ae4ce859",
+  "post_ack_dedup_patch_sha256": "584067c17a664a275aa70f0a41e8c062245ae8e9cb2c30e82c6626a9710ece2a",
+  "python_version": "3.10.21",
+  "qualification_evidence_sha256": "d81686a77126fb42a542aa1f2934036414ba04862c7e9e329b94e5eddcdd8dfc",
+  "registration_admission_recovery_patch_sha256": "f00c639860537fd1a6ebd7b79db8c56fa57e870ae54e05819d58215b1ac221b3",
+  "registration_confirm_retry_patch_sha256": "1e04e4c46028bb7a08e197a898cd27b804d10ccd67195e00c71a73128f0fbba1",
+  "registration_recovery_patch_sha256": "57aace37967df2136366eb470df7b4a5d85d72d448c29f2874e4da17273c7677",
+  "registration_run_hint_patch_sha256": "ef9cd50eac427d7f81a696d0884f950dac7a98528e35f812f5abfc71c44b18e0",
+  "registry_dashboard_candidates_patch_sha256": "ab00dd4859a67395e9e8f3346ae9c1d88bf5d4222cdf187009f614437a54b01a",
+  "registry_keyed_fallback_patch_sha256": "c85bbd492b423a591ab7c26180b88cac7474b79cd4a203c1048a53d055661d8f",
+  "registry_tolerance_patch_sha256": "2af68e4923395a2d6a6c18b9fcb1541e6bd5a9d5ea351ff3822ec41d5d4c7805",
+  "return_aware_routing_patch_sha256": "f5a8cb5a84c208286db766d0b3769660776ca1709f047986171574a9bd5ebad1",
+  "run_avoid_patch_sha256": "6ddd6df434e9a4df8ade62e2156370b987acf656dd499ae0b97d1a7e45d7dedf",
+  "runtime_kind": "isolated-cpython310-source-venv-hybrid",
+  "schema_version": 1,
+  "source_tree_sha256": "89ba8bc5315bf745e1dec654a38577a8a6c7c8f6b2b994fb5ec575b53689b89e",
+  "status_freshness_and_slot_reclaim_patch_sha256": "eab523b3d96f3eaefb8d0af6a52dc7e918562aecffcc3c9dee08fd4391ecf91a",
+  "structured_event_journal_patch_sha256": "fc67837c33d4f8b6154aac1d81825d39a05c562ff496e02e17e5cf0e0a4fff13",
+  "supplemental_patch_sha256": "b405ad4e69d73e89500a9f30ad2d54ef19977d59695e94add392f8eb383dcdf8",
+  "tensorops_gqa_v2_patch_sha256": "054f41988fd4745b030f77238788f731e36cd50e884ff7d47b27b7bbaaeb9010",
+  "tensorops_patch_sha256": "0e14e10f94358ceb1c904e48ccacb8abb857955ce9f7068e46b564479027e559",
+  "training_gate_grace_patch_sha256": "861341eb85d6e7ae46f9e1bd9b32c38a24a2a92779e1f086dcd2e1604ebea072",
+  "transport_health_patch_sha256": "608e6792aa0421ff5fe2cd8eab01ea500691d08d535842a3477ce8646b55e0b4",
+  "upload_attestation_decoupled_patch_sha256": "f5fb2c4a981a46c8a83a20792386fa0e84bb440dda46cdd191e11e15cc5e1f5c",
+  "upload_critical_path_patch_sha256": "79941c88e6df80824b3370cb360048bfc97ad734d3d10dcb9372094ec4466088",
+  "upload_mmap_close_patch_sha256": "de663eb2a8a6934f6b769a3f815a2a3539b87619ca6bb868116112c903342592",
+  "upload_straggler_hedge_patch_sha256": "56288c358da76ff35a72d9b368a01d35cec3b42a8ce42396b85f34d1f1f385ac",
+  "upstream_commit": "22d702acd07453dabb187abedfad185826091341",
+  "upstream_repository": "https://github.com/macrocosm-os/iota.git",
+  "upstream_tag": "v4.12.10",
+  "weights_already_submitted_patch_sha256": "67e551285833e3c75f1cfab3ddc0e02b08fa4b6b28614f4650a2ec24bfccc7d0"
+}

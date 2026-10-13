@@ -1,0 +1,2 @@
+# Exact, hash-pinned upstream evidence must retain its original whitespace.
+evidence/snapshots/*.txt -whitespace

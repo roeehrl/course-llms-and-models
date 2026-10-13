@@ -1,0 +1,1743 @@
+# IOTA Train at Home v4.12.10 local safety fixset
+
+This directory freezes the client-side changes tested against the public
+`macrocosm-os/iota` v4.12.10 source. It does not change coordinator semantics
+or modify the signed official desktop application. The combined artifact is a
+local experimental patch, not an official Macrocosmos release.
+
+## Exact baseline
+
+- Repository: `https://github.com/macrocosm-os/iota.git`
+- Tag: `v4.12.10`
+- Peeled commit: `22d702acd07453dabb187abedfad185826091341`
+- Patch: `iota-v4.12.10-safe-client-fixset.patch`
+- Patch SHA-256: `0ba6120c7639089ef54e775596fdab033c80961dce66c2eb4373705dfd9be55c`
+- Consolidated supplemental patch: `iota-v4.12.10-mps-numerical-recovery-fixset.patch`
+- Consolidated supplemental SHA-256: `b405ad4e69d73e89500a9f30ad2d54ef19977d59695e94add392f8eb383dcdf8`
+- Queue-lock release patch: `iota-v4.12.10-activation-queue-lock-release.patch`
+- Queue-lock release SHA-256: `e167a6f115e64c7a21e52af8160c3d18c7982dc2d2ad7cbb5d22da604ace338f`
+- Detached-forward saved-tensor-drop patch: `iota-v4.12.10-detached-forward-saved-tensor-drop.patch`
+- Detached-forward patch SHA-256: `c72aed5b7085cb06563b1b9a0130c6a8db7b478534a285ac6f924947f97dbd69`
+- Global-weight liveness patch: `iota-v4.12.10-global-weight-liveness-fixset.patch`
+- Global-weight liveness SHA-256: `f5f8c0ca78701045d5e4fc234adbfafcac38582b1fbe60c1410e39b7fac0540a`
+- Large optimizer-state patch: `iota-v4.12.10-large-optimizer-state.patch`
+- Large optimizer-state SHA-256: `e02209e97c3694be3dfa5355cdee4e7e3045783f5784a5c76cd4f45a0f1ef5ac`
+- Phase-worker split patch: `iota-v4.12.10-phase-worker-split.patch`
+- Phase-worker split SHA-256: `7d43a22826e34e80c39909fff2bb17d940f19129e55ece2825fe5210db370635`
+- Registration-reservation recovery patch: `iota-v4.12.10-registration-reservation-recovery.patch`
+- Registration-reservation recovery SHA-256: `57aace37967df2136366eb470df7b4a5d85d72d448c29f2874e4da17273c7677`
+- Apple-MPS component SHA-256: `110faa40e9059fd8eaeb984b439a126e29967022d769f91e3039dd35c85b255c`
+- Numerical-safety component SHA-256: `b628566ea9e06f7c9820a48a4209a7c69678ad16021d8cfdcc1bfc1c62e0b229`
+- Non-finite recovery component SHA-256: `316ae3f9535f1698ef77afdba46c0bebaa16c1ff55cb58ccadd19f1df387504e`
+- Regression-test tree SHA-256: `7b31d37c354379bc939078ce432d68a5a3195528fe14b199d6e4baf70fc70d77`
+- Activation transport budget patch: `iota-v4.12.10-activation-transport-budget.patch`
+- Activation transport budget SHA-256: `f3ddc7ba74ead125368fad3a110aba80a2e9a2be8bcb0c3adce0e401ce626f96`
+- Poisoned global-generation recovery patch: `iota-v4.12.10-poisoned-global-generation-recovery.patch`
+- Poisoned global-generation recovery SHA-256: `d084d95ef7443f3fd8a4341039debc48c3c37d9b654b20363f1fa4d8ae4ce859`
+- Coordinator-contract liveness patch: `iota-v4.12.10-coordinator-contract-liveness.patch`
+- Coordinator-contract liveness SHA-256: `81c89237a17c6c86bfb985b78f7f16ece5bbd55193dd5af4c61239757682031c`
+- Adaptive upload concurrency patch: `iota-v4.12.10-adaptive-upload-concurrency.patch`
+- Adaptive upload concurrency SHA-256: `e87bf9453081fa472b1bf61b80b5920add47ce022983a32562a603a0446d3b29`
+- Single-connection peer fanout patch: `iota-v4.12.10-single-connection-peer-fanout.patch`
+- Single-connection peer fanout SHA-256: `f4bc49bb7d8de6355aec84090cd1933ab5e51eead859c0ca7124c1a33f9f2215`
+- Upload critical path patch: `iota-v4.12.10-upload-critical-path.patch`
+- Upload critical path SHA-256: `79941c88e6df80824b3370cb360048bfc97ad734d3d10dcb9372094ec4466088`
+- Registry entry tolerance patch: `iota-v4.12.10-registry-entry-tolerance.patch`
+- Registry entry tolerance SHA-256: `2af68e4923395a2d6a6c18b9fcb1541e6bd5a9d5ea351ff3822ec41d5d4c7805`
+- Registration run hint patch: `iota-v4.12.10-registration-run-hint.patch`
+- Registration run hint SHA-256: `ef9cd50eac427d7f81a696d0884f950dac7a98528e35f812f5abfc71c44b18e0`
+
+The patch is intentionally version-locked. Do not apply it to a later tag
+without rebasing and repeating the complete test gate.
+
+Large ranged downloads retain verified bytes across transient disconnects and
+request timeouts. Each retry requests only the unreceived suffix and validates
+its exact `Content-Range`; gaps, overlaps, and full-object fallbacks fail closed.
+
+## Included changes
+
+1. Epoch-local cleanup and upload guard
+   - carries epoch cleanup across a phase transition that occurs during the
+     final merge submit;
+   - resets stale P2P and training state before the next training epoch;
+   - uses epoch-local optimization steps rather than a process-lifetime
+     backward counter before uploading weights.
+2. Registration/reset reconciliation
+   - resets the local advertised status to `initializing` on re-registration;
+   - repairs an existing own-registry entry whose status disagrees with the
+     process state, while treating an absent entry as startup rather than
+     false drift.
+3. Bounded P2P status retry and rotation
+   - removes the five-second outer cancellation that defeated the SDK retry
+     policy;
+   - limits and rotates background sends;
+   - derives a final hard timeout beyond the SDK's complete retry budget;
+   - cancels stale payloads and clears task/diagnostic state on empty targets,
+     phase changes, re-registration/reset, and shutdown.
+4. Faster phase-transition detection
+   - performs one immediate local phase probe when the run-wide gate closes;
+   - follows with a stable per-miner jittered cadence between three and five
+     seconds, avoiding a fleet-wide two-second polling pulse;
+   - propagates terminal phase and deregistration responses and bounds
+     rate-limit retries.
+5. HTTP connection pooling
+   - reuses one worker-owned coordinator session;
+   - reuses separate verified-TLS and local/minio S3 upload pools;
+   - keeps explicit per-request upload timeouts;
+   - closes all owned sessions during worker shutdown;
+   - preserves caller ownership and cancellation behavior for borrowed
+     sessions.
+6. Headless registration attestation and queue evidence
+   - uses the public signed native software-attestation helper when the pool
+     worker is not mounted in the Electron host;
+   - refuses to submit a reserved-run confirmation when the challenge,
+     factory, or attestation payload is absent;
+   - keeps the audited upstream pool entrypoint unchanged and adds a separate
+     standalone entrypoint/subclass;
+   - logs complete registration/queue/confirmation/challenge responses and
+     writes a 0600 machine-readable transition journal without request bodies
+     or authentication headers.
+   - treats signed-host queue-state reporting as a bounded, detached observer,
+     so an absent host capability cannot delay or reset authoritative
+     coordinator registration polling;
+   - forwards that optional observation only when the verified host advertises
+     `register.queue_state`, otherwise recording an explicit unavailable
+     outcome instead of retrying a protocol method the v3.7 host lacks;
+   - exits with code 78 on deterministic native helper identity mismatch
+     (native error code 15), preventing an unproductive registration loop.
+7. Mounted-host registration-status compatibility
+   - keeps the internal `training` literal unchanged for P2P peer routing;
+   - maps that wider runtime state to the host's legal `registered` status;
+   - preserves every legal registration status unchanged and rejects unknown
+     values before contacting the signed host;
+   - leaves detailed work lifecycle reporting on the independent
+     `training.state` channel.
+8. Deterministic Apple-MPS runtime
+   - selects and validates MPS explicitly instead of silently falling back to
+     CPU;
+   - disables inherited MPS fast-math/prefer-Metal toggles for the qualified
+     production path;
+   - keeps CUDA/NVML-only diagnostics informational on Apple Silicon.
+9. End-to-end numerical containment
+   - validates shapes, dtypes, layouts, and finite values at P2P ingress,
+     training boundaries, optimizer reconstruction, partition merging, and
+     every upload boundary;
+   - makes a non-finite gradient norm a hard error and clears poisoned
+     gradients/state instead of allowing `optimizer.step()` to spread NaNs;
+   - fails closed on empty or partial download, merge, and upload batches, and
+     on finite-to-half cast overflow.
+   - binds every partition, optimizer, pseudograd, merge, and upload payload to
+     its expected layer/chunk descriptor, including legacy weight blobs, so a
+     finite tensor from the wrong layer cannot pass validation;
+   - retries only genuinely transient global-weight failures with a bounded
+     three-attempt budget, while registration, phase, capacity, and numerical
+     failures propagate immediately and retry exhaustion fails closed.
+10. Epoch-local non-finite recovery
+   - quarantines only the affected epoch and suppresses its training ticks,
+     weight uploads, and partition submissions;
+   - commits model and optimizer snapshots as one atomic, transaction-matched
+     pair and ignores torn, stale, or mismatched snapshots;
+   - resumes only in a later training phase after a bounded authoritative
+     global pull validates finite and a clean snapshot commit succeeds;
+   - never emits a success or credit marker merely because local recovery ran.
+11. Activation-queue producer progress
+   - preserves the existing bounded 100 ms idle polling behavior;
+   - releases `_queue_lock` before that sleep so fetch, P2P-push, reset, and
+     shutdown paths are not serialized behind an idle consumer;
+   - preserves backward-first selection and cache-full forward behavior.
+12. Detached outbound-forward saved-tensor release
+   - keeps grad mode enabled so production-reachable MPS SDPA and RMSNorm
+     dispatch and outputs remain bitwise identical to the current worker;
+   - drops only tensors saved for a backward that this immediately-detached
+     outbound helper never performs, with a tensor-free sentinel and an
+     explicit fail-closed unpack error;
+   - activates only when the model explicitly declares the current
+     `quantize_activations=False` empty-state contract;
+   - keeps quantized or unknown contracts on the original grad-enabled path,
+     preserving their state list, and recomputes safely on that path if an
+     allegedly empty-state model unexpectedly returns state;
+   - restores outer saved-tensor hook scopes on success and model exceptions;
+   - is backed by fresh-process exact-shape AB/BA qualification showing
+     multi-gigabyte live-MPS allocation reductions without exceeding the
+     predeclared 2% median latency-regression ceiling on head or body.
+13. Global-weight download, merge, and memory liveness
+   - validates ranged responses down to status, range, length, and streamed
+     byte count, disables implicit content decompression, and retries only the
+     failed range for bounded transient failures;
+   - derives strict encoded and decoded bounds from the authoritative local
+     tensor/partition shape, with a 512 MiB hard safety ceiling;
+   - freezes compression flags for each full operation and fences downloaded
+     data against run, layer, epoch, descriptor, and generation changes before
+     commit;
+   - uses progress-driven watchdogs so continuing transfers are not killed by
+     a wall-clock timeout, while truly stalled work is cancelled without
+     spawning a competing retry or orphan writer;
+   - treats exhausted transient refreshes as retryable local liveness faults,
+     preserving valid registration while authoritative deregistration still
+     resets immediately;
+   - exports Darwin physical-footprint availability and applies serialized,
+     pressure-gated allocator relief only at quiescent cleanup boundaries;
+   - removes blocking full cyclic collection from the deadline-critical merge
+     upload pipeline, allowing each newly scheduled upload an immediate event-
+     loop turn.
+14. Accelerator/controller/upload process split
+   - keeps wallet, attestation, coordinator, and P2P authority exclusively in
+     the registered parent process;
+   - builds deterministic pseudogradients and the exact weights blob in a
+     short-lived spawned CPU worker bound to run/layer/epoch/generation;
+   - validates child output by owner-only receipt, byte count, and SHA-256;
+   - parks model and optimizer tensors on CPU and empties MPS before transfer,
+     restoring them before the next global-weight pull;
+   - transfers the immutable blob in a separate credential-free process using
+     only presigned URLs, while signed completion/submission stays in parent;
+   - fails closed on stale binding, tamper, non-finite input, crash, timeout,
+     or malformed multipart metadata.
+15. Registration-reservation recovery
+   - binds each confirmation attempt to the exact coordinator reservation
+     tuple `(queue_id, selected_run_id, reserved_until)`;
+   - sends at most one confirmation POST for that tuple, so an ambiguous
+     timeout or retryable response cannot replay a single-use attestation;
+   - reconciles the same authoritative queue after an ambiguous response and
+     accepts a resulting registration without re-attesting;
+   - abandons an expired or superseded reservation and returns to queue
+     polling instead of spinning or silently starting a second confirmation;
+   - applies a one-second minimum reconciliation poll to prevent a malformed
+     or zero-delay response from creating a tight coordinator loop.
+16. Activation transport budget (`iota-v4.12.10-activation-transport-budget.patch`)
+   - bounds outbound activation sends with a per-target transport budget and a
+     dedicated sender so a slow peer cannot starve the rest of the fan-out.
+17. Poisoned global-generation recovery
+   (`iota-v4.12.10-poisoned-global-generation-recovery.patch`)
+   - fingerprints a merged-partition generation whose shard repeatedly fails
+     the cosine check, records the rejected descriptor and payload digest,
+     quarantines that generation without deregistering, and retries only
+     after the coordinator's epoch or descriptor changes.
+18. Coordinator-contract liveness
+   (`iota-v4.12.10-coordinator-contract-liveness.patch`)
+   - restores upstream's limited cosine-only global-weight fallback (at least
+     90% accepted shards) only after a prior valid global sync and outside
+     fresh numerical recovery;
+   - backs persistent invalid generations off from 60 seconds to 15 minutes;
+   - reads the coordinator training gate through one in-flight request with a
+     cached TTL, cancels and awaits gate/fetch/materialization tasks at epoch
+     cleanup, and emits `TRAINING_PROGRESS` every 30 seconds.
+19. Adaptive upload concurrency (`iota-v4.12.10-adaptive-upload-concurrency.patch`)
+   - replaces the fixed sixteen-way multipart upload semaphore with a
+     process-local limiter that measures the aggregate throughput implied by
+     completed parts and keeps only as many parts in flight as can each finish
+     within half of the fixed `S3_UPLOAD_TIMEOUT`;
+   - halves the limit immediately when a part actually times out, never
+     exceeds `S3_UPLOAD_MAX_CONCURRENCY`, and never drops below
+     `S3_UPLOAD_MIN_CONCURRENCY` (default 2);
+   - logs every adjustment with the observed aggregate rate so a saturated or
+     shared uplink is visible in the worker log;
+   - deliberately does not coordinate across hosts: two Macs uploading in the
+     same merge window still share the uplink, each one simply stops
+     wasting it on timed-out retries.
+20. Single-connection peer fanout (`iota-v4.12.10-single-connection-peer-fanout.patch`)
+   - makes the per-peer P2P request semaphore an operator knob; the default
+     stays at upstream's 2 now that the SDK is pinned to 0.1.3 (iroh 0.98.1);
+   - motivation: the SDK's embedded iroh 1.0.0 grows one contiguous native
+     buffer without bound (n0-computer/iroh #4390, needs >= 2 paths per peer;
+     fixed upstream in #4414 after the SDK build). Captured live on the Studio
+     on 2026-09-10 (9 -> 41 GB in 6 min) and 2026-09-14 (22 -> 44 GB in 8 min),
+     both at the epoch weight-upload/merge boundary on a healthy link;
+   - `STRATA_P2P_MAX_CONCURRENT_PER_PEER` (clamped to 1..4) sets the limit;
+     1 removes the >=2-connection precondition of the iroh 1.0.0 bug if a
+     build ever embeds that SDK again; the effective limit is logged at init;
+   - this is a mitigation of the trigger precondition, not a fix of iroh; the
+     SDK ships wheels only, so the embedded iroh cannot be rebuilt locally.
+21. Upload critical path (`iota-v4.12.10-upload-critical-path.patch`)
+   - motivation: the coordinator moves a layer from `weights_uploading` to
+     `merging_partitions` as soon as the last other miner has submitted; on
+     2026-09-17 the Studio's 1 GB pseudo-gradient upload finished 5 s after
+     that transition twice (run .7 epoch 311, run .6 epoch 233), each time
+     the weights were rejected and the miner was deregistered into the
+     registration waitlist. Every second between the state change and
+     `submit_weights` is a second of that window;
+   - starts the coordinator state notification + weights attestation
+     challenge, the presigned-URL request (sized from the previous epoch's
+     blob, verified against the real byte count and re-requested on a
+     mismatch) and the upload worker's process start while the CPU worker is
+     still building the blob, instead of serially after it;
+   - a pre-spawned upload worker blocks in `_wait_for_job` until the parent
+     publishes the job atomically; it exits on its own after the build
+     timeout, the parent terminates it on any earlier failure, and a fresh
+     worker is spawned if it is not alive at dispatch;
+   - drops the two redundant full SHA-256 passes over the 1 GB artifact
+     (parent pre-dispatch, child post-upload) that sat on the same critical
+     path; the parent's post-build validation and the child's pre-upload
+     digest check remain, and both sides verify the byte count;
+   - `PHASE_WORKER_OVERLAP_CRITICAL_PATH=false` restores the serial order for
+     A/B measurement; `PHASE_SPLIT_CRITICAL_PATH` and the extended
+     `PHASE_SPLIT_UPLOAD_COMPLETE` log lines report build, submit, initiate
+     and dispatch outcomes per epoch;
+   - does not change the blob format, part layout, multipart concurrency or
+     any coordinator contract; expected gain is roughly 8-12 s per epoch on
+     the Studio, not a substitute for a faster uplink.
+
+## Deliberately excluded
+
+- Speculative attestation challenge prefetch or blind confirmation replay.
+  The client now guarantees one confirmation POST per exact reservation and
+  reconciles ambiguity, but it does not invent a coordinator-side durable
+  idempotency receipt or reuse a challenge across reservations.
+- Speculative multipart-init prefetch. The public API has no usable abort
+  route or explicit cleanup/TTL contract for abandoned uploads.
+- Stateless P2P cold-start exploration. It needs a one-outstanding-probe
+  budget, acknowledgement feedback, and a network-wide rollout design.
+- Event/condition activation wakeups. Detached materialization tasks can cross
+  epoch reset and shutdown today; a wakeup design therefore requires
+  generation fencing or cancel-and-await ownership plus full lifecycle tests.
+  The shipped lock-release patch deliberately adds no wakeup state.
+- Any claim of coordinator acceptance, validator credit, entitlement, or
+  payout. Those remain separate external proof stages.
+
+These exclusions are correctness boundaries, not abandoned ideas. They need
+coordinator/API commitments before they are safe to activate.
+
+22. Registry entry tolerance (`iota-v4.12.10-registry-entry-tolerance.patch`)
+   - motivation: on 2026-09-21 07:09 local a peer in run 4.12.16.8 published a
+     node-registry record with `node_id` as a list and `joined_at` as an
+     ISO-8601 string; `ComputeNode(**entry)` raised a pydantic
+     ValidationError out of `training_loop_tick`, the miner shut down and the
+     Studio was offline for three hours before anyone noticed;
+   - `all_nodes()` and `get_group()` now parse each record through
+     `_parse_registry_entry`, which skips records the `ComputeNode` model
+     rejects and logs one warning per node per five minutes instead of
+     raising; own-record writes and every coordinator contract are unchanged;
+   - unit tests: `src/miner/tests/test_registry_entry_tolerance.py`.
+
+23. Registration run hint (`iota-v4.12.10-registration-run-hint.patch`)
+   - motivation: on 2026-09-21 run 4.12.16.8 froze at epoch 320 for more than
+     ten hours while the Studio's Bronze seat sat in `initializing`; the
+     orchestrator picks the run server-side (`selected_run_id` in the queue
+     status), but the attestation-challenge request already accepts a
+     `run_id`, so this experiment asks whether a client-named run steers the
+     initial assignment;
+   - `subnet.registration_run_hint` reads an operator hint from
+     `STRATA_IOTA_REGISTRATION_RUN_HINT` or, when unset, the owner-only file
+     `~/Library/Application Support/STRATA/IOTA Worker/registration-run-hint.json`
+     (`{"run_id": "4.12.16.7-tah"}`); a missing, symlinked, oversized or
+     malformed hint means "no hint" and never raises;
+   - `MinerAPIClient.request_attestation_challenge` uses the hint only for
+     `action == "registration"` when no run was given, so queue confirmations
+     keep the orchestrator's `selected_run_id`; `register_miner_request` adds
+     `run_id` to the `/miner/register` body, logs
+     `Registration run hint outcome: requested=… assigned=… (HONOURED|IGNORED)`
+     after every registration, and after one HTTP 4xx (other than 429) on a
+     hinted body sends the stock body for the rest of the session; every
+     coordinator contract is otherwise unchanged and the pool miner bytecode
+     is untouched;
+   - unit tests: `shared/subnet/tests/test_registration_run_hint.py`.
+
+### Patches that reached the chain without a write-up
+
+Four patches were bound into the ordered chain, the manifest and every verifier
+but were never described above. Recorded here on 2026-09-22 so the numbered
+list is not mistaken for the whole chain; the numbering is left alone because
+the digests and the ordered apply sequence depend on it.
+
+- **Attestation pipeline** (`iota-v4.12.10-attestation-pipeline.patch`):
+  `activation_publisher` collects an activation's attestation and notifies the
+  orchestrator as a pipeline (`_collect_activation_attestation` feeding
+  `_notify_after_attestation`) instead of serialising the two, so the
+  notification waits on the pipelined attestation rather than a fresh one.
+  Unit tests: `src/miner/tests/test_activation_attestation_pipeline.py`.
+- **Post-ack dedup** (`iota-v4.12.10-post-ack-dedup.patch`): the P2P stack keeps
+  a delivery-dedup ledger so a duplicate post-ack push is enqueued exactly once,
+  forward and backward keys stay distinct, a full queue cannot poison the
+  ledger, and an epoch drain clears it.
+  Unit tests: `src/miner/tests/test_p2p_stack_routing.py`.
+- **TensorOps GQA** (`iota-v4.12.10-tensorops-gqa.patch`): routes llama3
+  grouped-query attention through the local Metal TensorOps runtime
+  (`subnet/model/llama3/tensorops_runtime.py`, `_grouped_attention`), loading
+  the kernel from the packaged asset root and falling back when it is absent or
+  non-finite. This is the patch whose first production forward/backward the
+  worker logs as `SN9 TensorOps first production … hit`.
+- **Transport health routing** (`iota-v4.12.10-transport-health-routing.patch`):
+  adds `miner/training/transport_health.py` (`PeerHealth`, `DeliveryOutcome`,
+  `classify_generic_failure`, `may_reroute`) so activation delivery can reroute
+  away from a peer that keeps failing, with the thresholds in `miner/settings.py`.
+
+## Patch 21: return-aware forward routing (27 September 2026)
+
+`iota-v4.12.10-return-aware-routing.patch` is the twenty-first ordered source
+patch, applied last. Transport-health routing picks a forward peer by free
+cache, delivery success and acknowledgement latency, but a peer can acknowledge
+a push in a tenth of a second and then never return the backward. On layer 0
+each such forward holds one of the 16 cache slots for the full cache timeout
+(900 s; 600 s on the middle layer). The patch adds the missing signal: the time
+until the matching backward arrives, or the full hold time when it expires.
+
+- `TransportHealthRouter` records each acknowledged forward's peer
+  (`note_forward_dispatched`), resolves it on backward arrival (`record_return`)
+  or cache expiry (`record_expiry`), keeps a per-peer EWMA, and multiplies each
+  candidate's score by `clamp((median_candidate_cost / peer_cost) ** 1.5, 0.2, 4.0)`.
+  Peers with fewer than three resolved sends stay neutral; the 0.2 floor keeps
+  slow peers sampled so a recovery is noticed; bookkeeping is capped at 8192
+  pending ids.
+- Hooks: the publisher notes acknowledged forwards, the activation queue
+  reports a materialized backward, and the activation cache reports expiry. A
+  failing hook is logged at debug level and never affects delivery or cleanup.
+- Layer behaviour: layer 0 and the middle layer forward and learn; the last
+  layer never forwards, so the router is unused and nothing changes there.
+- Disable with `STRATA_SN9_RETURN_AWARE_ROUTING=0` (it is otherwise on whenever
+  transport-health routing is on).
+
+Evidence, from the Studio's own logs over 3–27 September (43,613 resolved
+layer-0 sends on 11 days, 36,686 layer-1 sends on 10 days): a peer's cost in
+one two-hour window predicts the next (rank correlation 0.67 on layer 0, 0.88 on
+layer 1; the cheaper half cost 113 vs 216 slot-seconds per return next window on
+layer 0 and 18 vs 42 on layer 1). Timeouts took 22% of layer-0 and 31% of
+layer-1 slot time. Replaying the logs with this scoring, holding each peer at its
+observed cost, gave 22% more returns per slot-second than what actually
+happened on layer 0 and 62% on layer 1. The replay cannot see the capacity
+signal the live router also uses, so the real gain is expected to be smaller;
+on layer 1 it applies only to the ~32% of time spent waiting for free slots.
+Tests: `src/miner/tests/test_return_aware_routing.py` (router weighting,
+expiry cost, neutral new peers, floor/ceiling, disabled flag, bounded
+bookkeeping, last layer, cache expiry callback and a failing callback), and
+`test_transport_health.py`, which the build did not previously run, now runs in
+both the build and `verify.sh`.
+
+## Patch 23: upload straggler hedging (29 September 2026)
+
+`iota-v4.12.10-upload-straggler-hedge.patch` is the twenty-third ordered source
+patch, applied last. It changes `common/utils/s3_utils.py`, which both upload
+paths use:
+- weights, through `phase_worker.py`;
+- merge partitions and optimizer state, through `miner_api_client.py`.
+
+**What happened.** On 29 September at 01:32 the MacBook's first worker started
+its epoch-38 weight upload: 97 parts of about 10 MB. All but one part finished
+normally. Part 53 hung until the fixed 300 s request timeout, and its retry then
+finished in about 3 s. The upload took 342 s instead of the usual 91–142 s.
+`submit_weights` arrived about 18 s after the layer moved to
+`merging_partitions`, so the epoch was rejected and the orchestrator removed the
+worker from run 4.12.16.23.
+
+**The fix.** `UploadStragglerHedge` watches each part PUT. Once a part has been
+in flight longer than `4 × median` of the parts already finished, it starts a
+second PUT of the same bytes to the same presigned URL and keeps whichever
+finishes first. The other one is cancelled.
+- The threshold is clamped to 15–90 s, and is 90 s until four parts have
+  finished. It is re-checked every 2 s, because it tightens as more parts
+  finish.
+- Re-uploading an identical part number is valid in S3/R2 multipart uploads and
+  yields the same ETag, so the complete call is unaffected.
+- At most 25% of a blob's parts are duplicated.
+- If both copies fail, the existing retry loop takes over. The retries, backoff,
+  adaptive concurrency and 300 s timeout are unchanged.
+- To disable it, set `S3_UPLOAD_HEDGE=0`. The tunables are
+  `S3_UPLOAD_HEDGE_FACTOR`, `_MIN_SECONDS`, `_MAX_SECONDS`, `_MIN_SAMPLES` and
+  `_BUDGET_FRACTION`.
+
+**Replay against real logs.** The part-completion and part-failure lines of
+every upload in the worker logs were replayed through the same decision.
+
+| Upload set | Before | With hedging |
+|---|---|---|
+| The MacBook incident | 342 s | about 108 s |
+| MacBook, 97-part uploads | p95 341 s | p95 207 s |
+| Studio, 194-part uploads (50 of 167 had a part time out) | p95 450 s, max 462 s | p95 217 s, max 231 s |
+| Studio, 97-part weight uploads (no timeouts) | median 85 s | unchanged |
+
+The cost is 0.26% duplicate parts on the Studio and 2.3% on the MacBook.
+Uploads that are slow as a whole, rather than because of one straggler, are not
+sped up.
+
+**Tests.** `shared/common/tests/test_upload_straggler_hedge.py` ships inside the
+patch, like the adaptive-concurrency test. It covers:
+- the threshold, budget and defaults;
+- over a real local HTTP server:
+  - a stalled part is duplicated, and the upload finishes in about 1 s;
+  - a healthy upload sends no duplicates;
+  - with hedging disabled, the upload waits out the request timeout;
+  - a failing duplicate falls back to the original;
+  - when both copies fail, the normal retry takes over.
+
+The common, miner and subnet suites fail the same pre-existing tests before and
+after the patch; none are new.
+
+Build 78 also makes two small follow-ups to patch 22:
+- `forget_pending_returns` now documents that learned per-peer costs are kept,
+  and that a late backward or expiry for a forgotten id is dropped unscored.
+- `test_p2p_endpoint_recovery.py` gains a test proving it: after
+  `forget_pending_returns`, `record_expiry(id, 900)` and a late `record_return`,
+  `return_ewma_s`, `return_observations` and `return_expiries` are unchanged, and
+  a later dispatch is still tracked.
+
+## Patch 22: P2P endpoint recovery (27 September 2026)
+
+`iota-v4.12.10-p2p-endpoint-recovery.patch` is the twenty-second ordered source
+patch, applied last. On 27 September the MacBook's router lost its upstream for
+about a minute (19:37; the Mac's interfaces stayed up, Tailscale logged
+timeouts and DNS refusals). HTTP to the orchestrator recovered by itself, but
+the in-process iroh endpoint never did: the last inbound `/peer/status` arrived
+at 19:37:06, and after that every 30 minutes showed 0 successful and about 240
+failed peer-status sends. The epoch-20 upload at 19:42 (work done before the
+drop) was accepted; epoch 21 took no local steps, the upload was skipped as a
+no-op, and the orchestrator removed the worker at 21:44 during
+merging_partitions. `reset_miner_state` does not touch the P2P stack, so the
+worker went back to the queue with the same dead endpoint.
+
+- `miner/p2p/liveness.py`: `p2p_restart_reason` decides, and
+  `recover_p2p_endpoint` acts. A rebuild needs all of: the endpoint older
+  than the startup grace (180 s); no rebuild in the cooldown (300 s); at least
+  6 peer-status sends failed since the last success; and both no inbound P2P
+  message and no successful peer-status send for the stall window (180 s).
+  Silence is measured from the endpoint's own start, never from before a
+  rebuild. A miner with nobody to send to (queued, or alone in its layer)
+  never accumulates failures and is never rebuilt.
+- `P2PStack` records the last inbound message on every path (`/peer/status`
+  before its filters, activation push, activation request) and gains
+  `restart()`: stop, then start again from the same seed, so the node id and
+  registry entry stay valid. The push queue and peer-status table are kept.
+  A failed start is retried after 2, 5 and 10 s; if all fail, the stack is left
+  cleanly stopped and the next liveness check tries again.
+- After the rebuild the mesh re-registers peer address hints
+  (`on_sender_restarted`), pulls, and pushes its own entry so peers learn the
+  new relay URL and direct addresses. Registry errors are logged and left to
+  the mesh's background sync. The re-registration is essential: a rebuilt
+  sender starts with an empty address book (iroh public discovery is off, so
+  it fails with `PeerAddressUnknownError`), and the mesh's routine sync skips
+  peers it has already registered. Peer addresses go back at once; our own
+  entry is re-published only after the new endpoint reports a home relay (up
+  to 15 s). A fresh endpoint has none for a moment, and publishing then would
+  replace a still-working relay hint with none, leaving NATed peers unable to
+  reach us until a later sync.
+- On a rebuild, return-aware routing (patch 21) drops its unresolved forwards
+  without scoring them: backwards that could not reach us while our endpoint
+  was dead measure our outage, not the peers.
+- The miner counts peer-status send failures since the last success, and a
+  watchdog task in `training_loop` checks every 30 s.
+- Settings: `STRATA_SN9_P2P_LIVENESS_WATCHDOG` (default on; `0` disables).
+  The mounted proxy launches the worker with a fixed environment and passes
+  this switch and `STRATA_SN9_RETURN_AWARE_ROUTING` through only when the
+  terminal that runs `mounted-proxy run` sets them to exactly `0` or `1`.
+  STRATA's own session does not pass them, so the way back there is the
+  previous STRATA build. Tunables (not passed through by the proxy):
+  `P2P_LIVENESS_CHECK_INTERVAL_SECONDS`, `P2P_LIVENESS_STALL_SECONDS`,
+  `P2P_LIVENESS_MIN_FAILED_SENDS`, `P2P_LIVENESS_RESTART_COOLDOWN_SECONDS`,
+  `P2P_LIVENESS_STARTUP_GRACE_SECONDS`.
+
+Tests: `src/miner/tests/test_p2p_endpoint_recovery.py` covers the decision
+(dead, recent inbound, recent outbound, too few failures, grace, cooldown,
+silence counted from the restart, disabled), `P2PStack.restart` (same seed and
+node id, old endpoint closed, queue and peer table kept), inbound tracking on
+all three paths, the recovery order and its tolerance of registry failures, and
+the miner wiring (one rebuild, then cooldown; healthy endpoint untouched;
+failure counter), start retries and a clean stop when every retry fails, and
+the full recovery chain through the real `ElasticDeviceMesh` (the rebuilt
+sender and activation sender get every peer's hints back; a routine sync alone
+does not). The same 78 tests in the full miner suite fail on the
+21-patch baseline and with this patch, all for reasons outside it; none are new.
+
+Live check with the real iota_sdk (two stacks over the n0 relay, 27
+September): the restart took 0.75 s with the same node id; a peer holding the
+old direct addresses reached the rebuilt endpoint through the relay in 0.6 s;
+the rebuilt endpoint could not send until its address book was refilled, and
+then worked both ways, including after a second restart in a row.
+
+Replay against real logs: running the decision over every worker log (49
+Studio processes over 25 days, 56 MacBook processes over 23 days) fires in
+exactly two episodes, both real P2P deaths after MacBook network outages on 27
+September: worker 1 at 19:41 (outage 19:37) and worker 2 at 05:52 (outage
+05:48; its endpoint stayed dead until it was stopped at 08:19). It never fires
+on the Studio. An end-to-end run on the real transport (two endpoints trading
+status every second, the miner's own check and the real mesh) showed no
+rebuild in 90 s of health; after the endpoint was closed underneath the stack
+it was rebuilt in 14 s, the relay was up before re-publishing, and traffic
+resumed both ways with no further rebuilds.
+
+This change also refreshes `verify.sh`'s regression-test checksum, which had
+been stale since patch 21 added its test file.
+
+## Validation state on 21 September 2026 (registration run hint)
+
+The twentieth ordered source patch (registration run hint) is a deliberately
+reversible experiment: with no hint file present the worker sends exactly the
+pre-patch requests. It is bound into the ordered chain, manifest, doctor,
+runtime-integrity verifier, package verifier, control tests and the app's
+Swift allowlist like every prior patch; the manifest-identity and
+runtime-integrity control suites were extended to twenty roles and pass, and
+the new patch renders canonically on top of the nineteen-patch chain. The
+static `verify.sh` gate currently stops earlier, at the phase-worker split
+canonical-render comparison, on an untouched checkout as well; that failure
+predates this patch and was not investigated here.
+
+Live result, 2026-09-21 17:41 local (artifact 554d480b on the Studio, hint
+`4.12.16.7-tah`, run .7 at 59/100 and Bronze-authorized): the worker named
+the run in the challenge and in the `/miner/register` body, the orchestrator
+returned no client error and assigned `4.12.16.8-tah` layer 1 epoch 320
+again. Outcome logged as `IGNORED`. The client-side `run_id` is not an
+assignment input on this orchestrator; the hint file was removed so later
+registrations send the stock body. The patch stays in the chain as an inert,
+documented probe.
+
+The static-gate failure is now understood: the phase-worker split patch has a
+hand-inserted hunk (`@@ -1394,6 +1404,13 @@`) that overlaps the following
+hunk at `-1398`; `git apply` resolves it by context into `training_loop`,
+which is where the shipped runtimes have the handler, so the built code is
+correct and the byte-for-byte render check is what fails. Re-rendering that
+patch changes a pinned digest and the artifact identity, so it is a separate
+rebuild.
+
+## Validation state on 21 September 2026
+
+The nineteenth ordered source patch (registry entry tolerance) was added after
+the Studio miner died on a malformed peer registry record. It is bound into the
+ordered chain, manifest, doctor and runtime-integrity verifier like every prior
+patch; the manifest-identity and runtime-integrity control suites were extended
+to nineteen roles and pass.
+
+## Validation state on 18 September 2026
+
+The eighteenth ordered source patch (upload critical path) was added after
+the Studio lost two Bronze registrations on 2026-09-17 to weight uploads that
+completed 5 s after the merge window closed. It is bound into the ordered
+chain, manifest, doctor and runtime-integrity verifier like every prior patch.
+Its unit tests (`src/miner/tests/test_phase_worker_critical_path.py`) and the
+existing phase-worker split suite passed on a fresh eighteen-patch checkout;
+the split suite's two isolated-uploader tests now also assert the dispatch
+label. `verify.sh --static` fails at the pre-existing "Phase-worker split
+patch is not its canonical rendered diff" check on this machine before and
+after this change; that check is unrelated to the new patch.
+
+## Validation state on 15 September 2026
+
+The seventeenth ordered source patch (single-connection peer fanout) was added
+after the memory bloat reproduced twice under real training on artifact
+`3d2da7c3…`. It changes one integer default and adds an env override; it is
+bound into the ordered chain, manifest, doctor and runtime-integrity verifier
+like every prior patch and is included in the next clean build.
+
+## Validation state on 6 September 2026
+
+The manifest and this list were brought back in line with the sixteen-patch
+chain that the local-worker builder actually applies. The activation transport
+budget, poisoned global-generation recovery, and coordinator-contract liveness
+patches (Sept 5) were already live in artifact `3d2da7c3…` on both Macs but had
+never been recorded here; the adaptive upload concurrency patch (Sept 6) is new
+and is included in the next clean build. The layout-15 identity fields below
+refer to that next build.
+
+## Validation state on 4 September 2026
+
+The safe patch followed by the consolidated supplemental patch and the
+separately checksummed regression fixtures apply cleanly to a second checkout
+at the exact commit above. The consolidated supplemental patch is the canonical
+Git diff produced by this explicit order:
+
+1. `iota-v4.12.10-safe-client-fixset.patch` plus the regression fixture tree;
+2. `iota-v4.12.10-apple-mps-fixset.patch`;
+3. `iota-v4.12.10-numerical-safety.patch`;
+4. `iota-v4.12.10-nonfinite-epoch-recovery.patch`;
+5. `iota-v4.12.10-activation-queue-lock-release.patch`;
+6. `iota-v4.12.10-detached-forward-saved-tensor-drop.patch`;
+7. `iota-v4.12.10-global-weight-liveness-fixset.patch`;
+8. `iota-v4.12.10-phase-worker-split.patch`;
+9. `iota-v4.12.10-registration-reservation-recovery.patch`.
+
+The verifier now constructs both the consolidated route and the ordered
+component route in independent worktrees and requires their binary Git diffs
+to be byte-for-byte identical before the separately reviewable queue-lock,
+saved-tensor-drop, global-weight-liveness, phase-worker, and registration-
+reservation-recovery patches are each applied identically to both. Static
+apply/equivalence, fixset-manifest consistency, and `git diff --check` are green
+for the hashes above. The new reservation state machine passed 27 focused tests
+and a 138-test subnet run. The complete local mounted/standalone control suite,
+including secure first-run host onboarding, exact host-exit cleanup, atomic
+no-replace release promotion, shared selection locking, and rollback, passed
+355 tests.
+
+Installation layout 9 binds control-test tree
+`28c664c08335c8efd5dccd4aade67911003cf300040eee49643b1cebe5a618ef`,
+control surface
+`c14f385b39ccbcdcfce53ab93aaef68eb86ef78f000b9e0026f5f0149aabb43d`,
+and installation-tree algorithm v2. The controller and installer are now part
+of that measured control surface. Release promotion uses Darwin
+`renamex_np(RENAME_EXCL)` so concurrent installers cannot nest into or delete
+the winner, and installer/canary selection plus rollback share one fail-closed
+deployment lock.
+
+The source-tree digest was reproduced by applying the seventh source patch to
+the previously sealed six-patch runtime after first reproducing its exact
+preimage digest. The fresh clean build on 2026-09-04 passed 191 focused miner
+tests, 8 phase-worker tests, 129 subnet tests, 24 common tests, and all 355
+local control tests. One additional phase-worker test was intentionally skipped
+because it is opt-in for an explicit MPS maintenance window. The resulting
+layout-9 artifact is
+`78a1896e224bb6963af410c3bb28ef62f7f3c511d1c7ae3ea101fa0f03fd85db`
+(manifest SHA-256
+`065a6edc1f13afd89b614d45762a33c86012852c3cca710a31afd5ab48111b40`).
+It was staged unselected and passed the sealed real-layout doctor and isolated
+CLI smoke checks. The real MPS park/unpark gate and a live accepted epoch remain
+separate successor gates. The currently running production artifact
+`cb1c22b1e0daad047e40bf253f22c8b5e2ca37b87375ce3ab561a4cd87582fa9`
+belongs to the prior six-patch/layout-8 build and is not evidence for the new
+seven-patch successor. Selection and activation will wait for a fresh safe
+maintenance boundary plus artifact-specific operator authorization, followed
+by the independent coordinator/credit proof ladder.
+
+Run `./verify.sh --static [source-repository]` to repeat the checksum, clean
+apply, ordered-component equivalence, and whitespace gate without resolving
+dependencies or executing runtime tests. Run `./verify.sh` for the complete
+source test gate. Both modes clone into a new temporary directory and never
+edit an installed app or an existing checkout.
+The tag's checked-in root lock predates several declared workspace
+dependencies, so `uv` resolves the checked-in declarations and rewrites the
+stale root lock only in that disposable clone. The dependency inputs are
+reproducible from those declarations, but this gate is not bit-for-bit
+lock-frozen: a later resolver or package index can select different transitive
+versions. Generated lockfile churn is not part of the patch.
+
+The public-source gate cannot import the omitted private `miner.pool` package,
+so the headless/standalone private-boundary tests run only in the separately
+frozen package build after extracting those modules from the verified signed
+official app. That packaged gate is mandatory before installation.
+
+## Deployment boundary
+
+These patches are inputs to STRATA's local hybrid experimental worker. They do
+not alter the official signed application; the signed official host remains
+the attestation boundary. Local execution or recovery is not proof of
+coordinator acceptance, validator credit, entitlement, or wallet receipt.
+Replace this local patch with a verified official release when Macrocosmos
+publishes the equivalent fixes, then repeat the live proof ladder.
+
+## Patch 24: registration admission recovery (29 September 2026)
+
+`iota-v4.12.10-registration-admission-recovery.patch` is the twenty-fourth
+ordered source patch, applied last. It changes the registration path in
+`subnet/miner_api_client.py` and `subnet/common_api_client.py`, and overrides
+the pool miner's compiled `register_loop` in `miner/standalone_pool.py`.
+`tests/src/miner/tests/test_registration_retry_backoff.py` is a new fixset
+overlay test (it needs the extracted pool bytecode, like the headless
+attestation test).
+
+**What happened.** A log review of every registration journal on the Studio,
+both MacBook workers and the Mac mini (2–29 September) found 23 reservations
+since 18 September. Only 8 became admissions:
+- 10 failed with `invalid_attestation_challenge` after the coordinator had
+  accepted the confirmation. That is server-side and nothing here changes it.
+- 2 were lost after the confirmation POST got HTTP 500, both on the Mac mini
+  (29 September 12:15:28 and 15:55:32, run 4.12.16.23). The 500s left 39 s and
+  52 s of the ~90 s reservation. The coordinator kept answering `confirming`,
+  "Fresh registration confirmation is required." for the same reservation, but
+  the client only polled until it expired and the entry was dropped.
+- 1 was skipped because it was first seen with 10.5 s left, the challenge took
+  7.2 s, and the 5 s safety budget refused to confirm with ~3 s left.
+- 6 queue entries expired for inactivity: the coordinator drops an entry after
+  about 3 minutes without a successful status poll, and one failed poll could
+  take 92–124 s (3 attempts × 40 s).
+- The upstream `register_loop` retried every failure after a flat 10 s, which
+  re-posted `/miner/register` with a fresh challenge 36 times in 9 minutes on
+  6 September while the host signer was failing.
+
+The one-confirmation-per-reservation rule came from patch 15, which stopped an
+ambiguous response from replaying a single-use attestation. Upstream v4.12.10
+re-sent the confirmation up to three times.
+
+**The fix.**
+- A confirmation answered with HTTP 500 or 503 (a completed response, not a lost
+  one) is followed by a status reconciliation. If the same reservation is still
+  `confirming` with `confirmation_required`, the client requests a NEW
+  challenge and attestation and confirms once more: at most two confirmations
+  per reservation, never the same attestation twice. 502/504/408/425 stay
+  ambiguous and 429 is never retried, as before.
+- An attestation that fails or returns nothing while the reservation is open
+  (for example `request_attestation_challenge` swallowing a server error) is
+  retried once with a fresh challenge instead of abandoning the reservation.
+  The reservation deadline is published to `request_attestation_challenge`
+  through a context variable (same task, so an identity-mismatch
+  `SystemExit(78)` still propagates), which bounds the confirmation challenge
+  to one attempt that cannot outlive the reservation.
+- The safety budget drops from 5 s to 1.5 s: an unconfirmed reservation is lost
+  anyway, so the margin only has to cover the confirmation request.
+- Status polls are one attempt with a 20 s timeout; the existing outer backoff
+  keeps the queue id. Polls are spaced start-to-start, so a slow response
+  (p99 25–35 s) no longer delays noticing a reservation. The request rate does
+  not go up.
+- `HeadlessPoolMiner.register_loop` keeps the upstream outcomes (spec mismatch
+  fatal; `initializing` retried every 10 s, the seat-reclaim path) but backs
+  off 10 → 20 → … → 300 s while registration keeps failing within 120 s. A
+  failure that ends a long queue wait still rejoins after 10 s.
+- `CommonAPIClient.orchestrator_request` gains an optional `timeout_seconds`.
+
+**Replay.** The audit's fake-clock replay of both Mac mini incidents: without
+the patch, one confirmation and then "Registration queue entry expired."; with
+it, a second confirmation with a fresh attestation about 24 s after the
+reservation was seen, and the worker registers with 25–40 s to spare. If the
+second confirmation also gets 500, it stops at two confirmations after six
+status polls.
+
+**Tests.** `shared/subnet/tests/test_registration_admission_recovery.py` ships
+inside the patch: re-attest after 500, bounded at two, no re-attest for
+502/504/408/429, no re-attest once the coordinator committed or the budget is
+spent, attestation retried once then failing closed, the challenge bounded by
+the reservation, `SystemExit` propagation, start-to-start polling, the
+single-attempt 20 s status poll and the per-call timeout. One
+`test_registration_reservation_recovery.py` fixture moved its fake deadline
+into the future (a past deadline with a "has budget" answer cannot happen).
+The common, miner and subnet suites fail the same pre-existing tests before
+and after the patch; none are new.
+
+**Not changed.** `invalid_attestation_challenge` after a successful confirmation
+(10 of 23 reservations, 7 of MacBook worker 2's 8) happens on the coordinator.
+A setup error right after admission still exits the worker with no automatic
+restart; that belongs to the STRATA supervisor and is tracked separately.
+
+## Patch 25: structured event journal (29 September 2026)
+
+`iota-v4.12.10-structured-event-journal.patch` is the twenty-fifth ordered
+source patch, applied last. It adds `common/utils/strata_event_journal.py` and
+seven one-line `emit()` calls in `subnet/common_api_client.py`,
+`miner/new_miner.py` and `miner/training/training.py`, each placed right after
+the log call it mirrors, under the same conditions. Its test,
+`shared/subnet/tests/test_strata_event_journal.py`, ships inside the patch.
+
+**Why.** The STRATA app derived every worker fact by scraping free-text log
+lines: roughly 30 message types and 25 facts, matched by substring and regex.
+Wording is upstream's and can change in any release. The heartbeat response in
+the text log is also truncated to 100 characters, so a coordinator that adds
+fields would silently stop being recognised. Parsing that text was most of the
+app's CPU cost; see `Research/STRATA_IDLE_CPU_OBSERVABILITY_READERS_2026-09-29.md`
+and `reports/Low CPU incremental log parsing.md`.
+
+**What the worker writes.** The mounted proxy (`mounted_proxyctl.py`, a
+control-surface change) creates `events-<session>.jsonl` next to the
+registration journal (`O_EXCL`, 0600). It passes the path as
+`STRATA_IOTA_EVENT_JOURNAL` and records it as `evidence_paths.event_journal`
+in the session receipt. The worker appends one sorted-key JSON object per
+event with `schema_version` 1, `wall_time` (UTC), `monotonic_seconds`,
+`event` and typed fields. The write path copies the registration journal's:
+`O_APPEND|O_NOFOLLOW|O_CLOEXEC`, `fchmod 0600`, one `os.write`, strings
+bounded to 2 KiB and records to 64 KiB, NaN written as null. Without the
+variable every call is a no-op. A failure is logged at most once a minute and
+never changes worker behaviour.
+
+| event | emitted next to | fields |
+|---|---|---|
+| `heartbeat_response` | "Successfully completed request to /miner/heartbeat…" (every HTTP 200, including semantic failures) | `path`, complete `response` |
+| `registered` | "registered successfully in layer … on training epoch …" | `layer`, `epoch` |
+| `registration_started` | "Attempting to join registration waitlist" | – |
+| `kicked` | "appears to have been kicked during active work" | `phase`, `run_id`, `layer`, `source`, `error` |
+| `reset` | "Resetting miner entire state!" | – |
+| `forward_complete` / `backward_complete` | "FORWARD complete" / "BACKWARD complete" | `layer`, `activation_id` |
+| `training_progress` | the `TRAINING_PROGRESS` marker (patch 15) | `level`, exact `message`, `run_id`, `layer`, `fields` |
+
+Each of those messages has exactly one emission site in the patched tree
+(checked case-insensitively), so every fact is emitted once. Optimizer steps,
+weights upload/submit/merge, activation transport, GPU and peer telemetry are
+logged from several sites each and stay text-derived for now.
+
+**What the app does** (`BittensorTAHWorkerEventJournal.swift`). For a session
+whose receipt names the journal at exactly `root/events-<session>.jsonl`, and
+where that is an owner-only regular file, the app reads it as part of the same
+mounted-worker stream as the text log. The epoch ledger attributes evidence
+per stream, so it has to be the same one. Each record is rendered to one fixed
+canonical log line and parsed and redacted like any other worker record. The
+text-log lines the journal replaces are dropped for that session: the covered
+lifecycle events, every heartbeat response line and every `TRAINING_PROGRESS`
+line. `BittensorTAHWorkerEventJournalTests` checks that such a session
+produces the same lifecycle counts, heartbeat attempts, derived state, epoch
+ledger rows, telemetry and progress marker as a text-only session of the same
+activity. A mutant that stops dropping the text lines fails it. Workers
+without patch 25 have no `event_journal` and stay entirely on text parsing.
+
+## Patch 26: weights already submitted (29 September 2026)
+
+`iota-v4.12.10-weights-already-submitted.patch` is the twenty-sixth ordered
+source patch, applied last. It changes `MinerAPIClient.submit_weights` in
+`subnet/miner_api_client.py`.
+
+**What happened.** On 29 September at 20:00 the Studio (run 4.12.16.15,
+epoch 179) uploaded its 97-part weights blob in 85 s and called
+`/miner/submit_weights`. During a stretch of coordinator 500s:
+- attempt 1 timed out after 40 s but was committed by the coordinator;
+- attempt 2 got HTTP 500;
+- attempt 3 got `400 {"detail":"Weight already submitted, can't submit again"}`.
+
+The worker treated the 400 as a failure (the training loop's `APIException`
+branch, `weights_submitted` still false), rebuilt and re-uploaded the 1 GB blob,
+and resubmitted at 20:04, after the layer had moved to `merging_partitions`
+(`LayerStateError`). The epoch's weights were in; the work was wasted and the
+logs reported a failed submission.
+
+**The fix.** `is_weights_already_submitted()` matches exactly a 400 from
+`/miner/submit_weights` whose body says "Weight already submitted".
+`submit_weights` returns a `WeightSubmitResponse` for it, so the epoch counts as
+submitted. The first attempt's `should_upload_optimizer_state` is not
+recoverable, so it is false; that upload is optional and its failure was already
+non-fatal. Every other error, including other 400s, still raises.
+
+**Tests.** `shared/subnet/tests/test_weights_already_submitted.py` ships inside
+the patch: the matcher (only that 400 on that path), the success response,
+other errors still raising, and the 20:00 sequence (timeout, 500, 400) replayed
+through the real `CommonAPIClient.orchestrator_request` retry loop. The common,
+miner and subnet suites fail the same pre-existing tests before and after.
+
+## Patch 27: upload mmap close (30 September 2026)
+
+`iota-v4.12.10-upload-mmap-close.patch` is the twenty-seventh ordered source
+patch, applied last. It changes `MMapSliceBuffer.close()` in
+`miner/phase_worker.py`.
+
+**What happened.** MacBook worker 2 (run 4.12.16.22) uploaded its epoch-66
+weights on 30 September: all 97 parts finished at 06:28:40 (part 70 had one
+broken pipe and a successful retry). Closing the mmap then raised
+`BufferError: cannot close exported pointers exist`, because a slice of a part
+whose request broke or was cancelled (a hedged duplicate) was still referenced.
+The isolated upload worker exited 1, so the parent rebuilt and re-uploaded; that
+epoch still made the window. For epoch 67 the same crash hit three completed
+uploads in a row (07:59:37, 08:02:06, 08:08:20) during a MacBook network outage,
+and the miner was removed from the run at 08:08:29.
+
+**The fix.** `close()` catches `BufferError`, collects garbage and retries
+once; if a view is still exported, it leaves the read-only mapping for process
+exit. The file descriptor is always closed. A completed upload is no longer
+turned into a failure by its cleanup.
+
+**Tests.** `src/miner/tests/test_phase_worker_mmap_close.py` ships inside the
+patch: closing with a live exported slice (the old code raises `BufferError`
+here) and releasing the fd; the context-manager exit; a normal close; and an
+mmap-backed `upload_parts` over a local server with a dropped connection and a
+hedged part. The last one passes before and after the fix (the test harness
+frees the reference in time), so it guards the path rather than reproducing the
+race. The miner suite fails the same pre-existing tests before and after.
+
+## Patch 28: registry keyed fallback (30 September 2026)
+
+`iota-v4.12.10-registry-keyed-fallback.patch` is the twenty-eighth ordered
+source patch, applied last. It changes `miner/sync_v2/elastic_device_mesh.py`,
+`synced_dictionary.py`, `synced_collection.py` and `miner/p2p/stack.py`.
+
+**What happened.** Since about 23 September the bridge's `GET /bridge/vars`
+listing hangs (no bytes in 180 s, even for a single-hotkey prefix) while keyed
+`POST /bridge/get` answers in about 1 s; the Studio's `node_registry sync
+failed` count went from 27 a day on 09-23 to 750 on 09-29 (every poll). A
+long-running miner keeps its cached registry, but a miner that restarts or is
+newly admitted starts with an own-only registry: no adjacent-layer peers, no
+backwards, 0 steps, and removal at the epoch end. That removed the Studio from
+Bronze .15 at 23:42 on 29 September; MacBook worker 2 in Iron .22 only trained
+because one listing happened to get through at 01:39. Reported as
+macrocosm-os/iota#207.
+
+**The fix (fallback only).** `SyncedDictionary` gains `set_pull_fallback()`;
+the fallback runs only when the wildcard listing raises, so a working listing
+never uses it. `ElasticDeviceMesh` installs one that, at most every 30 s:
+- builds candidate peers from the cached registry, a per-run snapshot of the
+  last good registry (`~/.cache/strata-iota/node-registry/<run>.json`, 0600,
+  never overwritten by an own-only registry; `STRATA_IOTA_REGISTRY_SNAPSHOT_DIR`
+  overrides the location), and hotkeys whose `/peer/status` reached us in the
+  last 30 minutes but was dropped as "not in current run" (`P2PStack` now
+  remembers up to 1024 of them);
+- reads their registry leaves with keyed `POST /get` (`fetch_by_ids`, 500
+  names per request; unknown names are skipped) and returns them in place of
+  the listing result. Peers it finds become valid hotkeys, so their status is
+  no longer dropped.
+If the keyed read fails too, or within the 30 s throttle, the listing error is
+raised as before and the cached registry is kept.
+
+**Tests.** `src/miner/tests/sync_v2/test_registry_keyed_fallback.py` ships
+inside the patch: a working listing never calls the fallback; a failed listing
+is rebuilt from status senders (and stale ones are ignored); the background
+poll path refreshes cached peers; throttling keeps the cache; the snapshot is
+written 0600, seeds a restarted miner and is never replaced by an own-only
+registry; `fetch_by_ids` batches and skips unknown names; the dropped-hotkey
+memory is bounded. A live keyed read of one registry entry from the real bridge
+returned all 16 leaves in 2.1 s. The miner suite fails the same pre-existing
+tests before and after.
+
+## Patch 29: upload attestation decoupled (30 September 2026)
+
+`iota-v4.12.10-upload-attestation-decoupled.patch` is the twenty-ninth ordered
+source patch, applied last. It changes `miner/new_miner.py`
+(`_submit_weights_phase_split`).
+
+**What happened.** On 30 September the Studio (Bronze .17, layer 2, epoch 219)
+entered `weights_uploading` at 14:47:42 and had its blob built by 14:47:49, but
+`request_attestation_challenge` for action `weights` took 35 s on a slow,
+500-prone coordinator. The upload waited for it, as upstream's order requires:
+notify, attestation, upload, submit. The 85.6 s upload itself was normal. Then
+`complete_multipart_upload` returned one 500, and `submit_weights` at 14:49:58
+got `LayerStateError`, because the layer had moved to `merging_partitions`
+about 3 s earlier (a 136 s window). The miner was removed from the run at
+14:52:59. The upload critical-path patch already ran the credentials concurrently
+with the build, but the upload still awaited them.
+
+**The fix.** With `PHASE_WORKER_OVERLAP_CRITICAL_PATH` on (the default), the
+upload no longer awaits the credentials task. Only `submit_weights` needs the
+attestation, so it is awaited after the upload returns and logged as
+`PHASE_SPLIT_CREDENTIALS_AFTER_UPLOAD wait_seconds=…`. If the upload fails, the
+outstanding credentials task is cancelled. If the attestation fails, the error
+still surfaces before any submit. With the overlap knob off, upstream's serial
+order is unchanged. The challenge is used about 90 s after it is minted, well
+inside its validity.
+
+**Tests.** `src/miner/tests/test_upload_attestation_decoupled.py` ships inside
+the patch. It drives `_submit_weights_phase_split` with a real isolated build
+and checks four things:
+- the upload starts while the challenge is outstanding and the submit follows
+  both;
+- a failed upload cancels the outstanding challenge and nothing is submitted;
+- an attestation failure still blocks the submit;
+- overlap off keeps the serial order.
+
+On the previous code the first two fail (the second by timing out). The miner
+suite fails the same 77 pre-existing tests before and after.
+
+## Patch 30: registry dashboard candidates (30 September 2026)
+
+`iota-v4.12.10-registry-dashboard-candidates.patch` is the thirtieth ordered
+source patch, applied last. It changes `miner/sync_v2/elastic_device_mesh.py`.
+
+**What happened.** The Studio was readmitted to Bronze .17 at 17:08 on 30
+September while the bridge's `GET /vars` listing still hung. Patch 28's fallback
+worked but knew almost no peers: its candidates were its own cache (empty after
+readmission), a snapshot (none yet for .17) and hotkeys whose `/peer/status`
+reached it. Few peers message a miner they do not know, so for 20 minutes it
+read "2 of 2 candidate peers", itself and one other, and still had no
+adjacent-layer peers. The public dashboard feed
+(`https://iota-web.api.macrocosmos.ai/mainnet/miners?run_id=…`, no
+authentication) listed all 75 miners of the run. Keyed reads of their records
+returned 75 entries in about 6 s: 24 in layer 0, 25 in layer 1, 21 in layer 2,
+and 54 with P2P ids.
+
+**The fix (still fallback only).** When the listing fails, the fallback also
+fetches the dashboard's hotkeys for the current run. It refreshes them at most
+every 5 minutes, with a 10 s timeout, and caps them at 1024. They are added to
+the candidates.
+- They are only names to read. The records still come from the bridge's keyed
+  `POST /get`, a name without a record is skipped, and a hotkey the dashboard
+  lists for another run is ignored.
+- A failed dashboard read keeps the previous list and warns once per distinct
+  error. The patch-28 sources keep working without it.
+- A working listing never contacts the dashboard. It uses its own HTTP client,
+  so no bridge headers are sent to it.
+- `STRATA_IOTA_REGISTRY_DASHBOARD_URL` overrides the URL, and an empty value
+  turns it off.
+- The fallback warning now also says how many records are other than our own
+  and how many hotkeys the dashboard listed.
+
+This fills our own registry, so we can send forward and backward activations to
+adjacent layers. It cannot make peers whose listings also fail send work to us.
+
+**Tests.** `src/miner/tests/sync_v2/test_registry_dashboard_candidates.py` ships
+inside the patch (7 tests):
+- a new miner finds both adjacent layers from the dashboard, and another run's
+  hotkeys are ignored;
+- dashboard names without a bridge record are not invented;
+- a failing dashboard leaves the patch-28 sources working;
+- the 5-minute refresh;
+- an empty URL disables it;
+- a working listing never reads the dashboard;
+- the parser bounds and filters its input.
+
+They fail on the previous code. The miner suite fails the same 77 pre-existing
+tests before and after.
+
+## Patch 31: activation challenge retry (1 October 2026)
+
+`iota-v4.12.10-activation-challenge-retry.patch` is the thirty-first ordered
+source patch, applied last. It changes `miner/training/activation_publisher.py`.
+
+**What happened.** Each activation is reported with `POST /miner/submit_activation`,
+which carries an attestation over a fresh single-use challenge. The coordinator
+rejects a growing share of these reports with `400 {"detail":"no_cached_challenge_found"}`:
+about 5% in the long 22 September Studio session, 18% on 30 September and 20% on
+1 October, the same on the Studio and the Mac mini. The activation was computed
+and delivered to its peer, but the coordinator never recorded it, and the worker
+only logged "Failed to notify orchestrator of activation …".
+
+Pairing each report with its attestation (the `upload_activation` and
+`submit_activation` timer records, by activation id, Studio 2,608 reports and
+mini 777):
+- even a challenge under 2 s old fails 18-26% of the time, so the coordinator
+  loses challenges it has just issued;
+- older challenges fail more (41-78% at 8-30 s), and slow challenge issuance
+  goes with failure, so coordinator load makes it worse.
+
+One example: the challenge was requested at 12:09:11, issued 8.4 s later, and the
+report was rejected at 12:09:22, about 2.5 s after it arrived.
+
+**The fix.** When `submit_activation` returns 400 with `no_cached_challenge_found`
+or `attestation_required`, the publisher collects a fresh challenge and
+attestation and sends the same report again, at most twice.
+- Any other status or detail is not retried, and the final failure is logged as
+  before.
+- With attestation turned off by the run flags, nothing is retried.
+- A 400 means the coordinator rejected the report before recording it, so a
+  resend cannot count an activation twice.
+- Retries log `ACTIVATION_CHALLENGE_RETRY`, and a report that succeeds after a
+  retry logs `ACTIVATION_CHALLENGE_RETRY_OK`.
+
+If a fresh challenge succeeds about 80% of the time, two retries leave about 1%
+of reports unrecorded instead of 20%.
+
+**Tests.** `src/miner/tests/test_activation_challenge_retry.py` ships inside the
+patch (6 tests):
+- only the two named 400 details count as challenge misses;
+- a miss resends the same activation with a fresh attestation;
+- retries stop after two;
+- other errors are not retried;
+- nothing is retried with attestation off;
+- a first-time success collects no extra attestation.
+
+They fail on the previous code. The miner suite fails the same 77 pre-existing
+tests before and after.
+
+## Patch 32: bandwidth best server (2 October 2026)
+
+`iota-v4.12.10-bandwidth-best-server.patch` is the thirty-second ordered source
+patch, applied last. It adds `miner/utils/bandwidth_probe.py` and changes
+`run_speedtest` in `miner/utils/utils.py`.
+
+**What happened.** Registration sends `system_data` to the coordinator with
+`"bandwidth": {"download_mbps", "upload_mbps"}` from a speed test. The worker's
+speedtest-cli 2.1.3 broke in two ways:
+- the server list it fetches now returns ten servers chosen without regard to
+  location (all in Romania for a miner in Israel);
+- its HTTPS latency probe fails against servers whose certificates name their
+  ooklaserver.net host, so every latency is its 1,800,000 ms failure value.
+
+The "best" server was therefore arbitrary (Nokab, Norway, for lurus-mini).
+lurus-mini reported 0.0 down / 0.62 up twice and 184 / 50 once. On the same
+line, `networkQuality` measured 855 / 246.
+
+**The fix.** The worker chooses the server first, then measures:
+- Candidates: the five speedtest.net servers nearest the client, from the
+  current `api/js/servers` endpoint (each server's plain-HTTP redirect to its
+  HTTPS ooklaserver.net host is resolved once), plus Cloudflare's
+  speed.cloudflare.com.
+- A pre-test of each: latency (best of 3), then about 1.5 s of download and
+  1.5 s of upload over 4 parallel streams.
+- The real test runs against the best candidate per direction: about 8 s each
+  over 8 streams. A stream's rate counts only bytes that completed, divided by
+  the time they took.
+- Results under 1 Mbit/s count as failures. If no candidate works, the
+  original speedtest-cli test runs as before.
+- The report keeps the same two keys. The coordinator never received the server
+  name, and still does not.
+- For diagnostics, the original speedtest-cli selection and test then run, one
+  at a time and capped at 90 s, and are only logged (`SPEEDTEST_LEGACY_DIAGNOSTIC`).
+- Log lines: `SPEEDTEST_CANDIDATE`, `SPEEDTEST_SELECTED`, `SPEEDTEST_RESULT`.
+- `STRATA_SPEEDTEST_SMART=0` turns the new test off, and
+  `STRATA_SPEEDTEST_LEGACY_DIAGNOSTIC=0` skips the comparison.
+
+Live on lurus-mini (Partner fiber, 250 up):
+- All six candidates pre-tested at 859–906 down and 245–260 up.
+- Selected: DreamVPS (Rosh Haayin) for download and Partner (Petah Tikva) for upload.
+- Reported: 930.95 down / 245.86 up, in 37.6 s.
+- The legacy comparison chose Nokab, Norway, and measured 220.64 / 49.91 in 74 s.
+
+**Tests.** `src/miner/tests/test_bandwidth_probe.py` ships inside the patch (14
+tests). They fail on the previous code. The miner suite fails the same 77
+pre-existing tests before and after.
+
+## Patch 33: journal bandwidth and challenge stats (2 October 2026)
+
+`iota-v4.12.10-journal-bandwidth-and-challenge-stats.patch` is the thirty-third
+ordered source patch, applied last. It changes:
+- `miner/utils/bandwidth_probe.py`
+- `miner/utils/utils.py`
+- `miner/training/activation_publisher.py`
+- `subnet/miner_api_client.py`
+
+**Why.** Seatwatch (the STRATA workers dashboard) asked for structured data
+instead of log scraping. It wants every speed test that ran, so the dashboard
+can show diagnostics, and the challenge-retry counters from patch 31. All
+existing log lines stay as they were.
+
+**What it writes.** All events go to the patch-25 event journal
+(`events-<session>.jsonl`, the same envelope as the other events).
+
+- `bandwidth_measurement`, once per measurement, including cache hits:
+  - Fields:
+    - `cached`, `cache_age_seconds`
+    - `reported`: exactly what system_data.bandwidth carried
+    - `method`: smart / legacy / none
+    - `fallback`
+    - `seconds`, `total_seconds`, `total_bytes_down`, `total_bytes_up`
+    - `started_wall`, `finished_wall`
+    - `selected` (a server per direction)
+    - `legacy`: filled only when legacy was the reported method
+    - `run_id`, `layer`: null, because neither is known when system_data is collected
+    - `tests[]`, one entry per test that ran, in order
+  - Each `tests[]` entry has:
+    - `phase` (latency / probe / real / legacy), `direction`
+    - `server` {name, location, source, host}, `attempt`
+    - `started_monotonic`, `seconds`, `bytes`, `streams`, `mbps`
+    - `latency_ms` {min, avg, jitter, samples}, `timeouts`
+    - `used_for` (selection / report / comparison_only), `error`
+    - `piece_bytes`, `url`, `http_status`, `cut_short`
+    - real tests only: `samples_mbps` in 0.5 s bins
+  - The real upload now uses 1 MB pieces, so its 0.5 s samples mean something.
+- `bandwidth_legacy_comparison`: the speedtest-cli comparison now runs in a
+  background thread after a smart measurement. Registration therefore no
+  longer waits about 74 s for it. It writes its own event when it finishes,
+  with `legacy` {server, location, latency_ms, download_mbps, upload_mbps,
+  seconds, error} and two `tests[]` entries (comparison_only).
+- `activation_challenge_stats`, cumulative since the process started:
+  - Counters: `activations_submitted`, `needed_retry`, `recovered`, `lost`
+    (retried and still not recorded), `failed_other` (first-try failures
+    that are not challenge misses), `retries_total`, `by_detail`.
+  - Context: `run_id`, plus `epoch` from the latest heartbeat. MinerAPIClient
+    now keeps `last_heartbeat_epoch`.
+  - Emitted when activity happens 10 minutes or more after the previous
+    emit, and once at exit if anything was counted.
+
+Live on lurus-mini, a fresh measurement was one record of about 10 KB with
+20 tests:
+- reported 913.03 down / 234.94 up;
+- 1.83 GB down and 0.54 GB up in total;
+- the cache-hit record was 0.8 KB;
+- the legacy comparison arrived 74 s later.
+
+**Tests.** `src/miner/tests/test_bandwidth_probe.py`, rewritten for the new
+interfaces (25 tests), and `src/miner/tests/test_activation_challenge_stats.py`
+(3 tests) ship inside the patch. Both fail on the previous code. The miner
+suite fails the same 77 pre-existing tests before and after.
+
+## Patch 35: peer visibility journal (4 October 2026)
+
+`iota-v4.12.10-peer-visibility-journal.patch` is the thirty-fourth ordered
+source patch. It changes `miner/new_miner.py` (`_peer_status_broadcast_loop`,
+registration) and `miner/settings.py`, and adds `miner/utils/peer_visibility.py`.
+
+**Why.** On 4 October the Studio was admitted mid-epoch, broadcast its status
+to every adjacent-layer peer and looked healthy, but no peer listed it in its
+registry (the bridge registry listing outage), so no work arrived and the seat
+was kicked at the epoch boundary. Nothing local showed it
+(`Research/SN9_MID_EPOCH_JOIN_ZERO_WORK_2026-10-04.md`, sections 1–3 and 5).
+
+**What it does.** Read-only; no P2P or coordinator behaviour changes.
+- Once a minute (`PEER_VISIBILITY_INTERVAL_SECONDS`, 60) the peer-status loop
+  writes a `peer_visibility` event to the patch-25 event journal, counted over
+  the last 10 minutes (`PEER_VISIBILITY_WINDOW_SECONDS`, 600):
+  - `inbound_peers_10m`: distinct hotkeys whose status was accepted;
+  - `inbound_adjacent_10m`: the same, restricted to registry layers N±1;
+  - `dropped_unknown_10m`: hotkeys whose status was dropped because they are
+    not in our registry (`p2p.unknown_status_hotkeys`);
+  - `outbound_ok_10m`: peers our own status reached;
+  - `adjacent_registry_peers`: hotkeys our registry places in layers N±1;
+  - context: `run_id`, `layer`, `db_miner_status`, `miner_status`,
+    `training_for_s`, `all_layers_training_seen_s_ago`, `window_s`.
+- One WARNING per registration, plus a `peer_visibility_zero` journal event:
+  `PEER_VISIBILITY_ZERO no adjacent-layer peer has this miner in its registry;
+  it cannot receive work | run=… layer=… …`. All of these must hold:
+  - layer ≥ 1;
+  - `miner_status == "training"` for at least 10 minutes;
+  - `inbound_adjacent_10m == 0`;
+  - `outbound_ok_10m > 0` (our own P2P works);
+  - the run was not paused for the whole window: the activation queue's
+    all-layers-training gate was seen open at least once in the last 10 minutes.
+- A new registration resets the 10-minute training clock and allows one more
+  warning.
+
+**Cost.** One pass over the peer-status dict, the adjacent registry groups
+and the outbound-success dict per minute; about 1,440 small journal lines a day.
+
+**Tests.** `src/miner/tests/test_peer_visibility.py` (10 tests) ships inside
+the patch: the counts from a fake peer-status dict and registry, one warning
+under the conditions and none before 10 minutes, a second warning only after a
+new registration, none while an adjacent peer hears us, none when our outbound
+is 0, none during a run-wide pause (and one once the run resumes), none in
+layer 0 or when not training, and a safe no-op on a partially built miner. The
+seven that drive the miner fail on the previous code. The miner suite fails the
+same 77 pre-existing tests before and after.
+
+## Patch 36: merge stall bound (4 October 2026)
+
+`iota-v4.12.10-merge-stall-bound.patch` is the thirty-fifth ordered source
+patch, applied last. It changes:
+- `miner/new_miner.py` (`merge_partitions`, `_await_staged_merge_uploads`,
+  `_collect_attestation_payload`)
+- `miner/settings.py`, `common/settings.py`
+- `subnet/common_api_client.py` (`orchestrator_request`)
+- `miner/utils/timer_logger.py`
+- `miner/utils/utils.py` (`_initiate_and_upload_blob`), `common/utils/s3_utils.py`
+- new `common/utils/strata_progress.py`
+
+**What happened.** On 4 October, during the MacBook's epoch 81 → 82 merge,
+`complete_multipart_upload` (11:26:35) and two `initiate_blob_upload` steps
+never returned. `merge_partitions` waited in `asyncio.gather(*upload_tasks)`
+for 58 minutes although each coordinator request carries a 40 s × 3 aiohttp
+timeout; the event loop stayed alive, but the main loop sent no heartbeat until
+the process was restarted, which cost epoch 82 (research note, section 4). Why
+no timeout fired was not determined. The fix does not depend on it.
+
+**1. Progress-aware stall bound in `merge_partitions`.**
+- The final wait for the staged uploads replaces the gather with a loop over
+  `asyncio.wait(..., FIRST_COMPLETED)`. The first failed upload still fails the
+  merge at once, as before.
+- Progress is tracked by `strata_progress`: a tracker bound with a context
+  variable inside each upload task, so only the merge's own calls count, never
+  background traffic such as `get_run_config`. Marks:
+  - each finished S3 part PUT, a patch-23 hedged duplicate included (`s3_part`);
+  - each coordinator response, any status (`coordinator_response`);
+  - each blob initiated, uploaded and completed, and each upload batch done;
+  - attestation completion (`attestation_ready`; patch 29's slow attestation).
+- The clock restarts when the final wait begins, so download and merge time
+  between uploads never counts as a stall.
+- After `MERGE_UPLOAD_STALL_SECONDS` (240 s) without progress:
+  - `MERGE_UPLOAD_ABANDONED stage=… pending=… stalled_s=… total=… last_progress=… run=… layer=… epoch=…`
+    is logged and a `merge_upload_abandoned` journal event written;
+  - `MergeUploadStalled` (a `WeightPartitionException`) is raised, which the
+    training loop already handles with `continue`;
+  - the pending tasks are cancelled and given at most
+    `MERGE_UPLOAD_CANCEL_GRACE_SECONDS` (5 s); a task that ignores its
+    cancellation is detached and logged as `MERGE_UPLOAD_CANCEL_UNACKNOWLEDGED`.
+    The same bounded cleanup now applies to every merge failure and
+    cancellation; it used to be an unbounded gather.
+- `submit_batch`, the protocol commit point, is never reached after an
+  abandon, and the hung `complete_multipart_upload` is never retried by the
+  merge; at worst an orphaned multipart upload is left for the coordinator.
+- While waiting, `MERGE_UPLOAD_SLOW pending=… no_progress_s=… waiting_on=…`
+  is logged at most once a minute once 60 s pass without progress.
+- As after any merge failure today, the loop re-enters the merge on the next
+  tick while the layer is still merging, with fresh uploads.
+
+**Threshold check (240 s).** Logs from 448 merges on four Macs (Studio
+09-03 → 10-03, MacBook 09-05 → 10-04, guru-mini 10-01 → 10-04, lurus-mini
+10-03 → 10-04), with millisecond part-level lines:
+- longest no-progress gap while an upload or a merge coordinator request was
+  pending, in 362 healthy merges: p50 6.0 s, p90 14.9 s, p99 32.7 s, max 41.9 s
+  (a slow attestation challenge followed by a retry); late-submit merges max
+  41.4 s;
+- longest clean partition-part PUT inside a merge: 48.0 s; no hedge ever fired
+  inside a merge; partition blobs have 3 parts;
+- weights uploads after the patch-23 hedge: max gap 32.4 s; before it, single
+  300 s part timeouts produced 230–270 s gaps (the 09-29 incident was 233 s),
+  which the hedge removes (replayed: the duplicate PUT fires at about 56 s);
+- the 10-04 hang had 3,453 s without merge progress; the bound fires at 240 s.
+Counting every gap including download time between uploads, healthy merges
+reach 117 s, which is why the clock only runs during the final wait. If a
+part's hedged duplicate also hangs, 240 s abandons the merge before the 300 s
+S3 timeout would have retried it; that never happened in the 448 merges.
+
+**2. Per-attempt deadline in `orchestrator_request`.**
+- Each attempt runs as its own task under a deadline of its aiohttp timeout
+  plus `ORCHESTRATOR_REQUEST_DEADLINE_SLACK_SECONDS` (5 s), independent of
+  aiohttp's timer. A plain `async_timeout` block is not enough: it delivers one
+  cancellation, and an attempt that swallows it would still hang.
+- On expiry the attempt is cancelled and given
+  `ORCHESTRATOR_REQUEST_CANCEL_GRACE_SECONDS` (2 s), then detached if it still
+  runs (`ORCHESTRATOR_REQUEST_CANCEL_UNACKNOWLEDGED`). It logs
+  `ORCHESTRATOR_REQUEST_DEADLINE path=… attempt=… deadline_s=… detached=…` and
+  is treated like a timeout: the same retry and the same final
+  `RateLimitException` as today.
+- A cancellation of the caller cancels the attempt (bounded by the same grace)
+  and propagates; it is never turned into a retry.
+
+**3. Fire-and-forget telemetry.** `TimerLoggerMiner` posts its start, end and
+count events to the visualization API as background tasks, at most 32 in
+flight; a new event is dropped when 32 are still running. Nothing awaited the
+post's result, so nothing depends on it. Tasks of a closed event loop are
+pruned, and `cancel_pending_telemetry()` cancels the rest; asyncio's own
+shutdown also cancels them, and each post keeps its 2 s httpx timeout.
+
+**Tests.** `src/miner/tests/test_merge_stall_bound.py` (15 tests) ships inside
+the patch:
+- an upload awaiting a never-set event makes `merge_partitions` raise within
+  the stall window, never call `submit_batch`, leave no pending task, and write
+  one `MERGE_UPLOAD_ABANDONED` line and journal event;
+- a slow upload that marks progress every 0.1 s (1.2 s against a 0.3 s bound)
+  completes and submits;
+- an upload that swallows its cancellation cannot hold the merge;
+- a failed upload still fails fast;
+- part PUTs and attestation mark progress; marks reach only the bound tracker;
+- an `orchestrator_request` whose request hangs and swallows one
+  `CancelledError` still returns control through the deadline, twice, then
+  raises like a timeout; a hung first attempt is retried and succeeds;
+- caller cancellation propagates without a retry, also when the request
+  swallows it;
+- the telemetry stays bounded at 32 and never blocks, and frees its slots.
+Run against the previous code (with only the new helper module and settings
+present so the file imports), 10 of the 15 fail, three by hanging. The five
+that pass are the two settings checks, the helper-module test, and the two
+behaviours that must not change (a progressing upload completes, caller
+cancellation propagates). The miner suite fails the same 77 pre-existing tests
+before and after.
+
+## Patch 37: optimizer-state spool (5 October 2026)
+
+`iota-v4.12.10-optimizer-state-spool.patch` is the thirty-sixth ordered source
+patch, applied last. It changes:
+- `subnet/utils/vector_utils.py` (`check_for_nans_and_infs`,
+  `first_nonfinite_tensor_entry`, new `all_finite`, `iter_optimizer_state_tensors`,
+  `optimizer_state_numel`; `flatten_optimizer_state` now uses the iterator)
+- `subnet/utils/blob_format.py` (`weights_blob_envelope` split out of
+  `build_weights_blob`, new `write_weights_blob_file`)
+- `miner/utils/utils.py` (new `spool_optimizer_state_blob`,
+  `upload_spooled_blob`, `upload_optimizer_state_blob`,
+  `sweep_stale_optimizer_state_spools`)
+- `miner/new_miner.py` (both optimizer-state uploads), `miner/phase_worker.py`
+  (`_require_finite`), `miner/settings.py`
+
+**What happened.** On 5 October at 08:38:46 STRATA's memory guard stopped
+guru-mini (M5 Pro, 24 GB, cap 20 GB): "physical footprint 21.6 GB exceeded
+the 20.0 GB cap (rss 10.4 GB)". The worker had just submitted its run
+4.12.16.27 epoch-26 weights (layer 0) and been selected to upload its optimizer
+state. The guard's sample fell between `upload_weights_blob_entry` (08:38:44.985)
+and `after_nan_inf_check` (08:38:47.943). The optimizer-state upload was lost
+and the seat sat out the next epoch. Research note:
+`Research/SN9_LOW_MEMORY_UPLOAD_PEAK_2026-10-05.md`.
+
+**Cause.** After the weights upload the compute plane is parked: the model and
+the AdamW state (bf16, 1.01e9 elements, 1.89 GiB) sit on the CPU. The upload then
+- concatenated a second full copy of the state (`flatten_optimizer_state`,
+  `torch.cat`, +1.89 GiB), and
+- ran `check_for_nans_and_infs` over it: `torch.isnan(t).sum()` makes a
+  0.94 GiB bool mask and then a 7.5 GiB int64 copy for the sum, and
+  `torch.isinf(t)` adds a 1.89 GiB `abs` copy. Measured on 1.01e9 bf16
+  elements: isnan +8.5 GiB, isinf +10.4 GiB, isfinite +4.7 GiB at peak.
+Replayed with the build-138 code on an L0-sized state, parked from MPS, the
+footprint rose 15.3 GiB above the parked baseline for 4 to 6 s. On guru the
+parked baseline was 14.3 GB.
+
+**1. Bounded finite checks.** `check_for_nans_and_infs`,
+`first_nonfinite_tensor_entry` and the phase worker's `_require_finite` scan
+tensors larger than `FINITE_CHECK_CHUNK_ELEMENTS` (2^24) chunk by chunk and count
+with `count_nonzero`. Counts, the first bad index, NaN-before-Inf order, log
+lines and exception types are unchanged, and tensors at or below one chunk take
+the original single call. Peak extra memory is about 80 MB whatever the tensor
+size. Every caller benefits: the weights check before the build
+(`require_finite_tensor` on the 0.94 GiB weights, about 2.4 GiB before), the
+CPU build child, warm-up weight validation and the legacy upload path.
+
+**2. Streamed optimizer-state blob.** `upload_optimizer_state_blob` writes the
+blob to `phase-spool/optimizer-state-*/optimizer-state.blob` (0700 directory,
+0600 file), one optimizer tensor at a time, then uploads it from a read-only
+mmap through the same `_initiate_and_upload_blob` path as before (same
+multipart layout, patch 23 hedging, patch 36 progress marks, patch 27 mmap
+close). The tensors, order, bf16 conversion and finite checks come from the
+same iterator `flatten_optimizer_state` uses, and the header and trailer from
+the same `weights_blob_envelope` as `build_weights_blob`, so the file is
+byte-identical to the in-memory blob. File-backed pages are not part of the
+physical footprint the guard measures. Details:
+- runs synchronously like the flatten it replaces, so nothing else touches
+  the optimizer while it is written; no fsync (the file is read back from the
+  page cache and deleted);
+- logs `OPTIMIZER_STATE_SPOOLED bytes=… elements=… sha256=… seconds=… mode=mmap`
+  and keeps the `_log_upload_ram` tags (`upload_weights_blob_entry`,
+  `after_nan_inf_check`, `after_build_weights_blob`) for log continuity;
+- falls back to the previous in-memory build (`OPTIMIZER_STATE_SPOOL_FALLBACK`)
+  on any `OSError`, including less free space than the blob plus 2 GiB;
+- removes its directory after the upload, failed or not; a directory left by
+  a killed process is removed by the next spooled upload after an hour;
+- `OPTIMIZER_STATE_SPOOL_ENABLED=false` restores the in-memory build (the
+  finite checks stay bounded).
+A non-finite or empty state fails exactly as before (same `NanInfException`
+message, same `ValueError`), which the caller still treats as non-fatal.
+
+**Measured** on the Studio with the real worker code, an L0-sized AdamW state
+(embedding 128256x2048 plus four Llama-3.2-1B layers, 1.01e9 bf16 elements)
+created on MPS and parked, uploaded through `upload_parts` to a local multipart
+server in another process, peak footprint above the parked baseline:
+
+| Path | Peak extra footprint | Time over baseline +2 GiB | Wall time |
+|---|---|---|---|
+| build 138 | 15.3 GiB | 4.3–5.9 s | 4.2–5.8 s |
+| patch 37, spool off (bounded checks only) | 4.0–4.1 GiB | 1.5 s | 1.9 s |
+| patch 37 (spool) | 2.1–2.2 GiB | 1.2–1.3 s | 2.6 s |
+
+All three sent 194 parts, 2,023,817,405 bytes, with the same per-part SHA-256
+chain. About 1.9 GiB of the remaining 2.1 GiB is the parked state itself:
+pages copied from MPS are charged to the footprint only once the CPU reads
+them, and every path has to read them.
+
+**Tests.** `src/miner/tests/test_optimizer_state_spool.py` (48 tests) ships
+inside the patch:
+- the checks never touch more than one chunk (`torch.isnan`/`isinf`/`isfinite`
+  are wrapped and their largest input recorded), including the phase worker;
+- chunked results equal a whole-tensor oracle (the build-138 implementation,
+  kept in the test) for 24 combinations of NaN/Inf placement, dtype and
+  exception type, and for first-bad-index across shapes and transposed views;
+- peak footprint, read from the kernel's interval maximum in a fresh process:
+  `check_for_nans_and_infs` on a 192 MiB tensor stays under 0.75x the tensor
+  (build 138: about 4.5x); the spool on a 512 MiB state stays under 192 MiB
+  while the in-memory build needs at least 0.9x the state;
+- the spooled blob of a fixed state has the SHA-256 that build 138's
+  `flatten_optimizer_state` + `build_weights_blob` produce
+  (`74ec3acf…`, recorded from worker 630f0349), and equals the in-memory blob for
+  bf16 and fp32 states, several groups and a transposed state tensor;
+- the spool never calls `torch.cat`; a NaN fails with flatten's exact message
+  and leaves no file; an empty state raises the old `ValueError`;
+- uploads to a local server: spooled and in-memory uploads send the same parts
+  and the same `initiate_file_upload` request; a failed upload and the
+  low-disk fallback leave no spool; a single-part upload works;
+- both submit paths call the spooled upload.
+Run against build-138 behaviour (the new names provided as thin wrappers
+around the old code), 16 of the 48 fail; the three byte-identity cases among
+them fail only on the 0600/0700 permission checks, since the old bytes are the
+same. The 32 that pass are the equivalence and no-regression checks. The miner suite fails the same 77
+pre-existing tests before and after (461 passed before, 509 after); the subnet
+(222) and common (83) suites pass before and after.
+
+## Patch 38: bench escape (10 October 2026)
+
+`iota-v4.12.10-bench-escape.patch` is the thirty-seventh ordered source patch.
+It changes `miner/new_miner.py`, `miner/utils/utils.py` (new
+`extend_speedtest_cache`) and `miner/settings.py`.
+
+**Why.** Since 4 October the orchestrator no longer lifts a miner that
+registered mid-epoch (status `initializing`) at the next epoch flip; a
+registration that lands in the first minutes of the layer's training phase is
+still admitted as `idle`.
+
+**What it does.**
+- At the first training tick of an epoch, before the global-weight download,
+  `_maybe_escape_bench` runs only when the last known status is
+  `initializing`. A fresh heartbeat then decides: it must report
+  `initializing`, phase training and an epoch later than the one the miner
+  registered in. It runs at most once per epoch.
+- The escape re-registers in place (no model rebuild, no reset backoff), up to
+  `BENCH_ESCAPE_REGISTER_ATTEMPTS` (3) times, `BENCH_ESCAPE_RETRY_SECONDS` (5 s)
+  apart. If every attempt fails, or the registration returns a different run or
+  layer, it raises `MinerResetException` and the existing full reset takes over.
+- Before registering it reuses an in-memory bandwidth measurement up to
+  `BENCH_ESCAPE_SPEEDTEST_MAX_AGE_SEC` (6 h) old instead of running the speed
+  test inside the admission window; it never invents or shortens a measurement.
+- After `BENCH_ESCAPE_MAX_CONSECUTIVE` (3) escapes in a row that still come back
+  `initializing` it stops until a registration comes back working.
+- The reset backoff counter is cleared once the miner is registered and synced
+  to the epoch's global weights (the clear after `training_phase.run()` was
+  never reached).
+- Logs `BENCH_ESCAPE`, `BENCH_ESCAPE_RETRY`, `BENCH_ESCAPE_DONE`; journal events
+  `bench_escape_started`, `bench_escape_failed`, `bench_escape_moved`,
+  `bench_escape_finished`. `STRATA_SN9_BENCH_ESCAPE=false` restores the old
+  behaviour.
+
+**Tests.** `src/miner/tests/test_bench_escape.py` (19 test functions) ships
+inside the patch.
+
+## Patch 42: deadline drop notify (10 October 2026)
+
+`iota-v4.12.10-deadline-drop-notify.patch` is the thirty-eighth ordered source
+patch. It changes `miner/training/activation_publisher.py` and
+`miner/settings.py`.
+
+An activation dropped at the send deadline (`ACTIVATION_SEND_DEADLINE_SECONDS`)
+was removed silently, so work computed but not delivered in time was never
+reported. It is now a terminal delivery failure reported through
+`_record_and_notify`, like an activation that ran out of tries, with the
+recorded delivery errors plus a `send deadline exceeded` entry. A `notified`
+flag on the outbound item ensures no path reports an activation twice.
+`STRATA_SN9_DEADLINE_DROP_NOTIFY=false` restores the silent drop.
+
+**Tests.** `src/miner/tests/test_deadline_drop_notify.py` (5 test functions)
+ships inside the patch.
+
+## Patch 41: registration confirm retry (10 October 2026)
+
+`iota-v4.12.10-registration-confirm-retry.patch` is the thirty-ninth ordered
+source patch. It changes `subnet/miner_api_client.py`.
+
+- `REGISTRATION_CONFIRMATION_MAX_ATTEMPTS_PER_RESERVATION` goes from 2 to 6 and
+  `REGISTRATION_CONFIRMATION_ATTESTATION_RETRIES` from 1 to 4. The old limits gave
+  up live reservations with 40-70 s left while the coordinator returned 500s
+  (4 October). Every extra attempt is still bounded by the reservation
+  deadline, needs a status reconciliation showing the same reservation still
+  confirming, and uses a new challenge and attestation.
+- A confirmation 409 whose detail says confirmation "is not currently
+  available" is treated as a transient gate: after a 2 s pause the client
+  re-confirms with a new challenge while the same reservation stays open.
+  Other 409s keep the existing conflict handling.
+
+**Tests.** `shared/subnet/tests/test_registration_confirm_not_available.py`
+(3 test functions) ships inside the patch; two tests in
+`shared/subnet/tests/test_registration_admission_recovery.py` are updated for
+the new limits.
+
+## Patch 39: status freshness and slot reclaim (10 October 2026)
+
+`iota-v4.12.10-status-freshness-and-slot-reclaim.patch` is the fortieth ordered
+source patch. It changes `miner/training/transport_health.py`,
+`miner/training/activation_cache.py`, `miner/training/training.py` and
+`miner/settings.py`.
+
+- **Status freshness.** A received peer status never expired, so a peer that
+  stopped messaging us kept attracting forwards that never came back. Forward
+  routing now prefers peers whose last status is at most
+  `STRATA_SN9_STATUS_FRESHNESS_SECONDS` (900 s) old, or that returned at least
+  2 backwards in the last 300 s. If no candidate qualifies, routing is
+  unchanged. 0 disables the gate.
+- **Stale-slot reclaim (layer 0 only).** When the activation cache is full and
+  `cleanup()` found nothing timed out, the oldest slot is freed once it is older
+  than both 450 s and the 98th percentile of observed return times, and only
+  after 50 returns were observed. Logged as `STALE_SLOT_RECLAIM`; the expiry is
+  recorded for return-aware routing. `STRATA_SN9_STALE_SLOT_RECLAIM=false`
+  disables it.
+
+**Tests.** `src/miner/tests/test_status_freshness_and_reclaim.py`
+(12 test functions) ships inside the patch.
+
+## Patch 40: training gate grace (10 October 2026)
+
+`iota-v4.12.10-training-gate-grace.patch` is the forty-first ordered source
+patch. It changes `miner/training/activation_queue.py` and `miner/settings.py`.
+
+- The run-wide training gate is refreshed about every second, but a reply only
+  counted for its 2 s TTL, so about 40% of ticks saw an expired answer and
+  paused consumption although the orchestrator answered True more than 99% of
+  the time. A True answer now stays usable for
+  `STRATA_SN9_TRAINING_GATE_GRACE_SECONDS` (6 s) while a refresh is in flight,
+  and a failed refresh keeps the last answer for the same window. A False
+  answer still closes the gate at once; phase and registration errors still
+  abort. 0 restores the old rule.
+- Transient `get_activations` failures no longer end the layer-0 fetcher (which
+  cleared its queues): it retries with a 2-5 s jittered backoff, draining
+  backwards that already arrived, and fails as before after
+  `STRATA_SN9_LAYER0_FETCH_MAX_ERRORS` (20) consecutive errors. Logged as
+  `LAYER0_FETCH_RETRY`.
+
+**Tests.** `src/miner/tests/test_training_gate_grace.py` (9 test functions)
+ships inside the patch; one test in
+`src/miner/tests/test_training_progress_liveness.py` pins the grace to 0 to
+keep checking the original rule.
+
+## Patch 43: DNS serve stale (10 October 2026)
+
+`iota-v4.12.10-dns-serve-stale.patch` is the forty-second ordered source patch,
+applied last. It adds `miner/utils/dns_fallback.py` and changes
+`miner/standalone_pool.py` and `miner/settings.py`.
+
+On 9 October the Studio's only resolver failed for 12 minutes inside an epoch's
+weight-upload window; about 975 orchestrator requests failed on
+`nodename nor servname provided` and the seat was lost at the boundary.
+`HeadlessPoolMiner` (built by both the headless and the mounted entrypoints)
+now wraps `socket.getaddrinfo` once per process: a failed lookup returns the
+last successful answer for the same query if it is younger than
+`STRATA_SN9_DNS_SERVE_STALE_SECONDS` (6 h). Successful lookups are unchanged,
+IP literals and `localhost` are never cached, the cache holds at most 512
+entries, and TLS still verifies the original hostname. Each stale answer is
+logged as `DNS_SERVE_STALE` (at most once a minute per host) and journalled as
+`dns_served_stale`. 0 disables the fallback.
+
+**Tests.** `src/miner/tests/test_dns_fallback.py` (8 test functions) ships
+inside the patch.
+
+## Patch 44: node-control heartbeat (10 October 2026)
+
+`iota-v4.12.10-node-control-heartbeat.patch` is the forty-third ordered source
+patch, applied last (sha256
+`58219792c1f38f19e77f08676622f2523c08639869129b2ee813e650ce02ce1e`). It changes
+`miner/utils/node_protocol_control_api.py` and `miner/settings.py`.
+
+Upstream, the worker's node-control server pinged the host every 10 s and
+closed the connection with 1011 when the last pong was more than 20 s old. It
+checked right after sending the next ping, so one pong delayed by about 10 s
+was enough. On the Studio, at a load around 110 on 16 cores, that closed the
+verified relay 11 times in five days. The server no longer closes the host
+connection after one delayed pong:
+
+- Any frame from the host counts as alive, not only a pong.
+- The timeout is `STRATA_SN9_NODE_CONTROL_PING_TIMEOUT_SECONDS` (60 s), bounded
+  to 20-300 s. 20 restores the upstream limit.
+- A check is skipped when the worker's own event loop overslept (the sleep
+  between pings ran more than 5 s long), because frames the host sent in the
+  meantime are still unread. It is logged as `NODE_CONTROL_PING_OVERSLEPT`; a
+  real silence is logged as `NODE_CONTROL_HOST_SILENT` before the 1011 close.
+
+**Tests.** `src/miner/tests/test_node_control_heartbeat.py` (5 test functions)
+ships inside the patch.
+
+## Patch 45: run avoid and emergency leave (11 October 2026)
+
+`iota-v4.12.10-run-avoid.patch` is the forty-fourth ordered source patch,
+applied last (sha256
+`6ddd6df434e9a4df8ade62e2156370b987acf656dd499ae0b97d1a7e45d7dedf`). It adds
+`subnet/registration_run_avoid.py` and `miner/utils/emergency_leave.py` and
+changes `subnet/miner_api_client.py`, `miner/new_miner.py` and
+`miner/standalone_pool.py`.
+
+The orchestrator picks a miner's run, and nothing in the protocol leaves one.
+After our TensorOps kernel corrupted run .24 (see
+`../SN9_RUN24_CORRUPTION_INCIDENT_2026-10-11.md`), the M5 Macs had to stay out
+of it.
+
+- **Run avoid.** The supervisor passes the app's avoid list as
+  `STRATA_SN9_RUN_AVOID` (comma-separated run ids).
+  - A reservation offered in an avoided run is never attested or confirmed. The
+    worker logs `RUN_AVOID_DECLINE` and the journal event
+    `registration_run_declined`.
+  - The worker waits for the reservation to expire, then registers again after
+    10 s. After more than 6 declines in 24 h it waits an hour instead.
+  - If the orchestrator returns a seat in an avoided run directly (the hotkey is
+    still seated there), the worker does not train. It logs `RUN_AVOID_SEATED`
+    and checks again every 5 minutes, so the seat lapses at that run's next
+    upload window.
+  - The production registration loop (`HeadlessPoolMiner.register_loop`) waits
+    these out without counting them as failures.
+- **Emergency leave.** The app arms it by writing `emergency-leave.json`
+  (`{"schema_version": 1, "armed": true, "run_id": ...}`, owner-only). The
+  supervisor passes its path as `STRATA_SN9_EMERGENCY_LEAVE_FILE`, and the
+  worker re-reads it at every weight-upload window.
+  - While armed for the run the worker is in, it skips that epoch's weight
+    upload (`EMERGENCY_LEAVE_SKIP_UPLOAD`, journal
+    `emergency_leave_skipped_upload`) so the orchestrator removes it at the
+    epoch boundary. It keeps merging the partitions it was assigned.
+  - When the removal shows up (the miner is no longer registered in that run),
+    or the miner registers in another run, the file is rewritten with
+    `"armed": false` and the outcome `kicked` or `left-run`. That turns the
+    switch off. The run is then avoided in-process for 24 h, because the seat it
+    freed is the first one the queue would hand back.
+  - In-process bench escape (patch 38) and the external bench guard (v7) stay
+    out while it is armed.
+  - Missing uploads have cost a tier before (Bronze to Iron on 2026-09-18,
+    restored two days later), so the app asks for confirmation.
+- The patch also fixes an environment-dependent test from patch 36: the merge
+  timers posted telemetry to the local visualization API. On a Mac where a live
+  worker listens on that port, the connection attempt outlived the test and
+  `test_hung_upload_is_abandoned_within_the_stall_window` failed. It failed
+  clean worker builds on the MacBook and the Studio on 2026-10-11. That test now
+  sends no telemetry.
+
+**Tests.** `shared/subnet/tests/test_registration_run_avoid.py` (8 tests) and
+`src/miner/tests/test_emergency_leave.py` (12 tests) ship inside the patch.
+
+## Patch 46: TensorOps GQA v2 (11 October 2026)
+
+`iota-v4.12.10-tensorops-gqa-v2.patch` is the forty-fifth ordered source patch,
+applied last (sha256
+`054f41988fd4745b030f77238788f731e36cd50e884ff7d47b27b7bbaaeb9010`). It changes
+`subnet/model/llama3/tensorops_runtime.py` and `subnet/model/llama3/modules.py`.
+It ships `shared/subnet/tests/test_tensorops_runtime.py`, 30 tests including one
+real-kernel test.
+
+**Why v1 was wrong on M5.** The v1 kernel (patch "tensorops-gqa") converted the
+fp32 score tile straight into the left operand of the next matmul. It never
+checked `is_compatible_as_left_input()`, which is 0 on Apple M5, where 896 of
+1,024 elements landed at the wrong coordinate.
+
+**The v2 kernels.** The kernel sources in `Research/sn9-gqa-kernel-lab` (Metal
+kernels, bridge ABI 2, `-fmetal-math-mode=relaxed`):
+- stage P and dS through threadgroup memory;
+- keep the fp32 O for the backward pass's D term;
+- skip fully masked key tiles.
+
+**The v2 runtime:**
+- loads the kernel only when the machine matches an entry of the allowlist named
+  by `STRATA_SN9_TENSOROPS_ALLOWLIST` (chip, macOS build, torch, both asset
+  hashes);
+- self-tests forward and all gradients against an fp32 reference at first load;
+- latches the kernel off for the life of the process on any failure, exception,
+  non-finite result or shadow mismatch (`STRATA_SN9_TENSOROPS_SHADOW_EVERY`,
+  default 500);
+- journals `tensorops_selftest`, `tensorops_latched_off` and
+  `tensorops_shadow_mismatch`;
+- falls back to upstream SDPA, never grouped math, whenever the kernel declines.
+
+**Qualified on:**
+
+| Mac | macOS build | Speed, fwd+bwd attention with guards |
+|---|---|---|
+| M5 Pro | 26A428 and 26A434 | 4.0× upstream SDPA |
+| M5 Max | 26A428 | 4.35× |
+| M4 Max | 26A434 | qualified on a loaded host |
+
+All passed every distribution, the 150-step training-equivalence test and
+determinism checks. A whole transformer block is about 27–28 % faster on M5.

@@ -1,0 +1,216 @@
+#include <metal_stdlib>
+#include <MetalPerformancePrimitives/MetalPerformancePrimitives.h>
+
+using namespace metal;
+using namespace mpp::tensor_ops;
+
+// D_i = dot(dO_i, O_i), reused by both dQ and dK/dV kernels.
+kernel void tensorops_attention_s800_backward_drow(
+    device bfloat *grad_output [[buffer(0)]],
+    device bfloat *output [[buffer(1)]],
+    device float *drow [[buffer(2)]],
+    uint row [[threadgroup_position_in_grid]],
+    ushort lane [[thread_index_in_simdgroup]]) {
+  if (row >= 4u * 32u * 800u) return;
+  const ulong base = ulong(row) * 64ul;
+  float partial = float(grad_output[base + lane]) * float(output[base + lane]);
+  partial += float(grad_output[base + lane + 32]) * float(output[base + lane + 32]);
+  const float total = simd_sum(partial);
+  if (lane == 0) drow[row] = total;
+}
+
+// Deterministic dQ: one SIMD group owns 32 query rows. QK and dO*V^T use
+// TensorOps, probabilities are reconstructed from saved forward LSE, and the
+// final dS*K TensorOp writes a disjoint BF16 tile.
+kernel void tensorops_attention_s800_backward_dq(
+    device bfloat *q [[buffer(0)]],
+    device bfloat *k [[buffer(1)]],
+    device bfloat *v [[buffer(2)]],
+    device bfloat *grad_output [[buffer(3)]],
+    device float *mask [[buffer(4)]],
+    device float *lse [[buffer(5)]],
+    device float *drow [[buffer(6)]],
+    device bfloat *grad_q [[buffer(7)]],
+    uint3 group [[threadgroup_position_in_grid]]) {
+  const uint q_block = group.x;
+  const uint query_head = group.y;
+  const uint batch = group.z;
+  const uint kv_head = query_head / 4;
+  constexpr ulong head_elements = 800ul * 64ul;
+  const ulong q_head_index = batch * 32ul + query_head;
+  const ulong kv_head_index = batch * 8ul + kv_head;
+  q += q_head_index * head_elements;
+  grad_output += q_head_index * head_elements;
+  grad_q += q_head_index * head_elements;
+  k += kv_head_index * head_elements;
+  v += kv_head_index * head_elements;
+  lse += q_head_index * 800ul;
+  drow += q_head_index * 800ul;
+
+  auto tq = tensor(q, dextents<int32_t, 2>{64, 800}, array<int32_t, 2>{1, 64});
+  auto tk = tensor(k, dextents<int32_t, 2>{64, 800}, array<int32_t, 2>{1, 64});
+  auto tv = tensor(v, dextents<int32_t, 2>{64, 800}, array<int32_t, 2>{1, 64});
+  auto tgo = tensor(grad_output, dextents<int32_t, 2>{64, 800}, array<int32_t, 2>{1, 64});
+  auto tm = tensor(mask, dextents<int32_t, 2>{800, 800}, array<int32_t, 2>{1, 800});
+  auto tdq = tensor(grad_q, dextents<int32_t, 2>{64, 800}, array<int32_t, 2>{1, 64});
+  auto qtile = tq.slice<64, 32>(0, q_block * 32);
+  auto gotile = tgo.slice<64, 32>(0, q_block * 32);
+
+  constexpr auto qk_desc = matmul2d_descriptor(32, 32, 64, false, true);
+  matmul2d<qk_desc, execution_simdgroup> qk;
+  constexpr auto ds_k_desc = matmul2d_descriptor(
+      32, 64, 32, false, false, false,
+      matmul2d_descriptor::mode::multiply_accumulate);
+  matmul2d<ds_k_desc, execution_simdgroup> ds_k;
+
+  auto first_k = tk.slice<64, 32>(0, 0);
+  auto scores_shape = qk.get_destination_cooperative_tensor<decltype(qtile), decltype(first_k), float>();
+  auto ds_shape = ds_k.get_left_input_cooperative_tensor<float, bfloat, float>(scores_shape);
+  auto accum = ds_k.get_destination_cooperative_tensor<decltype(ds_shape), decltype(first_k), float>();
+  for (auto it = accum.begin(); it != accum.end(); ++it) *it = 0.0f;
+
+  auto row_lse = qk.get_row_reduction_destination_cooperative_tensor<decltype(qtile), decltype(first_k), float>();
+  auto row_d = qk.get_row_reduction_destination_cooperative_tensor<decltype(qtile), decltype(first_k), float>();
+  for (uint i = 0; i < row_lse.get_capacity(); ++i) {
+    const auto coordinate = row_lse.get_multidimensional_index(i);
+    row_lse[i] = lse[q_block * 32 + coordinate[0]];
+    row_d[i] = drow[q_block * 32 + coordinate[0]];
+  }
+
+  for (uint kb = 0; kb < 25; ++kb) {
+    auto ktile = tk.slice<64, 32>(0, kb * 32);
+    auto vtile = tv.slice<64, 32>(0, kb * 32);
+    auto scores = qk.get_destination_cooperative_tensor<decltype(qtile), decltype(ktile), float>();
+    auto dp = qk.get_destination_cooperative_tensor<decltype(gotile), decltype(vtile), float>();
+    qk.run(qtile, ktile, scores);
+    qk.run(gotile, vtile, dp);
+    auto mtile = tm.slice<32, 32>(kb * 32, q_block * 32);
+    auto cmask = qk.get_destination_cooperative_tensor<decltype(qtile), decltype(ktile), float>();
+    cmask.load(mtile);
+    for (auto it = scores.begin(); it != scores.end(); ++it) {
+      auto saved_lse = row_lse.map_iterator(it);
+      auto saved_d = row_d.map_iterator(it);
+      const uint index = uint(it - scores.begin());
+      const float probability = exp(*it * 0.125f + cmask[index] - *saved_lse);
+      *it = 0.125f * probability * (dp[index] - *saved_d);
+    }
+    auto ds = ds_k.get_left_input_cooperative_tensor<float, bfloat, float>(scores);
+    ds_k.run(ds, ktile, accum);
+  }
+
+  auto packed = ds_k.get_destination_cooperative_tensor<decltype(ds_shape), decltype(first_k), bfloat>();
+  for (uint i = 0; i < packed.get_capacity(); ++i) packed[i] = bfloat(accum[i]);
+  auto dq_tile = tdq.slice<64, 32>(0, q_block * 32);
+  packed.store(dq_tile);
+}
+
+// Deterministic grouped dK/dV: one SIMD group owns 32 KV rows and loops over
+// the four query heads which share that KV head. This deliberately avoids
+// global atomics; profiling will decide whether a later split-Q reduction is
+// worthwhile.
+kernel void tensorops_attention_s800_backward_dkv(
+    device bfloat *q [[buffer(0)]],
+    device bfloat *k [[buffer(1)]],
+    device bfloat *v [[buffer(2)]],
+    device bfloat *grad_output [[buffer(3)]],
+    device float *mask [[buffer(4)]],
+    device float *lse [[buffer(5)]],
+    device float *drow [[buffer(6)]],
+    device bfloat *grad_k [[buffer(7)]],
+    device bfloat *grad_v [[buffer(8)]],
+    threadgroup float *scratch [[threadgroup(0)]],
+    uint3 group [[threadgroup_position_in_grid]]) {
+  const uint key_block = group.x;
+  const uint kv_head = group.y;
+  const uint batch = group.z;
+  constexpr ulong head_elements = 800ul * 64ul;
+  const ulong kv_head_index = batch * 8ul + kv_head;
+  k += kv_head_index * head_elements;
+  v += kv_head_index * head_elements;
+  grad_k += kv_head_index * head_elements;
+  grad_v += kv_head_index * head_elements;
+
+  auto tk = tensor(k, dextents<int32_t, 2>{64, 800}, array<int32_t, 2>{1, 64});
+  auto tv = tensor(v, dextents<int32_t, 2>{64, 800}, array<int32_t, 2>{1, 64});
+  auto tdk = tensor(grad_k, dextents<int32_t, 2>{64, 800}, array<int32_t, 2>{1, 64});
+  auto tdv = tensor(grad_v, dextents<int32_t, 2>{64, 800}, array<int32_t, 2>{1, 64});
+  auto ktile = tk.slice<64, 32>(0, key_block * 32);
+  auto vtile = tv.slice<64, 32>(0, key_block * 32);
+
+  constexpr auto qk_desc = matmul2d_descriptor(32, 32, 64, false, true);
+  matmul2d<qk_desc, execution_simdgroup> qk;
+  constexpr auto transposed_desc = matmul2d_descriptor(
+      32, 64, 32, true, false, false,
+      matmul2d_descriptor::mode::multiply_accumulate);
+  matmul2d<transposed_desc, execution_simdgroup> transposed_mm;
+
+  // Establish cooperative layouts from representative tiles.
+  const ulong first_q_head_index = batch * 32ul + kv_head * 4ul;
+  auto tq0 = tensor(q + first_q_head_index * head_elements,
+      dextents<int32_t, 2>{64, 800}, array<int32_t, 2>{1, 64});
+  auto tgo0 = tensor(grad_output + first_q_head_index * head_elements,
+      dextents<int32_t, 2>{64, 800}, array<int32_t, 2>{1, 64});
+  auto qtile0 = tq0.slice<64, 32>(0, key_block * 32);
+  auto gotile0 = tgo0.slice<64, 32>(0, key_block * 32);
+  auto scores_shape = qk.get_destination_cooperative_tensor<decltype(qtile0), decltype(ktile), float>();
+  auto scratch_native = tensor(scratch, dextents<int32_t, 2>{32, 32}, array<int32_t, 2>{1, 32});
+  auto dk_accum = transposed_mm.get_destination_cooperative_tensor<decltype(scratch_native), decltype(qtile0), float>();
+  auto dv_accum = transposed_mm.get_destination_cooperative_tensor<decltype(scratch_native), decltype(gotile0), float>();
+  for (auto it = dk_accum.begin(); it != dk_accum.end(); ++it) *it = 0.0f;
+  for (auto it = dv_accum.begin(); it != dv_accum.end(); ++it) *it = 0.0f;
+
+  for (uint grouped_head = 0; grouped_head < 4; ++grouped_head) {
+    const uint query_head = kv_head * 4 + grouped_head;
+    const ulong q_head_index = batch * 32ul + query_head;
+    auto tq = tensor(q + q_head_index * head_elements,
+        dextents<int32_t, 2>{64, 800}, array<int32_t, 2>{1, 64});
+    auto tgo = tensor(grad_output + q_head_index * head_elements,
+        dextents<int32_t, 2>{64, 800}, array<int32_t, 2>{1, 64});
+    device float *head_lse = lse + q_head_index * 800ul;
+    device float *head_drow = drow + q_head_index * 800ul;
+
+    // Only query tiles at or after this key tile can contribute causally.
+    for (uint qb = key_block; qb < 25; ++qb) {
+      auto qtile = tq.slice<64, 32>(0, qb * 32);
+      auto gotile = tgo.slice<64, 32>(0, qb * 32);
+      auto scores = qk.get_destination_cooperative_tensor<decltype(qtile), decltype(ktile), float>();
+      auto dp = qk.get_destination_cooperative_tensor<decltype(gotile), decltype(vtile), float>();
+      qk.run(qtile, ktile, scores);
+      qk.run(gotile, vtile, dp);
+      auto tm = tensor(mask, dextents<int32_t, 2>{800, 800}, array<int32_t, 2>{1, 800});
+      auto mtile = tm.slice<32, 32>(key_block * 32, qb * 32);
+      auto cmask = qk.get_destination_cooperative_tensor<decltype(qtile), decltype(ktile), float>();
+      cmask.load(mtile);
+      auto row_lse = qk.get_row_reduction_destination_cooperative_tensor<decltype(qtile), decltype(ktile), float>();
+      auto row_d = qk.get_row_reduction_destination_cooperative_tensor<decltype(qtile), decltype(ktile), float>();
+      for (uint i = 0; i < row_lse.get_capacity(); ++i) {
+        const auto coordinate = row_lse.get_multidimensional_index(i);
+        row_lse[i] = head_lse[qb * 32 + coordinate[0]];
+        row_d[i] = head_drow[qb * 32 + coordinate[0]];
+      }
+      for (auto it = scores.begin(); it != scores.end(); ++it) {
+        auto saved_lse = row_lse.map_iterator(it);
+        auto saved_d = row_d.map_iterator(it);
+        const uint index = uint(it - scores.begin());
+        const float probability = exp(*it * 0.125f + cmask[index] - *saved_lse);
+        *it = 0.125f * probability * (dp[index] - *saved_d);
+        dp[index] = probability;
+      }
+      scores.store(scratch_native);
+      threadgroup_barrier(mem_flags::mem_threadgroup);
+      transposed_mm.run(scratch_native, qtile, dk_accum);
+      threadgroup_barrier(mem_flags::mem_threadgroup);
+      dp.store(scratch_native);
+      threadgroup_barrier(mem_flags::mem_threadgroup);
+      transposed_mm.run(scratch_native, gotile, dv_accum);
+      threadgroup_barrier(mem_flags::mem_threadgroup);
+    }
+  }
+
+  auto dk_packed = transposed_mm.get_destination_cooperative_tensor<decltype(scratch_native), decltype(qtile0), bfloat>();
+  auto dv_packed = transposed_mm.get_destination_cooperative_tensor<decltype(scratch_native), decltype(gotile0), bfloat>();
+  for (uint i = 0; i < dk_packed.get_capacity(); ++i) dk_packed[i] = bfloat(dk_accum[i]);
+  for (uint i = 0; i < dv_packed.get_capacity(); ++i) dv_packed[i] = bfloat(dv_accum[i]);
+  dk_packed.store(tdk.slice<64, 32>(0, key_block * 32));
+  dv_packed.store(tdv.slice<64, 32>(0, key_block * 32));
+}

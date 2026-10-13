@@ -1,0 +1,4600 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "id": "ada-src-reviewed-bank",
+    "title": "Private authored recovery tasks and independent CPU reference procedures",
+    "url": "urn:private-course:recovery-cpu-v1",
+    "reviewedAt": "2026-10-12T21:00:00Z"
+  },
+  "extensions": [
+    {
+      "id": "course-numeric-creator",
+      "version": "1.0.0",
+      "integrity": "sha256-a625ed7beafe239deb860c7af60029efef6d5e68d68923f4539851631cccb31a",
+      "entrypoint": "extensions/bounded-numeric-v1.js",
+      "execution": "server",
+      "platforms": [
+        "web"
+      ],
+      "capabilities": [
+        "teaching.generate",
+        "teaching.verify"
+      ],
+      "accessibility": {
+        "keyboard": true,
+        "reducedMotion": true,
+        "textAlternative": "Verified text, numeric and choice recovery controls."
+      }
+    },
+    {
+      "id": "course-bank-creator",
+      "version": "1.0.0",
+      "integrity": "sha256-5bb608ab355039b753fa83db2477dbaad0d5eb1457eb7b341ac5f135bf45525c",
+      "entrypoint": "extensions/authored-bank-v1.js",
+      "execution": "server",
+      "platforms": [
+        "web"
+      ],
+      "capabilities": [
+        "teaching.generate",
+        "teaching.verify"
+      ],
+      "accessibility": {
+        "keyboard": true,
+        "reducedMotion": true,
+        "textAlternative": "Verified text, numeric and choice recovery controls."
+      }
+    }
+  ],
+  "adaptation": {
+    "schemaVersion": 1,
+    "sourceRefs": [
+      "ada-src-reviewed-bank"
+    ],
+    "profileFieldIds": [],
+    "targets": [
+      {
+        "episodeId": "fnd-e01-01",
+        "objectiveIds": [
+          "fnd-o01-01"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "fnd-e01-02",
+        "objectiveIds": [
+          "fnd-o01-02"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "fnd-e01-03",
+        "objectiveIds": [
+          "fnd-o01-03"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "fnd-e01-04",
+        "objectiveIds": [
+          "fnd-o01-04"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "fnd-e02-01",
+        "objectiveIds": [
+          "fnd-o02-01"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "fnd-e02-02",
+        "objectiveIds": [
+          "fnd-o02-02"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "fnd-e02-03",
+        "objectiveIds": [
+          "fnd-o02-03"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "fnd-e02-04",
+        "objectiveIds": [
+          "fnd-o02-04"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "fnd-e03-01",
+        "objectiveIds": [
+          "fnd-o03-01"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "fnd-e03-02",
+        "objectiveIds": [
+          "fnd-o03-02"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "fnd-e03-03",
+        "objectiveIds": [
+          "fnd-o03-03"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "fnd-e03-04",
+        "objectiveIds": [
+          "fnd-o03-04"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "fnd-e04-01",
+        "objectiveIds": [
+          "fnd-o04-01"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "fnd-e04-02",
+        "objectiveIds": [
+          "fnd-o04-02"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "fnd-e04-03",
+        "objectiveIds": [
+          "fnd-o04-03"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "fnd-e04-04",
+        "objectiveIds": [
+          "fnd-o04-04"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "ttf-e05-01",
+        "objectiveIds": [
+          "ttf-o05-01"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "ttf-e05-02",
+        "objectiveIds": [
+          "ttf-o05-02"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "ttf-e05-03",
+        "objectiveIds": [
+          "ttf-o05-03"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "ttf-e05-04",
+        "objectiveIds": [
+          "ttf-o05-04"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "ttf-e06-01",
+        "objectiveIds": [
+          "ttf-o06-01"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "ttf-e06-02",
+        "objectiveIds": [
+          "ttf-o06-02"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "ttf-e06-03",
+        "objectiveIds": [
+          "ttf-o06-03"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "ttf-e06-04",
+        "objectiveIds": [
+          "ttf-o06-04"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "ttf-e07-01",
+        "objectiveIds": [
+          "ttf-o07-01"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "ttf-e07-02",
+        "objectiveIds": [
+          "ttf-o07-02"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "ttf-e07-03",
+        "objectiveIds": [
+          "ttf-o07-03"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "ttf-e07-04",
+        "objectiveIds": [
+          "ttf-o07-04"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "ttf-e08-01",
+        "objectiveIds": [
+          "ttf-o08-01"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "ttf-e08-02",
+        "objectiveIds": [
+          "ttf-o08-02"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "ttf-e08-03",
+        "objectiveIds": [
+          "ttf-o08-03"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "ttf-e08-04",
+        "objectiveIds": [
+          "ttf-o08-04"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "sys-e09-01",
+        "objectiveIds": [
+          "sys-o09-01"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "sys-e09-02",
+        "objectiveIds": [
+          "sys-o09-02"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "sys-e09-03",
+        "objectiveIds": [
+          "sys-o09-03"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "sys-e09-04",
+        "objectiveIds": [
+          "sys-o09-04"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "sys-e10-01",
+        "objectiveIds": [
+          "sys-o10-01"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "sys-e10-02",
+        "objectiveIds": [
+          "sys-o10-02"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "sys-e10-03",
+        "objectiveIds": [
+          "sys-o10-03"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "sys-e10-04",
+        "objectiveIds": [
+          "sys-o10-04"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "sys-e11-01",
+        "objectiveIds": [
+          "sys-o11-01"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "sys-e11-02",
+        "objectiveIds": [
+          "sys-o11-02"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "sys-e11-03",
+        "objectiveIds": [
+          "sys-o11-03"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "sys-e11-04",
+        "objectiveIds": [
+          "sys-o11-04"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "eng-e12-01",
+        "objectiveIds": [
+          "eng-o12-01"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "eng-e12-02",
+        "objectiveIds": [
+          "eng-o12-02"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "eng-e12-03",
+        "objectiveIds": [
+          "eng-o12-03"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "eng-e12-04",
+        "objectiveIds": [
+          "eng-o12-04"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "eng-e13-01",
+        "objectiveIds": [
+          "eng-o13-01"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "eng-e13-02",
+        "objectiveIds": [
+          "eng-o13-02"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "eng-e13-03",
+        "objectiveIds": [
+          "eng-o13-03"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "eng-e13-04",
+        "objectiveIds": [
+          "eng-o13-04"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "eng-e14-01",
+        "objectiveIds": [
+          "eng-o14-01"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "eng-e14-02",
+        "objectiveIds": [
+          "eng-o14-02"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "eng-e14-03",
+        "objectiveIds": [
+          "eng-o14-03"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      },
+      {
+        "episodeId": "eng-e14-04",
+        "objectiveIds": [
+          "eng-o14-04"
+        ],
+        "allowedOperations": [
+          "add_assessment_variant"
+        ],
+        "replaceableBlockIds": []
+      }
+    ],
+    "families": [
+      {
+        "familyId": "fnd-family-coefficient-trace",
+        "canonicalAssessmentId": "fnd-a01-01-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-01-01"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-artifact-boundary",
+        "canonicalAssessmentId": "fnd-a01-01-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-training-state-ledger",
+        "canonicalAssessmentId": "fnd-a01-02-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-01-02"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-frozen-stage-transfer",
+        "canonicalAssessmentId": "fnd-a01-02-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-token-pipeline",
+        "canonicalAssessmentId": "fnd-a01-03-trace",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-tokenizer-abi",
+        "canonicalAssessmentId": "fnd-a01-03-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-partition-payload",
+        "canonicalAssessmentId": "fnd-a01-04-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-01-04"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-distributed-evidence",
+        "canonicalAssessmentId": "fnd-a01-04-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-tensor-payload",
+        "canonicalAssessmentId": "fnd-a02-01-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-02-01"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-semantic-axis-transfer",
+        "canonicalAssessmentId": "fnd-a02-01-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-strided-address",
+        "canonicalAssessmentId": "fnd-a02-02-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-02-02"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-transpose-counterexample",
+        "canonicalAssessmentId": "fnd-a02-02-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-matrix-product",
+        "canonicalAssessmentId": "fnd-a02-03-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-02-03"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-reduction-contract",
+        "canonicalAssessmentId": "fnd-a02-03-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-fp32-rounding",
+        "canonicalAssessmentId": "fnd-a02-04-trace",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-precision-transfer",
+        "canonicalAssessmentId": "fnd-a02-04-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-loss-computation",
+        "canonicalAssessmentId": "fnd-a03-01-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-03-01"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-objective-proxy",
+        "canonicalAssessmentId": "fnd-a03-01-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-chain-rule",
+        "canonicalAssessmentId": "fnd-a03-02-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-03-02"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-gradient-discriminator",
+        "canonicalAssessmentId": "fnd-a03-02-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-optimizer-step",
+        "canonicalAssessmentId": "fnd-a03-03-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-03-03"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-loss-scale-transfer",
+        "canonicalAssessmentId": "fnd-a03-03-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-weighted-evaluation",
+        "canonicalAssessmentId": "fnd-a03-04-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-03-04"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-evaluation-leakage",
+        "canonicalAssessmentId": "fnd-a03-04-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-dag-identity",
+        "canonicalAssessmentId": "fnd-a04-01-trace",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-saved-forward-state",
+        "canonicalAssessmentId": "fnd-a04-01-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-fanout-gradient",
+        "canonicalAssessmentId": "fnd-a04-02-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-04-02"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-optimizer-boundary",
+        "canonicalAssessmentId": "fnd-a04-02-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-microbatch-weighting",
+        "canonicalAssessmentId": "fnd-a04-03-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-04-03"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-recompute-contract",
+        "canonicalAssessmentId": "fnd-a04-03-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-engine-novel-graph",
+        "canonicalAssessmentId": "fnd-a04-04-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-04-04"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "fnd-family-engine-repair-suite",
+        "canonicalAssessmentId": "fnd-a04-04-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-mlp-chain",
+        "canonicalAssessmentId": "ttf-a05-01-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-05-01"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-composition-transfer",
+        "canonicalAssessmentId": "ttf-a05-01-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-residual-sensitivity",
+        "canonicalAssessmentId": "ttf-a05-02-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-05-02"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-normalization-isolation",
+        "canonicalAssessmentId": "ttf-a05-02-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-momentum-transition",
+        "canonicalAssessmentId": "ttf-a05-03-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-05-03"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-optimizer-state-transfer",
+        "canonicalAssessmentId": "ttf-a05-03-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-clean-loop-trace",
+        "canonicalAssessmentId": "ttf-a05-04-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-05-04"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-resume-counterexample",
+        "canonicalAssessmentId": "ttf-a05-04-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-embedding-scatter",
+        "canonicalAssessmentId": "ttf-a06-01-trace",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-embedding-identity",
+        "canonicalAssessmentId": "ttf-a06-01-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-stable-token-loss",
+        "canonicalAssessmentId": "ttf-a06-02-trace",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-loss-interface",
+        "canonicalAssessmentId": "ttf-a06-02-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-valid-token-mean",
+        "canonicalAssessmentId": "ttf-a06-03-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-06-03"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-future-leakage",
+        "canonicalAssessmentId": "ttf-a06-03-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-cache-budget",
+        "canonicalAssessmentId": "ttf-a06-04-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-06-04"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-cache-reuse-contract",
+        "canonicalAssessmentId": "ttf-a06-04-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-projection-budget",
+        "canonicalAssessmentId": "ttf-a07-01-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-07-01"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-projection-gradient-path",
+        "canonicalAssessmentId": "ttf-a07-01-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-attention-mixture",
+        "canonicalAssessmentId": "ttf-a07-02-trace",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-attention-gradient-oracle",
+        "canonicalAssessmentId": "ttf-a07-02-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-gqa-projection-budget",
+        "canonicalAssessmentId": "ttf-a07-03-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-07-03"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-norm-position-conventions",
+        "canonicalAssessmentId": "ttf-a07-03-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-decoder-ledger",
+        "canonicalAssessmentId": "ttf-a07-04-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-07-04"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-decoder-causality",
+        "canonicalAssessmentId": "ttf-a07-04-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-framework-accumulation",
+        "canonicalAssessmentId": "ttf-a08-01-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-08-01"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-registration-boundary",
+        "canonicalAssessmentId": "ttf-a08-01-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-async-timing",
+        "canonicalAssessmentId": "ttf-a08-02-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-08-02"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-benchmark-contract",
+        "canonicalAssessmentId": "ttf-a08-02-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-lazy-update-arithmetic",
+        "canonicalAssessmentId": "ttf-a08-03-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-08-03"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-lazy-evaluation-contract",
+        "canonicalAssessmentId": "ttf-a08-03-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-adapter-budget",
+        "canonicalAssessmentId": "ttf-a08-04-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-08-04"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "ttf-family-adapter-initialization",
+        "canonicalAssessmentId": "ttf-a08-04-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-dispatch-coverage",
+        "canonicalAssessmentId": "sys-a09-01-trace",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-barrier-scope",
+        "canonicalAssessmentId": "sys-a09-01-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-tile-traffic",
+        "canonicalAssessmentId": "sys-a09-02-trace",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-tile-resource-tradeoff",
+        "canonicalAssessmentId": "sys-a09-02-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-fusion-bytes",
+        "canonicalAssessmentId": "sys-a09-03-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-09-03"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-hardware-attribution",
+        "canonicalAssessmentId": "sys-a09-03-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-memory-budget",
+        "canonicalAssessmentId": "sys-a09-04-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-09-04"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-end-to-end-bound",
+        "canonicalAssessmentId": "sys-a09-04-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-weighted-replica-gradient",
+        "canonicalAssessmentId": "sys-a10-01-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-10-01"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-partition-message-contract",
+        "canonicalAssessmentId": "sys-a10-01-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-pipeline-fill-drain",
+        "canonicalAssessmentId": "sys-a10-02-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-10-02"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-stale-work-lifetime",
+        "canonicalAssessmentId": "sys-a10-02-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-return-score",
+        "canonicalAssessmentId": "sys-a10-03-trace",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-retry-evidence",
+        "canonicalAssessmentId": "sys-a10-03-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-outer-optimizer",
+        "canonicalAssessmentId": "sys-a10-04-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-10-04"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-chunking-semantics",
+        "canonicalAssessmentId": "sys-a10-04-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-readiness-margin",
+        "canonicalAssessmentId": "sys-a11-01-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-11-01"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-process-evidence",
+        "canonicalAssessmentId": "sys-a11-01-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-split-block-count",
+        "canonicalAssessmentId": "sys-a11-02-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-11-02"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-split-state-contract",
+        "canonicalAssessmentId": "sys-a11-02-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-optimizer-window-trace",
+        "canonicalAssessmentId": "sys-a11-03-trace",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-cache-versus-queue",
+        "canonicalAssessmentId": "sys-a11-03-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-event-interval",
+        "canonicalAssessmentId": "sys-a11-04-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-11-04"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "sys-family-semantic-heartbeat",
+        "canonicalAssessmentId": "sys-a11-04-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-coordinate-error",
+        "canonicalAssessmentId": "eng-a12-01-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-12-01"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-qualification-counterexample",
+        "canonicalAssessmentId": "eng-a12-01-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-layout-coordinate-audit",
+        "canonicalAssessmentId": "eng-a12-02-trace",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-gradient-identifiability",
+        "canonicalAssessmentId": "eng-a12-02-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-unequal-microbatch",
+        "canonicalAssessmentId": "eng-a12-03-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-12-03"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-path-coverage",
+        "canonicalAssessmentId": "eng-a12-03-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-containment-timeline",
+        "canonicalAssessmentId": "eng-a12-04-trace",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-causal-disclosure",
+        "canonicalAssessmentId": "eng-a12-04-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-global-log-partition",
+        "canonicalAssessmentId": "eng-a13-01-trace",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-finite-check-boundary",
+        "canonicalAssessmentId": "eng-a13-01-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-rms-pullback",
+        "canonicalAssessmentId": "eng-a13-02-trace",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-recompute-lifetime",
+        "canonicalAssessmentId": "eng-a13-02-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-comparison-envelope",
+        "canonicalAssessmentId": "eng-a13-03-trace",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-artifact-and-probe-gate",
+        "canonicalAssessmentId": "eng-a13-03-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-end-to-end-speedup",
+        "canonicalAssessmentId": "eng-a13-04-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-13-04"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-false-success-harness",
+        "canonicalAssessmentId": "eng-a13-04-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-spec-to-equation",
+        "canonicalAssessmentId": "eng-a14-01-trace",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-paper-claim-scope",
+        "canonicalAssessmentId": "eng-a14-01-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-paired-experiment",
+        "canonicalAssessmentId": "eng-a14-02-trace",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-evidence-manifest",
+        "canonicalAssessmentId": "eng-a14-02-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-network-critical-path",
+        "canonicalAssessmentId": "eng-a14-03-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-14-03"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-operational-receipts",
+        "canonicalAssessmentId": "eng-a14-03-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-heldout-gradient-defense",
+        "canonicalAssessmentId": "eng-a14-04-trace",
+        "generatorIds": [
+          "course-numeric-generator"
+        ],
+        "verifierIds": [
+          "course-numeric-verifier"
+        ],
+        "numericalRecipeIds": [
+          "ada-recipe-14-04"
+        ],
+        "maxVariantsPerPlan": 20
+      },
+      {
+        "familyId": "eng-family-portfolio-evidence-boundary",
+        "canonicalAssessmentId": "eng-a14-04-transfer",
+        "generatorIds": [
+          "course-bank-generator"
+        ],
+        "verifierIds": [
+          "course-bank-verifier"
+        ],
+        "numericalRecipeIds": [],
+        "maxVariantsPerPlan": 20
+      }
+    ],
+    "generators": [
+      {
+        "id": "course-numeric-generator",
+        "version": "1.0.0",
+        "extensionId": "course-numeric-creator",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "artifactKinds": [
+          "assessment_variant"
+        ]
+      },
+      {
+        "id": "course-bank-generator",
+        "version": "1.0.0",
+        "extensionId": "course-bank-creator",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "artifactKinds": [
+          "assessment_variant"
+        ]
+      }
+    ],
+    "verifiers": [
+      {
+        "id": "course-numeric-verifier",
+        "version": "1.0.0",
+        "extensionId": "course-numeric-creator",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "artifactKinds": [
+          "assessment_variant"
+        ],
+        "requiredCheckIds": [
+          "independent-answer"
+        ]
+      },
+      {
+        "id": "course-bank-verifier",
+        "version": "1.0.0",
+        "extensionId": "course-bank-creator",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "artifactKinds": [
+          "assessment_variant"
+        ],
+        "requiredCheckIds": [
+          "authored-bank-match"
+        ]
+      }
+    ],
+    "numericalRecipes": [
+      {
+        "id": "ada-recipe-01-01",
+        "version": "0.1.0",
+        "promptTemplate": "Two deployments run p(x)=w*x+b. A uses w=2,b=-1. B uses w=2+{{dw}},b=-1+{{db}}. At x={{x}}, how much must you ADD to B's bias so both deployments agree on this input? Keep both slopes fixed. Enter one signed number.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "db",
+            "minimum": 2,
+            "maximum": 5,
+            "integer": true
+          },
+          {
+            "name": "dw",
+            "minimum": 1,
+            "maximum": 3,
+            "integer": true
+          },
+          {
+            "name": "x",
+            "minimum": 2,
+            "maximum": 6,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "unary",
+          "operator": "negate",
+          "value": {
+            "type": "binary",
+            "operator": "add",
+            "left": {
+              "type": "binary",
+              "operator": "multiply",
+              "left": {
+                "type": "variable",
+                "name": "dw"
+              },
+              "right": {
+                "type": "variable",
+                "name": "x"
+              }
+            },
+            "right": {
+              "type": "variable",
+              "name": "db"
+            }
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-01-02",
+        "version": "0.1.0",
+        "promptTemplate": "A scalar state starts at w={{w}}. A completed backward pass stores g={{g}} but does not update w. The optimizer then executes w <- w-eta*g once, with eta=1. A second backward pass stores g=99, and execution stops before another optimizer call. What value of w belongs in a checkpoint at this boundary?",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "g",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          },
+          {
+            "name": "w",
+            "minimum": 7,
+            "maximum": 11,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "subtract",
+          "left": {
+            "type": "variable",
+            "name": "w"
+          },
+          "right": {
+            "type": "variable",
+            "name": "g"
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-01-04",
+        "version": "0.1.0",
+        "promptTemplate": "A split toy network has h=w*x, p=v*h and L=(p-y)^2/2. For x={{x}},w={{w}},v={{v}},y={{y}}, the second stage sends the correct scalar dL/dh. The first stage must still finish its chain rule. What dL/dw must it produce? No optimizer step occurs.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "v",
+            "minimum": -3,
+            "maximum": -2,
+            "integer": true
+          },
+          {
+            "name": "w",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          },
+          {
+            "name": "x",
+            "minimum": 2,
+            "maximum": 3,
+            "integer": true
+          },
+          {
+            "name": "y",
+            "minimum": 1,
+            "maximum": 2,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "multiply",
+          "left": {
+            "type": "binary",
+            "operator": "multiply",
+            "left": {
+              "type": "binary",
+              "operator": "subtract",
+              "left": {
+                "type": "binary",
+                "operator": "multiply",
+                "left": {
+                  "type": "binary",
+                  "operator": "multiply",
+                  "left": {
+                    "type": "variable",
+                    "name": "v"
+                  },
+                  "right": {
+                    "type": "variable",
+                    "name": "w"
+                  }
+                },
+                "right": {
+                  "type": "variable",
+                  "name": "x"
+                }
+              },
+              "right": {
+                "type": "variable",
+                "name": "y"
+              }
+            },
+            "right": {
+              "type": "variable",
+              "name": "v"
+            }
+          },
+          "right": {
+            "type": "variable",
+            "name": "x"
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-02-01",
+        "version": "0.1.0",
+        "promptTemplate": "A dense tensor has shape ({{b}},{{t}},{{d}}), with 2 bytes per element. A transpose VIEW shares its allocation. Making one contiguous copy of that view allocates another equally sized payload. Ignoring metadata and allocator padding, how many payload bytes are live while the original and copy both remain reachable?",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "b",
+            "minimum": 2,
+            "maximum": 3,
+            "integer": true
+          },
+          {
+            "name": "d",
+            "minimum": 4,
+            "maximum": 6,
+            "integer": true
+          },
+          {
+            "name": "t",
+            "minimum": 3,
+            "maximum": 4,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "multiply",
+          "left": {
+            "type": "binary",
+            "operator": "multiply",
+            "left": {
+              "type": "binary",
+              "operator": "multiply",
+              "left": {
+                "type": "binary",
+                "operator": "multiply",
+                "left": {
+                  "type": "variable",
+                  "name": "b"
+                },
+                "right": {
+                  "type": "variable",
+                  "name": "t"
+                }
+              },
+              "right": {
+                "type": "variable",
+                "name": "d"
+              }
+            },
+            "right": {
+              "type": "constant",
+              "value": 2
+            }
+          },
+          "right": {
+            "type": "constant",
+            "value": 2
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-02-02",
+        "version": "0.1.0",
+        "promptTemplate": "A rank-two view uses element offset = base+i*{{s0}}+j*{{s1}}, with 4 bytes per element. Both (i,j)=(1,2) and (2,0) are valid. What is address(2,0) MINUS address(1,2), in bytes? The shared base offset is unspecified because it cancels.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "s0",
+            "minimum": 1,
+            "maximum": 2,
+            "integer": true
+          },
+          {
+            "name": "s1",
+            "minimum": 4,
+            "maximum": 6,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "multiply",
+          "left": {
+            "type": "binary",
+            "operator": "subtract",
+            "left": {
+              "type": "variable",
+              "name": "s0"
+            },
+            "right": {
+              "type": "binary",
+              "operator": "multiply",
+              "left": {
+                "type": "constant",
+                "value": 2
+              },
+              "right": {
+                "type": "variable",
+                "name": "s1"
+              }
+            }
+          },
+          "right": {
+            "type": "constant",
+            "value": 4
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-02-03",
+        "version": "0.1.0",
+        "promptTemplate": "A=[[2,{{a}}],[0,3]] and B=[[1,4],[{{b}},-1]]. For C=A*B, enter C[0,0]+C[1,1], the trace of the product. Indices are zero based. Do not multiply corresponding entries elementwise.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "a",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          },
+          {
+            "name": "b",
+            "minimum": 2,
+            "maximum": 5,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "subtract",
+          "left": {
+            "type": "binary",
+            "operator": "multiply",
+            "left": {
+              "type": "variable",
+              "name": "a"
+            },
+            "right": {
+              "type": "variable",
+              "name": "b"
+            }
+          },
+          "right": {
+            "type": "constant",
+            "value": 1
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-03-01",
+        "version": "0.1.0",
+        "promptTemplate": "Two scalar examples have residuals prediction-target equal to {{r}} and -{{r}}. The loss is their MEAN half-squared error. A debugging change doubles only the second residual. What is new loss minus old loss?",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "r",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "divide",
+          "left": {
+            "type": "binary",
+            "operator": "multiply",
+            "left": {
+              "type": "binary",
+              "operator": "multiply",
+              "left": {
+                "type": "constant",
+                "value": 3
+              },
+              "right": {
+                "type": "variable",
+                "name": "r"
+              }
+            },
+            "right": {
+              "type": "variable",
+              "name": "r"
+            }
+          },
+          "right": {
+            "type": "constant",
+            "value": 4
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-03-02",
+        "version": "0.1.0",
+        "promptTemplate": "The parameter w is reused: u=w*w, p=u+{{c}}*w, L=(p-{{y}})^2/2. Evaluate dL/dw at w={{w}}. Count both operand paths through w*w.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "c",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          },
+          {
+            "name": "w",
+            "minimum": 2,
+            "maximum": 3,
+            "integer": true
+          },
+          {
+            "name": "y",
+            "minimum": 1,
+            "maximum": 4,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "multiply",
+          "left": {
+            "type": "binary",
+            "operator": "subtract",
+            "left": {
+              "type": "binary",
+              "operator": "add",
+              "left": {
+                "type": "binary",
+                "operator": "multiply",
+                "left": {
+                  "type": "variable",
+                  "name": "w"
+                },
+                "right": {
+                  "type": "variable",
+                  "name": "w"
+                }
+              },
+              "right": {
+                "type": "binary",
+                "operator": "multiply",
+                "left": {
+                  "type": "variable",
+                  "name": "c"
+                },
+                "right": {
+                  "type": "variable",
+                  "name": "w"
+                }
+              }
+            },
+            "right": {
+              "type": "variable",
+              "name": "y"
+            }
+          },
+          "right": {
+            "type": "binary",
+            "operator": "add",
+            "left": {
+              "type": "binary",
+              "operator": "multiply",
+              "left": {
+                "type": "constant",
+                "value": 2
+              },
+              "right": {
+                "type": "variable",
+                "name": "w"
+              }
+            },
+            "right": {
+              "type": "variable",
+              "name": "c"
+            }
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-03-03",
+        "version": "0.1.0",
+        "promptTemplate": "A scalar optimizer starts at w={{w}} with recorded gradient g={{g}}. It applies ordinary descent with learning rate 1/{{d}}. A second optimizer call intentionally uses the SAME recorded gradient without a new backward pass. Return w after the second call.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "d",
+            "minimum": 4,
+            "maximum": 8,
+            "integer": true
+          },
+          {
+            "name": "g",
+            "minimum": 2,
+            "maximum": 5,
+            "integer": true
+          },
+          {
+            "name": "w",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "subtract",
+          "left": {
+            "type": "variable",
+            "name": "w"
+          },
+          "right": {
+            "type": "binary",
+            "operator": "divide",
+            "left": {
+              "type": "binary",
+              "operator": "multiply",
+              "left": {
+                "type": "constant",
+                "value": 2
+              },
+              "right": {
+                "type": "variable",
+                "name": "g"
+              }
+            },
+            "right": {
+              "type": "variable",
+              "name": "d"
+            }
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-03-04",
+        "version": "0.1.0",
+        "promptTemplate": "A held-out report covers {{n}} examples with mean loss {{m}}. Its first example has loss {{a}} and is removed because it was duplicated. What is the mean over the remaining {{n}} minus one examples? Use the weighted loss total, not a mean of means.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "a",
+            "minimum": 1,
+            "maximum": 3,
+            "integer": true
+          },
+          {
+            "name": "m",
+            "minimum": 4,
+            "maximum": 6,
+            "integer": true
+          },
+          {
+            "name": "n",
+            "minimum": 3,
+            "maximum": 5,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "divide",
+          "left": {
+            "type": "binary",
+            "operator": "subtract",
+            "left": {
+              "type": "binary",
+              "operator": "multiply",
+              "left": {
+                "type": "variable",
+                "name": "n"
+              },
+              "right": {
+                "type": "variable",
+                "name": "m"
+              }
+            },
+            "right": {
+              "type": "variable",
+              "name": "a"
+            }
+          },
+          "right": {
+            "type": "binary",
+            "operator": "subtract",
+            "left": {
+              "type": "variable",
+              "name": "n"
+            },
+            "right": {
+              "type": "constant",
+              "value": 1
+            }
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-04-02",
+        "version": "0.1.0",
+        "promptTemplate": "Let u=x*x and z=u*u+{{c}}*u, with x={{x}}. In a reverse pass, what TOTAL adjoint must accumulate at the intermediate u before its multiplication is differentiated? Report dz/du, not dz/dx.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "c",
+            "minimum": 1,
+            "maximum": 3,
+            "integer": true
+          },
+          {
+            "name": "x",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "add",
+          "left": {
+            "type": "binary",
+            "operator": "multiply",
+            "left": {
+              "type": "binary",
+              "operator": "multiply",
+              "left": {
+                "type": "constant",
+                "value": 2
+              },
+              "right": {
+                "type": "variable",
+                "name": "x"
+              }
+            },
+            "right": {
+              "type": "variable",
+              "name": "x"
+            }
+          },
+          "right": {
+            "type": "variable",
+            "name": "c"
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-04-03",
+        "version": "0.1.0",
+        "promptTemplate": "A logical batch has {{n}} examples with mean gradient {{g}}. One microbatch contains {{k}} of those examples and has mean gradient {{a}}. What SUM of per-example gradients must the remaining examples contribute? No update occurs between microbatches.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "a",
+            "minimum": -2,
+            "maximum": -1,
+            "integer": true
+          },
+          {
+            "name": "g",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          },
+          {
+            "name": "k",
+            "minimum": 2,
+            "maximum": 3,
+            "integer": true
+          },
+          {
+            "name": "n",
+            "minimum": 6,
+            "maximum": 8,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "subtract",
+          "left": {
+            "type": "binary",
+            "operator": "multiply",
+            "left": {
+              "type": "variable",
+              "name": "n"
+            },
+            "right": {
+              "type": "variable",
+              "name": "g"
+            }
+          },
+          "right": {
+            "type": "binary",
+            "operator": "multiply",
+            "left": {
+              "type": "variable",
+              "name": "k"
+            },
+            "right": {
+              "type": "variable",
+              "name": "a"
+            }
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-04-04",
+        "version": "0.1.0",
+        "promptTemplate": "At x={{x}}, u=x*x and z=u+x. backward(root,seed) clears ALL adjoints before propagation. Call backward(z,3), then backward(u,2), without changing x. Return x.grad after the second call only.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "x",
+            "minimum": -4,
+            "maximum": -2,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "multiply",
+          "left": {
+            "type": "constant",
+            "value": 4
+          },
+          "right": {
+            "type": "variable",
+            "name": "x"
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-05-01",
+        "version": "0.1.0",
+        "promptTemplate": "A scalar two-unit MLP at x={{x}} has h0=ReLU(2*x-1), h1=ReLU(-x-1), p=3*h0+2*h1, L=(p-{{y}})^2/2. What is dL/dx? All approved inputs keep both preactivations away from zero.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "x",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          },
+          {
+            "name": "y",
+            "minimum": 1,
+            "maximum": 3,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "multiply",
+          "left": {
+            "type": "binary",
+            "operator": "subtract",
+            "left": {
+              "type": "binary",
+              "operator": "multiply",
+              "left": {
+                "type": "constant",
+                "value": 3
+              },
+              "right": {
+                "type": "binary",
+                "operator": "subtract",
+                "left": {
+                  "type": "binary",
+                  "operator": "multiply",
+                  "left": {
+                    "type": "constant",
+                    "value": 2
+                  },
+                  "right": {
+                    "type": "variable",
+                    "name": "x"
+                  }
+                },
+                "right": {
+                  "type": "constant",
+                  "value": 1
+                }
+              }
+            },
+            "right": {
+              "type": "variable",
+              "name": "y"
+            }
+          },
+          "right": {
+            "type": "constant",
+            "value": 6
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-05-02",
+        "version": "0.1.0",
+        "promptTemplate": "A scalar stack applies x1=x0+F1(x0), x2=x1+F2(x1), where F1(x)=x/{{a}} and F2(x)=-x/{{b}}. At x0=1, enter dx2/dx0. The skip paths remain present in BOTH blocks.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "a",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          },
+          {
+            "name": "b",
+            "minimum": 3,
+            "maximum": 5,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "multiply",
+          "left": {
+            "type": "binary",
+            "operator": "add",
+            "left": {
+              "type": "constant",
+              "value": 1
+            },
+            "right": {
+              "type": "binary",
+              "operator": "divide",
+              "left": {
+                "type": "constant",
+                "value": 1
+              },
+              "right": {
+                "type": "variable",
+                "name": "a"
+              }
+            }
+          },
+          "right": {
+            "type": "binary",
+            "operator": "subtract",
+            "left": {
+              "type": "constant",
+              "value": 1
+            },
+            "right": {
+              "type": "binary",
+              "operator": "divide",
+              "left": {
+                "type": "constant",
+                "value": 1
+              },
+              "right": {
+                "type": "variable",
+                "name": "b"
+              }
+            }
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-05-03",
+        "version": "0.1.0",
+        "promptTemplate": "Momentum uses m_new=(1/2)*m_old+g and w_new=w_old-(1/4)*m_new. Start w=3,m={{m}}. Use gradient {{g}} on step one and gradient zero on step two. Return w after BOTH updates; momentum is retained.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "g",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          },
+          {
+            "name": "m",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "subtract",
+          "left": {
+            "type": "binary",
+            "operator": "subtract",
+            "left": {
+              "type": "constant",
+              "value": 3
+            },
+            "right": {
+              "type": "binary",
+              "operator": "divide",
+              "left": {
+                "type": "binary",
+                "operator": "add",
+                "left": {
+                  "type": "binary",
+                  "operator": "divide",
+                  "left": {
+                    "type": "variable",
+                    "name": "m"
+                  },
+                  "right": {
+                    "type": "constant",
+                    "value": 2
+                  }
+                },
+                "right": {
+                  "type": "variable",
+                  "name": "g"
+                }
+              },
+              "right": {
+                "type": "constant",
+                "value": 4
+              }
+            }
+          },
+          "right": {
+            "type": "binary",
+            "operator": "divide",
+            "left": {
+              "type": "binary",
+              "operator": "add",
+              "left": {
+                "type": "binary",
+                "operator": "divide",
+                "left": {
+                  "type": "variable",
+                  "name": "m"
+                },
+                "right": {
+                  "type": "constant",
+                  "value": 2
+                }
+              },
+              "right": {
+                "type": "variable",
+                "name": "g"
+              }
+            },
+            "right": {
+              "type": "constant",
+              "value": 8
+            }
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-05-04",
+        "version": "0.1.0",
+        "promptTemplate": "A bias-only regressor predicts w, with loss (w-y)^2/2 and learning rate 1/2. Start w={{w}}. Recompute and clear gradients each step. First train on y={{a}}, then on a DIFFERENT example y={{b}}. Return w after step two.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "a",
+            "minimum": 3,
+            "maximum": 5,
+            "integer": true
+          },
+          {
+            "name": "b",
+            "minimum": -3,
+            "maximum": -1,
+            "integer": true
+          },
+          {
+            "name": "w",
+            "minimum": 0,
+            "maximum": 2,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "divide",
+          "left": {
+            "type": "binary",
+            "operator": "add",
+            "left": {
+              "type": "binary",
+              "operator": "divide",
+              "left": {
+                "type": "binary",
+                "operator": "add",
+                "left": {
+                  "type": "variable",
+                  "name": "w"
+                },
+                "right": {
+                  "type": "variable",
+                  "name": "a"
+                }
+              },
+              "right": {
+                "type": "constant",
+                "value": 2
+              }
+            },
+            "right": {
+              "type": "variable",
+              "name": "b"
+            }
+          },
+          "right": {
+            "type": "constant",
+            "value": 2
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-06-03",
+        "version": "0.1.0",
+        "promptTemplate": "A packed loss report has three valid token losses 1,2,{{x}} and two padded entries with loss 100 each. The desired mean is over valid tokens. A bug divides the valid loss sum by all five positions. Enter correct mean minus buggy mean.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "x",
+            "minimum": 2,
+            "maximum": 5,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "subtract",
+          "left": {
+            "type": "binary",
+            "operator": "divide",
+            "left": {
+              "type": "binary",
+              "operator": "add",
+              "left": {
+                "type": "constant",
+                "value": 3
+              },
+              "right": {
+                "type": "variable",
+                "name": "x"
+              }
+            },
+            "right": {
+              "type": "constant",
+              "value": 3
+            }
+          },
+          "right": {
+            "type": "binary",
+            "operator": "divide",
+            "left": {
+              "type": "binary",
+              "operator": "add",
+              "left": {
+                "type": "constant",
+                "value": 3
+              },
+              "right": {
+                "type": "variable",
+                "name": "x"
+              }
+            },
+            "right": {
+              "type": "constant",
+              "value": 5
+            }
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-06-04",
+        "version": "0.1.0",
+        "promptTemplate": "An append-only KV cache has {{l}} layers, batch {{b}}, {{h}} KV heads, head width {{d}}, and 2 bytes per cached scalar. Both keys and values are cached. Its length grows from 5 to 8 tokens. How many ADDITIONAL payload bytes are needed, excluding allocation slack?",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "b",
+            "minimum": 1,
+            "maximum": 2,
+            "integer": true
+          },
+          {
+            "name": "d",
+            "minimum": 3,
+            "maximum": 5,
+            "integer": true
+          },
+          {
+            "name": "h",
+            "minimum": 1,
+            "maximum": 2,
+            "integer": true
+          },
+          {
+            "name": "l",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "multiply",
+          "left": {
+            "type": "binary",
+            "operator": "multiply",
+            "left": {
+              "type": "binary",
+              "operator": "multiply",
+              "left": {
+                "type": "binary",
+                "operator": "multiply",
+                "left": {
+                  "type": "binary",
+                  "operator": "multiply",
+                  "left": {
+                    "type": "binary",
+                    "operator": "multiply",
+                    "left": {
+                      "type": "constant",
+                      "value": 2
+                    },
+                    "right": {
+                      "type": "variable",
+                      "name": "l"
+                    }
+                  },
+                  "right": {
+                    "type": "variable",
+                    "name": "b"
+                  }
+                },
+                "right": {
+                  "type": "variable",
+                  "name": "h"
+                }
+              },
+              "right": {
+                "type": "variable",
+                "name": "d"
+              }
+            },
+            "right": {
+              "type": "constant",
+              "value": 2
+            }
+          },
+          "right": {
+            "type": "constant",
+            "value": 3
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-07-01",
+        "version": "0.1.0",
+        "promptTemplate": "A bias-free attention module has D={{d}}, Q width {{q}}, K width {{q}}, and V width {{v}}. Its output projection maps width {{v}} back to D. If you omit ONLY the K projection from a parameter ledger, how many parameters are missing? Count scalar weights, not activations.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "d",
+            "minimum": 5,
+            "maximum": 7,
+            "integer": true
+          },
+          {
+            "name": "q",
+            "minimum": 3,
+            "maximum": 5,
+            "integer": true
+          },
+          {
+            "name": "v",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "multiply",
+          "left": {
+            "type": "variable",
+            "name": "d"
+          },
+          "right": {
+            "type": "variable",
+            "name": "q"
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-07-03",
+        "version": "0.1.0",
+        "promptTemplate": "Hold model width D={{d}}, query heads Hq=4 and head width 2 fixed. Change KV heads from 4 to 1, retaining Q and output projections unchanged. There are no biases. How many projection parameters are SAVED by this grouped-query change?",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "d",
+            "minimum": 6,
+            "maximum": 10,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "multiply",
+          "left": {
+            "type": "binary",
+            "operator": "multiply",
+            "left": {
+              "type": "binary",
+              "operator": "multiply",
+              "left": {
+                "type": "variable",
+                "name": "d"
+              },
+              "right": {
+                "type": "constant",
+                "value": 2
+              }
+            },
+            "right": {
+              "type": "constant",
+              "value": 2
+            }
+          },
+          "right": {
+            "type": "binary",
+            "operator": "subtract",
+            "left": {
+              "type": "constant",
+              "value": 4
+            },
+            "right": {
+              "type": "constant",
+              "value": 1
+            }
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-07-04",
+        "version": "0.1.0",
+        "promptTemplate": "A decoder ties its token embedding and output vocabulary matrix: one V by D parameter allocation serves both roles. V={{v}},D={{d}},T={{t}}. Learned position embeddings have T by D entries. Other weights are unaffected. A ledger mistakenly counts a separate vocabulary output matrix. How many parameters does it overcount?",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "d",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          },
+          {
+            "name": "t",
+            "minimum": 4,
+            "maximum": 6,
+            "integer": true
+          },
+          {
+            "name": "v",
+            "minimum": 6,
+            "maximum": 9,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "multiply",
+          "left": {
+            "type": "variable",
+            "name": "v"
+          },
+          "right": {
+            "type": "variable",
+            "name": "d"
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-08-01",
+        "version": "0.1.0",
+        "promptTemplate": "For p=w*x and half-squared loss, w={{w}}. Backward on (x=2,y=1) runs first. Then the gradient is explicitly cleared. Backward on (x=3,y=2) runs TWICE with fresh forward graphs but no intervening clear or optimizer call. Return the final w.grad.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "w",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "multiply",
+          "left": {
+            "type": "binary",
+            "operator": "multiply",
+            "left": {
+              "type": "constant",
+              "value": 2
+            },
+            "right": {
+              "type": "binary",
+              "operator": "subtract",
+              "left": {
+                "type": "binary",
+                "operator": "multiply",
+                "left": {
+                  "type": "constant",
+                  "value": 3
+                },
+                "right": {
+                  "type": "variable",
+                  "name": "w"
+                }
+              },
+              "right": {
+                "type": "constant",
+                "value": 2
+              }
+            }
+          },
+          "right": {
+            "type": "constant",
+            "value": 3
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-08-02",
+        "version": "0.1.0",
+        "promptTemplate": "A synthetic asynchronous trace is: previous work completes at t=11ms; measured launch starts t=14ms; CPU submission ends t=16ms; measured device work completes t={{end}}ms. Synchronization before t=14 has already finished. How many milliseconds does submission-only timing UNDERREPORT the measured interval?",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "end",
+            "minimum": 25,
+            "maximum": 32,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "subtract",
+          "left": {
+            "type": "variable",
+            "name": "end"
+          },
+          "right": {
+            "type": "constant",
+            "value": 16
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-08-03",
+        "version": "0.1.0",
+        "promptTemplate": "A lazy scalar training graph represents L=(w*x-y)^2/2 at w={{w}},x=2,y=1. The planned descent step has eta=1/4. Before materialization, host code changes an unrelated scalar variable named w to 99; the graph captured the ORIGINAL numeric value. Once evaluated, what updated parameter value does this graph produce?",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "w",
+            "minimum": 2,
+            "maximum": 5,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "subtract",
+          "left": {
+            "type": "variable",
+            "name": "w"
+          },
+          "right": {
+            "type": "binary",
+            "operator": "divide",
+            "left": {
+              "type": "binary",
+              "operator": "multiply",
+              "left": {
+                "type": "binary",
+                "operator": "subtract",
+                "left": {
+                  "type": "binary",
+                  "operator": "multiply",
+                  "left": {
+                    "type": "constant",
+                    "value": 2
+                  },
+                  "right": {
+                    "type": "variable",
+                    "name": "w"
+                  }
+                },
+                "right": {
+                  "type": "constant",
+                  "value": 1
+                }
+              },
+              "right": {
+                "type": "constant",
+                "value": 2
+              }
+            },
+            "right": {
+              "type": "constant",
+              "value": 4
+            }
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-08-04",
+        "version": "0.1.0",
+        "promptTemplate": "A frozen bias-free matrix has shape ({{o}},{{i}}). An adapter uses B of shape (out,r) and A of shape (r,in). Compare rank 2 with rank 3, both with no other trainable weights. How many ADDITIONAL trainable scalars does rank 3 introduce?",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "i",
+            "minimum": 6,
+            "maximum": 9,
+            "integer": true
+          },
+          {
+            "name": "o",
+            "minimum": 4,
+            "maximum": 7,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "add",
+          "left": {
+            "type": "variable",
+            "name": "o"
+          },
+          "right": {
+            "type": "variable",
+            "name": "i"
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-09-03",
+        "version": "0.1.0",
+        "promptTemplate": "Two unfused stages materialize an intermediate with shape ({{r}},{{c}}), 4 bytes per element. A fused path removes the intermediate write and later read, but additionally reads a separate r-element bias vector once. Count that entire new bias read. What is NET payload bytes saved under this explicit traffic model?",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "c",
+            "minimum": 4,
+            "maximum": 6,
+            "integer": true
+          },
+          {
+            "name": "r",
+            "minimum": 3,
+            "maximum": 5,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "subtract",
+          "left": {
+            "type": "binary",
+            "operator": "multiply",
+            "left": {
+              "type": "binary",
+              "operator": "multiply",
+              "left": {
+                "type": "binary",
+                "operator": "multiply",
+                "left": {
+                  "type": "constant",
+                  "value": 2
+                },
+                "right": {
+                  "type": "variable",
+                  "name": "r"
+                }
+              },
+              "right": {
+                "type": "variable",
+                "name": "c"
+              }
+            },
+            "right": {
+              "type": "constant",
+              "value": 4
+            }
+          },
+          "right": {
+            "type": "binary",
+            "operator": "multiply",
+            "left": {
+              "type": "variable",
+              "name": "r"
+            },
+            "right": {
+              "type": "constant",
+              "value": 4
+            }
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-09-04",
+        "version": "0.1.0",
+        "promptTemplate": "A hypothetical memory budget is {{p}} GiB physical with {{o}} GiB reserved for the OS/other processes. Parameters, gradients and optimizer state together occupy {{s}} GiB. Activations need 7 GiB but checkpointing reduces them to 3 GiB. After that change, how much usable headroom remains? Use GiB consistently and ignore allocator overhead.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "o",
+            "minimum": 7,
+            "maximum": 9,
+            "integer": true
+          },
+          {
+            "name": "p",
+            "minimum": 32,
+            "maximum": 36,
+            "integer": true
+          },
+          {
+            "name": "s",
+            "minimum": 16,
+            "maximum": 19,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "subtract",
+          "left": {
+            "type": "binary",
+            "operator": "subtract",
+            "left": {
+              "type": "binary",
+              "operator": "subtract",
+              "left": {
+                "type": "variable",
+                "name": "p"
+              },
+              "right": {
+                "type": "variable",
+                "name": "o"
+              }
+            },
+            "right": {
+              "type": "variable",
+              "name": "s"
+            }
+          },
+          "right": {
+            "type": "constant",
+            "value": 3
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-10-01",
+        "version": "0.1.0",
+        "promptTemplate": "Two replicas each report a mean gradient: replica A has {{a}} examples with mean 2; replica B has {{b}} examples with mean -1. The correct logical-batch gradient is their sample-weighted mean. What TOTAL gradient sum, before division by the total example count, should the merge use?",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "a",
+            "minimum": 3,
+            "maximum": 5,
+            "integer": true
+          },
+          {
+            "name": "b",
+            "minimum": 1,
+            "maximum": 3,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "subtract",
+          "left": {
+            "type": "binary",
+            "operator": "multiply",
+            "left": {
+              "type": "constant",
+              "value": 2
+            },
+            "right": {
+              "type": "variable",
+              "name": "a"
+            }
+          },
+          "right": {
+            "type": "variable",
+            "name": "b"
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-10-02",
+        "version": "0.1.0",
+        "promptTemplate": "A forward-only pipeline has {{s}} equal stages, each taking {{t}} ms per microbatch, no communication overhead and no overlap inside one stage. Sending {{m}} microbatches together takes fill plus drain time. How many milliseconds are SAVED compared with sending those microbatches strictly one at a time through all stages?",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "m",
+            "minimum": 3,
+            "maximum": 6,
+            "integer": true
+          },
+          {
+            "name": "s",
+            "minimum": 3,
+            "maximum": 5,
+            "integer": true
+          },
+          {
+            "name": "t",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "multiply",
+          "left": {
+            "type": "binary",
+            "operator": "subtract",
+            "left": {
+              "type": "binary",
+              "operator": "multiply",
+              "left": {
+                "type": "variable",
+                "name": "m"
+              },
+              "right": {
+                "type": "variable",
+                "name": "s"
+              }
+            },
+            "right": {
+              "type": "binary",
+              "operator": "subtract",
+              "left": {
+                "type": "binary",
+                "operator": "add",
+                "left": {
+                  "type": "variable",
+                  "name": "m"
+                },
+                "right": {
+                  "type": "variable",
+                  "name": "s"
+                }
+              },
+              "right": {
+                "type": "constant",
+                "value": 1
+              }
+            }
+          },
+          "right": {
+            "type": "variable",
+            "name": "t"
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-10-04",
+        "version": "0.1.0",
+        "promptTemplate": "Synthetic outer update: old weight w={{w}}, two local weights w-1 and w-3. Form g as the mean of old-minus-local pseudo-gradients. Start momentum m=2, update m_new=(1/2)*m+g, then use Nesterov direction g+(1/2)*m_new with learning rate 1/4. Return new weight. No local dataset weighting is implied.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "w",
+            "minimum": 8,
+            "maximum": 12,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "subtract",
+          "left": {
+            "type": "variable",
+            "name": "w"
+          },
+          "right": {
+            "type": "binary",
+            "operator": "divide",
+            "left": {
+              "type": "binary",
+              "operator": "add",
+              "left": {
+                "type": "constant",
+                "value": 2
+              },
+              "right": {
+                "type": "binary",
+                "operator": "divide",
+                "left": {
+                  "type": "binary",
+                  "operator": "add",
+                  "left": {
+                    "type": "binary",
+                    "operator": "divide",
+                    "left": {
+                      "type": "constant",
+                      "value": 2
+                    },
+                    "right": {
+                      "type": "constant",
+                      "value": 2
+                    }
+                  },
+                  "right": {
+                    "type": "constant",
+                    "value": 2
+                  }
+                },
+                "right": {
+                  "type": "constant",
+                  "value": 2
+                }
+              }
+            },
+            "right": {
+              "type": "constant",
+              "value": 4
+            }
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-11-01",
+        "version": "0.1.0",
+        "promptTemplate": "A synthetic supervisor deadline is t={{deadline}}s after spawn. The executable starts at t=2, readiness succeeds at t={{ready}}, and admission succeeds at t={{admit}}. How many seconds of deadline margin exist at ADMISSION? Neither process creation nor readiness is admission.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "admit",
+            "minimum": 15,
+            "maximum": 18,
+            "integer": true
+          },
+          {
+            "name": "deadline",
+            "minimum": 20,
+            "maximum": 24,
+            "integer": true
+          },
+          {
+            "name": "ready",
+            "minimum": 8,
+            "maximum": 10,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "subtract",
+          "left": {
+            "type": "variable",
+            "name": "deadline"
+          },
+          "right": {
+            "type": "variable",
+            "name": "admit"
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-11-02",
+        "version": "0.1.0",
+        "promptTemplate": "A synthetic 20-block model is split at half-open boundaries [0,{{h}}), [{{h}},{{t}}), [{{t}},20). Blocks execute once in increasing order. If the middle process and tail process are combined, how many block invocations does their combined forward perform? Embeddings and output heads are not counted as blocks.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "h",
+            "minimum": 4,
+            "maximum": 7,
+            "integer": true
+          },
+          {
+            "name": "t",
+            "minimum": 13,
+            "maximum": 16,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "subtract",
+          "left": {
+            "type": "constant",
+            "value": 20
+          },
+          "right": {
+            "type": "variable",
+            "name": "h"
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-11-04",
+        "version": "0.1.0",
+        "promptTemplate": "Synthetic monotonic timestamps in seconds: spawn=2, registration=7, forward completed=13, backward completed={{b}}, upload acknowledged={{u}}. What is upload-acknowledgment time minus backward-completion time? Treat this as an event interval; it does not measure GPU execution or credit.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "b",
+            "minimum": 23,
+            "maximum": 26,
+            "integer": true
+          },
+          {
+            "name": "u",
+            "minimum": 30,
+            "maximum": 34,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "subtract",
+          "left": {
+            "type": "variable",
+            "name": "u"
+          },
+          "right": {
+            "type": "variable",
+            "name": "b"
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-12-01",
+        "version": "0.1.0",
+        "promptTemplate": "Reference tensor is [10,-10,2,-2]; candidate is [{{a}},-{{a}},2,-2]. Signed sums agree. What is their maximum coordinatewise absolute error?",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "a",
+            "minimum": 12,
+            "maximum": 15,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "unary",
+          "operator": "abs",
+          "value": {
+            "type": "binary",
+            "operator": "subtract",
+            "left": {
+              "type": "variable",
+              "name": "a"
+            },
+            "right": {
+              "type": "constant",
+              "value": 10
+            }
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-12-03",
+        "version": "0.1.0",
+        "promptTemplate": "One microbatch contains {{n}} examples, each with gradient 2. Another contains ONE example with gradient 8. A candidate averages the two microbatch means equally. Enter candidate gradient minus the correct example-weighted mean.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "n",
+            "minimum": 2,
+            "maximum": 5,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "subtract",
+          "left": {
+            "type": "constant",
+            "value": 5
+          },
+          "right": {
+            "type": "binary",
+            "operator": "divide",
+            "left": {
+              "type": "binary",
+              "operator": "add",
+              "left": {
+                "type": "binary",
+                "operator": "multiply",
+                "left": {
+                  "type": "constant",
+                  "value": 2
+                },
+                "right": {
+                  "type": "variable",
+                  "name": "n"
+                }
+              },
+              "right": {
+                "type": "constant",
+                "value": 8
+              }
+            },
+            "right": {
+              "type": "binary",
+              "operator": "add",
+              "left": {
+                "type": "variable",
+                "name": "n"
+              },
+              "right": {
+                "type": "constant",
+                "value": 1
+              }
+            }
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-13-04",
+        "version": "0.1.0",
+        "promptTemplate": "A serial reference run spends {{c}} seconds in the optimized computation and {{o}} seconds elsewhere. The new computation is twice as fast BUT adds {{h}} seconds of setup on the measured path. Return full-run speedup old_time/new_time.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "c",
+            "minimum": 20,
+            "maximum": 28,
+            "integer": true
+          },
+          {
+            "name": "h",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          },
+          {
+            "name": "o",
+            "minimum": 14,
+            "maximum": 18,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "divide",
+          "left": {
+            "type": "binary",
+            "operator": "add",
+            "left": {
+              "type": "variable",
+              "name": "c"
+            },
+            "right": {
+              "type": "variable",
+              "name": "o"
+            }
+          },
+          "right": {
+            "type": "binary",
+            "operator": "add",
+            "left": {
+              "type": "binary",
+              "operator": "add",
+              "left": {
+                "type": "binary",
+                "operator": "divide",
+                "left": {
+                  "type": "variable",
+                  "name": "c"
+                },
+                "right": {
+                  "type": "constant",
+                  "value": 2
+                }
+              },
+              "right": {
+                "type": "variable",
+                "name": "o"
+              }
+            },
+            "right": {
+              "type": "variable",
+              "name": "h"
+            }
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-14-03",
+        "version": "0.1.0",
+        "promptTemplate": "A strictly serial toy job computes for {{c}} seconds, sends 150 decimal MB over a sustained 100 Mbit/s link, and performs {{o}} seconds of other work. A compression pass costs 1 second and halves ONLY the payload size. What is the net reduction in total wall time, in seconds? No overlap or protocol overhead is assumed.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "c",
+            "minimum": 4,
+            "maximum": 7,
+            "integer": true
+          },
+          {
+            "name": "o",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "subtract",
+          "left": {
+            "type": "binary",
+            "operator": "divide",
+            "left": {
+              "type": "binary",
+              "operator": "multiply",
+              "left": {
+                "type": "constant",
+                "value": 150
+              },
+              "right": {
+                "type": "constant",
+                "value": 8
+              }
+            },
+            "right": {
+              "type": "constant",
+              "value": 100
+            }
+          },
+          "right": {
+            "type": "binary",
+            "operator": "add",
+            "left": {
+              "type": "constant",
+              "value": 1
+            },
+            "right": {
+              "type": "binary",
+              "operator": "divide",
+              "left": {
+                "type": "binary",
+                "operator": "multiply",
+                "left": {
+                  "type": "constant",
+                  "value": 75
+                },
+                "right": {
+                  "type": "constant",
+                  "value": 8
+                }
+              },
+              "right": {
+                "type": "constant",
+                "value": 100
+              }
+            }
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      },
+      {
+        "id": "ada-recipe-14-04",
+        "version": "0.1.0",
+        "promptTemplate": "For F(a,b)=a*a*b+sin(b), evaluate the directional derivative at (a,b)=(1,0) along direction (da,db)=({{da}},{{db}}). The direction is NOT normalized. Return grad(F) dot direction.",
+        "sourceRefs": [
+          "ada-src-reviewed-bank"
+        ],
+        "variables": [
+          {
+            "name": "da",
+            "minimum": 2,
+            "maximum": 4,
+            "integer": true
+          },
+          {
+            "name": "db",
+            "minimum": -3,
+            "maximum": -1,
+            "integer": true
+          }
+        ],
+        "expression": {
+          "type": "binary",
+          "operator": "multiply",
+          "left": {
+            "type": "constant",
+            "value": 2
+          },
+          "right": {
+            "type": "variable",
+            "name": "db"
+          }
+        },
+        "maxNodes": 128,
+        "maxDepth": 16,
+        "maxAbsoluteValue": 1000000000,
+        "referenceCheck": {
+          "verifierId": "course-numeric-verifier",
+          "verifierVersion": "1.0.0",
+          "checkId": "independent-answer",
+          "absoluteTolerance": 1e-9
+        }
+      }
+    ],
+    "limits": {
+      "maxOperations": 4,
+      "maxArtifacts": 4,
+      "maxArtifactBytes": 20000,
+      "maxPlannedMinutesPerAssignment": 10,
+      "maxAdditionalEpisodesPerAssignment": 1,
+      "allowedClassifications": [
+        "required",
+        "optional"
+      ]
+    }
+  },
+  "qualification": {
+    "basis": "private_independent_cpu_domain_checks_and_reviewed_bank",
+    "creatorCode": "exact_installed_generic_implementation",
+    "registryAuthorization": "not_granted",
+    "practicalRecovery": "not_covered"
+  }
+}

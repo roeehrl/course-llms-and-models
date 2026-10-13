@@ -1,0 +1,25 @@
+# Repository rules
+
+## SN9 worker: protect the shared run
+
+STRATA runs a patched IOTA v4.12.10 worker for Bittensor SN9 Train at Home, behind the official app through our mounted proxy (`macos/StrataMiner/Research/iota-v4.12.10-local-worker/`, patches in `Research/iota-v4.12.10-fixset/`). Macrocosmos (Marcus) personally authorized this setup. That authorization is rare, and losing it ends our SN9 work. Our worker trains one shared model with every other operator in its run, so a bug in the work we compute damages everyone's run and payouts, not just ours.
+
+On 2026-10-11 we did exactly that. Our custom TensorOps attention kernel, validated only on an M4 Max, computed wrong attention on our M5 Macs. Those Macs corrupted run 4.12.16.24-tah until its loss diverged, and the run's payouts were forfeited. Read `macos/StrataMiner/Research/SN9_RUN24_CORRUPTION_INCIDENT_2026-10-11.md` before touching the worker.
+
+### Optimize aggressively, verify everything
+
+We are encouraged to optimize the worker as much as possible, especially the GPU work: kernels, fusions, memory, throughput. Speed is how we earn. The one condition is proof that every optimization produces results that match expectations and cannot poison a run. That proof comes from the rules below, not from a hunch.
+
+### Scope: the upstream-equivalence rule covers the computed work only
+
+"Actual work" means everything the worker computes and submits that ends up in the shared model: activations, losses, gradients, optimizer state, pseudo-gradients, merge results and the weights and blobs we upload.
+
+Worker behaviour is outside the rule. Routing and peer selection, scheduling, timeouts and send deadlines, retries, registration and bench escape, upload strategy, P2P and DNS handling, journaling and similar improvements are deliberate and have proved to improve the worker. Do not treat their differences from upstream as a problem, and do not propose reverting or switching them off for being "different from upstream". Fix them only for real bugs.
+
+### Hard rules for the computed work
+
+1. **Equal to upstream on every chip.** No change that can alter the computed work ships unless the patched-vs-upstream equivalence suite (`macos/StrataMiner/Research/sn9-equivalence-suite/`) passes on every chip family we deploy to: Studio M4 Max, MacBook M5 Max, and the guru/lurus M5 Pro minis. Pass means within upstream's own error against an fp32 oracle. Being finite does not make an output correct.
+2. **Compute kernels and math optimizations ship only when qualified per chip.** A custom kernel may run only on a chip listed in `mounted_proxyctl.TENSOROPS_QUALIFIED_CHIPS` (and the matching set in `doctor.py`). A chip gets listed only after the full qualification suite passes on that chip and macOS version: fp32 oracle, realistic inputs including attention sinks and outliers, every gradient, determinism, and a multi-step loss comparison against upstream. It also needs a start-up self-test that falls back to upstream on any mismatch. Build kernels without fast math.
+3. **Upgrades go out one Mac at a time.** Put a new worker on one Mac first. Watch that run's `/loss` for at least 3 epochs after it starts, and its own registration and work, before the next Mac. If a run's loss rises more than about 1% in the first epochs after one of our restarts, stop our worker in that run and investigate.
+4. **Be candid with Macrocosmos.** If our worker may have harmed a run, stop it, then tell the user right away and draft an honest report for them to send. Drafts go in `reports/`. Never send messages or posts yourself.
+5. **Keep out of run .24.** Don't put the M5 Macs (MacBook, guru, lurus) back into run 4.12.16.24-tah unless Macrocosmos says otherwise.

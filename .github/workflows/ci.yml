@@ -31,7 +31,7 @@ jobs:
         run: npm test
       - name: Independently verify arithmetic, gradients and intentional broken variants
         run: npm run verify:math
-      - name: Validate explicit partial development preview
-        run: npm run build:preview
-      # Complete-course readiness changes this gate to npm run build after all56episodes
-      # and their practical evaluators are delivered. No private bundles are uploaded.
+      - name: Validate full authored curriculum bundle
+        run: npm run build
+      # Full authored coverage is separate from practical/live platform acceptance.
+      # No private bundles or source evidence are uploaded as public artifacts.

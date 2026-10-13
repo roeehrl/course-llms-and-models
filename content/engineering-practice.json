@@ -1,0 +1,1359 @@
+{
+  "objectives": [
+    {
+      "id": "eng-o12-01",
+      "description": "Distinguish finiteness, repeatability and numerical equivalence, and select a test that rejects finite systematic errors.",
+      "prerequisites": [
+        "fnd-o02-04",
+        "ttf-o08-02"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "eng-o12-02",
+      "description": "Trace a layout mismatch through attention output and its pullback, while separating measured coordinate evidence from inference.",
+      "prerequisites": [
+        "eng-o12-01",
+        "ttf-o07-02"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "eng-o12-03",
+      "description": "Audit execution-path coverage and microbatch semantics so a successful fallback or recalibration cannot masquerade as candidate qualification.",
+      "prerequisites": [
+        "eng-o12-02",
+        "fnd-o03-04",
+        "ttf-o05-04"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "eng-o12-04",
+      "description": "Construct a dated evidence timeline and a proportionate containment/reporting proposal while separating confirmed faults from unproven historical causes.",
+      "prerequisites": [
+        "eng-o12-03"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "eng-o13-01",
+      "description": "Derive globally normalized tiled loss and gradients, and place finite checks at equivalent state-transition boundaries.",
+      "prerequisites": [
+        "eng-o12-03",
+        "ttf-o06-02",
+        "ttf-o08-02"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "eng-o13-02",
+      "description": "Verify normalization pullbacks and recomputation state while accounting for actual retained allocations rather than logical tensor sizes.",
+      "prerequisites": [
+        "eng-o13-01",
+        "ttf-o07-03",
+        "fnd-o04-03"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "eng-o13-03",
+      "description": "Design configuration-specific attention and training-state comparisons, including local probes, reference variability and unchanged acceptance limits.",
+      "prerequisites": [
+        "eng-o12-04",
+        "eng-o13-02"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "eng-o13-04",
+      "description": "Evaluate end-to-end optimization evidence using matched timing boundaries, allocation budgets and fault-sensitive release gates.",
+      "prerequisites": [
+        "eng-o13-03",
+        "ttf-o08-02"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "eng-o14-01",
+      "description": "Translate a research claim into a concrete implementation contract and state what evidence transfers across algorithms, artifacts and platforms.",
+      "prerequisites": [
+        "eng-o13-03",
+        "ttf-o07-04"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "eng-o14-02",
+      "description": "Specify a reproducible paired experiment with immutable identities, independent numerical checks, negative controls and scoped conclusions.",
+      "prerequisites": [
+        "eng-o14-01",
+        "eng-o13-04"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "eng-o14-03",
+      "description": "Compute useful-work throughput under explicit communication and overlap assumptions without equating completion, submission, acceptance or payment.",
+      "prerequisites": [
+        "eng-o13-04",
+        "eng-o14-02"
+      ],
+      "critical": true,
+      "placeable": false
+    },
+    {
+      "id": "eng-o14-04",
+      "description": "Defend a coherent engineering portfolio using a novel gradient task, held-out diagnosis and an explicitly limited improvement proposal.",
+      "prerequisites": [
+        "eng-o14-01",
+        "eng-o14-02",
+        "eng-o14-03"
+      ],
+      "critical": true,
+      "placeable": false
+    }
+  ],
+  "chapters": [
+    {
+      "id": "chapter12",
+      "title": "The corruption incident",
+      "summary": "Reconstruct numerical failure from pinned evidence and build discriminating tests without confusing distinct historical findings.",
+      "episodes": [
+        {
+          "id": "eng-e12-01",
+          "title": "Finite, deterministic and correct are different claims",
+          "objectiveIds": [
+            "eng-o12-01"
+          ],
+          "blocks": [
+            {
+              "id": "eng-12-01-lesson",
+              "type": "text",
+              "markdown": "A floating-point program can produce ordinary numbers, reproduce them perfectly, and still implement the wrong function. Finiteness excludes NaN and infinity in the values inspected. Repeatability compares executions of a chosen implementation. Correctness compares the implementation with a specified computation, including its permitted numerical error. These questions overlap, but none substitutes for the others. A hash of the wrong vector is still an excellent identifier for the wrong vector.\n\nConsider a four-element result whose intended logical coordinates contain `[1,2,3,4]`. A mistaken layout returns `[1,3,2,4]` on every call. Both vectors are finite, both have sum ten, and both have the same norm. Repeating the candidate ten thousand times would not repair the coordinate interpretation. A comparison of aggregate means would also miss it. This is an original CPU counterexample, not a recreation of a particular GPU's register mapping.\n\n```python\nimport math\nreference = [1.0, 2.0, 3.0, 4.0]\ncandidate = [1.0, 3.0, 2.0, 4.0]\nassert all(math.isfinite(x) for x in candidate)\nassert sum(candidate) == sum(reference)\nassert candidate == list(candidate)  # repeatability alone\nassert max(abs(a-b) for a,b in zip(candidate,reference)) == 1.0\n```\n\nA useful oracle comparison includes shape, coordinates, dtype, masks, reduction convention and input identity. Define maximum absolute error as the largest coordinate difference. Define relative L2 error as the norm of the difference divided by the reference norm, with a declared convention near zero. Inspect both: an average can hide a severe local error, while a relative statistic can become unstable when its denominator is tiny. A tolerance must come from the numerical contract and baseline evidence, not from a desire to make the candidate pass.\n\nThe private incident narrative dated 11 October 2026 reports that installation and smoke checks had accepted finite outputs while a custom attention path produced wrong computed work. Its later addendum describes a coordinate-layout defect. That is a historical report with a pinned digest, not a statement about today's machines. The precise saved coordinate probes and their limitations appear in the next episode. The course's own tests below use tiny CPU arrays and cannot qualify a Metal binary.\n\nBuild a ladder of increasingly demanding evidence. First verify input and output structure, then finiteness, then deterministic replay where expected, then elementwise and global agreement with an independent reference. Add gradients, optimizer state and repeated training transitions. Keep the old bad implementation as a negative control: a suite that accepts a known wrong permutation is not a credible release gate. Check empty arrays and mismatched shapes explicitly; a loop over zero pairs can otherwise report a vacuous pass.\n\nNow compare two hypothetical outcomes. Candidate A matches final loss but changes one optimizer second-moment buffer beyond its declared limit. Candidate B matches every inspected tensor but was tested on a different binary than the proposed artifact. Neither result qualifies the proposed computation. Loss is one projection of a much larger state. Artifact identity determines which program the evidence actually describes.\n\nFor practice, add a constant bias, transpose a nonsymmetric matrix and return an all-zero gradient. Predict which weak checks survive before running the CPU verification in the instructor review. Your independent items use a new vector and a different release decision. The practical task is to explain why each negative control is discriminating; passing the two short items alone does not demonstrate that you can audit a complete training system.",
+              "sourceRefs": [
+                "eng-src-original",
+                "eng-src-incident",
+                "eng-src-accuracy",
+                "eng-src-rules"
+              ]
+            },
+            {
+              "id": "eng-12-01-check-trace",
+              "type": "assessment",
+              "assessmentId": "eng-a12-01-trace"
+            },
+            {
+              "id": "eng-12-01-check-transfer",
+              "type": "assessment",
+              "assessmentId": "eng-a12-01-transfer"
+            }
+          ],
+          "gateId": "eng-g12-01"
+        },
+        {
+          "id": "eng-e12-02",
+          "title": "The M5 coordinate-layout bug and forward/backward damage",
+          "objectiveIds": [
+            "eng-o12-02"
+          ],
+          "blocks": [
+            {
+              "id": "eng-12-02-lesson",
+              "type": "text",
+              "markdown": "A tensor's mathematical coordinates are not its physical lane assignments. Two cooperative tensors can have equal element counts and different ownership maps. Reinterpreting the first as the second without checking compatibility can attach correct numerical values to incorrect coordinates. Apple's advanced TensorOps material describes a compatibility check before direct operand reuse; an incompatible representation needs an explicit conversion path through appropriately synchronized storage. That API contract matters more than a successful cast or a familiar shape.\n\nThe pinned private M5 Pro probe records dated 11 October 2026 provide unusually concrete evidence. For both recorded OS builds, `is_compatible_as_left_input_fp32` is zero. The coordinate audit inspects 1,024 left-input elements and finds 896 mismatches under its column,row convention; the destination load itself has zero mismatches. The unsafe fp32 cooperative conversion has relative output error about 1.304, whereas the explicit threadgroup fp32 path is about 9.94e-8. These are saved measurements for those probes, not new runs or a current qualification claim. The host and Metal sources are pinned alongside the results.\n\nThe saved pre-change forward source directly converts its score accumulator to a left-input operand at lines 81 and 97. The saved backward source does the analogous conversion for dQ at lines 68 and 97; its D-row kernel reads bf16 output at lines 8–18. These inspected source paths support the local mechanism without executing or identifying every historical deployed binary.\n\nUse a smaller analogy to understand the failure mechanism. Let P have rows `[0.25,0.75]` and `[0.6,0.4]`, and V have rows `[2,-1]` and `[4,3]`. Correct multiplication produces O with rows `[3.5,2]` and `[2.8,0.6]`. A teaching bug that consumes P-transpose instead produces `[2.9,1.55]` and `[3.1,0.45]`. Every value remains finite. This transpose is deliberately illustrative: the saved hardware probe also compared against P-transpose times V and did not establish that the actual defect was simply a matrix transpose.\n\n```python\nP = [[.25,.75],[.6,.4]]\nV = [[2.,-1.],[4.,3.]]\ndef mm(a,b):\n    return [[sum(a[i][k]*b[k][j] for k in range(len(b)))\n             for j in range(len(b[0]))] for i in range(len(a))]\nO = mm(P,V)\nwrong = mm([list(row) for row in zip(*P)],V)\nassert abs(O[0][0]-3.5) < 1e-12\nassert abs(wrong[0][0]-2.9) < 1e-12\n```\n\nThe backward damage has an algebraic route. For an upstream sensitivity dO, attention uses dP=dO V-transpose, row scalar D=sum(dO*O), and dS=P*(dP-D). Then dQ and dK are matrix products involving dS and the attention scale. With dO rows `[1,2]` and `[-1,0.5]`, the correct first-row D is 7.5. Substituting the wrong O makes it 6. That changes dS even if its P and dP inputs were otherwise correct. The first correct row sums to zero; the corrupted row need not. This gives a targeted invariant in addition to a final gradient comparison.\n\nMeanwhile dV=P-transpose dO does not use O. In this toy it can remain correct while O, dQ and dK are damaged. Do not invert that observation into a universal proof that P is correct: one product P-transpose dO does not uniquely identify every element of P. Direct intermediate checks and basis probes are stronger evidence than a plausible dependency story.\n\nThe CPU review differentiates a separate, fully specified scaled-attention function with central differences for every Q, K and V element. It compares those derivatives with an independently written analytic pullback and injects the wrong-output D-row variant. Your lab submission should identify the first mismatching boundary and retain both successful and rejected paths. It must not claim to reproduce the exact M5 lane mapping or to certify any chip from this analogy.",
+              "sourceRefs": [
+                "eng-src-original",
+                "eng-src-apple-layout",
+                "eng-src-pv-host",
+                "eng-src-pv-metal",
+                "eng-src-pv-a",
+                "eng-src-pv-b",
+                "eng-src-oracle-source",
+                "eng-src-original-forward",
+                "eng-src-original-backward"
+              ]
+            },
+            {
+              "id": "eng-12-02-check-trace",
+              "type": "assessment",
+              "assessmentId": "eng-a12-02-trace"
+            },
+            {
+              "id": "eng-12-02-check-transfer",
+              "type": "assessment",
+              "assessmentId": "eng-a12-02-transfer"
+            }
+          ],
+          "gateId": "eng-g12-02"
+        },
+        {
+          "id": "eng-e12-03",
+          "title": "Batch calibration, fallback changes and misleading smoke tests",
+          "objectiveIds": [
+            "eng-o12-03"
+          ],
+          "blocks": [
+            {
+              "id": "eng-12-03-lesson",
+              "type": "text",
+              "markdown": "An optimization is not tested merely because its entry function was called. Dispatch may select a fallback, a startup guard may disable the candidate, or a calibration routine may choose an unsupported shape. The result can be numerically excellent while the intended kernel never executes. Treat path selection as part of the experiment: record requested path, resolved path, forward and backward hit counts, disable reason and the identity of the code that actually ran.\n\nThe incident narrative dated 11 October 2026 describes an older custom attention path restricted to local batch four. It reports that MPS calibration could choose one, two or four, with smaller batches taking a grouped fallback. That historical dispatch contract explains why a restart could change the computation without a source edit. It does not tell us which path is active now. The course reads only the pinned narrative and research artifacts; it makes no live-worker observation.\n\nBatch size can also change mathematics when the logical objective is normalized incorrectly. Suppose a logical batch contains gradients `[2,8,8]`, split into microbatches of sizes one and two. Their local means are two and eight. Averaging those means gives five, but the sample-weighted mean is six. The larger microbatch contains two examples, so its mean needs weight two. Compare both implementations against the same full logical batch, with the same reduction and the same number of optimizer transitions.\n\n```python\nmicro = [[2.0], [8.0,8.0]]\nmeans = [sum(x)/len(x) for x in micro]\nwrong = sum(means)/len(means)\nright = sum(sum(x) for x in micro)/sum(map(len,micro))\nassert wrong == 5.0 and right == 6.0\n```\n\nEven correctly weighted accumulation is not automatically identical in finite precision. Reduction order, intermediate dtype, clipping placement and optimizer-step timing matter. An update after every microbatch is a different state machine from one update after the accumulated batch. If normalization uses batch statistics, changing the partition may change the function itself. First establish the logical contract, then measure the numerical envelope for implementations that satisfy it.\n\nA separate later investigation provides another coverage trap. Its dated record says an initial v2 test encountered saved-tensor hooks that discarded values needed by the startup self-test's reference backward. The runtime latched the custom path off and fell back to upstream. A successful process exit then described fallback execution, not v2 equivalence. That initialization-context defect is distinct from both the original coordinate bug and the historical attention-disabled drift. The record also documents later tests with actual kernel hits; do not merge those cases into the initial fallback result.\n\nFor an offline harness, make the expected-path assertion fail before interpreting numerical comparisons. Require nonzero forward and backward hits when both are part of the claimed optimization, successful startup validation, and no unexpected disable reason. Keep a deliberate test where dispatch always selects the reference: numerical outputs should pass while the candidate-coverage gate rejects the run. A second negative control should average unequal microbatch means, proving that your objective check notices a change that a finite-only probe misses.\n\nIn the lab report, separate “the fallback protected the process” from “the candidate was validated.” Both are useful results, but they support different claims. Also list calibration values and exact logical-batch composition. An unrecorded selection rule is a hidden experimental variable, even when every chosen batch completes without exceptions.",
+              "sourceRefs": [
+                "eng-src-original",
+                "eng-src-incident",
+                "eng-src-drift-note",
+                "eng-src-accuracy",
+                "eng-src-checkpoint"
+              ]
+            },
+            {
+              "id": "eng-12-03-check-trace",
+              "type": "assessment",
+              "assessmentId": "eng-a12-03-trace"
+            },
+            {
+              "id": "eng-12-03-check-transfer",
+              "type": "assessment",
+              "assessmentId": "eng-a12-03-transfer"
+            }
+          ],
+          "gateId": "eng-g12-03"
+        },
+        {
+          "id": "eng-e12-04",
+          "title": "Diagnosis, containment, disclosure and causal uncertainty",
+          "objectiveIds": [
+            "eng-o12-04"
+          ],
+          "blocks": [
+            {
+              "id": "eng-12-04-lesson",
+              "type": "text",
+              "markdown": "Incident response has two different decision thresholds. A credible risk to shared computed work can justify containment before the exact low-level cause is known. A causal claim in a report requires stronger evidence. Confusing those thresholds creates either dangerous delay or unjustified certainty. In this course, containment is a written proposal for an authorized operator; the exercise does not grant access to worker controls or authorize an operational action.\n\nStart a timeline with UTC instants, artifact identities and evidence types. A detector event is an observation. A candidate explanation is a hypothesis. A controlled intervention can discriminate hypotheses. A broad historical loss curve aggregates many influences, including other contributors, data and changing participation. Correlation between a restart and a loss jump can motivate investigation, but it cannot assign a precise share of harm by itself. Healthy loss is equally incapable of proving local equivalence.\n\nThe pinned incident narrative dated 11 October 2026 reports wrong original attention computation, deployment-path changes and shared-run damage. Its causal account is the report's account; this course has not rerun the historical shared run or audited all contributions. The saved coordinate probes provide direct support for a local layout defect. Those two evidence levels should appear in separate sentences rather than becoming a single supposedly measured causal chain.\n\nThe later M5 Max investigation dated the same day concerns different experiments. It describes a saved attention-disabled discrepancy that did not reproduce in several recorded fresh controls, a separate startup-hook problem, and a reproducible full-v2 pipeline gate failure. Its exact embedding second-moment summary records candidate/reference error ratio 1.517376634 against a 1.5 factor with a small floor. The raw large tensors were not read for this course. We cite the saved comparison and dated investigation, not a new independent verification of those millions of values or a claim about present status.\n\nUse a claim ledger with four columns: assertion, direct evidence, alternative explanations and next discriminating test. For example, “the original operand conversion misplaced coordinates in the saved probe” has a coordinate audit. “That conversion explains every historical loss jump” has a much larger burden and remains unsupported by that probe alone. “The later optimizer-state discrepancy is the same coordinate defect” is also unsupported merely because both involve an M5 label. The exact tested configuration matters.\n\n```text\nSynthetic response timeline, not fleet telemetry:\n2030-02-01T10:02:30Z  first reproducible mismatch saved\n2030-02-01T10:07:45Z  operator confirms proposed isolation completed\n2030-02-01T10:12:00Z  draft report reviewed; not sent by the test\n```\n\nA useful disclosure draft states what was observed, the potentially affected computation, the chosen containment, preserved artifacts and what remains uncertain. Avoid hiding a failure behind a passing global metric, but also avoid asserting an unmeasured payout or downstream effect. Attach source and binary digests, initial-state identifiers and exact comparison criteria. A result with an absent identity is not made reliable by confident prose.\n\nFor the practical exercise, assemble a small timeline from the pinned local records and separately label the synthetic timestamps above. Propose a read-only discriminating experiment that could distinguish a representation error from an accumulated backward precision issue. Include a negative-control outcome that would invalidate your preferred explanation. Another reviewer should be able to disagree using the same evidence without guessing what “fixed” meant. The independent questions check timeline arithmetic and claim discipline; an actual incident report still needs expert review and authorization before any operational use.",
+              "sourceRefs": [
+                "eng-src-original",
+                "eng-src-incident",
+                "eng-src-drift-note",
+                "eng-src-drift-cases",
+                "eng-src-drift-exact",
+                "eng-src-rules"
+              ]
+            },
+            {
+              "id": "eng-12-04-check-trace",
+              "type": "assessment",
+              "assessmentId": "eng-a12-04-trace"
+            },
+            {
+              "id": "eng-12-04-check-transfer",
+              "type": "assessment",
+              "assessmentId": "eng-a12-04-transfer"
+            }
+          ],
+          "gateId": "eng-g12-04"
+        }
+      ]
+    },
+    {
+      "id": "chapter13",
+      "title": "Optimize without changing the answer",
+      "summary": "Preserve loss, gradients and state while measuring tiling, fusion, memory behavior and guarded release evidence.",
+      "episodes": [
+        {
+          "id": "eng-e13-01",
+          "title": "Head/loss tiling and finite-check synchronization",
+          "objectiveIds": [
+            "eng-o13-01"
+          ],
+          "blocks": [
+            {
+              "id": "eng-13-01-lesson",
+              "type": "text",
+              "markdown": "The language-model head can create a large logits matrix even when the final training objective is one scalar. If there are N token positions and V vocabulary entries, a materialized fp32 logits array occupies 4NV bytes before gradients, saved activations and allocator overhead. At N=1024 and V=8192, that one array is 32 MiB. Processing 256 token rows at a time reduces the current logits tile to 8 MiB; processing 256 vocabulary columns at a time instead makes a 1 MiB tile but requires a global normalization across vocabulary tiles. These are different tiling axes and different implementation obligations.\n\nFor one row, cross-entropy is log(sum(exp(z))) minus the target logit. A stable implementation subtracts a maximum. When vocabulary tiles are streamed, maintain the running maximum m and scaled sum s. Combining a tile with maximum mt and scaled sum st gives new maximum M=max(m,mt), and new sum s*exp(m-M)+st*exp(mt-M). The final log-partition is M+log(s). Retain the target logit regardless of which tile contains it; averaging separate tile losses is not the original objective.\n\n```python\nimport math\nz = [1000.,999.,998.,997.]\nm, s = -math.inf, 0.0\nfor tile in [z[:2],z[2:]]:\n    mt = max(tile); st = sum(math.exp(x-mt) for x in tile)\n    M = max(m,mt)\n    s = s*math.exp(m-M) + st*math.exp(mt-M)\n    m = M\nloss = m + math.log(s) - z[2]\nassert abs(loss-2.4401896985611953) < 1e-10\n```\n\nBackward must preserve the same global denominator. Each logit derivative is its globally normalized probability minus the target indicator, with the declared token reduction factor. The head's weight gradient accumulates across token tiles; its input gradient combines contributions across vocabulary tiles. A tile boundary must not reset those accumulators or apply the optimizer early. The review checks a tiny linear head using central differences with respect to every input and weight, then shows that tile-local softmax gradients fail that reference.\n\nFinite checking creates a second optimization opportunity and a second semantic trap. Reading a device boolean into a host branch may require waiting for queued work. Repeated reads can dominate a small kernel's apparent cost. You can consider aggregating flags and reading once, but every relevant value must still be covered before the same irreversible boundary. A check after a weight update cannot retroactively prevent that update. A stale flag from an earlier launch can falsely certify the current computation.\n\nUse a synthetic cost ledger: sixty-four serial checks each impose fifteen microseconds of synchronization overhead, totaling 0.96 milliseconds. Four equivalent checks would impose 0.06 milliseconds under those assumptions. The possible saving is 0.9 milliseconds, not a measured end-to-end speedup. Flag production, reduction and required ordering also cost time. A host timer that measures only enqueue time may hide those costs entirely.\n\nFor the lab, inject NaN into a later tile and retain a previously clear flag as a bad variant. Your correct implementation must reject before commit, while a deliberately weak “any element is finite” check accepts a mixed finite/NaN vector and is rejected by the test. Record which allocations stay live after tiling: reducing a temporary logits tile does not erase weights, optimizer state or all saved buffers. The two independent items test a fresh partition calculation and a synchronization-boundary decision, while the practical implementation still requires the CPU reference and negative controls.",
+              "sourceRefs": [
+                "eng-src-original",
+                "eng-src-accuracy",
+                "eng-src-benchmark"
+              ]
+            },
+            {
+              "id": "eng-13-01-check-trace",
+              "type": "assessment",
+              "assessmentId": "eng-a13-01-trace"
+            },
+            {
+              "id": "eng-13-01-check-transfer",
+              "type": "assessment",
+              "assessmentId": "eng-a13-01-transfer"
+            }
+          ],
+          "gateId": "eng-g13-01"
+        },
+        {
+          "id": "eng-e13-02",
+          "title": "Normalization fusion, recomputation and buffer lifetime",
+          "objectiveIds": [
+            "eng-o13-02"
+          ],
+          "blocks": [
+            {
+              "id": "eng-13-02-lesson",
+              "type": "text",
+              "markdown": "Fusion removes intermediate traffic only when the fused computation preserves the intended operations and their dependencies. RMS normalization illustrates the point. For a vector x of length n, define r=sqrt(sum(x_i squared)/n+epsilon) and y_i=gamma_i*x_i/r. Unlike centered layer normalization, this operation does not subtract the mean. Calling a centered implementation “normalization” does not make it an equivalent substitution.\n\nGiven incoming sensitivities a_i, write u_i=a_i*gamma_i. The input derivative is u_i/r minus x_i*sum(u_j*x_j)/(n*r cubed); the gain derivative is a_i*x_i/r. The second term couples coordinates through the denominator. Omitting it can yield finite, plausible gradients with correct forward output. That makes a backward-only negative control especially useful: forward agreement cannot reveal a missing derivative term.\n\n```python\nimport math\nx, gamma, dy = [3.,4.], [1.,2.], [1.,-.5]\neps = 1e-5\nr = math.sqrt(sum(v*v for v in x)/len(x)+eps)\nu = [a*g for a,g in zip(dy,gamma)]\ndot = sum(a*b for a,b in zip(u,x))\ndx = [a/r-v*dot/(len(x)*r**3) for a,v in zip(u,x)]\ndgamma = [a*v/r for a,v in zip(dy,x)]\n```\n\nThe instructor's CPU verifier differentiates a separately written scalar objective with respect to x and gamma and checks every component. It also tries a centered forward and an uncoupled backward; both must fail the appropriate reference. The exercise is about an explicit equation and its derivative, not a claim that every fusion maintains bitwise identity on every backend. Record reduction axes, epsilon placement, accumulation dtype and the precise input values.\n\nRecomputation trades saved activations for repeated execution. It is correct only if the replay supplies the values needed by the original derivative. Consider y=w2*(w1*x). With w1=2, w2=3 and x=4, the sensitivity to w1 is twelve. If an optimizer changes w2 to five before backward recomputation, replaying the current weights yields sensitivity twenty. A numerically accurate multiplication has still differentiated the wrong forward state. Random masks, mutable buffers and context-dependent hooks create similar hazards.\n\nPyTorch's checkpoint documentation discusses preservation of random state and the consequences of different recomputation behavior. Use that as an API contract to inspect, not as permission to ignore state in your own implementation. In a tiny dropout example, retaining the original mask `[1,0]` differs from drawing `[0,1]` during backward. The verifier exercises both; it does not emulate a framework's random-number generator or establish accelerator checkpoint compatibility.\n\nMemory accounting also needs ownership, not just shape. A small view into a large allocation may keep the entire storage alive. In a synthetic trace, an eight-MiB base remains referenced by a one-row view while a three-MiB scratch allocation is created. The live allocation total is eleven MiB, not three MiB plus the view's logical payload. Releasing the base variable alone does not prove the storage is free. Shared ownership and asynchronous readers can extend lifetime beyond lexical scope.\n\nFor practice, draw a timeline containing allocation, last producer, last consumer, backward use and reclamation. Mark which values are saved and which are recomputed. Then add one retained-view fault and one wrong-replay-state fault. A valid optimization report includes numerical rejection of the latter and a memory explanation for the former. The conceptual gate is useful preparation; an actual fused-kernel or checkpoint implementation still needs independent execution and review.",
+              "sourceRefs": [
+                "eng-src-original",
+                "eng-src-rms-paper",
+                "eng-src-checkpoint",
+                "eng-src-recompute-paper",
+                "eng-src-gradcheck"
+              ]
+            },
+            {
+              "id": "eng-13-02-check-trace",
+              "type": "assessment",
+              "assessmentId": "eng-a13-02-trace"
+            },
+            {
+              "id": "eng-13-02-check-transfer",
+              "type": "assessment",
+              "assessmentId": "eng-a13-02-transfer"
+            }
+          ],
+          "gateId": "eng-g13-02"
+        },
+        {
+          "id": "eng-e13-03",
+          "title": "Attention layouts, precision and forward/backward qualification",
+          "objectiveIds": [
+            "eng-o13-03"
+          ],
+          "blocks": [
+            {
+              "id": "eng-13-03-lesson",
+              "type": "text",
+              "markdown": "A qualification record describes a specific configuration, not a product family in the abstract. Identify the source and binary digests, compiler flags, chip, OS build, framework version, shapes, dtype, mask, batch size and dispatch path. The numerical reference must receive the same represented inputs as the candidate. Comparing a low-precision candidate with an oracle built from different unrounded inputs mixes input quantization error with implementation error.\n\nAttention testing should include output, log-partition values and all Q, K and V gradients. Use random inputs, coordinate encodings, sharp score distributions, attention sinks, outliers and nontrivial masks. Include shared-key/value heads and verify that their gradients add contributions from all query heads; averaging those contributions changes the derivative. Avoid symmetric fixtures as your only examples: a transpose can disappear when the matrix is symmetric, and an all-zero sensitivity can hide a backward defect.\n\nThe private CPU oracle source pinned to the 11 October 2026 research directory explicitly converts the represented inputs to CPU float64 and computes causal grouped attention. We inspected that source; we did not execute its GPU callers. Our course verifier instead uses an original, small standard-library implementation and independent central differences. Agreement between these teaching calculations and their own reference is not qualification of a shipping kernel.\n\nThe saved layout defect and later pipeline drift illustrate why multiple scales are necessary. The original M5 Pro coordinate probes directly reject an incompatible operand representation. The later M5 Max investigation reports a different v2 pipeline with passing startup and shadow checks but a failed embedding second-moment comparison. Its saved exact summary lists relative L2 errors approximately 0.581648822 for the candidate and 0.383325279 for upstream, giving ratio 1.517376634. Its recorded criterion was factor 1.5 plus a small floor, so that saved check failed. These facts are dated evidence, not a current status announcement or a universal tolerance recommendation.\n\nThe same investigation also records a tested M5 Pro layer-one full-v2 pass and a forward-only variation that failed a different Pro probe. Therefore neither “M5 always fails” nor “using upstream backward universally fixes it” follows. The tested OS builds also differ, so those observations do not isolate chip hardware from operating-system effects. A controlled ablation narrows an explanation; it does not automatically identify a faulty instruction.\n\n```python\ndef within_band(candidate_error, upstream_error, factor, floor):\n    return candidate_error <= factor*upstream_error + floor\nassert not within_band(.0062,.0040,1.5,.0001)\nassert within_band(.0060,.0040,1.5,.0001)\n```\n\nFor a practical matrix of tests, retain full-vector metrics alongside fixed-coordinate probes and several training steps. A passing global norm cannot overrule a failed mandatory local probe. Handle near-zero references with the declared absolute floor and report the actual errors, not only their ratio. Check the reference's own repeatability: a changed oracle result is evidence to investigate, not permission to widen the band after observing the candidate.\n\nFinally, seal the artifact identity with the result. Editing source, flags or an embedded binary creates a new candidate even if the function name and version label stay unchanged. The CPU exercise verifies a mathematical model and rejects specific bad variants. It does not provide the chip-specific, model-scale or production evidence needed to authorize a real release. Keep that remaining gate visible in the report.",
+              "sourceRefs": [
+                "eng-src-original",
+                "eng-src-oracle-source",
+                "eng-src-pv-a",
+                "eng-src-pv-b",
+                "eng-src-drift-note",
+                "eng-src-drift-exact",
+                "eng-src-drift-cases",
+                "eng-src-accuracy"
+              ]
+            },
+            {
+              "id": "eng-13-03-check-trace",
+              "type": "assessment",
+              "assessmentId": "eng-a13-03-trace"
+            },
+            {
+              "id": "eng-13-03-check-transfer",
+              "type": "assessment",
+              "assessmentId": "eng-a13-03-transfer"
+            }
+          ],
+          "gateId": "eng-g13-03"
+        },
+        {
+          "id": "eng-e13-04",
+          "title": "Benchmarking, memory gates, fault injection and guarded rollout",
+          "objectiveIds": [
+            "eng-o13-04"
+          ],
+          "blocks": [
+            {
+              "id": "eng-13-04-lesson",
+              "type": "text",
+              "markdown": "A faster operator is a hypothesis about a faster system. Suppose a baseline job spends three seconds in a target kernel and seven seconds elsewhere. Making the kernel four times faster yields an optimistic total of 7.75 seconds, a speedup of about 1.2903, before accounting for new overhead. The kernel's fourfold improvement is not a fourfold job improvement. If the extra memory traffic slows another stage, even that optimistic estimate may fail.\n\nFirst specify the useful-work denominator. Tokens assigned, backward passes completed, results submitted and results accepted are different counts. Compare the same task, layer, batch, numerical mode and accepted-work definition. A run with more retries can report more operations while accomplishing less unique useful work. This lesson uses synthetic traces only; it does not compare live machines or infer present contribution from historical worker names.\n\nTiming must include completion of the work you claim to measure. Warm up compilation and caches separately, synchronize at matched boundaries when the backend is asynchronous, and preserve raw paired observations. Interleave reference and candidate trials to reduce drift from temperature or competing load. Report distributions and tail behavior, not only the minimum. PyTorch's benchmark utilities provide relevant timing machinery, but they cannot decide whether your workloads or artifact identities are comparable.\n\n```python\nbaseline = [100.,110.,90.,100.]  # synthetic milliseconds\ncandidate = [80.,88.,72.,80.]\nratios = [a/b for a,b in zip(baseline,candidate)]\nassert all(abs(r-1.25) < 1e-12 for r in ratios)\nend_to_end = 7.0 + 3.0/4.0\nassert abs(end_to_end-7.75) < 1e-12\n```\n\nSet memory gates independently of speed. An eight-GiB persistent state, a three-GiB temporary and two GiB of concurrently live communication buffers require thirteen GiB in that synthetic interval. Reporting only the temporary size misses the actual peak. Include initialization, steady state, backward, export and cleanup phases. A failed high-memory case is still a failed case; rerunning both reference and candidate under a new memory regime creates a new comparison that needs its own numerical check.\n\nA qualification harness also needs fault injection. Introduce one finite arithmetic error, one malformed shape, one stale artifact digest, one forced fallback and one cancelled-publication attempt. The appropriate checks must reject them. A test that catches only exceptions misses finite wrong answers. A test that catches only wrong answers misses an unexecuted candidate. A test that compares source hashes but never exercises the failing function proves identity rather than correctness.\n\nFor a guarded-rollout proposal, identify an exact qualified artifact, the first eligible configuration, the rollback target, observation windows and stop conditions. The pinned repository rules distinguish computed-work equivalence from deliberate changes in routing, retries and registration. Respect that scope: a scheduling change is not automatically wrong because upstream schedules differently, while a change to gradients cannot be excused as a harmless scheduling optimization. This course asks for the proposal only, with no deployment or worker access.\n\nKeep two gates visible at the end. Numerical qualification addresses the chosen computation and tested configuration. Operational observation addresses integration and possible regressions after an authorized rollout. A healthy shared loss plot can be useful surveillance but cannot replace numerical qualification. Likewise, a clean offline suite does not prove that the installed system selected the tested path. Your independent questions use a new cost breakdown and a harness that can falsely report success, forcing you to defend both boundaries.",
+              "sourceRefs": [
+                "eng-src-original",
+                "eng-src-benchmark",
+                "eng-src-rules",
+                "eng-src-drift-note"
+              ]
+            },
+            {
+              "id": "eng-13-04-check-trace",
+              "type": "assessment",
+              "assessmentId": "eng-a13-04-trace"
+            },
+            {
+              "id": "eng-13-04-check-transfer",
+              "type": "assessment",
+              "assessmentId": "eng-a13-04-transfer"
+            }
+          ],
+          "gateId": "eng-g13-04"
+        }
+      ]
+    },
+    {
+      "id": "chapter14",
+      "title": "Operate like an ML systems engineer",
+      "summary": "Read claims precisely, run reproducible CPU experiments, account for useful work and defend a bounded engineering portfolio.",
+      "episodes": [
+        {
+          "id": "eng-e14-01",
+          "title": "Read papers, distinguish claims and inspect implementations",
+          "objectiveIds": [
+            "eng-o14-01"
+          ],
+          "blocks": [
+            {
+              "id": "eng-14-01-lesson",
+              "type": "text",
+              "markdown": "Reading an ML systems paper is an exercise in translating claims into testable boundaries. Begin with the question, the mathematical object being computed, the assumptions and the comparison workload. Then locate the implementation paths that make the claim meaningful. A title containing “exact” does not tell you the tolerance of a particular floating-point kernel, and a speedup figure does not specify your machine's memory pressure or communication bottleneck.\n\nFlashAttention describes an exact attention algorithm organized to reduce memory traffic through tiling. That statement is about the intended attention computation and the algorithm's IO behavior. It does not certify a private Metal port, imply bitwise equality across reduction orders, or prove that a surrounding optimizer preserves state. Read the equations and workload assumptions before transferring a performance conclusion. The course uses the paper as a primary algorithm reference, not as an endorsement of any local artifact.\n\nLikewise, Apple's compatibility guidance concerns a particular API boundary. The documented fast path is conditional on layout compatibility. Copying only the operand-conversion call while dropping the guard changes the program's obligations. Inspect helpers and dispatch code as carefully as the main kernel: mask construction, dtype conversion and fallback selection may determine which mathematical function reaches the accelerator.\n\nUse an implementation-contract worksheet. Record input shape and coordinate conventions, the forward equation, every trainable input, reduction factors, epsilon placement, saved state and output precision. For this invented RMS-style contract, r=sqrt(sum(x_i squared)/n+epsilon), x=[0,3,4] and epsilon=2/3. The mean square is 25/3, the radicand is nine and r is three. The final normalized component is therefore 4/3. Omitting division by n computes a different equation, regardless of how similar the function names look.\n\n```python\nimport math\nx = [0.,3.,4.]\nr = math.sqrt(sum(v*v for v in x)/len(x) + 2/3)\nassert abs(r-3.0) < 1e-12\nassert abs(x[-1]/r-4/3) < 1e-12\n```\n\nThis numerical contract is an original exercise inspired by normalization mechanics; its constants are not an experimental result from the RMSNorm paper. That distinction is part of good sourcing. Separate a paper's proposition, an API's documented behavior, a saved experiment, your own derivation and your hypothesis. A citation next to a paragraph does not turn all five into measured facts.\n\nNext audit implementation identity. A source file can be correct while the installed binary comes from another build. A checksum links evidence to bytes, but it does not establish correctness, authenticity of the surrounding narrative or coverage of untested inputs. Preserve the build recipe and dependency versions when the claim depends on compilation. If a report refers to inaccessible raw tensors, say that you inspected its comparison summary rather than pretending to have rechecked those tensors.\n\nFor the reading lab, select one claim, write the smallest falsifiable implementation contract and construct a counterexample to an overbroad interpretation. One useful pair is an algebraically equivalent reduction that differs slightly in finite precision and a genuinely wrong reduction that remains finite. Explain why these deserve different judgments. Your independent items use a new normalization calculation and an inference about a paper's scope. A practical paper defense still requires explaining the equations and examining an actual implementation with a reviewer.",
+              "sourceRefs": [
+                "eng-src-original",
+                "eng-src-flashattention",
+                "eng-src-apple-layout",
+                "eng-src-rms-paper",
+                "eng-src-accuracy"
+              ]
+            },
+            {
+              "id": "eng-14-01-check-trace",
+              "type": "assessment",
+              "assessmentId": "eng-a14-01-trace"
+            },
+            {
+              "id": "eng-14-01-check-transfer",
+              "type": "assessment",
+              "assessmentId": "eng-a14-01-transfer"
+            }
+          ],
+          "gateId": "eng-g14-01"
+        },
+        {
+          "id": "eng-e14-02",
+          "title": "Build a reproducible experiment and evidence report",
+          "objectiveIds": [
+            "eng-o14-02"
+          ],
+          "blocks": [
+            {
+              "id": "eng-14-02-lesson",
+              "type": "text",
+              "markdown": "A reproducible experiment is a procedure another person can inspect and repeat, not merely a table of favorable results. State the hypothesis before collecting measurements. For example: “This vocabulary-tiled head preserves the declared loss and all derivatives while reducing the peak temporary allocation in this workload.” The numerical claim, memory claim and speed claim need separate observations. A shorter runtime cannot compensate for a changed derivative.\n\nCreate a manifest containing source and binary digests, reference identity, compiler settings, runtime and library versions, shapes, represented input values or their immutable source, seeds, masks, reduction conventions and expected dispatch path. Include the initial parameter and optimizer state when measuring multiple steps. A seed alone does not identify all inputs if code, generator version or preprocessing changed. A label such as latest is not an artifact identifier.\n\nFor a CPU example, pair reference times `[10,20,10,20]` with candidate times `[9,18,9,18]` in the same experimental blocks. Each paired speedup is 10/9. If instead all cool reference trials were compared with heated candidate trials, a thermal trend could masquerade as an implementation effect. These numbers are invented to explain pairing. They are not measured benchmark results, confidence intervals or evidence of any actual chip's performance.\n\n```python\nimport statistics\nreference = [10.,20.,10.,20.]\ncandidate = [9.,18.,9.,18.]\npaired = [a/b for a,b in zip(reference,candidate)]\nassert abs(statistics.median(paired)-10/9) < 1e-12\nassert statistics.median([a-b for a,b in zip(reference,candidate)]) == 1.5\n```\n\nPredeclare correctness criteria before looking at the candidate. Use an independent derivation or finite-difference reference where practical, and keep the trusted baseline's own error visible. Include negative controls with finite wrong arithmetic, an unexecuted candidate, wrong initial state and a changed artifact digest. A test harness that reports equality between two copies of the same mistaken function offers much less independence than it appears to. Record which checks are independent implementations and which share code.\n\nA failed test belongs in the report. Preserve the first divergence and the worst divergence separately, because they answer different questions. The dated M5 Max investigation explicitly distinguishes the first small loss difference from the maximum over the run. It also retains an unexplained historical failure despite passing reruns. This is an example of evidence discipline, not a claim that the same finding remains open today. Every historical statement here is bounded by the pinned document.\n\nUse an evidence ledger with pass, fail, not run and inconclusive states. A missing metric cannot default to pass. A timeout cannot establish a numerical comparison that never finished. A passing result from an old source digest cannot attach to edited code automatically. The course's CPU verifier includes a small gate predicate that checks identity, path coverage and comparison status, then demonstrates rejection of mismatched and incomplete records.\n\nThe final report should explain the observed result, its scope, plausible alternatives, the next discriminating experiment and any practical risk. Include raw measurements and the exact command needed to rerun the tiny CPU lab. Avoid claims of deployment, production qualification or professional certification. The two independent assessment families sample arithmetic and experimental design; full reproduction by another person and a reviewed practical submission remain additional evidence to collect.",
+              "sourceRefs": [
+                "eng-src-original",
+                "eng-src-benchmark",
+                "eng-src-gradcheck",
+                "eng-src-drift-note"
+              ]
+            },
+            {
+              "id": "eng-14-02-check-trace",
+              "type": "assessment",
+              "assessmentId": "eng-a14-02-trace"
+            },
+            {
+              "id": "eng-14-02-check-transfer",
+              "type": "assessment",
+              "assessmentId": "eng-a14-02-transfer"
+            }
+          ],
+          "gateId": "eng-g14-02"
+        },
+        {
+          "id": "eng-e14-03",
+          "title": "End-to-end performance, network limits and resource budgets",
+          "objectiveIds": [
+            "eng-o14-03"
+          ],
+          "blocks": [
+            {
+              "id": "eng-14-03-lesson",
+              "type": "text",
+              "markdown": "The system objective is useful work completed under the required correctness and resource constraints. A local kernel timer captures only one portion of that objective. Trace the path through computation, serialization, transfer, acknowledgement, merge and any retry. Keep application-level acceptance distinct from transport completion. The receipt that a server received bytes is not automatically proof that a contribution was accepted, credited or paid.\n\nFor a synthetic example, transferring one hundred MiB over a two-hundred-megabit-per-second payload channel has an ideal duration of 4.194304 seconds: multiply 100 by 2^20 bytes, multiply by eight bits per byte, then divide by 200 million bits per second. Protocol overhead, congestion, contention and retries can only invalidate the assumption of ideal payload service; they do not disappear because the headline link rate looks large. Always state whether the units are decimal MB, binary MiB, bits or bytes.\n\nNow consider a serial work cycle with eight seconds of computation, five seconds of transfer and two seconds of merge. Its duration is fifteen seconds. Under a separately stated model where computation and transfer overlap perfectly and merge cannot overlap either, the lower bound is max(8,5)+2=10 seconds. That is a model of a schedule, not proof that the actual implementation overlaps those stages. Measure dependency boundaries before selecting an overlap formula.\n\n```python\npayload_bytes = 100 * 2**20\nideal_seconds = payload_bytes * 8 / (200 * 10**6)\nassert abs(ideal_seconds-4.194304) < 1e-12\nserial = 8 + 5 + 2\nideal_overlap = max(8,5) + 2\nassert serial == 15 and ideal_overlap == 10\n```\n\nRetries introduce another denominator trap. If sixty logical contributions each require three attempts, an attempt counter reports 180 operations while the unique-work count remains sixty. Deduplicate using logical identity and authoritative outcome, not a label on a dashboard. A completed upload may still be waiting for acceptance; an accepted contribution may still lack a credit record. Loss statistics cannot fill in those missing state transitions. The course does not inspect wallets or infer payment from computation.\n\nResource budgets constrain which overlap is feasible. Concurrent transfers may require extra live buffers; batching may increase temporary memory; retry storms may consume request capacity without increasing accepted throughput. Record peak memory by phase and maximum in-flight work. A faster path that breaches a memory ceiling or drops validation is not a valid improvement under the original contract. Compare the same model split and workload when evaluating peers, because different layers can have radically different arithmetic and communication costs.\n\nIn the practical trace, create unique task IDs and explicit attempted, computed, submitted and accepted events. Include a duplicate acceptance event, a timeout with uncertain outcome and one task that was computed but never submitted. Write a CPU reducer that counts unique accepted IDs while refusing contradictory payload identities. That reducer is a teaching model; a real distributed service needs transactional receipts and durable recovery rather than an in-memory set.\n\nFinish with a bottleneck argument that could be wrong. State what measurement would falsify it, which resource limit might move, and how you would preserve numerical comparisons while changing scheduling. All timing and network figures in this lesson are synthetic calculations. They make no statement about a current fleet, link upgrade, worker health or payout. The independent items use a fresh serial cost model and a receipt interpretation that cannot be answered from throughput alone.",
+              "sourceRefs": [
+                "eng-src-original",
+                "eng-src-benchmark",
+                "eng-src-rules"
+              ]
+            },
+            {
+              "id": "eng-14-03-check-trace",
+              "type": "assessment",
+              "assessmentId": "eng-a14-03-trace"
+            },
+            {
+              "id": "eng-14-03-check-transfer",
+              "type": "assessment",
+              "assessmentId": "eng-a14-03-transfer"
+            }
+          ],
+          "gateId": "eng-g14-03"
+        },
+        {
+          "id": "eng-e14-04",
+          "title": "Final review: teach back, diagnose and propose a safe improvement",
+          "objectiveIds": [
+            "eng-o14-04"
+          ],
+          "blocks": [
+            {
+              "id": "eng-14-04-lesson",
+              "type": "text",
+              "markdown": "The final portfolio should connect equations, implementations and operational evidence into one defensible story. Include a tiny model, independent gradient tests, an execution trace, an incident reconstruction and one optimization proposal. Each artifact should state what it establishes and what it does not. A collection of green screenshots is weaker than a small reproducible experiment that rejects a realistic wrong implementation and preserves its failed result.\n\nBegin the teach-back without your original worked answers open. Explain the forward objective, a local derivative, how shared paths accumulate sensitivity, and when parameter mutation occurs. Then receive a new debugging fixture with one changed assumption: a noncontiguous layout, an unequal final microbatch, a stale saved activation or a missing state reset. This held-out task must differ from rehearsing an item whose answer you already saw. Record assistance and any hints so independent evidence is not manufactured from guided practice.\n\nHere is a compact practice model for discussing state. It predicts w*x, uses half squared error and performs ordinary gradient descent. Starting at w=1 with x=2 and target four, two correctly ordered updates of size 0.1 produce weights 1.4 and 1.64. A deliberately bad version retains the first gradient in the second update and reaches 2.04 instead. Its final loss can look deceptively small on this single example. The changed state transition remains wrong even when a scalar objective happens to improve.\n\n```python\nw = 1.0\nweights = []\nfor _ in range(2):\n    grad = (w*2.0-4.0)*2.0\n    w -= 0.1*grad\n    weights.append(w)\nassert all(abs(a-b)<1e-12 for a,b in zip(weights,[1.4,1.64]))\n```\n\nYour practical implementation must do more than repeat that trace. Use new coefficients, compare analytic gradients with independent finite differences, and retain a negative control for stale accumulation. For attention, include all Q/K/V sensitivities and at least one nonsymmetric masked case. For a proposed tiling or fusion change, compare forward values, gradients and several optimizer transitions from identical initial state. The instructor review provides reproducible CPU reference checks, not a deployed sandbox grader or accelerator certificate.\n\nThe incident portion should keep the original layout evidence separate from later M5 Max findings. Cite the exact saved source and result digests, date every historical statement and distinguish a measured failed gate from a proposed explanation. Do not declare today's issue resolved or unresolved from a document dated yesterday. Likewise, never infer shared-run corruption causality, accepted work or payment solely from a healthy loss plot or a completed job.\n\nThe proposal portion should identify a narrow change, predicted bottleneck, correctness invariant, memory bound, matched benchmark and conditions for abandoning the hypothesis. Include the exact artifact identities that would need new evidence after an edit. An authorized operator could later evaluate a staged rollout proposal; this exercise neither performs a rollout nor grants permission to one. The best recommendation may be to gather a discriminating measurement before changing anything.\n\nFinally, schedule a delayed revisit with a genuinely new item and an independent written or oral defense. This fragment supplies a conceptual assessment bank, but no calendar action or automatic credential. The two short final items check a novel local derivative and the limits of an evidence portfolio. Passing them is useful evidence of understanding. It is not professional certification, proof of production safety, or a substitute for a reviewer observing your practical work and explaining the remaining gaps honestly.",
+              "sourceRefs": [
+                "eng-src-original",
+                "eng-src-rules",
+                "eng-src-gradcheck",
+                "eng-src-drift-note"
+              ]
+            },
+            {
+              "id": "eng-14-04-check-trace",
+              "type": "assessment",
+              "assessmentId": "eng-a14-04-trace"
+            },
+            {
+              "id": "eng-14-04-check-transfer",
+              "type": "assessment",
+              "assessmentId": "eng-a14-04-transfer"
+            }
+          ],
+          "gateId": "eng-g14-04"
+        }
+      ]
+    }
+  ],
+  "assessments": [
+    {
+      "id": "eng-a12-01-trace",
+      "objectiveIds": [
+        "eng-o12-01"
+      ],
+      "familyId": "eng-family-coordinate-error",
+      "prompt": "Independent numeric check. Reference output is [10,-5,1,3]; candidate output is [10,-5,1,7]. Both are finite and repeat exactly. What is the maximum absolute coordinate error?",
+      "type": "numeric",
+      "grading": {
+        "expected": 4,
+        "absoluteTolerance": 0,
+        "explanation": "Only the fourth coordinate differs: |7-3|=4. Repeatability and finiteness do not reduce that error."
+      }
+    },
+    {
+      "id": "eng-a12-01-transfer",
+      "objectiveIds": [
+        "eng-o12-01"
+      ],
+      "familyId": "eng-family-qualification-counterexample",
+      "prompt": "Independent transfer check. An attention replacement has identical output sums and loss values on one seed. Its deterministic dK differs from the independent oracle outside the unchanged baseline envelope. Which release conclusion is warranted?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "It is qualified because deterministic gradients are safe."
+        },
+        {
+          "id": "b",
+          "text": "A matching loss overrides a gradient discrepancy."
+        },
+        {
+          "id": "c",
+          "text": "Changing the seed until the error disappears establishes qualification."
+        },
+        {
+          "id": "d",
+          "text": "The numerical gate fails; retain the failing dK and investigate before treating the artifact as equivalent."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "d",
+        "explanation": "The failed gradient is part of computed work. Aggregated outputs and one loss cannot establish full-vector equivalence; selecting a favorable seed would discard evidence."
+      }
+    },
+    {
+      "id": "eng-a12-02-trace",
+      "objectiveIds": [
+        "eng-o12-02"
+      ],
+      "familyId": "eng-family-layout-coordinate-audit",
+      "prompt": "Independent numeric check. A logical 3-by-3 array has row-major labels [0,1,2,3,4,5,6,7,8]. A bad conversion exposes [0,3,6,1,4,7,2,5,8] at those same logical coordinates. How many coordinates disagree?",
+      "type": "numeric",
+      "grading": {
+        "expected": 6,
+        "absoluteTolerance": 0,
+        "explanation": "Only coordinates 0,4,8 retain their labels; six coordinates differ. Counting the same nine stored numbers is not a coordinate check."
+      }
+    },
+    {
+      "id": "eng-a12-02-transfer",
+      "objectiveIds": [
+        "eng-o12-02"
+      ],
+      "familyId": "eng-family-gradient-identifiability",
+      "prompt": "Independent diagnostic check. On one input, dV matches its oracle but O and dQ do not. Which next argument is valid?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "The dV result is a useful localization clue; inspect P and the O-to-D dependency directly, because one matching projection cannot prove all of P correct."
+        },
+        {
+          "id": "b",
+          "text": "Correct dV mathematically proves every coordinate of P is correct for every input."
+        },
+        {
+          "id": "c",
+          "text": "The defect must be nondeterministic because different gradients disagree differently."
+        },
+        {
+          "id": "d",
+          "text": "Since dV passes, its value can replace all other gradient checks."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "The dependency graph motivates probes, but a single matrix product can hide errors in its null space. Direct stage evidence and independent gradients distinguish mechanisms."
+      }
+    },
+    {
+      "id": "eng-a12-03-trace",
+      "objectiveIds": [
+        "eng-o12-03"
+      ],
+      "familyId": "eng-family-unequal-microbatch",
+      "prompt": "Independent numeric check. Per-example gradients are [1,1,1,1,9], split as four examples and one example. A candidate averages the two microbatch means equally. What is candidate gradient minus the correct full-batch mean?",
+      "type": "numeric",
+      "grading": {
+        "expected": 2.4,
+        "absoluteTolerance": 1e-12,
+        "explanation": "The local means are 1 and 9, so the candidate is 5. The full mean is 13/5=2.6; the signed difference is 2.4."
+      }
+    },
+    {
+      "id": "eng-a12-03-transfer",
+      "objectiveIds": [
+        "eng-o12-03"
+      ],
+      "familyId": "eng-family-path-coverage",
+      "prompt": "Independent transfer check. A validation job exits successfully and matches reference tensors, but its log records requested=candidate, resolved=upstream, custom_forward_hits=0, custom_backward_hits=0 after a self-test exception. What did it establish?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Full candidate forward and backward equivalence."
+        },
+        {
+          "id": "b",
+          "text": "Useful fallback execution, with candidate qualification still untested by this job."
+        },
+        {
+          "id": "c",
+          "text": "That all self-test exceptions are harmless and can be ignored in production."
+        },
+        {
+          "id": "d",
+          "text": "That a later run with nonzero hits may reuse this job’s passing numerical result."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "Correct fallback output is not evidence about an unexecuted candidate. A later execution has its own identity, inputs and comparison results."
+      }
+    },
+    {
+      "id": "eng-a12-04-trace",
+      "objectiveIds": [
+        "eng-o12-04"
+      ],
+      "familyId": "eng-family-containment-timeline",
+      "prompt": "Independent numeric check using a synthetic timeline. A mismatch is saved at 2030-02-01T10:02:30Z; confirmed isolation is recorded at 10:07:45Z. How many seconds elapsed? Do not use the approximate historical report timestamps.",
+      "type": "numeric",
+      "grading": {
+        "expected": 315,
+        "absoluteTolerance": 0,
+        "explanation": "Five minutes and fifteen seconds is 315 seconds. These are exact synthetic instants, not measurements of the private incident."
+      }
+    },
+    {
+      "id": "eng-a12-04-transfer",
+      "objectiveIds": [
+        "eng-o12-04"
+      ],
+      "familyId": "eng-family-causal-disclosure",
+      "prompt": "Independent reporting check. A saved original-kernel coordinate probe fails; a later kernel version fails an optimizer-state gate; aggregate loss during that later test stays acceptable. Which report is defensible?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Both findings have the same proven cause because the chip family label matches."
+        },
+        {
+          "id": "b",
+          "text": "The later loss curve proves the optimizer-state failure cannot matter."
+        },
+        {
+          "id": "c",
+          "text": "Report the distinct configurations and failed gates, state the limits of causal attribution, and propose containment and discriminating tests without asserting current fleet status."
+        },
+        {
+          "id": "d",
+          "text": "Discard the original evidence because some later controls passed."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "Different versions and paths are separate findings. Local failures justify investigation; neither healthy aggregate loss nor successful reruns erase them or identify a universal cause."
+      }
+    },
+    {
+      "id": "eng-a13-01-trace",
+      "objectiveIds": [
+        "eng-o13-01"
+      ],
+      "familyId": "eng-family-global-log-partition",
+      "prompt": "Independent numeric check. A row has logits [ln(2),ln(3),ln(5)], split into vocabulary tiles containing the first two logits and the final logit. The target is the final class. What is the correct globally normalized cross-entropy? Use natural logarithms.",
+      "type": "numeric",
+      "grading": {
+        "expected": 0.6931471805599453,
+        "absoluteTolerance": 1e-09,
+        "explanation": "The partition is 2+3+5=10 and the target mass is 5, so loss=-ln(5/10)=ln(2). The target tile alone would incorrectly produce zero loss."
+      }
+    },
+    {
+      "id": "eng-a13-01-transfer",
+      "objectiveIds": [
+        "eng-o13-01"
+      ],
+      "familyId": "eng-family-finite-check-boundary",
+      "prompt": "Independent transfer check. A refactor combines per-tile finite flags. Which trace preserves rejection before any optimizer mutation?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Launch all tile checks; update weights; later read the aggregate flag."
+        },
+        {
+          "id": "b",
+          "text": "Reuse the previous batch’s clear flag because the buffer address is unchanged."
+        },
+        {
+          "id": "c",
+          "text": "Launch all relevant checks, establish their completion, read their aggregate, and update only if every required value is finite."
+        },
+        {
+          "id": "d",
+          "text": "Accept a tile if at least one of its values is finite."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "Aggregation can reduce synchronization only if it retains coverage, freshness and the original pre-mutation boundary. Checking afterward or reusing stale state changes behavior."
+      }
+    },
+    {
+      "id": "eng-a13-02-trace",
+      "objectiveIds": [
+        "eng-o13-02"
+      ],
+      "familyId": "eng-family-rms-pullback",
+      "prompt": "Independent numeric check. RMS normalization uses x=[0,2], gamma=[1,1], epsilon=0, and incoming gradient dy=[1,0]. What is dL/dx[0]? Both coordinates belong to one normalization group.",
+      "type": "numeric",
+      "grading": {
+        "expected": 0.7071067811865475,
+        "absoluteTolerance": 1e-09,
+        "explanation": "r=sqrt((0+4)/2)=sqrt(2). The coupling term for x[0] is zero, so the derivative is 1/sqrt(2). The input norm is nonzero, so this point is differentiable."
+      }
+    },
+    {
+      "id": "eng-a13-02-transfer",
+      "objectiveIds": [
+        "eng-o13-02"
+      ],
+      "familyId": "eng-family-recompute-lifetime",
+      "prompt": "Independent implementation review. A proposed checkpoint saves only a view into a large activation buffer, and its replay draws a new dropout mask. Which objection is correct?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "It may retain the large storage and differentiate a different random realization; measure allocation lifetime and preserve the required forward state."
+        },
+        {
+          "id": "b",
+          "text": "The view necessarily frees the original allocation immediately."
+        },
+        {
+          "id": "c",
+          "text": "A new mask is always valid because dropout is random."
+        },
+        {
+          "id": "d",
+          "text": "Matching output shapes proves both memory savings and correct backward."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "Views can retain their owners, and replay must reproduce the relevant forward computation. Neither shape equality nor the word checkpoint establishes either claim."
+      }
+    },
+    {
+      "id": "eng-a13-03-trace",
+      "objectiveIds": [
+        "eng-o13-03"
+      ],
+      "familyId": "eng-family-comparison-envelope",
+      "prompt": "Independent numeric check. An experiment prespecifies candidate_error <= 1.5*upstream_error + 0.0001. Upstream error is 0.003. What is the largest permitted candidate error? This is the supplied experiment rule, not a universal qualification tolerance.",
+      "type": "numeric",
+      "grading": {
+        "expected": 0.0046,
+        "absoluteTolerance": 1e-12,
+        "explanation": "1.5*0.003+0.0001=0.0046. The inclusive comparison permits the boundary; the experiment must not change that rule after seeing a candidate result."
+      }
+    },
+    {
+      "id": "eng-a13-03-transfer",
+      "objectiveIds": [
+        "eng-o13-03"
+      ],
+      "familyId": "eng-family-artifact-and-probe-gate",
+      "prompt": "Independent qualification review. The proposed binary differs from the one whose startup test passed. On the new binary, all global metrics pass but one required optimizer-state probe fails. Which conclusion follows?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "The old startup result qualifies the new binary because the public function names match."
+        },
+        {
+          "id": "b",
+          "text": "Averaging the passing metrics with the failed probe produces a valid overall pass."
+        },
+        {
+          "id": "c",
+          "text": "The probe can be deleted because it disagrees with the global metric."
+        },
+        {
+          "id": "d",
+          "text": "The new artifact fails its declared gate; retain the local failure and qualify the exact proposed identity before any release claim."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "d",
+        "explanation": "Evidence is bound to artifact identity and to all mandatory comparisons. Neither old tests nor aggregate metrics erase a failed required probe."
+      }
+    },
+    {
+      "id": "eng-a13-04-trace",
+      "objectiveIds": [
+        "eng-o13-04"
+      ],
+      "familyId": "eng-family-end-to-end-speedup",
+      "prompt": "Independent numeric check. A serial job takes 50 seconds: 20 in a target computation and 30 elsewhere. Only the target becomes twice as fast, with no new overhead and no overlap. What is total-job speedup, baseline time divided by candidate time?",
+      "type": "numeric",
+      "grading": {
+        "expected": 1.25,
+        "absoluteTolerance": 1e-12,
+        "explanation": "Candidate time is 20/2+30=40 seconds, so speedup is 50/40=1.25. The isolated computation is 2x faster, not the whole job."
+      }
+    },
+    {
+      "id": "eng-a13-04-transfer",
+      "objectiveIds": [
+        "eng-o13-04"
+      ],
+      "familyId": "eng-family-false-success-harness",
+      "prompt": "Independent fault-injection review. A harness catches a candidate exception, executes the reference, labels its output candidate, and reports equality plus faster enqueue time. What is the essential correction?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Treat exception recovery as evidence that the candidate is safe and faster."
+        },
+        {
+          "id": "b",
+          "text": "Separate fallback from candidate execution, assert actual candidate hits, use matched completion timing, and require injected faults to fail the relevant gate."
+        },
+        {
+          "id": "c",
+          "text": "Remove exception handling and skip all numerical checks to simplify timing."
+        },
+        {
+          "id": "d",
+          "text": "Keep the labels because both paths implement the same intended formula."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "Fallback correctness and enqueue latency do not measure candidate equivalence or completed performance. Negative controls must demonstrate that both coverage and numerical gates can fail."
+      }
+    },
+    {
+      "id": "eng-a14-01-trace",
+      "objectiveIds": [
+        "eng-o14-01"
+      ],
+      "familyId": "eng-family-spec-to-equation",
+      "prompt": "Independent numeric check. An implementation contract defines r=sqrt(mean(x_i^2)+epsilon) and y_i=x_i/r. Use x=[0,3,4] and epsilon=2/3. What is the last output component? This is an invented contract, not a quoted paper result.",
+      "type": "numeric",
+      "grading": {
+        "expected": 1.3333333333333333,
+        "absoluteTolerance": 1e-09,
+        "explanation": "The mean square is 25/3; adding 2/3 gives 9, so r=3 and the last output is 4/3."
+      }
+    },
+    {
+      "id": "eng-a14-01-transfer",
+      "objectiveIds": [
+        "eng-o14-01"
+      ],
+      "familyId": "eng-family-paper-claim-scope",
+      "prompt": "Independent reading check. A paper gives an exact tiled-attention algorithm and a speedup on its evaluated hardware. A private port uses a different layout conversion and compiler. Which claim is supported without new measurements?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "The port is bitwise identical on every accelerator because the paper says exact."
+        },
+        {
+          "id": "b",
+          "text": "The paper supplies an algorithmic reference; the port still needs its own equation, layout, gradient and platform evidence."
+        },
+        {
+          "id": "c",
+          "text": "The published speedup directly predicts the private system’s accepted tokens per hour."
+        },
+        {
+          "id": "d",
+          "text": "A paper citation replaces source and binary provenance."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "An algorithmic result does not qualify an independently implemented artifact or transfer a measured speedup to a new system. Equations, implementation fidelity and workload assumptions remain separate."
+      }
+    },
+    {
+      "id": "eng-a14-02-trace",
+      "objectiveIds": [
+        "eng-o14-02"
+      ],
+      "familyId": "eng-family-paired-experiment",
+      "prompt": "Independent numeric check. Three matched reference/candidate measurements in milliseconds are (100,90), (110,99), and (120,108). What is the median paired time saving in milliseconds? Report reference minus candidate, not a speedup ratio.",
+      "type": "numeric",
+      "grading": {
+        "expected": 11,
+        "absoluteTolerance": 0,
+        "explanation": "Paired savings are 10,11,12 milliseconds; their median is 11. Mixing units with ratios would answer a different question."
+      }
+    },
+    {
+      "id": "eng-a14-02-transfer",
+      "objectiveIds": [
+        "eng-o14-02"
+      ],
+      "familyId": "eng-family-evidence-manifest",
+      "prompt": "Independent experiment review. A report has clean metrics, but the oracle used old initial weights and the claimed candidate digest differs from the executed binary. Which repair makes the evidence interpretable?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Average the numbers because both differences are probably small."
+        },
+        {
+          "id": "b",
+          "text": "Rename the executed binary to the claimed version."
+        },
+        {
+          "id": "c",
+          "text": "Increase the error threshold until the old oracle passes."
+        },
+        {
+          "id": "d",
+          "text": "Preserve the invalid comparison, fix identities and initial-state matching, then rerun the declared controls and candidate before making a scoped claim."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "d",
+        "explanation": "Inputs and executed artifact are part of the comparison. Renaming, averaging or threshold changes cannot repair evidence from mismatched computations."
+      }
+    },
+    {
+      "id": "eng-a14-03-trace",
+      "objectiveIds": [
+        "eng-o14-03"
+      ],
+      "familyId": "eng-family-network-critical-path",
+      "prompt": "Independent numeric check. A serial job spends 6 seconds computing, transfers a decimal 240 MB payload over an ideal 80 Mbit/s payload channel, then spends 5 seconds in other work. There is no overlap. How many seconds does one cycle take?",
+      "type": "numeric",
+      "grading": {
+        "expected": 35,
+        "absoluteTolerance": 1e-09,
+        "explanation": "Transfer is 240*1,000,000*8/(80*1,000,000)=24 seconds. Total is 6+24+5=35 seconds. MB and Mbit are explicitly decimal here."
+      }
+    },
+    {
+      "id": "eng-a14-03-transfer",
+      "objectiveIds": [
+        "eng-o14-03"
+      ],
+      "familyId": "eng-family-operational-receipts",
+      "prompt": "Independent trace review. A worker has computed a result and completed an upload. The acceptance receipt is absent; aggregate run loss looks healthy. Which state can be reported?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Computed and transport-submitted, with acceptance, credit and payment still unestablished."
+        },
+        {
+          "id": "b",
+          "text": "Accepted and paid, because healthy loss confirms all contributions."
+        },
+        {
+          "id": "c",
+          "text": "Not computed, because payment is absent."
+        },
+        {
+          "id": "d",
+          "text": "Numerically qualified, because the upload completed."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "A transport event establishes neither server acceptance nor numerical equivalence. Later credit and payment require their own evidence; aggregate loss does not substitute for those receipts."
+      }
+    },
+    {
+      "id": "eng-a14-04-trace",
+      "objectiveIds": [
+        "eng-o14-04"
+      ],
+      "familyId": "eng-family-heldout-gradient-defense",
+      "prompt": "Independent held-out numeric check. Define F(a,b)=a*a*b+sin(b). At a=0.5 and b=0, what is the partial derivative dF/db? Derive it from the function rather than from the practice training trace.",
+      "type": "numeric",
+      "grading": {
+        "expected": 1.25,
+        "absoluteTolerance": 1e-12,
+        "explanation": "dF/db=a*a+cos(b). At the specified point this is 0.25+1=1.25. This is a different function family from the rehearsed linear-model update."
+      }
+    },
+    {
+      "id": "eng-a14-04-transfer",
+      "objectiveIds": [
+        "eng-o14-04"
+      ],
+      "familyId": "eng-family-portfolio-evidence-boundary",
+      "prompt": "Independent final review. A portfolio has passing short-item gates and a faster toy kernel, but one optimizer-state comparison fails and no practical submission has been independently graded. Which conclusion is appropriate?",
+      "type": "choice",
+      "options": [
+        {
+          "id": "a",
+          "text": "Issue a professional safety certificate because the course was completed."
+        },
+        {
+          "id": "b",
+          "text": "Declare production equivalence because the toy benchmark improved."
+        },
+        {
+          "id": "c",
+          "text": "Credit only the demonstrated conceptual evidence, retain the failed comparison, and require reviewed practical work plus exact-configuration qualification for stronger claims."
+        },
+        {
+          "id": "d",
+          "text": "Remove the optimizer state from the portfolio and treat the missing practical review as a pass."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "Course gates, practical implementation evidence, numerical qualification and production observation are distinct. A failed required state comparison and an ungraded practical artifact must remain explicit."
+      }
+    }
+  ],
+  "gates": [
+    {
+      "id": "eng-g12-01",
+      "objectiveIds": [
+        "eng-o12-01"
+      ],
+      "assessmentIds": [
+        "eng-a12-01-trace",
+        "eng-a12-01-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "eng-g12-02",
+      "objectiveIds": [
+        "eng-o12-02"
+      ],
+      "assessmentIds": [
+        "eng-a12-02-trace",
+        "eng-a12-02-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "eng-g12-03",
+      "objectiveIds": [
+        "eng-o12-03"
+      ],
+      "assessmentIds": [
+        "eng-a12-03-trace",
+        "eng-a12-03-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "eng-g12-04",
+      "objectiveIds": [
+        "eng-o12-04"
+      ],
+      "assessmentIds": [
+        "eng-a12-04-trace",
+        "eng-a12-04-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "eng-g13-01",
+      "objectiveIds": [
+        "eng-o13-01"
+      ],
+      "assessmentIds": [
+        "eng-a13-01-trace",
+        "eng-a13-01-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "eng-g13-02",
+      "objectiveIds": [
+        "eng-o13-02"
+      ],
+      "assessmentIds": [
+        "eng-a13-02-trace",
+        "eng-a13-02-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "eng-g13-03",
+      "objectiveIds": [
+        "eng-o13-03"
+      ],
+      "assessmentIds": [
+        "eng-a13-03-trace",
+        "eng-a13-03-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "eng-g13-04",
+      "objectiveIds": [
+        "eng-o13-04"
+      ],
+      "assessmentIds": [
+        "eng-a13-04-trace",
+        "eng-a13-04-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "eng-g14-01",
+      "objectiveIds": [
+        "eng-o14-01"
+      ],
+      "assessmentIds": [
+        "eng-a14-01-trace",
+        "eng-a14-01-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "eng-g14-02",
+      "objectiveIds": [
+        "eng-o14-02"
+      ],
+      "assessmentIds": [
+        "eng-a14-02-trace",
+        "eng-a14-02-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "eng-g14-03",
+      "objectiveIds": [
+        "eng-o14-03"
+      ],
+      "assessmentIds": [
+        "eng-a14-03-trace",
+        "eng-a14-03-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    },
+    {
+      "id": "eng-g14-04",
+      "objectiveIds": [
+        "eng-o14-04"
+      ],
+      "assessmentIds": [
+        "eng-a14-04-trace",
+        "eng-a14-04-transfer"
+      ],
+      "minimumIndependentFamilies": 2,
+      "requireAllObjectives": true
+    }
+  ],
+  "sources": [
+    {
+      "id": "eng-src-apple-layout",
+      "title": "Apple WWDC26: cooperative-tensor compatibility, advanced operations",
+      "url": "https://developer.apple.com/videos/play/wwdc2026/330/",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-accuracy",
+      "title": "PyTorch 2.14: numerical accuracy",
+      "url": "https://docs.pytorch.org/docs/2.14/notes/numerical_accuracy.html",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-gradcheck",
+      "title": "PyTorch 2.14: gradcheck mechanics",
+      "url": "https://docs.pytorch.org/docs/2.14/notes/gradcheck.html",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-checkpoint",
+      "title": "PyTorch 2.14: activation checkpointing",
+      "url": "https://docs.pytorch.org/docs/2.14/checkpoint.html",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-benchmark",
+      "title": "PyTorch 2.14: benchmark utilities",
+      "url": "https://docs.pytorch.org/docs/2.14/benchmark_utils.html",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-flashattention",
+      "title": "Dao et al. 2022: FlashAttention, exact attention with IO awareness",
+      "url": "https://arxiv.org/abs/2205.14135",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-recompute-paper",
+      "title": "Chen et al. 2016: Training Deep Nets with Sublinear Memory Cost",
+      "url": "https://arxiv.org/abs/1604.06174",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-rms-paper",
+      "title": "Zhang and Sennrich 2019: Root Mean Square Layer Normalization",
+      "url": "https://arxiv.org/abs/1910.07467",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-rules",
+      "title": "Repository computed-work rules, captured 2026-10-12; SHA-256 60da4971318cd8c3e8c2735255d4e526e48e12427c20555488c7c5a9b35f1743",
+      "url": "urn:private:course-llms-and-models:evidence:sha256:60da4971318cd8c3e8c2735255d4e526e48e12427c20555488c7c5a9b35f1743",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-incident",
+      "title": "Private incident narrative dated 2026-10-11, including later layout addendum; SHA-256 ab1508a9b8767d6477f1c662251aff7e9add6285ed44e01fcaba89058eb6f174",
+      "url": "urn:private:course-llms-and-models:evidence:sha256:ab1508a9b8767d6477f1c662251aff7e9add6285ed44e01fcaba89058eb6f174",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-pv-host",
+      "title": "2026-10-11 layout probe Python source; inspected, not executed; SHA-256 e88766e8af0d36606c31577c27be7463a2b495ca6e43303a5670ba26a525367a",
+      "url": "urn:private:course-llms-and-models:evidence:sha256:e88766e8af0d36606c31577c27be7463a2b495ca6e43303a5670ba26a525367a",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-pv-metal",
+      "title": "2026-10-11 layout probe Metal source; inspected, not compiled; SHA-256 c1f4458eb0ce3c4cff3c77e958ef5389a3193e0795aff92edb03cf7e000f8aa9",
+      "url": "urn:private:course-llms-and-models:evidence:sha256:c1f4458eb0ce3c4cff3c77e958ef5389a3193e0795aff92edb03cf7e000f8aa9",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-pv-a",
+      "title": "Saved 2026-10-11 M5 Pro coordinate probe, macOS build 26A428; SHA-256 48035246087ace071cf8900500f86e7ea3b4649718ea447e81e5b7b7f3316c50",
+      "url": "urn:private:course-llms-and-models:evidence:sha256:48035246087ace071cf8900500f86e7ea3b4649718ea447e81e5b7b7f3316c50",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-pv-b",
+      "title": "Saved 2026-10-11 M5 Pro coordinate probe, macOS build 26A434; SHA-256 2f0c5b7f2a563bca586344755b68bf7b8b789f9a94a460f1a1c69138d15c7889",
+      "url": "urn:private:course-llms-and-models:evidence:sha256:2f0c5b7f2a563bca586344755b68bf7b8b789f9a94a460f1a1c69138d15c7889",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-drow",
+      "title": "2026-10-11 D-row precision intervention source; inspected, not executed; SHA-256 9cd63f0ecef1480af194cba37c591cc82d0f026fc1ceb85de8f67c1e145a2def",
+      "url": "urn:private:course-llms-and-models:evidence:sha256:9cd63f0ecef1480af194cba37c591cc82d0f026fc1ceb85de8f67c1e145a2def",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-oracle-source",
+      "title": "2026-10-11 causal GQA CPU float64 oracle source; inspected, not executed; SHA-256 7a9d95dedb7e8aaf5d7d736228f825a828c9b3d22422174ab6637c48f64f8152",
+      "url": "urn:private:course-llms-and-models:evidence:sha256:7a9d95dedb7e8aaf5d7d736228f825a828c9b3d22422174ab6637c48f64f8152",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-drift-note",
+      "title": "Private M5 Max investigation dated 2026-10-11; historical findings only; SHA-256 146c862ad7ed63fe00d505f4f099d808e52df265f50e74524e35f9bd038a9698",
+      "url": "urn:private:course-llms-and-models:evidence:sha256:146c862ad7ed63fe00d505f4f099d808e52df265f50e74524e35f9bd038a9698",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-drift-cases",
+      "title": "Saved 2026-10-11 pipeline case summary, not live telemetry; SHA-256 1567849ad8ccd1e601eb40dc5f819b9eefc397138f0f5e03b5db1ae26deecb5b",
+      "url": "urn:private:course-llms-and-models:evidence:sha256:1567849ad8ccd1e601eb40dc5f819b9eefc397138f0f5e03b5db1ae26deecb5b",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-drift-exact",
+      "title": "Saved 2026-10-11 full embedding second-moment comparison; SHA-256 ebaa9a4d3c3b4bbe42465ee5c2c9a35e0e73fdf1f280ff14dcac787b39da30fc",
+      "url": "urn:private:course-llms-and-models:evidence:sha256:ebaa9a4d3c3b4bbe42465ee5c2c9a35e0e73fdf1f280ff14dcac787b39da30fc",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-original",
+      "title": "Original engineering-practice derivations, CPU verification and instructor review",
+      "url": "urn:private:course-llms-and-models:engineering-practice-review:2026-10-12",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-original-forward",
+      "title": "Saved pre-change forward Metal source in 2026-10-11 research archive; SHA-256 0d261149786b2472a120ffe60b3a289a83410f437be951f11001900c2ee0e92e",
+      "url": "urn:private:course-llms-and-models:evidence:sha256:0d261149786b2472a120ffe60b3a289a83410f437be951f11001900c2ee0e92e",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    },
+    {
+      "id": "eng-src-original-backward",
+      "title": "Saved pre-change backward Metal source in 2026-10-11 research archive; SHA-256 cb95a20da60019a5e9409851a45f06996a323a1de67ffa3faf7c750236be6910",
+      "url": "urn:private:course-llms-and-models:evidence:sha256:cb95a20da60019a5e9409851a45f06996a323a1de67ffa3faf7c750236be6910",
+      "reviewedAt": "2026-10-12T16:28:47Z"
+    }
+  ],
+  "visuals": [],
+  "media": [],
+  "extensions": []
+}

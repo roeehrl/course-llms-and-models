@@ -1,0 +1,103 @@
+# Incident: our worker corrupted SN9 run 4.12.16.24-tah (2026-10-11)
+
+**Status (2026-10-11 12:30 IDT):**
+- The three Apple M5 workers have been stopped since 08:58Z and must not rejoin run .24.
+- Build 148 runs upstream attention on every chip. The Studio (M4 Max, run .17) moves to it at its next flip.
+- The user sent a disclosure to Marcus (Macrocosmos) on WhatsApp at about 09:25Z. It asked for a rollback of .24 to before epoch 163, and its text is in `reports/SN9 run 24 disclosure to Macrocosmos (draft).md`.
+- An equivalence sweep, a run-harm audit and a kernel requalification are in progress.
+
+## Why this matters
+
+We run a patched IOTA v4.12.10 worker behind the official Train at Home app (the mounted proxy). Macrocosmos (Marcus) authorized this setup personally. That authorization is rare, and losing it ends our SN9 work.
+
+Our worker trains one shared model together with every other operator in the run. A math bug in our worker does not stay local. It went into a public run, damaged every miner's work there, and probably cost the whole run its payouts.
+
+## What was wrong
+
+- **The kernel.** The patch `iota-v4.12.10-tensorops-gqa.patch` added a custom Metal attention kernel for forward and backward at shape (4, 32, 800, 64) in bf16. Its build and runtime files are under `Research/sn9-gqa-kernel-lab/` and `tensorops_runtime.py`.
+- **How it was switched on.** `mounted_proxyctl.py` hard-coded `STRATA_SN9_TENSOROPS_GQA=1` and `STRATA_SN9_GROUPED_GQA=1` for every worker. There was no switch to turn it off and no indication of which path was running.
+- **Accuracy measured on 2026-10-11** (`kernel_parity.py`, against an fp32 CPU oracle):
+  - **M4 Max (Studio):** forward equal to upstream SDPA. dQ/dK 0.2–0.9% off, which is 2–5x upstream's own error. Deterministic.
+  - **M5 Max (MacBook) and M5 Pro (guru), with identical numbers:**
+
+    | Output | Error |
+    |---|---|
+    | forward output | 102–141% |
+    | dQ | 140–1,460% |
+    | dK | 43–806% |
+    | dV | 0.2% (correct) |
+
+    The results were deterministic, so this was a systematic error, not a race. Because dV is right, P is right; the forward P·V output is wrong, and D = rowsum(dO·O) carries that error into dQ and dK.
+  - **Upstream SDPA** is correct on every chip.
+- **The fallback** (`_grouped_attention`, bf16 softmax) is the same on every chip but sits 8–10% off on gradients with outlier-heavy inputs. Upstream SDPA computes the softmax in fp32.
+- **Which path ran depended on batch size.** The kernel only runs at local batch 4. Our apple-mps patch turns on batch calibration on MPS (upstream fixes 4), which picks 1, 2 or 4 by timing. Below 4 the worker silently used the grouped bf16 fallback.
+
+  | Mac | Kernel (bs=4), the wrong path | Grouped fallback |
+  |---|---|---|
+  | guru (M5 Pro, .24 layer 1) | from ~10-01 until it stopped | — |
+  | MacBook (M5 Max) | 09-22 to 10-07 18:03 IDT, and 10-11 03:17 IDT until stopped | 10-07 18:03 to 10-11 03:13 IDT (bs=2) |
+  | lurus (M5 Pro) | 10-03 to 10-08 06:03, and 10-10 20:39 IDT until stopped | 10-08 06:03 to 10-10 20:39 IDT (bs=1) |
+
+## What it did to run .24
+
+- **What the loss is made of.** The run's loss is the mean of the losses that its layer-2 miners report. Our two layer-2 Macs (MacBook and lurus) produced 40–66% of .24's loss samples from epoch 128 on.
+- **The upgrades.** On 10-10 and 10-11 we upgraded to builds 142 and 143 with flip-timed restarts. Each restart re-calibrated, and lurus and then the MacBook switched from the fallback onto the broken kernel. The run's loss followed each switch:
+
+  | Epoch | Training end (UTC) | Loss change | Our change |
+  |---|---|---|---|
+  | 163 | 10-10 18:46 | +1.8% | lurus on build 142 |
+  | 166 | 10-10 22:46 | +1.8% | lurus on build 143 |
+  | 167 | 10-11 00:04 | +3.0% | guru on build 143 |
+  | 168 | 10-11 01:38 | +39.4% | MacBook on build 143 |
+
+  The loss was then 5.43 at 10-10 14:27Z. It reached 13.79 by 10-11 08:53Z, worse than a uniform guess (ln 128256 = 11.76). No other run showed anything like this.
+- **Forfeits.** Macrocosmos forfeited .24's whole day, for every miner, on 10-05, 10-08 and 10-10. These are the only forfeited run-days network-wide since 09-28, and each was a day when .24's loss rose:
+  - 10-10 alone froze 238 α across 77 hotkeys.
+  - Our own frozen total is about 103 α.
+  - The deciding jumps of 10-05 and 10-08 also came in our Macs' first epochs after a restart. The statistics before 10-10 are inconclusive, but we cannot rule ourselves out.
+- **Control.** .24's rate of ≥1% loss jumps was 8.2%, against 0.2–2% in every other run. The Studio's presence in .15 and .17 shows no effect.
+
+Data and scripts are in the session scratchpad (`lossjump/`, `kernel_parity.py`, `forfeit_rule.py`). The key numbers are in this file and in memory note `sn9-tensorops-m5-wrong-attention`.
+
+## How we missed it (the negligence)
+
+1. **One chip tested, three deployed.** The kernel was qualified on the M4 Max only (`sn9-gqa-kernel-lab/results/m4-max-*`), with one random seed and no realistic inputs (attention sinks, outliers). We then shipped it to M5 Macs, a different GPU family with neural accelerators, without testing it there.
+2. **"Finite" passed for "correct".** The install-time doctor probe and the build smoke test only checked that outputs were finite.
+3. **Unsafe build flags.** The metallib was built with Metal's default fast math, while the kernel relies on −inf arithmetic.
+4. **No control and no visibility.** The kernel was hard-coded on, with no off switch, and the app never showed which attention path a worker used.
+5. **Production behaviour drifted per restart.** Batch calibration silently changed the attention path from one restart to the next.
+6. **No watch on the shared run.** We rolled builds 142 and 143 to all M5 Macs within hours without watching the run's loss. The flip watcher only checked our own registration and backward passes.
+7. **An early signal was not acted on.** The 10-11 morning research flagged that "all 12 ≥1% jumps in .24 came while the MacBook worked" as something to check. It was not checked before the next rollout.
+
+## Fixes
+
+- **Build 148:**
+  - `mounted_proxyctl.worker_attention()` reads the chip in-process. The kernel runs only on a chip listed in `TENSOROPS_QUALIFIED_CHIPS`, which is empty, so every chip runs upstream attention.
+  - The grouped fallback is off.
+  - A new switch, `STRATA_SN9_TENSOROPS_GQA`, can only turn the kernel off.
+  - The session records `patched_worker_attention`. The app's worker-patches panel and Seatwatch's worker summary show it.
+  - The doctor probe measures the kernel against upstream SDPA, and the `tensorops-accuracy` check fails wherever the kernel would be used.
+- **In progress:**
+  - A differential equivalence suite: patched against upstream, per stage (forward, backward, optimizer step, pseudo-gradients, blob bytes, merge), on M4 and M5. It must also fail on the old configuration.
+  - A run-harm audit of every patch.
+  - Kernel root cause and requalification (safe math, full qualification suite).
+  - Research on how to keep the M5 Macs out of .24.
+- **Known smaller issues in the computed work:**
+  - A cross-epoch `.grad` leak after an epoch with zero optimizer steps, which adds stale gradients to the next epoch's pseudo-gradient.
+  - After a failed global-weight pull, a later merge can use the previous epoch's snapshot as its base.
+  - A failed TensorOps dispatch never actually latches the kernel off.
+  - Batch calibration on MPS (local batch 1, 2 or 4) must be shown by the equivalence suite to match upstream within upstream's own error.
+  - On the plus side, the Studio saw 206 all-NaN activation pushes from other operators, and our validation rejected them.
+- **Root cause on M5, found later on 10-11** (`Research/sn9-gqa-kernel-lab/requalify-2026-10-11/`):
+  - The forward (P·V) and the dQ kernel convert the fp32 score tile straight into the left operand of the next matmul. They never check `is_compatible_as_left_input()`, which returns 0 on M5. There the conversion puts 896 of 1,024 elements at the wrong coordinate.
+  - A second defect affects every chip: D = rowsum(dO·O) is computed from the bf16 O.
+  - A fixed variant, `tgP_o32_causal` (P and dS staged through threadgroup memory, fp32 O kept for backward), passes the full qualification suite on the M4 Max and M5 Pro. It is not shipped, and the M5 Max is untested.
+
+## Rules from now on
+
+They are in the repository's `CLAUDE.md` under "SN9 worker: protect the shared run". In short:
+- The upstream-equivalence rule covers the computed work only: activations, losses, gradients, optimizer state, pseudo-gradients, merges, and the weights and blobs we upload. Nothing that can change these ships without the equivalence suite passing on every chip family we deploy to.
+- Worker behaviour is outside the rule. That includes routing, peer selection, timeouts, retries, registration, bench escape and upload strategy. These changes are deliberate improvements, so don't revert them for differing from upstream.
+- Compute kernels stay off until qualified per chip, with a self-test at start-up.
+- Upgrades go out one Mac at a time, with the run's loss watched before the next Mac.
+- Report problems to Macrocosmos promptly and honestly.
