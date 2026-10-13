@@ -1,3 +1,52 @@
+# Current release repair and migration preparation — 2026-10-13 13:46 IDT
+
+The complete v0.8 goal remains ACTIVE. This turn made verified release repair
+progress and safe native migration preparation. No native restart/deployment or
+paid call occurred. Core0.1.6 is still the latest actual published runtime.
+
+- Release38382533084 for immutable tagv0.1.7 TERMINALLY FAILED at candidate
+  assembly before publishing assets. Exact diagnostic: public source filename
+  services/api/src/credential-vault.ts matched the operational-credential privacy
+  deny pattern. All implementation CI had passed. Do not retry unchanged bytes or
+  move this tag; failure log Core/.local/v7-release-assembly-failure.log is retained.
+- PR15 merged after all twelve checks passed at head
+  352c190c12439cd81a04a0440fc140eb8edd4c05, run38384744766. Public module/test
+  renamed key-vault; imports updated. Privacy guard unchanged. New boundary test
+  admits code entries while credential-labelled files/binary key material remain
+  denied. Local infrastructure48/API250/typechecks and ten PG/HTTP/Temporal
+  scenarios passed. Actual tracked-tree source inventory validates441paths.
+  https://github.com/roeehrl/course-core/pull/15 (attached)
+- Core clean main db54ca0853db996ae21db62da740e6d5af06f0a7, root0.1.8.
+  Annotated tagv0.1.8 object7fa2746884185093d71aab2dc5238a03d2810f50 peels to
+  that commit. Release dispatched ONCE as run38385397184, freshly IN_PROGRESS:
+  https://github.com/roeehrl/course-core/actions/runs/38385397184.
+  Preserve that handle; no duplicate dispatch, tag movement or unverified publish.
+- Native pilot was freshly observed healthy on pinned Core0.1.5 with all four
+  services and instance13ad219c-1baa-42d2-8a52-c0f2e653d412. Protected preparation
+  snapshot Core/.local/pilot/v7-preparation-snapshot.json contains consistent read
+  of all3existing enrollments (course0.1.0,0.1.2,0.1.3), plans/policies/budgets.
+  Owner enrollments0; configured provider credentials0. Source DB was read only.
+- Private operational helpers, NOT public release code:
+  Core/.local/pilot/snapshot-v7.mjs (repeatable-read, redacted summary),
+  Core/.local/pilot/backup-v8.mjs (stopped-pilot PG/SQLite/key backup and isolated
+  newly created disposable-DB restore with snapshot equality). Helper syntax
+  verified; backup/restore has NOT run yet. Do not claim it qualified. Local role
+  can create a disposable test database. No existing DB is overwritten. Only
+  after verified released artifacts/consumer/staging may the old authenticated
+  controller be stopped, then a consistent backup made and restore-qualified.
+- Keep old root explicit in manager calls while active:
+  /Users/tnt/Library/Application Support/Course Core/Pilot/releases/v0.1.5/course-core
+  and state /Users/tnt/git/course-core/.local/pilot. Never touch other agents or
+  assume stale PIDs. Newruntime must be pinned outside checkout and all dependency
+  links kept within it. Preserve queue, config, learner state and grader pins.
+
+Next: same release handle to terminal; immutable artifact/draft/hosted verification;
+private released-interface install and original56episode practical acceptance;
+pinned native staged upgrade with stopped backup/disposable restore/state equality
+and key custody. Then secure user key/allowance configuration and live Google
+checks. Full supervisor generation/research/media/SDK/policy/privacy/operations
+requirements remain in scope; this release repair is not completion.
+
 # Current merged operator phase — 2026-10-13 13:20 IDT
 
 The complete v0.8 goal remains ACTIVE. PR14 merged after all twelve hosted checks
