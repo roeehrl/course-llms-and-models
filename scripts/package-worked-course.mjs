@@ -11,6 +11,8 @@ import {stageWorkedExamples,ROOT} from './stage-worked-examples.mjs';
 
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const json=value=>Buffer.from(JSON.stringify(value,null,2)+'\n');
+// Course bundles hold deep expression trees; indentation would multiply their size.
+const compact=value=>Buffer.from(JSON.stringify(value)+'\n');
 export const packageNames=['course.compiled.json','course.manifest.json','course.learner.json','adaptation-registry.json','worked-example-verifier.json','practical-registries.json','code-fixtures-autodiff-qualified.json','code-fixtures-decoder-qualified.json','code-fixtures-qualification-qualified.json'];
 async function privateBytes(filename){
   const file=await open(filename,constants.O_RDONLY|constants.O_NOFOLLOW);
@@ -22,7 +24,7 @@ export async function packageWorkedCourse(directory,{sourceCommit}={}){
   const staged=await stageWorkedExamples(),registries=JSON.parse(await readFile(new URL('runtime/practical-registries.json',ROOT)));
   assert(verifyCompiledCourse(staged.compiled));
   const members=new Map([
-    ['course.compiled.json',json(staged.compiled)],['course.manifest.json',json(staged.compiled.server)],['course.learner.json',json(staged.compiled.learner)],
+    ['course.compiled.json',compact(staged.compiled)],['course.manifest.json',compact(staged.compiled.server)],['course.learner.json',compact(staged.compiled.learner)],
     ['adaptation-registry.json',json(staged.proposedRegistry)],['worked-example-verifier.json',staged.bytes],['practical-registries.json',json(registries)],
   ]);
   for(const registry of registries.registries){const name=path.basename(registry.file);assert(packageNames.includes(name));const bytes=await readFile(new URL(registry.file,ROOT));assert(bytes.length===registry.bytes&&hash(bytes)===registry.sha256,'Practical implementation changed');members.set(name,bytes);}
@@ -36,7 +38,7 @@ export async function packageWorkedCourse(directory,{sourceCommit}={}){
 }
 export async function verifyWorkedPackage(directory){
   const manifest=JSON.parse(await privateBytes(path.join(directory,'package.json')));
-  assert(manifest.schemaVersion===1&&manifest.courseVersion==='0.1.4'&&manifest.minimumCoreVersion==='0.1.17'&&manifest.sdkVersion==='0.2.0','Unexpected package contract');
+  assert(manifest.schemaVersion===1&&['0.1.4','0.1.5'].includes(manifest.courseVersion)&&manifest.minimumCoreVersion==='0.1.17'&&manifest.sdkVersion==='0.2.0','Unexpected package contract');
   assert(/^[a-f0-9]{40}$/.test(manifest.sourceCommit),'Invalid package source');
   assert.deepEqual(manifest.members.map(m=>m.name).sort(),[...packageNames].sort(),'Unexpected package members');
   const members=new Map();

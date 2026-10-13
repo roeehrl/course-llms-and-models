@@ -74,7 +74,7 @@ async function main(){
   const config=await read('content/course-config.json'),modules=await Promise.all(fragments.map(name=>read(`content/${name}.json`)));
   // Build from source without the prior recovery overlay, so a second invocation
   // cannot duplicate declarations or depend on a stale compiled artifact.
-  const base=assemble(config,modules,{practicalOverlay:await read('content/practicals-qualified.json'),visualOverlays:await Promise.all(['visuals','systems-visuals'].map(name=>read(`content/${name}.json`)))});
+  const base=assemble(config,modules,{practicalOverlay:await read('content/practicals-qualified.json'),visualOverlays:await Promise.all(['visuals','systems-visuals','learning-visuals'].map(name=>read(`content/${name}.json`)))});
   const {overlay,configuration}=bindRecoveryRuntime({descriptors:(await read('runtime/installed-adaptation-descriptors.json')).adapters,authored:await read('content/adaptation-authoring.json'),fresh:await read('content/fresh-assessments.json'),codeRecovery:await read('content/practical-recovery.json'),baseCourse:base.server});
   for(const [file,value] of [['content/recovery-runtime.json',overlay],['runtime/recovery-registry.json',configuration]])await writeFile(new URL(file,root),JSON.stringify(value,null,2)+'\n',{mode:0o600});
   console.log({profiles:configuration.profiles.length,numericalTemplates:overlay.adaptation.numericalRecipes.length,reviewedBanks:configuration.profiles.filter(p=>p.bank).length,registryAuthorization:'not_granted',baselineAssessmentsUnchanged:true});

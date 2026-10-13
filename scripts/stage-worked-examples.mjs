@@ -7,6 +7,9 @@ import {compileCourse} from '@course-core/sdk/compiler';
 import {assemble,fragments} from './assemble.mjs';
 
 export const ROOT=new URL('../',import.meta.url);
+/** 0.1.5 adds the learning-visuals illustrations to the 0.1.4 worked-example course. */
+export const COURSE_VERSION='0.1.5';
+export const VISUAL_OVERLAYS=['visuals','systems-visuals','learning-visuals'];
 const read=async file=>JSON.parse(await readFile(new URL(file,ROOT),'utf8'));
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 function formula(node){
@@ -45,8 +48,8 @@ export async function stageWorkedExamples(){
   const proposedRegistry={...structuredClone(baseRegistry),verifiers:[...baseRegistry.verifiers,{id,version,implementationDigest:digest,sourceRefs:[sourceRef],artifactKinds:['explanation'],checkIds:['worked-example-reference']}],profiles:[...baseRegistry.profiles,...profiles]};
   assert(proposedRegistry.profiles.length<=512);
   const source={id:sourceRef,title:'Independent procedural CPU checks for worked examples',url:'urn:private-course:worked-example-reference',reviewedAt:'2026-10-13T00:00:00Z'};
-  const base=assemble(await read('content/course-config.json'),await Promise.all(fragments.map(name=>read('content/'+name+'.json'))),{practicalOverlay:await read('content/practicals-qualified.json'),visualOverlays:await Promise.all(['visuals','systems-visuals'].map(name=>read('content/'+name+'.json'))),recoveryOverlay:await read('content/recovery-runtime.json')});
-  const candidate=structuredClone(base.server);candidate.version='0.1.4';candidate.sources.push(source);
+  const base=assemble(await read('content/course-config.json'),await Promise.all(fragments.map(name=>read('content/'+name+'.json'))),{practicalOverlay:await read('content/practicals-qualified.json'),visualOverlays:await Promise.all(VISUAL_OVERLAYS.map(name=>read('content/'+name+'.json'))),recoveryOverlay:await read('content/recovery-runtime.json')});
+  const candidate=structuredClone(base.server);candidate.version=COURSE_VERSION;candidate.sources.push(source);
   candidate.extensions.push({id,version,integrity:'sha256-'+digest,execution:'server',entrypoint:'runtime/worked-example-verifier.json',platforms:['web'],capabilities:['teaching.generate','teaching.verify'],accessibility:{keyboard:true,reducedMotion:true,textAlternative:'Bounded worked examples with independently checked arithmetic.'}});
   candidate.adaptation.sourceRefs.push(sourceRef);
   candidate.adaptation.generators.push({id:generatorId,version,extensionId:id,sourceRefs:[sourceRef],artifactKinds:['explanation']});

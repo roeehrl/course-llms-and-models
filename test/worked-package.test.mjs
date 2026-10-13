@@ -8,7 +8,7 @@ import {packageWorkedCourse,verifyWorkedPackage} from '../scripts/package-worked
 test('deployment rejects altered bytes, replaced private files and unrecognized members; packages are immutable',async()=>{
   const temporary=await mkdtemp(path.join(tmpdir(),'course-worked-package-')),directory=path.join(temporary,'release');
   try {
-    const manifest=await packageWorkedCourse(directory,{sourceCommit:'1'.repeat(40)});assert.equal(manifest.courseVersion,'0.1.4');assert.equal(manifest.members.length,9);
+    const manifest=await packageWorkedCourse(directory,{sourceCommit:'1'.repeat(40)});assert.equal(manifest.courseVersion,'0.1.5');assert.equal(manifest.members.length,9);
     await assert.rejects(packageWorkedCourse(directory,{sourceCommit:'1'.repeat(40)}),{code:'EEXIST'});
     const target=path.join(directory,'course.learner.json'),original=await readFile(target);
     await writeFile(target,Buffer.concat([original,Buffer.from(' ')]));await assert.rejects(verifyWorkedPackage(directory),/integrity/);
