@@ -1,3 +1,45 @@
+# Current continuation — supervisor tools PR 13, 2026-10-13 09:49 IDT
+
+The full approved v0.8 goal is ACTIVE and incomplete. This continuation delivered
+and verified the learner-facing part of the scoped supervisor module. PR 13 is
+open at public Core commit `58bffc4244b220a8c203c29261c026d0dd7a31e4`:
+https://github.com/roeehrl/course-core/pull/13. Hosted run `38358825263` is in
+progress. Root version 0.1.6 is a candidate, not a released or deployed version.
+
+- Scoped, bounded tools retrieve retained history, profile/evidence and source
+  references, then select exact author-reviewed support. Learner opt-in, separate
+  verifier and existing transactional policy/evidence/plan fences govern delivery.
+  No completion credit or easier grading is created. Novel generated drafts,
+  whole episodes, source retrieval, research and media dispatch remain open.
+- Learner controls are in My profile; safe actual tool/delivery records are in
+  Learning record. Both remain optional to the linear learning path. Permission
+  retries keep the original request identity; acknowledged writes are not repeated
+  because a subsequent refresh failed. Account changes clear private UI state.
+- A real pagination regression was caught: JavaScript Date conversion rounded
+  PostgreSQL microseconds and could omit retained messages. The cursor now uses
+  exact DB timestamps; a same-millisecond eight-message case proves full paging.
+- Local full repository check passed. Final API suite: 232 tests; learner suite:
+  103 tests. Nine real connected browser cases pass across phone/tablet/desktop,
+  including accessible opt-in/opt-out, reload persistence and unchanged gates.
+  The hosted API job now requires this learner-owned connected suite explicitly.
+- Combined real Postgres/HTTP/Temporal qualification passed eight scenarios,
+  two worker restarts and three injected lost acknowledgements. The tool phase
+  adds one reviewed lesson block with one aggregate usage charge, unchanged gate,
+  zero mastery and safe native history replay/redaction. External models are
+  synthetic; live Google and arbitrary generation are not proven.
+- Qualification programs now participate in strict TypeScript checking. Public
+  source audit and infrastructure checks pass. Wait for all twelve hosted checks,
+  merge only the exact verified head, and release exact immutable candidates before
+  private consumption or changing the pinned native runtime.
+- Native service was freshly observed running on pinned Core 0.1.5 with all four
+  services alive, instance `13ad219c-1baa-42d2-8a52-c0f2e653d412`. Private course
+  0.1.3 is unchanged. No deployment, paid model call, secret read/output, fleet
+  change or new subagent occurred. Private hosted CI billing restriction remains.
+
+Next: complete PR/release/consumer gates, then provider/model/budget/secure setup
+GUI and reviewable generation/research/media delivery. Preserve every remaining
+v0.8 acceptance row; this module is not full supervisor or platform completion.
+
 # Current supervisor tools implementation — local verified work, not deployed
 
 GoalACTIVE. This turnPROGRESS: actual boundedtoolloop,learnerconsent,reviewedexplanationadapter,transactionalcourseeffect,separateverifier andrealDB/HTTPacceptance. Fullscopeunchanged/incomplete. No blocker audit.
