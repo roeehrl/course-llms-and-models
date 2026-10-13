@@ -1,0 +1,59 @@
+import assert from 'node:assert/strict';
+import {constants} from 'node:fs';
+import {mkdir,open,readFile,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+import {fileURLToPath} from 'node:url';
+import path from 'node:path';
+import {verifyCompiledCourse} from '@course-core/sdk/compiler';
+import {stageWorkedExamples,ROOT} from './stage-worked-examples.mjs';
+
+const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
+const json=value=>Buffer.from(JSON.stringify(value,null,2)+'\n');
+export const packageNames=['course.compiled.json','course.manifest.json','course.learner.json','adaptation-registry.json','worked-example-verifier.json','practical-registries.json','code-fixtures-autodiff-qualified.json','code-fixtures-decoder-qualified.json','code-fixtures-qualification-qualified.json'];
+async function privateBytes(filename){
+  const file=await open(filename,constants.O_RDONLY|constants.O_NOFOLLOW);
+  try {const stat=await file.stat();assert(stat.isFile()&&stat.nlink===1&&stat.uid===process.getuid()&&!(stat.mode&0o077)&&stat.size<=4*1024*1024,'Rejected private package member');return await file.readFile();}
+  finally {await file.close();}
+}
+export async function packageWorkedCourse(directory,{sourceCommit}={}){
+  assert(/^[a-f0-9]{40}$/.test(sourceCommit??''),'Immutable source commit required');
+  const staged=await stageWorkedExamples(),registries=JSON.parse(await readFile(new URL('runtime/practical-registries.json',ROOT)));
+  assert(verifyCompiledCourse(staged.compiled));
+  const members=new Map([
+    ['course.compiled.json',json(staged.compiled)],['course.manifest.json',json(staged.compiled.server)],['course.learner.json',json(staged.compiled.learner)],
+    ['adaptation-registry.json',json(staged.proposedRegistry)],['worked-example-verifier.json',staged.bytes],['practical-registries.json',json(registries)],
+  ]);
+  for(const registry of registries.registries){const name=path.basename(registry.file);assert(packageNames.includes(name));const bytes=await readFile(new URL(registry.file,ROOT));assert(bytes.length===registry.bytes&&hash(bytes)===registry.sha256,'Practical implementation changed');members.set(name,bytes);}
+  assert.deepEqual([...members.keys()].sort(),[...packageNames].sort());
+  // Fresh directories only: a previously qualified package is never overwritten.
+  await mkdir(directory,{mode:0o700});
+  for(const [name,bytes] of members)await writeFile(path.join(directory,name),bytes,{mode:0o600,flag:'wx'});
+  const manifest={schemaVersion:1,courseId:staged.compiled.server.id,courseVersion:staged.compiled.server.version,courseDigest:staged.compiled.digest,sourceCommit,minimumCoreVersion:staged.minimumCoreVersion,sdkVersion:'0.2.0',workedVerifierDigest:staged.digest,members:[...members].map(([name,bytes])=>({name,bytes:bytes.length,sha256:hash(bytes)})),liveProviderAcceptance:false};
+  await writeFile(path.join(directory,'package.json'),json(manifest),{mode:0o600,flag:'wx'});
+  return verifyWorkedPackage(directory);
+}
+export async function verifyWorkedPackage(directory){
+  const manifest=JSON.parse(await privateBytes(path.join(directory,'package.json')));
+  assert(manifest.schemaVersion===1&&manifest.courseVersion==='0.1.4'&&manifest.minimumCoreVersion==='0.1.17'&&manifest.sdkVersion==='0.2.0','Unexpected package contract');
+  assert(/^[a-f0-9]{40}$/.test(manifest.sourceCommit),'Invalid package source');
+  assert.deepEqual(manifest.members.map(m=>m.name).sort(),[...packageNames].sort(),'Unexpected package members');
+  const members=new Map();
+  for(const member of manifest.members){const bytes=await privateBytes(path.join(directory,member.name));assert(bytes.length===member.bytes&&hash(bytes)===member.sha256,'Package member integrity failed');members.set(member.name,bytes);}
+  const compiled=JSON.parse(members.get('course.compiled.json'));assert(verifyCompiledCourse(compiled)&&compiled.digest===manifest.courseDigest,'Compiled course integrity failed');
+  assert.deepEqual(JSON.parse(members.get('course.manifest.json')),compiled.server);assert.deepEqual(JSON.parse(members.get('course.learner.json')),compiled.learner);
+  assert(compiled.server.id===manifest.courseId&&compiled.server.version===manifest.courseVersion);
+  assert(hash(members.get('worked-example-verifier.json'))===manifest.workedVerifierDigest,'Teaching implementation changed');
+  const registry=JSON.parse(members.get('adaptation-registry.json'));assert(registry.profiles.length===154&&registry.profiles.filter(p=>p.operation==='append_teaching').length===39);
+  assert(registry.profiles.filter(p=>p.operation==='append_teaching').every(p=>p.adapterDigest===manifest.workedVerifierDigest));
+  for(const registry of JSON.parse(members.get('practical-registries.json')).registries){const bytes=members.get(path.basename(registry.file));assert(bytes&&bytes.length===registry.bytes&&hash(bytes)===registry.sha256,'Practical binding changed');}
+  return manifest;
+}
+async function main(){
+  assert(process.argv.length===4&&process.argv[2]==='--output','Usage: package-worked-course.mjs --output <new private directory>');
+  const exec=promisify(execFile),cwd=fileURLToPath(ROOT),status=(await exec('git',['status','--porcelain'],{cwd})).stdout;assert(status==='','Commit source before packaging');
+  const sourceCommit=(await exec('git',['rev-parse','HEAD'],{cwd})).stdout.trim();
+  const receipt=await packageWorkedCourse(path.resolve(process.argv[3]),{sourceCommit});console.log(JSON.stringify({packaged:true,version:receipt.courseVersion,digest:receipt.courseDigest,sourceCommit,members:receipt.members.length,liveProviderAcceptance:false}));
+}
+if(process.argv[1]===fileURLToPath(import.meta.url))await main();
