@@ -1,3 +1,65 @@
+# Novel teaching delivery implemented and locally qualified — 2026-10-13 16:57 IDT
+
+The full approved v0.8 goal remains ACTIVE and incomplete. This milestone adds
+actual supervisor-generated explanation/practice delivery through the released
+SDK artifact contracts and course-owned independent verification. It is source
+implementation and local system acceptance, not production or live-provider proof.
+
+- Public Core branch `codex/generated-teaching` is clean/pushed at
+  `6b5c6198be6226176d63934ef22df10092311f30`; runtime target 0.1.12.
+  Draft PR19 https://github.com/roeehrl/course-core/pull/19 is attached and based
+  on PR18's `codex/supervisor-learner-model`. Public CI run38409220607 is queued.
+  Retarget to main and ready it only after PR18 merges; retain protected checks.
+- PR18 head remains `1f8096af570db520a641bf6c3f9f86bdb15d18bb`, OPEN. At this
+  observation 10/12 checks passed; providers and example-courses were queued.
+  Specific parent CI handle:38405139747. Do not replace an observation timeout
+  with a new job or mutate a release tag.
+- New tools list_generation_profiles/create_teaching bind candidates to observed
+  installed profiles, current episode, consent, registry revision/digest and
+  declared objectives/sources. Host chooses artifact/generator identity; the
+  model cannot mint grading keys, proof, costs or assignment classifications.
+- Verification matches scoped tool receipts and actually calls the independent
+  installed course verifier. Atomic delivery repeats that verifier and quota,
+  target, consent, active-assessment, source/registry and SDK checks. Lesson,
+  proof and work writes roll back together. Duplicate delivery is idempotent;
+  no mastery credit or supervisor feedback loop is created.
+- Learner/admin activity shows exact candidate delivery metadata and withholds
+  pre-delivery prose. The normal responsive linear lesson renders the new text.
+  A discovered quota error normalization bug was fixed for generated and reviewed
+  support: an actual quota failure returns a clear denial rather than storage500.
+- Local final API265 tests /24 files PASS; learner104 tests/typecheck PASS;
+  infra48/lifecycle12 PASS; public audit450 files PASS. Three actual connected
+  browser cases PASS on phone, tablet and desktop: generated content, reload,
+  disabled completion, accessibility, no overflow/page errors. Initial browser
+  failures were incorrect test navigation; corrected journey enters the lesson
+  and acknowledges the original reading before checking the newly added part.
+- Final real Postgres/HTTP/Temporal acceptance PASS12 scenarios,13 synthetic
+  supervisor model rounds,5 worker restarts,4 lost apply acknowledgements,
+ 24 replayed histories/384 decoded payloads. All cleanup completed. Only external
+  model outputs are synthetic. Reference fixture checks the entire closed
+  mathematical grammar and rejects wrong answers/unsupported appended claims;
+  it does NOT claim to validate arbitrary prose, pedagogy or real model quality.
+- Core ignored receipts: .local/generated-teaching-api-final.log,
+  generated-teaching-temporal-final.log, generated-teaching-browser-final.log,
+  generated-teaching-phone.png. Owned disposable qualification database:
+  course_core_test_generated_20261013 on local Postgres17. Tests remove their own
+  schemas; do not redirect them to the active pilot or inspect private secrets.
+
+Active native pilot remains pinned Core0.1.10, SDK0.2.0, private course0.1.3;
+provider credentials/paid limits remain unconfigured. Neither PR18 nor PR19 is
+merged/released/deployed. No original miner, remote Mac, GPU or wallet changes.
+
+Next: complete parent/stacked CI, merge and immutable release/consumer/native
+qualification in order; package and qualify production course-owned verifier
+extensions using released interfaces. The stock CLI still installs no arbitrary
+module or universal factual verifier. Continue the broader moat: verified novel
+teaching beyond this small reference fixture, dynamic activities/visuals/whole
+personal episodes/branches, dedicated research/media dispatch/review/delivery,
+creator strategy/tool extensibility, placement/caps/deadline/privacy/operations
+completion and real Google acceptance. No new live call is authorized by a
+configuration default; secure credentials plus explicit allowance remain needed.
+Native app binaries stay deferred. This increment does not close the full goal.
+
 # Supervisor learner-model integration — 2026-10-13
 
 Fullv0.8goalACTIVE. This turnPROGRESS: real supervisor-to-source-linked model
