@@ -24,6 +24,9 @@ check(registryMetadata.schemaVersion===1&&registryMetadata.registries.length===3
 for(const r of registryMetadata.registries){check(/^runtime\/code-fixtures-(autodiff|decoder|qualification)-qualified\.json$/.test(r.file),'qualified_registry_path');const bytes=await readFile(path.join(root,r.file));check(bytes.length===r.bytes&&bytes.length<=1024*1024&&createHash('sha256').update(bytes).digest('hex')===r.sha256,'qualified_registry_bytes_changed');}
 const schema='course_private_flow_'+randomUUID().replaceAll('-',''),admin=new pg.Pool({connectionString:url.href,max:1});
 const pgVersion=Number((await admin.query("SELECT current_setting('server_version_num') AS version")).rows[0].version);check(pgVersion>=170000&&pgVersion<180000,'postgres_17_required');
+// The child intentionally receives a minimal environment. Preserve the already
+// authenticated local test role explicitly rather than relying on inherited USER.
+if(!url.username)url.username=(await admin.query('SELECT current_user AS role')).rows[0].role;
 const port=await new Promise(resolve=>{const s=createServer();s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>resolve(p));});});
 const origin=`http://127.0.0.1:${port}`,instanceId=randomUUID();
 await mkdir(path.join(root,'.local/learner-flow'),{recursive:true,mode:0o700});const state=await mkdtemp(path.join(root,'.local/learner-flow/run-'));

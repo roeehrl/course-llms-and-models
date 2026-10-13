@@ -1,7 +1,8 @@
 import {readFile,lstat} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
-export const expectedCoreRelease={version:'0.1.10',tag:'v0.1.10',commit:'e96763e5dbfbc2f036e84fe8a38bb514f21b1551',tagObject:'f86c3d4046e54396efe2a33973269404bb1426b1',runId:38394906665,manifestSha256:'3d89d4b66b70275fd5246a7d9a6a041c21a206d3adb3709ccaf5a753cae60b19'};
+export const expectedCoreRelease10={version:'0.1.10',tag:'v0.1.10',commit:'e96763e5dbfbc2f036e84fe8a38bb514f21b1551',tagObject:'f86c3d4046e54396efe2a33973269404bb1426b1',runId:38394906665,manifestSha256:'3d89d4b66b70275fd5246a7d9a6a041c21a206d3adb3709ccaf5a753cae60b19'};
+export const expectedCoreRelease={version:'0.1.17',tag:'v0.1.17',commit:'74e60f4c9b1f5116f6e5984185c23cb64cbf8dc8',tagObject:'fd60139916c0ec72442796e7d9bfbecdbce5ee6d',runId:38428514171,manifestSha256:'25a358dbf66c2532af7a98505949b833a8ffb0197e7ffc96a6827e5a947e2906'};
 export const releaseCiNames=['Public source and orchestration','Module / policy','Module / providers','Module / adaptation','Module / research','Module / example-courses','Module / supervisor','Sandbox / real Docker Linux','API and connected learner / Postgres 17','Browser / visuals','Browser / learner','Browser / admin'];
 const check=(v,code)=>{if(!v)throw Error(code);},sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 /** Verify published delivery data and installed files independently of Core

@@ -4,13 +4,13 @@ import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {createHash} from 'node:crypto';
 import {stageWorkedExamples,ROOT} from '../scripts/stage-worked-examples.mjs';
-import {verifyReleasedRuntime} from './released-runtime.mjs';
+import {verifyReleasedRuntime,expectedCoreRelease10} from './released-runtime.mjs';
 
 // Deliberately use an independently verified published runtime, not a sibling
 // development checkout or the pending creator-guidance/installation interfaces.
 const runtime=fileURLToPath(new URL('.local/released-core-v0.1.10/course-core/',ROOT));
 const artifacts=fileURLToPath(new URL('.local/released-core-artifacts/v0.1.10/',ROOT));
-const delivery=await verifyReleasedRuntime(runtime,artifacts);
+const delivery=await verifyReleasedRuntime(runtime,artifacts,expectedCoreRelease10);
 const {DockerSandbox,QUALIFIED_IMAGES}=await import(pathToFileURL(path.join(runtime,'packages/sandbox/dist/index.js')).href);
 const image=QUALIFIED_IMAGES[process.arch];assert(image,'Prepared architecture-pinned sandbox required');
 const staged=await stageWorkedExamples();
