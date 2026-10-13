@@ -9,15 +9,17 @@ import path from 'node:path';
 import {createServer} from 'node:net';
 import pg from 'pg';
 import {verifyReleasedRuntime,expectedCoreRelease} from './released-runtime.mjs';
+import {stageWorkedExamples} from '../scripts/stage-worked-examples.mjs';
 const exec=promisify(execFile),root=fileURLToPath(new URL('../',import.meta.url));
 class Failure extends Error {constructor(code){super(code);this.code=code;}}
 const check=(condition,code)=>{if(!condition)throw new Failure(code);};
-const args=process.argv.slice(2);check((args.length===4||(args.length===5&&args[4]==='--browser'))&&args[0]==='--runtime-dir'&&args[2]==='--release-dir','usage_runtime_and_release_dirs');const browserMode=args[4]==='--browser';
+const args=process.argv.slice(2),flags=args.slice(4);check(args.length>=4&&args.length<=6&&args[0]==='--runtime-dir'&&args[2]==='--release-dir'&&flags.every(f=>['--browser','--worked-course'].includes(f))&&new Set(flags).size===flags.length,'usage_runtime_and_release_dirs');const browserMode=flags.includes('--browser'),workedCourse=flags.includes('--worked-course');
 const runtime=path.resolve(args[1]),manifest=JSON.parse(await readFile(path.join(runtime,'package.json'),'utf8'));check(manifest.name==='@course-core/repository'&&manifest.version===expectedCoreRelease.version,'released_runtime_version_required');
 const releaseReceipt=await verifyReleasedRuntime(runtime,path.resolve(args[3]));
 check(process.env.TEST_DATABASE_URL&&!process.env.DATABASE_URL,'disposable_database_required');
 const url=new URL(process.env.TEST_DATABASE_URL);check(['postgres:','postgresql:'].includes(url.protocol)&&['localhost','127.0.0.1','[::1]'].includes(url.hostname)&&/^\/course_core_(?:ci|test(?:_[a-z0-9_]+)?)$/.test(url.pathname)&&!url.search&&!url.hash,'disposable_database_required');
-const compiled=JSON.parse(await readFile(path.join(root,'dist/course.compiled.json'),'utf8')),course=compiled.server,configuration=JSON.parse(await readFile(path.join(root,'runtime/recovery-registry.json'),'utf8'));
+const worked=workedCourse?await stageWorkedExamples():null,compiled=worked?.compiled??JSON.parse(await readFile(path.join(root,'dist/course.compiled.json'),'utf8')),course=compiled.server,configuration=worked?.proposedRegistry??JSON.parse(await readFile(path.join(root,'runtime/recovery-registry.json'),'utf8'));
+let verifierFile;if(worked){verifierFile=path.join(root,'.local/generated-teaching/verifier.json');await writeFile(verifierFile,worked.bytes,{mode:0o600});}
 const candidate=(await exec('python3',['-B','-c',"import importlib.util;s=importlib.util.spec_from_file_location('r','runtime/recovery-code-reference.py');r=importlib.util.module_from_spec(s);s.loader.exec_module(r);print(r.candidate_source())"],{cwd:root,maxBuffer:64000})).stdout;
 const registryMetadata=JSON.parse(await readFile(path.join(root,'runtime/practical-registries.json'),'utf8'));
 check(registryMetadata.schemaVersion===1&&registryMetadata.registries.length===3,'qualified_registries_required');
@@ -31,7 +33,7 @@ const port=await new Promise(resolve=>{const s=createServer();s.listen(0,'127.0.
 const origin=`http://127.0.0.1:${port}`,instanceId=randomUUID();
 await mkdir(path.join(root,'.local/learner-flow'),{recursive:true,mode:0o700});const state=await mkdtemp(path.join(root,'.local/learner-flow/run-'));
 await admin.query(`CREATE SCHEMA ${schema}`);url.searchParams.set('options',`-csearch_path=${schema}`);const db=new pg.Pool({connectionString:url.href,max:2});
-const childEnv={PATH:process.env.PATH,DATABASE_URL:url.href,PUBLIC_ORIGIN:origin,API_HOST:'127.0.0.1',PORT:String(port),CORE_INSTANCE_ID:instanceId,LEARNER_WEB_DIR:path.join(runtime,'apps/learner/dist'),CODE_FIXTURE_FILES:JSON.stringify(registryMetadata.registries.map(r=>path.join(root,r.file))),ADAPTATION_ADAPTERS:JSON.stringify(['bounded-numeric-v1','authored-bank-v1','authored-code-bank-v1']),SANDBOX_STORAGE_DIR:path.join(state,'sandbox')};
+const childEnv={PATH:process.env.PATH,DATABASE_URL:url.href,PUBLIC_ORIGIN:origin,API_HOST:'127.0.0.1',PORT:String(port),CORE_INSTANCE_ID:instanceId,LEARNER_WEB_DIR:path.join(runtime,'apps/learner/dist'),CODE_FIXTURE_FILES:JSON.stringify(registryMetadata.registries.map(r=>path.join(root,r.file))),ADAPTATION_ADAPTERS:JSON.stringify(['bounded-numeric-v1','authored-bank-v1','authored-code-bank-v1']),SANDBOX_STORAGE_DIR:path.join(state,'sandbox'),...(verifierFile?{TEACHING_VERIFIER_FILES:JSON.stringify([verifierFile])}:{})};
 const server=spawn(process.execPath,['--max-old-space-size=512','services/api/dist/main.js'],{cwd:runtime,env:childEnv,stdio:['ignore','pipe','pipe']});let childExit=false,output='';server.once('exit',()=>{childExit=true;});server.once('error',()=>{childExit=true;});for(const pipe of [server.stdout,server.stderr])pipe.on('data',b=>{output=(output+b.toString()).slice(-65536);});
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 async function ready(){for(let n=0;n<120;n++){check(!childExit,'released_api_startup_failed');try{const r=await fetch(origin+'/health',{signal:AbortSignal.timeout(1000)});if(r.ok&&(await r.json()).instanceId===instanceId)return;}catch{}await pause(100);}throw new Failure('released_api_readiness_timeout');}
@@ -121,7 +123,7 @@ try{
   }
   }
   check(requireOk(await request(teacher,'GET','/api/enrollments'),'owner_enrollments').length===0,'operator_course_clock_started');
-  await writeFile(path.join(state,'acceptance.json'),JSON.stringify({observedAt:new Date().toISOString(),coreVersion:manifest.version,releaseReceipt,courseVersion:course.version,courseDigest:compiled.digest,storage:'actual_postgresql',execution:'actual_released_http_and_isolated_python',reports,ownerUnenrolled:true,liveProviderAcceptance:false},null,2)+'\n',{mode:0o600});
+  await writeFile(path.join(state,'acceptance.json'),JSON.stringify({observedAt:new Date().toISOString(),coreVersion:manifest.version,releaseReceipt,courseVersion:course.version,courseDigest:compiled.digest,workedExampleCapability:workedCourse,storage:'actual_postgresql',execution:'actual_released_http_and_isolated_python',reports,ownerUnenrolled:true,liveProviderAcceptance:false},null,2)+'\n',{mode:0o600});
   console.log(JSON.stringify({verified:true,coreVersion:manifest.version,releaseReceipt,courseVersion:course.version,reports,ownerUnenrolled:true,liveProviderAcceptance:false}));
 }catch(error){await writeFile(path.join(state,'failure.json'),JSON.stringify({code:error instanceof Failure?error.code:'private_acceptance_failed',type:error?.name,detailCode:error?.code,message:String(error?.message??'').slice(0,2000)})+'\n',{mode:0o600});console.error(error instanceof Failure?error.code:'private_acceptance_failed');process.exitCode=1;
 }finally{
