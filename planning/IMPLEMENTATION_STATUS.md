@@ -1,3 +1,19 @@
+# Handoff prepared; catalogue CI complete — 2026-10-13
+
+User requested transfer to another coding session, possibly on a different host
+or fresh clone. Portable continuation is in planning/HANDOFF_TO_CLAUDE_CODE.md;
+the approved v0.8 design and its five standalone HTML mockups are tracked privately.
+No live config, credentials, learner database, vault key or ignored local state
+is included. All implementation commits were already pushed; handoff additions
+are committed separately. Prior goal reports paused, full objective incomplete.
+
+Fresh authoritative check: PR26 remains OPEN at
+4cae6ab52c82d3ebb56a412dbb177e68fd26aeab. Run38454055282 COMPLETED/SUCCESS,
+all12required hosted checks PASS. It is NOT merged/released/deployed. This
+supersedes the in-progress entry below. Current prior-host runtime remains
+Core0.1.17/private0.1.4,all4services running,4QA enrollments and ownerunenrolled.
+Do not assume any prior paths/services/dependencies exist on the destination.
+
 # Catalogue release selection in hosted qualification — 2026-10-13
 
 Private course0.1.4 is genuinely published/installed and native acceptance passed
