@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "courseVersion": "0.1.4",
+  "sourceCommit": "4d370672251aa7367667e3122f8373e46a2ce61c",
+  "courseDigest": "bf54e1289f1fda0c49c4a7d1ac4525376be5c666a0d08e8394021da38af669bb",
+  "coreVersion": "0.1.17",
+  "sdkVersion": "0.2.0",
+  "privateRelease": "https://github.com/roeehrl/course-llms-and-models/releases/tag/course-v0.1.4",
+  "artifactSha256": "8a40b0ae76a8f1dd9d49354d1cd69a273479019e90d88b1cafb72e07878c8a47",
+  "fullHttpEpisodes": 56,
+  "fullPhoneEpisodes": 56,
+  "desktopAndTabletEpisodes": 16,
+  "recoveredPracticalFamilies": 3,
+  "nativeAcceptance": {
+    "viewports": [
+      "phone",
+      "tablet",
+      "desktop"
+    ],
+    "completedQaEpisodes": 1,
+    "oldEnrollmentsPreserved": 3,
+    "ownerUnenrolled": true,
+    "pageErrors": 0
+  },
+  "liveProviderAcceptance": false,
+  "defaultReleaseSelectionImplemented": false,
+  "observedAt": "2026-10-13T19:05:44.785Z"
+}

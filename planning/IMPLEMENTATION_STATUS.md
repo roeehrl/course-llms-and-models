@@ -1,3 +1,44 @@
+# Private course0.1.4 published and installed — 2026-10-13
+
+Full v0.8 goal ACTIVE/incomplete. Private course0.1.4 is NOW actually published
+through the native Core0.1.17 review workflow, with154 registered profiles
+(115 recovery +39 optional independently verified worked examples). Exact source
+4d370672251aa7367667e3122f8373e46a2ce61c; course digest
+bf54e1289f1fda0c49c4a7d1ac4525376be5c666a0d08e8394021da38af669bb.
+Private GitHub course-v0.1.4 artifacts published and hosted bytes independently
+matched; archiveSHA8a40b0ae76a8f1dd9d49354d1cd69a273479019e90d88b1cafb72e07878c8a47.
+
+Complete releasedCore HTTP56 and phone56 acceptance PASS; desktop/tablet16 each,
+3practical families recovered,6assignments,unearned completion rejected every
+episode and exhausted banks without extra charges. Private15tests PASS, including
+package tampering,symlink/path-member rejection and exclusive no-overwrite.
+Actual native phone enrollment passed original first-episode assessments, saved
+completion and next-episode gate; tablet/desktop resumed that SAME saved QA
+enrollment. Accessibility/nooverflow/0pageerrors and actual desktopAdmin PASS.
+3old enrollment pins/progress/evidence/plans/policies preserved exactly; operator
+remains unenrolled. Native now has4saved QA enrollments: old16/1/0 plus new1.
+
+Owned native app stopped gracefully before consistent backup
+v17-20261013185922670; actual disposable restore matched saved state. Added ONLY
+the immutable isolated teaching verifier file to config; other provider/config
+values unchanged. New owned installatione279b724-ecfb-4f7a-8d6c-8752add9ccf8,
+instance d91ca8d0-e018-4725-8c13-9c220d2eb82d; all4services running. Fresh setup
+credentials0/roles0/workspacebudgets0: no paid calls or live Google acceptance.
+Preparation helper Date-vs-JSON-string comparison was corrected only after proving
+serialized rows identical. Admin browser helper initially searched bare0.1.4;
+correct actual Version0.1.4 control passed on retry, retaining QA progress.
+
+The current catalogue lists historical published releases; this is availability,
+NOT an implemented administrator-selected default release. Close this linear-UX
+gap without repinning existing enrollments. Novel examples remain limited to
+39math objectives; no arbitrary prose/learning-efficacy claim. Research25 is
+merged but unreleased; complete inspection/review/rights/media, broaderSDK and
+supervision, placement/caps/deadlines/privacy/ops and actual-provider acceptance
+remain in the full goal. Native binaries deferred.
+
+Receipts: evidence/course-0.1.4-acceptance.json and protected native/private.local
+logs/receipts. Do not treat old status entries below as the current deployment.
+
 # Private worked-example application and UI qualified — 2026-10-13
 
 Full v0.8 goal ACTIVE/incomplete. New private verification/worked-example-flow.mjs
