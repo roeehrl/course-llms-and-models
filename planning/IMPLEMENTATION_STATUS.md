@@ -1,3 +1,82 @@
+# Current continuation checkpoint — 2026-10-13 12:01 IDT
+
+The full approved v0.8 goal remains ACTIVE. This turn made implementation and
+release progress; the complete platform is not yet delivered.
+
+## Published release and unchanged pilot
+
+Core0.1.6 is publicly published as an infrastructure prerelease:
+https://github.com/roeehrl/course-core/releases/tag/v0.1.6.
+Commit bcd98a29b517233f799a78c056263cc0f01a3d40; annotated tag object
+4f9aadc187ff99331bb896859a76d04d79f83939. Release run38359445830 passed
+attempt1. Immutable artifact11793928805 has ZIP SHA
+6a39aa3dd388814089ab5f71f0b2c6bd543f415bb3b32e96c5430ce180627dc8.
+All seven candidate/draft/downloaded assets, hashes, member inventories, locks,
+identity and twelve same-commit CI receipts were verified before publication.
+Runtime SHA2bdf74d1d62bd619d9f2957fa825a2db88456057e40cbb8b4e07b118807bc32c.
+The private consumer downloaded all seven exact hosted assets into
+.local/released-core-artifacts/v0.1.6; this is not an installed or deployed v6.
+
+Native pilot was freshly verified still running from pinned Core0.1.5 with all
+four services alive, instance13ad219c-1baa-42d2-8a52-c0f2e653d412. Private
+course0.1.3 is unchanged. No real credentials, paid model calls, owner learning
+progress, miners, wallets or other deployments were touched.
+
+## Operator setup foundation — source only
+
+Core branch codex/provider-setup is pushed at e37fac7c9ea2c92d53e12c1a2f26ff98683f624b.
+No PR/merge/release/deployment for this module yet. Root version remains0.1.6;
+its existing immutable tag must not be moved to these changes. No agents spawned.
+
+Migration011 adds workspace provider settings/immutable versions, encrypted
+credentials, job version bindings, operator-tagged HMAC receipts and budget
+configuration revisions. credential-vault.ts supplies authenticated AES-256-GCM
+with workspace/version/binding AAD and protected host key persistence. No raw
+credential readback or logging. Public configuration rejects secret fields/values;
+server-installed factories remain the only code/adapter authority.
+
+WorkspaceProviders binds exact configuration and explicit job policy at actual
+outbox preparation. Capability lookup carries the authorized workspace rather
+than treating a different workspace's provider as available. Replacements mark
+unfinished jobs for cancellation; old completed dispatch receipts still settle
+without another call. Binding waits recheck wall clock before admission. Gateway
+clips timeout to remaining job time and rechecks host authority before every
+model round; earlier usage survives a later denial. Per-role token bounds reject
+unusable admission envelopes before saving; no budget is automatically enlarged.
+
+Owner/admin setup and budget routes use cookie/origin/CSRF, scoped permissions,
+CAS, canonical HMAC idempotence, operator/operation receipts and reservation-aware
+limits. Positive budgets require affirmative paid-work approval. Workspace and
+enrollment budgets both remain necessary and default zero. Application allowances
+are explicitly distinct from actual provider invoices or external spending caps.
+
+New responsive admin panel permits public model/role JSON, encrypted key setup,
+job admission and independent budget settings. Secret drafts/unconfirmed requests
+remain only in mounted memory and clear on account/workspace change. Lost-ack
+retry keeps the exact original payload/ID. Configured status never becomes live
+verification. Admin metadata now resolves the selected workspace and reuses its
+SQL client. Advanced JSON is still the primary model editor; guided setup,
+actual model discovery and safe connection/live-test UX are NOT complete.
+
+## Verification and next gates
+
+Final API240tests passed, admin48tests, supervisor45tests, native lifecycle12tests,
+real admin browser12cases across phone/tablet/desktop passed with accessibility,
+no overflow and no synthetic key readback. Public audit and infrastructure47
+passed. Full root check passed before the final model-round/deadline guard change;
+that changed API then passed240tests and the required legacy combined real
+PG/HTTP/Temporal eight-scenario gate (two worker restarts, three lost acks,
+20native history replays). This combined test does NOT yet prove the newly
+configured-workspace Temporal path; keep that explicit remaining gate.
+
+NEXT: guided Google/neutral model setup and actual metadata inspection; new
+workspace-bound Temporal recovery/rotation/in-flight cancellation and key
+backup/restore/membership/deadline races; operator tool/context/version timeline;
+whole CI/PR/release/private consumer/native acceptance. Only after secure user
+configuration and explicit spend allowance may live Google acceptance run.
+Continue the remaining v0.8 supervisor generation/research/media/SDK/policy/privacy
+work as well; this foundation is not full completion or a smaller replacement goal.
+
 # Current release checkpoint — 2026-10-13 09:55 IDT
 
 The full v0.8 goal remains ACTIVE. PR13 merged after all twelve hosted checks
