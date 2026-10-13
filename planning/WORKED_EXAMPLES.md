@@ -42,3 +42,23 @@ contain no program, qualification keys or adaptation implementation. Model
 guidance contains declared format/variable bounds, never a proof or paid authority.
 Provider credentials and spending limits must be explicitly configured by the
 user before any real model acceptance call.
+
+
+Published0.1.17 constructor,154-profile approval and actual Postgres/HTTP
+supervisor/check/repair/application now PASS in a new owned disposable schema.
+The wrong draft was rejected by actual isolated Python; five scripted model
+rounds repaired it; one optional3-minute/0-additional-episode example was added,
+with duplicate application replay, unchanged gates and no mastery writes.
+Browser acceptance passed390/834/1440 widths with the actual delivered example,
+retained reading across contexts, unchanged completion gate, accessibility,
+no overflow and0page errors. The other viewport contexts correctly used the
+reading-review controls after the first context had acknowledged the material.
+External model responses remain scripted; this is not real-provider/learning
+efficacy or native course installation. Existing native0.1.3 pins remain unchanged.
+
+Receipts are ignored under.local/generated-teaching/application-receipt.json;
+actual delivered course digestbf54e1289f1fda0c49c4a7d1ac4525376be5c666a0d08e8394021da38af669bb.
+The separate staged0.1.4 course still needs full published-private-release and
+56episode acceptance plus explicit installation/authorized enrollment lifecycle
+before becoming the running default. Do not substitute one successful draft
+flow for the complete course, source/media pipeline or overall platform goal.
