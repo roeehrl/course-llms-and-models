@@ -1,4 +1,31 @@
-# Core 0.1.25 published and deployed; SDK 0.4.0 and Core features in review — 2026-10-14
+# Core 0.1.32 published and deployed; visuals versioning regression found — 2026-10-14
+
+Full approved v0.8 objective ACTIVE and incomplete. States are distinguished below.
+
+- PUBLISHED Core 0.1.32 (prerelease; tag object 1964d60 on 859b4db, release run
+  38498335184, artifact 11865321561 digest 3908fd6e…, manifest ed2f247e…; 547
+  source members byte-compared; hosted bytes identical; consumer shasum ok).
+  Contains all features listed under 0.1.25 "in review" below plus SDK 0.4.0
+  consumption. v0.1.31 was tagged but never released (main CI failed a WebKit
+  placement reload race; fixed in the test, shipped as 0.1.32).
+- DEPLOYED: native pilot upgraded 0.1.25 -> 0.1.32 with the release's own
+  deploy/local/upgrade.mjs (stop, backup, restore drill 70 tables/146 rows,
+  start, health). Migrations 021-027 applied. QA enrollment unchanged (0.1.4
+  pin, 2 evidence, revision 9). Pilot browser acceptance phone/tablet/desktop
+  passed, no axe defects. Installed runtime verified 1310 members / 752 files.
+  verification/released-runtime.mjs now pins 0.1.32 (0.1.19 kept as
+  expectedCoreRelease19). Evidence: evidence/core-0.1.32-pilot-upgrade.json.
+- REGRESSION FOUND (released + deployed): 0.1.32 changed visuals dist/react.js
+  without bumping visuals 0.1.0, so the renderer integrity no longer matches
+  courses that declare the earlier 0.1.0. Private 56-episode released-consumer
+  acceptance FAILED at publish (PUBLISH_CAPABILITY_MISSING); on the pilot,
+  interactive visual context for course 0.1.4 is refused. Lessons, answers,
+  evidence and progress unaffected. Stated in the 0.1.32 release notes. Fix in
+  progress on Core branch core-0.1.33 (visuals 0.1.1, explicit acceptance of the
+  server-identical earlier build, digest guard in CI).
+- Concept illustrations: 31/56 episodes (b913141); LoRA verdict wording fix in progress.
+
+# (earlier) Core 0.1.25 published and deployed; SDK 0.4.0 and Core features in review — 2026-10-14
 
 Full approved v0.8 objective ACTIVE and incomplete. States are distinguished below.
 
