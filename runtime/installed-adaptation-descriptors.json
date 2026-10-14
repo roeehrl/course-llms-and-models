@@ -17,6 +17,12 @@
       "implementationDigest": "05d8ba2439c6b2e26a06a1dfd4d366700f08a3b964eb1f1d24ea3fd73e9f7cc2",
       "kind": "code-bank",
       "authorization": "release_registry_approval_required"
+    },
+    {
+      "id": "authored-teaching-bank-v1",
+      "implementationDigest": "5e2550a162872a495841c007b9b359e82a69d91038ac6d1a6e9e7b30155bdadd",
+      "kind": "teaching-bank",
+      "authorization": "release_registry_approval_required"
     }
   ]
 }

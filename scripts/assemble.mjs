@@ -5,7 +5,71 @@ import { compileCourse, verifyCompiledCourse } from '@course-core/sdk/compiler';
 
 export const fragments = ['foundations', 'training-and-transformers', 'systems-and-distribution', 'engineering-practice'];
 export const fields = ['objectives', 'chapters', 'assessments', 'gates', 'sources', 'visuals', 'media', 'extensions'];
-export function assemble(config, modules, { preview = false, visualOverlay, visualOverlays = [], practicalOverlay,practicalRuntimeOverlay,recoveryOverlay } = {}) {
+/** Every verified illustration overlay, oldest first. Assembly, recovery binding and
+ * packaging all read this one list so a packaged course cannot silently drop one. */
+export const VISUAL_OVERLAYS = ['visuals', 'systems-visuals', 'learning-visuals', 'concept-visuals'];
+const contentRoot = new URL('../content/', import.meta.url);
+const readContent = async name => JSON.parse(await readFile(new URL(`${name}.json`, contentRoot), 'utf8'));
+/** All overlays of the complete course. Pass recovery: false to build the unadapted
+ * baseline that scripts/bind-recovery-runtime.mjs binds against. */
+export async function loadOverlays({ recovery = true } = {}) {
+  const [first, ...rest] = await Promise.all(VISUAL_OVERLAYS.map(readContent));
+  return {
+    visualOverlay: first, visualOverlays: rest, practicalOverlay: await readContent('practicals-qualified'),
+    ...(recovery ? { recoveryOverlay: await readContent('recovery-runtime') } : {}),
+    writtenOverlay: await readContent('written-explanations'), placementOverlay: await readContent('placement'), retentionOverlay: await readContent('retention-checks'),
+  };
+}
+const allEpisodes = course => course.chapters.flatMap(chapter => chapter.episodes);
+/** Written explanations, optional placement and delayed retention checks. Each
+ * overlay is additive: no teaching text, existing item, gate threshold or policy changes. */
+export function applyLearnerEvidence(course, { writtenOverlay, placementOverlay, retentionOverlay } = {}) {
+  if (writtenOverlay) {
+    assert(writtenOverlay.schemaVersion === 1 && writtenOverlay.extension && Array.isArray(writtenOverlay.assessments) && Array.isArray(writtenOverlay.bindings), 'Invalid written-explanation overlay');
+    const declared = course.extensions.find(e => e.id === writtenOverlay.extension.id);
+    if (declared) assert.deepEqual(declared, writtenOverlay.extension, 'Conflicting rubric evaluator declaration');
+    else course.extensions.push(structuredClone(writtenOverlay.extension));
+    for (const binding of writtenOverlay.bindings) {
+      const item = writtenOverlay.assessments.find(a => a.id === binding.assessmentId), episode = allEpisodes(course).find(e => e.id === binding.episodeId);
+      assert(item?.type === 'rubric' && item.grading.evaluatorId === writtenOverlay.extension.id && episode, 'Invalid written-explanation binding');
+      const gate = course.gates.find(g => g.id === episode.gateId), before = structuredClone(gate);
+      assert(item.objectiveIds.every(id => gate.objectiveIds.includes(id)), 'Written explanation outside its gate scope');
+      assert(!course.assessments.filter(a => gate.assessmentIds.includes(a.id)).some(a => a.type === 'code' || a.familyId === item.familyId), 'Written explanations only join non-practical gates as a new family');
+      course.assessments.push(structuredClone(item));
+      // First in the gate, so the learner app offers the written explanation before the
+      // short checks; the family threshold is unchanged, so review never blocks completion.
+      gate.assessmentIds.unshift(item.id);
+      assert.deepEqual({ ...gate, assessmentIds: before.assessmentIds }, before, 'Gate threshold changed');
+      const at = episode.blocks.findIndex(block => block.type === 'assessment');
+      episode.blocks.splice(at < 0 ? episode.blocks.length : at, 0, { id: `written-${item.id}`, type: 'assessment', assessmentId: item.id });
+    }
+  }
+  if (placementOverlay) {
+    const placement = placementOverlay.placement;
+    assert(placementOverlay.schemaVersion === 1 && placement?.enabled === true && placement.learnerMayDecline === true, 'Invalid placement overlay');
+    const covered = allEpisodes(course).filter(e => e.objectiveIds.every(id => placement.objectiveIds.includes(id)));
+    assert(placement.objectiveIds.every(id => course.objectives.find(o => o.id === id)?.placeable === true), 'Placement objective is not author-marked placeable');
+    // Exactly the existing independent short checks of the covered episodes: never a
+    // written explanation, practical, retention item or new question.
+    const expected = covered.flatMap(e => course.gates.find(g => g.id === e.gateId).assessmentIds)
+      .filter(id => ['choice', 'numeric'].includes(course.assessments.find(a => a.id === id).type));
+    assert.deepEqual([...placement.assessmentIds].sort(), [...expected].sort(), 'Placement items must be the covered episodes\' existing short checks');
+    assert(placement.maxItems === placement.assessmentIds.length && placement.protectedEpisodeIds.every(id => covered.some(e => e.id === id)), 'Invalid placement limits');
+    course.placement = structuredClone(placement);
+  }
+  if (retentionOverlay) {
+    assert(retentionOverlay.schemaVersion === 1 && Array.isArray(retentionOverlay.assessments) && Array.isArray(retentionOverlay.intervalsDays), 'Invalid retention overlay');
+    const exposed = new Set([...course.gates.flatMap(g => g.assessmentIds), ...(course.placement?.assessmentIds ?? [])]);
+    for (const item of retentionOverlay.assessments) {
+      assert(['choice', 'numeric'].includes(item.type) && !exposed.has(item.id) && !course.assessments.some(a => a.id === item.id), 'Retention items must be new held-out short checks');
+      course.assessments.push(structuredClone(item));
+    }
+    course.retention = { intervalsDays: [...retentionOverlay.intervalsDays], objectiveIds: retentionOverlay.objectives.map(o => o.objectiveId), assessmentIds: retentionOverlay.assessments.map(a => a.id) };
+  }
+  return course;
+}
+
+export function assemble(config, modules, { preview = false, visualOverlay, visualOverlays = [], practicalOverlay,practicalRuntimeOverlay,recoveryOverlay, writtenOverlay, placementOverlay, retentionOverlay } = {}) {
   const course = structuredClone(config);
   for (const field of fields) course[field] = modules.flatMap(module => {
     assert(Array.isArray(module[field]), `Fragment lacks ${field}`);
@@ -71,6 +135,7 @@ export function assemble(config, modules, { preview = false, visualOverlay, visu
     course.extensions[index]=structuredClone(replacement);
     for(const assessment of course.assessments)if(assessment.type==='code'&&assessment.grading.evaluatorId===practicalOverlay.extension.id)assessment.grading.evaluatorId=replacement.id;
   }
+  applyLearnerEvidence(course, { writtenOverlay, placementOverlay, retentionOverlay });
   if (preview) {
     course.id += '-preview'; course.title += ' · development preview';
     course.summary = `Partial course preview. ${course.chapters.length} chapters are available; this is not the complete 14-chapter course. ${course.summary}`;
@@ -104,20 +169,7 @@ async function main() {
     try { modules.push(JSON.parse(await readFile(new URL(`content/${name}.json`, root), 'utf8'))); }
     catch (error) { if (!preview || error.code !== 'ENOENT') throw error; }
   }
-  let visualOverlay;
-  try { visualOverlay = JSON.parse(await readFile(new URL('content/visuals.json', root), 'utf8')); }
-  catch (error) { if (error.code !== 'ENOENT') throw error; }
-  const practicalOverlay=JSON.parse(await readFile(new URL('content/practicals-qualified.json',root),'utf8'));
-  const visualOverlays = [];
-  try { visualOverlays.push(JSON.parse(await readFile(new URL('content/systems-visuals.json', root), 'utf8'))); }
-  catch (error) { if (error.code !== 'ENOENT') throw error; }
-  try { visualOverlays.push(JSON.parse(await readFile(new URL('content/learning-visuals.json', root), 'utf8'))); }
-  catch (error) { if (error.code !== 'ENOENT') throw error; }
-  try { visualOverlays.push(JSON.parse(await readFile(new URL('content/concept-visuals.json', root), 'utf8'))); }
-  catch (error) { if (error.code !== 'ENOENT') throw error; }
-  let recoveryOverlay;
-  try{recoveryOverlay=JSON.parse(await readFile(new URL('content/recovery-runtime.json',root),'utf8'));}catch(error){if(error.code!=='ENOENT')throw error;}
-  const compiled = assemble(config, modules, { preview, visualOverlay, visualOverlays, practicalOverlay,recoveryOverlay });
+  const compiled = assemble(config, modules, { preview, ...await loadOverlays() });
   const directory = new URL('dist/', root); await mkdir(directory, { recursive: true, mode: 0o700 });
   const stem = preview ? 'course-preview' : 'course';
   await writeFile(new URL(`${stem}.manifest.json`, directory), JSON.stringify(compiled.server, null, 2) + '\n', { mode: 0o600 });

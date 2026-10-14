@@ -12,6 +12,12 @@
       "title": "Full-coverage practical contracts; runtime qualification required",
       "url": "urn:private:practical-recovery-v2",
       "reviewedAt": "2026-10-13T03:00:00Z"
+    },
+    {
+      "id": "remedial-episodes-reviewed",
+      "title": "Private remedial episodes restating anchor-episode examples; numbers independently checked",
+      "url": "urn:private-course:remedial-episodes-v1",
+      "reviewedAt": "2026-10-14T00:00:00Z"
     }
   ],
   "extensions": [
@@ -71,13 +77,33 @@
         "reducedMotion": true,
         "textAlternative": "Verified text, numeric and choice recovery controls."
       }
+    },
+    {
+      "id": "course-teaching-bank-creator",
+      "version": "1.0.0",
+      "integrity": "sha256-5e2550a162872a495841c007b9b359e82a69d91038ac6d1a6e9e7b30155bdadd",
+      "entrypoint": "extensions/authored-teaching-bank-v1.js",
+      "execution": "server",
+      "platforms": [
+        "web"
+      ],
+      "capabilities": [
+        "teaching.generate",
+        "teaching.verify"
+      ],
+      "accessibility": {
+        "keyboard": true,
+        "reducedMotion": true,
+        "textAlternative": "Reviewed remedial episodes as readable text."
+      }
     }
   ],
   "adaptation": {
     "schemaVersion": 1,
     "sourceRefs": [
       "ada-src-reviewed-bank",
-      "practical-recovery-reviewed"
+      "practical-recovery-reviewed",
+      "remedial-episodes-reviewed"
     ],
     "profileFieldIds": [],
     "targets": [
@@ -137,7 +163,8 @@
           "fnd-o02-02"
         ],
         "allowedOperations": [
-          "add_assessment_variant"
+          "add_assessment_variant",
+          "insert_episode"
         ],
         "replaceableBlockIds": []
       },
@@ -177,7 +204,8 @@
           "fnd-o03-02"
         ],
         "allowedOperations": [
-          "add_assessment_variant"
+          "add_assessment_variant",
+          "insert_episode"
         ],
         "replaceableBlockIds": []
       },
@@ -217,7 +245,8 @@
           "fnd-o04-02"
         ],
         "allowedOperations": [
-          "add_assessment_variant"
+          "add_assessment_variant",
+          "insert_episode"
         ],
         "replaceableBlockIds": []
       },
@@ -337,7 +366,8 @@
           "ttf-o07-02"
         ],
         "allowedOperations": [
-          "add_assessment_variant"
+          "add_assessment_variant",
+          "insert_episode"
         ],
         "replaceableBlockIds": []
       },
@@ -2135,6 +2165,17 @@
         "artifactKinds": [
           "assessment_variant"
         ]
+      },
+      {
+        "id": "course-remedial-generator",
+        "version": "1.0.0",
+        "extensionId": "course-teaching-bank-creator",
+        "sourceRefs": [
+          "remedial-episodes-reviewed"
+        ],
+        "artifactKinds": [
+          "episode"
+        ]
       }
     ],
     "verifiers": [
@@ -2178,6 +2219,20 @@
         ],
         "requiredCheckIds": [
           "authored-bank-match"
+        ]
+      },
+      {
+        "id": "course-remedial-verifier",
+        "version": "1.0.0",
+        "extensionId": "course-teaching-bank-creator",
+        "sourceRefs": [
+          "remedial-episodes-reviewed"
+        ],
+        "artifactKinds": [
+          "episode"
+        ],
+        "requiredCheckIds": [
+          "reviewed-teaching-match"
         ]
       }
     ],
@@ -4684,6 +4739,7 @@
     "basis": "private_independent_cpu_domain_checks_and_reviewed_bank",
     "creatorCode": "exact_installed_generic_implementation",
     "registryAuthorization": "not_granted",
-    "practicalRecovery": "reviewed_host_fixture_bank"
+    "practicalRecovery": "reviewed_host_fixture_bank",
+    "remedialEpisodes": "reviewed_teaching_bank_insert_episode"
   }
 }

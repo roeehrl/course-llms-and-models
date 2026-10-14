@@ -8,6 +8,12 @@ import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {verifyCompiledCourse} from '@course-core/sdk/compiler';
 import {stageWorkedExamples,ROOT} from './stage-worked-examples.mjs';
+import {readFileSync} from 'node:fs';
+
+/** The SDK the package was compiled with, read from the installed released package. */
+export const SDK_VERSION=JSON.parse(readFileSync(new URL('node_modules/@course-core/sdk/package.json',ROOT),'utf8')).version;
+/** Accepted package contracts: earlier packages stay verifiable after the upgrade. */
+const CONTRACTS={'0.1.4':{sdkVersion:'0.2.0',minimumCoreVersion:'0.1.17'},'0.1.5':{sdkVersion:'0.2.0',minimumCoreVersion:'0.1.17'},'0.1.6':{sdkVersion:'0.4.0',minimumCoreVersion:'0.1.34',profiles:158,remedialEpisodes:4}};
 
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const json=value=>Buffer.from(JSON.stringify(value,null,2)+'\n');
@@ -32,13 +38,14 @@ export async function packageWorkedCourse(directory,{sourceCommit}={}){
   // Fresh directories only: a previously qualified package is never overwritten.
   await mkdir(directory,{mode:0o700});
   for(const [name,bytes] of members)await writeFile(path.join(directory,name),bytes,{mode:0o600,flag:'wx'});
-  const manifest={schemaVersion:1,courseId:staged.compiled.server.id,courseVersion:staged.compiled.server.version,courseDigest:staged.compiled.digest,sourceCommit,minimumCoreVersion:staged.minimumCoreVersion,sdkVersion:'0.2.0',workedVerifierDigest:staged.digest,members:[...members].map(([name,bytes])=>({name,bytes:bytes.length,sha256:hash(bytes)})),liveProviderAcceptance:false};
+  const manifest={schemaVersion:1,courseId:staged.compiled.server.id,courseVersion:staged.compiled.server.version,courseDigest:staged.compiled.digest,sourceCommit,minimumCoreVersion:staged.minimumCoreVersion,sdkVersion:SDK_VERSION,workedVerifierDigest:staged.digest,members:[...members].map(([name,bytes])=>({name,bytes:bytes.length,sha256:hash(bytes)})),liveProviderAcceptance:false};
   await writeFile(path.join(directory,'package.json'),json(manifest),{mode:0o600,flag:'wx'});
   return verifyWorkedPackage(directory);
 }
 export async function verifyWorkedPackage(directory){
   const manifest=JSON.parse(await privateBytes(path.join(directory,'package.json')));
-  assert(manifest.schemaVersion===1&&['0.1.4','0.1.5'].includes(manifest.courseVersion)&&manifest.minimumCoreVersion==='0.1.17'&&manifest.sdkVersion==='0.2.0','Unexpected package contract');
+  const contract=Object.hasOwn(CONTRACTS,manifest.courseVersion)?CONTRACTS[manifest.courseVersion]:undefined;
+  assert(manifest.schemaVersion===1&&contract&&manifest.minimumCoreVersion===contract.minimumCoreVersion&&manifest.sdkVersion===contract.sdkVersion,'Unexpected package contract');
   assert(/^[a-f0-9]{40}$/.test(manifest.sourceCommit),'Invalid package source');
   assert.deepEqual(manifest.members.map(m=>m.name).sort(),[...packageNames].sort(),'Unexpected package members');
   const members=new Map();
@@ -47,7 +54,7 @@ export async function verifyWorkedPackage(directory){
   assert.deepEqual(JSON.parse(members.get('course.manifest.json')),compiled.server);assert.deepEqual(JSON.parse(members.get('course.learner.json')),compiled.learner);
   assert(compiled.server.id===manifest.courseId&&compiled.server.version===manifest.courseVersion);
   assert(hash(members.get('worked-example-verifier.json'))===manifest.workedVerifierDigest,'Teaching implementation changed');
-  const registry=JSON.parse(members.get('adaptation-registry.json'));assert(registry.profiles.length===154&&registry.profiles.filter(p=>p.operation==='append_teaching').length===39);
+  const registry=JSON.parse(members.get('adaptation-registry.json'));assert(registry.profiles.length===(contract.profiles??154)&&registry.profiles.filter(p=>p.operation==='append_teaching').length===39&&registry.profiles.filter(p=>p.operation==='insert_episode').length===(contract.remedialEpisodes??0));
   assert(registry.profiles.filter(p=>p.operation==='append_teaching').every(p=>p.adapterDigest===manifest.workedVerifierDigest));
   for(const registry of JSON.parse(members.get('practical-registries.json')).registries){const bytes=members.get(path.basename(registry.file));assert(bytes&&bytes.length===registry.bytes&&hash(bytes)===registry.sha256,'Practical binding changed');}
   return manifest;

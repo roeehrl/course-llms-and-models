@@ -4,22 +4,27 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {digestTeachingArtifact,instantiateNumericalRecipe} from '@course-core/sdk';
 import {compileCourse} from '@course-core/sdk/compiler';
-import {assemble,fragments} from './assemble.mjs';
+import {assemble,fragments,loadOverlays,VISUAL_OVERLAYS} from './assemble.mjs';
 
 export const ROOT=new URL('../',import.meta.url);
-/** 0.1.5 adds the learning-visuals illustrations to the 0.1.4 worked-example course. */
-export const COURSE_VERSION='0.1.5';
-export const VISUAL_OVERLAYS=['visuals','systems-visuals','learning-visuals'];
+/** 0.1.6 moves to SDK 0.4.0 and adds every verified concept illustration, optional
+ * placement, reviewed written explanations, delayed retention checks and reviewed
+ * remedial episodes to the 0.1.5 worked-example course. */
+export const COURSE_VERSION='0.1.6';
+export {VISUAL_OVERLAYS};
+/** Placement, retention, reviewed written answers and teaching-bank episode
+ * insertion with the restored code-bank digest are first available together in 0.1.34. */
+export const MINIMUM_CORE_VERSION='0.1.34';
 const read=async file=>JSON.parse(await readFile(new URL(file,ROOT),'utf8'));
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
-function formula(node){
+export function formula(node){
   if(node.type==='constant')return String(node.value);
   if(node.type==='variable')return '{{'+node.name+'}}';
   if(node.type==='unary')return node.operator==='negate'?'−('+formula(node.value)+')':'abs('+formula(node.value)+')';
   if(['min','max'].includes(node.operator))return node.operator+'('+formula(node.left)+', '+formula(node.right)+')';
   return '('+formula(node.left)+' '+{add:'+',subtract:'−',multiply:'×',divide:'÷'}[node.operator]+' '+formula(node.right)+')';
 }
-const render=(text,variables)=>text.replace(/\{\{([a-z][a-z0-9_]*)\}\}/g,(_,name)=>String(variables[name]));
+export const render=(text,variables)=>text.replace(/\{\{([a-z][a-z0-9_]*)\}\}/g,(_,name)=>String(variables[name]));
 export async function stageWorkedExamples(){
   const authored=await read('content/adaptation-authoring.json'),baseRegistry=await read('runtime/recovery-registry.json');
   const reference=await readFile(new URL('verification/adaptation-reference.py',ROOT),'utf8'),wrapper=await readFile(new URL('runtime/worked-example-wrapper.py',ROOT),'utf8');
@@ -48,7 +53,7 @@ export async function stageWorkedExamples(){
   const proposedRegistry={...structuredClone(baseRegistry),verifiers:[...baseRegistry.verifiers,{id,version,implementationDigest:digest,sourceRefs:[sourceRef],artifactKinds:['explanation'],checkIds:['worked-example-reference']}],profiles:[...baseRegistry.profiles,...profiles]};
   assert(proposedRegistry.profiles.length<=512);
   const source={id:sourceRef,title:'Independent procedural CPU checks for worked examples',url:'urn:private-course:worked-example-reference',reviewedAt:'2026-10-13T00:00:00Z'};
-  const base=assemble(await read('content/course-config.json'),await Promise.all(fragments.map(name=>read('content/'+name+'.json'))),{practicalOverlay:await read('content/practicals-qualified.json'),visualOverlays:await Promise.all(VISUAL_OVERLAYS.map(name=>read('content/'+name+'.json'))),recoveryOverlay:await read('content/recovery-runtime.json')});
+  const base=assemble(await read('content/course-config.json'),await Promise.all(fragments.map(name=>read('content/'+name+'.json'))),await loadOverlays());
   const candidate=structuredClone(base.server);candidate.version=COURSE_VERSION;candidate.sources.push(source);
   candidate.extensions.push({id,version,integrity:'sha256-'+digest,execution:'server',entrypoint:'runtime/worked-example-verifier.json',platforms:['web'],capabilities:['teaching.generate','teaching.verify'],accessibility:{keyboard:true,reducedMotion:true,textAlternative:'Bounded worked examples with independently checked arithmetic.'}});
   candidate.adaptation.sourceRefs.push(sourceRef);
@@ -57,7 +62,7 @@ export async function stageWorkedExamples(){
   for(const entry of entries){const target=candidate.adaptation.targets.find(t=>t.episodeId===entry.episodeId);assert(target);if(!target.allowedOperations.includes('append_teaching'))target.allowedOperations.push('append_teaching');}
   assert.deepEqual(candidate.gates,base.server.gates);assert.deepEqual(candidate.assessments,base.server.assessments);assert.deepEqual(candidate.policy,base.server.policy);
   const compiled=compileCourse(candidate);assert(!('adaptation' in compiled.learner));assert(!JSON.stringify(compiled.learner).includes('def solve(payload)'));
-  return {definition,bytes,digest,entries,make,profiles,proposedRegistry,source,compiled,baseDigest:base.digest,qualificationScope:'arithmetic_and_declared_trace_only_not_arbitrary_prose',minimumCoreVersion:'0.1.17',publishedAuthority:false};
+  return {definition,bytes,digest,entries,make,profiles,proposedRegistry,source,compiled,baseDigest:base.digest,qualificationScope:'arithmetic_and_declared_trace_only_not_arbitrary_prose',minimumCoreVersion:MINIMUM_CORE_VERSION,publishedAuthority:false};
 }
 async function main(){
   const staged=await stageWorkedExamples(),folder=new URL('.local/generated-teaching/',ROOT);await mkdir(folder,{recursive:true,mode:0o700});

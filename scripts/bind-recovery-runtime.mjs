@@ -2,14 +2,14 @@ import assert from 'node:assert/strict';
 import {readFile,writeFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {compileCourse} from '@course-core/sdk/compiler';
-import {assemble,fragments} from './assemble.mjs';
+import {assemble,fragments,loadOverlays} from './assemble.mjs';
 
 // Declarations pin executable host code. They cannot authenticate proofs, approve
 // a registry, install plugins or place answer banks in the free baseline course.
-export function bindRecoveryRuntime({descriptors,authored,fresh,baseCourse,codeRecovery}) {
+export function bindRecoveryRuntime({descriptors,authored,fresh,baseCourse,codeRecovery,remedial}) {
   assert(Array.isArray(descriptors)&&descriptors.length<=16,'Invalid installed adapter descriptors');
   const select=kind=>{
-    const candidates=descriptors.filter(a=>a.id===({numeric:'bounded-numeric-v1',bank:'authored-bank-v1','code-bank':'authored-code-bank-v1'}[kind])&&a.kind===kind);
+    const candidates=descriptors.filter(a=>a.id===({numeric:'bounded-numeric-v1',bank:'authored-bank-v1','code-bank':'authored-code-bank-v1','teaching-bank':'authored-teaching-bank-v1'}[kind])&&a.kind===kind);
     assert.equal(candidates.length,1,'Required installed creator is absent or ambiguous');
     const a=candidates[0];assert(/^[a-f0-9]{64}$/.test(a.implementationDigest)&&a.authorization==='release_registry_approval_required','Invalid installed creator descriptor');return a;
   };
@@ -61,7 +61,27 @@ export function bindRecoveryRuntime({descriptors,authored,fresh,baseCourse,codeR
     }
     adaptation.limits.maxPlannedMinutesPerAssignment=Math.max(adaptation.limits.maxPlannedMinutesPerAssignment,...[...groups.values()].map(g=>g.plannedMinutes));
   }
-  const overlay={schemaVersion:1,source,...(sources.length?{sources}:{}),extensions,adaptation,qualification:{basis:'private_independent_cpu_domain_checks_and_reviewed_bank',creatorCode:'exact_installed_generic_implementation',registryAuthorization:'not_granted',practicalRecovery:codeRecovery?'reviewed_host_fixture_bank':'not_covered'}};
+  if(remedial){
+    // Whole remedial episodes: exact reviewed text, inserted after the anchor episode,
+    // never graded and always metered as one additional episode.
+    assert(remedial.schemaVersion===1&&remedial.source&&Array.isArray(remedial.entries)&&remedial.entries.length,'Invalid remedial episode declaration');
+    const adapter=select('teaching-bank'),extensionId='course-teaching-bank-creator',generatorId='course-remedial-generator',verifierId='course-remedial-verifier';
+    sources.push(structuredClone(remedial.source));adaptation.sourceRefs.push(remedial.source.id);
+    extensions.push({...structuredClone(extensions[1]),id:extensionId,integrity:`sha256-${adapter.implementationDigest}`,entrypoint:'extensions/authored-teaching-bank-v1.js',accessibility:{keyboard:true,reducedMotion:true,textAlternative:'Reviewed remedial episodes as readable text.'}});
+    adaptation.generators.push({id:generatorId,version:'1.0.0',extensionId,sourceRefs:[remedial.source.id],artifactKinds:['episode']});
+    adaptation.verifiers.push({id:verifierId,version:'1.0.0',extensionId,sourceRefs:[remedial.source.id],artifactKinds:['episode'],requiredCheckIds:['reviewed-teaching-match']});
+    configuration.verifiers.push({id:verifierId,version:'1.0.0',implementationDigest:adapter.implementationDigest,sourceRefs:[remedial.source.id],artifactKinds:['episode'],checkIds:['reviewed-teaching-match']});
+    for(const entry of remedial.entries){
+      const target=adaptation.targets.find(t=>t.episodeId===entry.anchorEpisodeId),episode=baseCourse.chapters.flatMap(c=>c.episodes).find(e=>e.id===entry.anchorEpisodeId);
+      assert(target&&episode&&entry.objectiveIds.every(id=>target.objectiveIds.includes(id)&&episode.objectiveIds.includes(id)),'Remedial episode outside its anchor objectives');
+      assert(entry.classification==='optional'&&entry.additionalEpisodes===1&&Number.isSafeInteger(entry.plannedMinutes)&&entry.plannedMinutes>0&&entry.plannedMinutes<=adaptation.limits.maxPlannedMinutesPerAssignment,'Invalid remedial effort estimate');
+      assert(entry.blocks.length>=1&&entry.blocks.length<=12&&new Set(entry.blocks.map(b=>b.id)).size===entry.blocks.length,'Invalid remedial blocks');
+      if(!target.allowedOperations.includes('insert_episode'))target.allowedOperations.push('insert_episode');
+      profiles.push({id:`profile-${entry.id}`,episodeId:entry.anchorEpisodeId,operation:'insert_episode',generatorId,verifierId,adapterId:adapter.id,adapterDigest:adapter.implementationDigest,classification:entry.classification,plannedMinutes:entry.plannedMinutes,additionalEpisodes:entry.additionalEpisodes,
+        teachingBank:[{id:entry.id,kind:'episode',title:entry.title,blocks:entry.blocks.map(b=>({id:b.id,markdown:b.markdown})),objectiveIds:[...entry.objectiveIds],sourceRefs:[remedial.source.id]}]});
+    }
+  }
+  const overlay={schemaVersion:1,source,...(sources.length?{sources}:{}),extensions,adaptation,qualification:{basis:'private_independent_cpu_domain_checks_and_reviewed_bank',creatorCode:'exact_installed_generic_implementation',registryAuthorization:'not_granted',practicalRecovery:codeRecovery?'reviewed_host_fixture_bank':'not_covered',remedialEpisodes:remedial?'reviewed_teaching_bank_insert_episode':'not_covered'}};
   const course=structuredClone(baseCourse);assert(!course.adaptation,'Bind against an unadapted baseline, not a previously generated release');
   course.adaptation=adaptation;course.sources.push(source,...sources);course.extensions.push(...extensions);
   const checked=compileCourse(course);assert(!('adaptation' in checked.learner));
@@ -74,9 +94,9 @@ async function main(){
   const config=await read('content/course-config.json'),modules=await Promise.all(fragments.map(name=>read(`content/${name}.json`)));
   // Build from source without the prior recovery overlay, so a second invocation
   // cannot duplicate declarations or depend on a stale compiled artifact.
-  const base=assemble(config,modules,{practicalOverlay:await read('content/practicals-qualified.json'),visualOverlays:await Promise.all(['visuals','systems-visuals','learning-visuals'].map(name=>read(`content/${name}.json`)))});
-  const {overlay,configuration}=bindRecoveryRuntime({descriptors:(await read('runtime/installed-adaptation-descriptors.json')).adapters,authored:await read('content/adaptation-authoring.json'),fresh:await read('content/fresh-assessments.json'),codeRecovery:await read('content/practical-recovery.json'),baseCourse:base.server});
+  const base=assemble(config,modules,await loadOverlays({recovery:false}));
+  const {overlay,configuration}=bindRecoveryRuntime({descriptors:(await read('runtime/installed-adaptation-descriptors.json')).adapters,authored:await read('content/adaptation-authoring.json'),fresh:await read('content/fresh-assessments.json'),codeRecovery:await read('content/practical-recovery.json'),remedial:await read('content/remedial-episodes.json'),baseCourse:base.server});
   for(const [file,value] of [['content/recovery-runtime.json',overlay],['runtime/recovery-registry.json',configuration]])await writeFile(new URL(file,root),JSON.stringify(value,null,2)+'\n',{mode:0o600});
-  console.log({profiles:configuration.profiles.length,numericalTemplates:overlay.adaptation.numericalRecipes.length,reviewedBanks:configuration.profiles.filter(p=>p.bank).length,registryAuthorization:'not_granted',baselineAssessmentsUnchanged:true});
+  console.log({profiles:configuration.profiles.length,remedialEpisodes:configuration.profiles.filter(p=>p.operation==='insert_episode').length,numericalTemplates:overlay.adaptation.numericalRecipes.length,reviewedBanks:configuration.profiles.filter(p=>p.bank).length,registryAuthorization:'not_granted',baselineAssessmentsUnchanged:true});
 }
 if(process.argv[1]===fileURLToPath(import.meta.url))await main();
