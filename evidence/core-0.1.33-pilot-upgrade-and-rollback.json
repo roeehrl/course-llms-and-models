@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "coreVersion": "0.1.33",
+  "coreTag": "v0.1.33",
+  "coreCommit": "fa41b02e2e3fbca46dc15f707b84e87a0005b5b2",
+  "coreTagObject": "bf187f2ba60679798753ae6d2a3aa5458821a511",
+  "coreReleaseRun": 38506727322,
+  "coreCandidateArtifact": 11869246342,
+  "coreArtifactDigest": "sha256:401b7a25bc227c2b2754e3d396ac98991c765bc100888b0255cc547fb7d3d3ce",
+  "coreManifestSha256": "70c9edacc4a4aba3434309fa6510d21c3cb0a92dc351ca4e3901eece5fcd3015",
+  "coreRelease": "https://github.com/roeehrl/course-core/releases/tag/v0.1.33",
+  "consumerChecks": {
+    "sourceMembersComparedToGitTree": 553,
+    "hostedBytesIdentical": true,
+    "sha256sumsAllOk": true,
+    "installedRuntimeCheck": { "checkedMembers": 1323, "uniqueFiles": 759 },
+    "publishedWebMembersRestored": 15,
+    "pilotCourseRendererDeclarationAccepted": true
+  },
+  "nativePilotUpgrade": {
+    "from": "0.1.32",
+    "to": "0.1.33",
+    "result": { "status": "upgraded", "backup": "backups/backup-20261014040014151-37aa73", "restoreDrill": { "tables": 77, "rows": 164 } },
+    "preservedEnrollment": { "id": "6d7439c7-43b0-42d9-a2e2-c0ad5f8367ec", "pinnedCourse": "0.1.4", "status": "active", "evidence": 2, "revision": 9, "unchangedByUpgrade": true },
+    "pilotAcceptance": { "phone": "completed fnd-e01-01", "tablet": "resumed fnd-e01-02", "desktop": "resumed fnd-e01-02", "operatorEnrolled": false, "knownAxeDefectsObserved": [] }
+  },
+  "privateReleasedConsumerAcceptance": {
+    "runner": "verification/learner-flow.mjs --worked-course",
+    "pinnedCore": "0.1.33",
+    "result": "failed",
+    "failure": "installed_creator_digest_mismatch",
+    "cause": "0.1.33 changed the source text of qualifiedCodeEvaluator, which feeds the authored-code-bank-v1 implementationDigest (05d8ba2439c6… in 0.1.32 → c51bc8a56d20… in 0.1.33); behaviour unchanged, digest moved"
+  },
+  "nativePilotRollback": {
+    "from": "0.1.33",
+    "to": "0.1.32",
+    "reason": "approved code-recovery registries on the pilot pin the 0.1.32 code-bank digest; 0.1.32's remaining issue (interactive visual context) needs a live provider the pilot does not have",
+    "result": { "status": "upgraded", "backup": "backups/backup-20261014040228834-4c06ad", "restoreDrill": { "tables": 77, "rows": 175 } },
+    "migrationsBetween": [],
+    "health": "ok",
+    "preservedEnrollmentUnchanged": true
+  },
+  "liveProviderAcceptance": false,
+  "notVerified": ["live provider behavior", "learning efficacy", "physical devices", "native app binaries", "private 56-episode released-consumer acceptance (fails on 0.1.32 and 0.1.33)"],
+  "observedAt": "2026-10-14T04:10:00Z"
+}
