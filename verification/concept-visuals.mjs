@@ -1,4 +1,4 @@
-// Read-only verification of the eight concept scenes, except optional private
+// Read-only verification of the sixteen concept scenes, except optional private
 // temporary browser screenshots. Default consumption: the released package.
 import assert from "node:assert/strict";
 import { readFile, mkdtemp, writeFile, chmod } from "node:fs/promises";
@@ -31,7 +31,7 @@ const overlay = await read("content/concept-visuals.json");
 const scenes = overlay.visuals.map(fromVisualExperience);
 assert.deepEqual(scenes, data.scenes, "Delivered overlay differs from authored scenes");
 assert.deepEqual(overlay.bindings, data.bindings);
-assert.equal(scenes.length, 8);
+assert.equal(scenes.length, 16);
 
 // ------------------------------------------------ full-curriculum integration
 // Same overlays and order as scripts/assemble.mjs, compiled in memory through
@@ -208,6 +208,9 @@ const add = (...v) => op("add", ...v),
   ge = (a, b) => op("gte", a, b),
   max = (...v) => op("max", ...v),
   floor = (v) => op("floor", v),
+  pow = (a, b) => op("pow", a, b),
+  lt = (a, b) => op("lt", a, b),
+  sqrt = (v) => op("sqrt", v),
   cos = (v) => op("cos", v),
   sin = (v) => op("sin", v),
   cat = (...v) => op("concat", ...v),
@@ -383,6 +386,154 @@ mutated("concept-transfer-budget", "tb-unique", "text",
   { mustPassElsewhere: at({ attempts: 1 }, 5200) });
 mutated("concept-transfer-budget", "tb-tbar", "width", mul(7, tx),
   at({ mib: 100, mbps: 200 }, 3000), "transfer bar drawn before its step");
+
+// ------------------------------------------------ second batch (09-16)
+// 09 tensor offsets
+const b9 = st("b"),
+  t9 = st("t"),
+  d9 = st("d"),
+  o9 = st("offset");
+const size9 = iff(eq(st("dtype"), "FP32 (4 bytes)"), 4, 2),
+  off9 = add(mul(b9, 12), mul(t9, 4), d9);
+mutated("concept-tensor-offsets", "to-offset", "text",
+  after(1600, cat("offset = ", add(b9, mul(t9, 2), mul(d9, 6))), "offset = …"),
+  from({ b: 0, t: 2, d: 1 }, 1600), "column-major offset (first index fastest)",
+  { mustPassElsewhere: at({ b: 1, t: 2, d: 3 }, 4800) });
+mutated("concept-tensor-offsets", "to-range", "text",
+  after(2400, cat("bytes ", mul(off9, size9), " … ", mul(add(off9, 1), size9)), "bytes …"),
+  (c) => c.time === 4800, "byte range ends one byte past the element");
+mutated("concept-tensor-offsets", "to-rt", "text",
+  after(3200, cat("t = (o mod 12) div 4 = ", floor(div(o9, 4))), "t = …"),
+  (c) => c.state.offset >= 12 && c.time === 4800, "time index decoded without removing the batch stride",
+  { mustPassElsewhere: at({ offset: 9 }, 4800) });
+
+// 10 batch mean
+const w10 = st("w"),
+  eta10 = st("eta"),
+  f10 = iff(eq(st("reduction"), "Sum"), 1, 0.5);
+const r10 = (i) => sub(mul(w10, [1, 2][i]), [3, 2][i]);
+mutated("concept-batch-mean", "bm-loss", "text",
+  after(1600, cat("batch loss = ", r3(add(mul(0.5, r10(0), r10(0)), mul(0.5, r10(1), r10(1))))), "batch loss = …"),
+  from({ reduction: "Mean" }, 1600), "summed loss reported as the mean",
+  { mustPassElsewhere: at({ reduction: "Sum" }, 4800) });
+mutated("concept-batch-mean", "bm-w1", "text",
+  after(2400, cat("w′ = ", r3(add(w10, mul(eta10, f10, add(r10(0), mul(2, r10(1))))))), "w′ = …"),
+  (c) => c.time >= 2400 && c.state.eta > 0 && c.state.w !== 1.4, "update steps up the gradient",
+  { mustPassElsewhere: at({ eta: 0 }, 4800) });
+mutated("concept-batch-mean", "bm-grad", "text",
+  after(1600, cat("batch grad = ", r3(mul(f10, add(r10(0), r10(1))))), "batch grad = …"),
+  (c) => c.time >= 1600 && c.state.w !== 1, "per-example gradient missing the factor x",
+  { mustPassElsewhere: at({ w: 1, reduction: "Mean" }, 4800) });
+
+// 11 autodiff fan-out
+mutated("concept-autodiff-fanout", "af-xgrad", "text",
+  after(2400, cat("x.grad = ", r3(mul(2, st("x")))), "x.grad = …"),
+  (c) => c.time >= 2400 && c.state.x !== 0 && c.state.slots === "Both operand slots" &&
+    c.state.combine === "+= accumulate" && c.state.reset,
+  "fan-out lost: u + u counted once", { mustPassElsewhere: at({ x: 0 }, 4800) });
+mutated("concept-autodiff-fanout", "af-ugrad", "text",
+  after(1600, cat("u.grad = ", iff(eq(st("combine"), "+= accumulate"), 2, 1)), "u.grad = …"),
+  (c) => c.time >= 1600 && !c.state.reset && c.state.calls >= 2 && c.state.combine === "+= accumulate",
+  "repeated backward without reset reported as fresh", { mustPassElsewhere: at({ reset: true, calls: 3 }, 4800) });
+mutated("concept-autodiff-fanout", "af-xu-b", "opacity", 1,
+  at({ slots: "One slot only" }, 4800), "ignored operand slot drawn as active",
+  { mustPassElsewhere: at({ slots: "Both operand slots" }, 4800) });
+
+// 12 residual and normalization
+const a12s = st("slope"),
+  L12 = st("layers"),
+  a2s = st("a2"),
+  comp12 = st("batch");
+const pk12 = (vals) => iff(eq(comp12, "alone"), vals[0], iff(eq(comp12, "with [5, 9]"), vals[1], vals[2]));
+const meanB = div(add(1, a2s, pk12([0, 14, 0])), pk12([2, 4, 4]));
+const varB = sub(div(add(1, mul(a2s, a2s), pk12([0, 106, 0])), pk12([2, 4, 4])), mul(meanB, meanB));
+const nb = (v) => div(sub(v, meanB), sqrt(add(varB, 0.00001)));
+mutated("concept-residual-norm", "rn-skip", "text",
+  after(1600, cat("skip (1+F′)^L: ", r6(add(1, pow(a12s, L12)))), "skip (1+F′)^L: …"),
+  (c) => c.time === 4800 && c.state.layers > 1 && c.state.slope !== 0, "identity added once, not once per layer",
+  { mustPassElsewhere: at({ layers: 1, slope: 0.1 }, 4800) });
+mutated("concept-residual-norm", "rn-out", "text",
+  after(3200, cat("A → [", r3(nb(1)), ", ", r3(nb(a2s)), "]"), "A → …"),
+  from({ axis: "Per token", batch: "with [5, 9]" }, 3200), "statistics taken over the whole batch",
+  { mustPassElsewhere: at({ axis: "Per token", batch: "alone" }, 4800) });
+mutated("concept-residual-norm", "rn-bar-skip-10", "opacity", 1,
+  (c) => c.state.layers < 10 && c.time === 4800, "bars drawn past the chosen depth",
+  { mustPassElsewhere: at({ layers: 10 }, 4800) });
+
+// 13 embedding gather and scatter
+const ids13 = [st("id0"), st("id1"), st("id2")];
+const E13 = [[1, 0], [0, 1], [1, 1], [-1, 0]],
+  G13 = [[1, 2], [2, -1], [-0.5, 3]];
+const row13 = (id, c) => iff(eq(id, 0), E13[0][c], iff(eq(id, 1), E13[1][c], iff(eq(id, 2), E13[2][c], E13[3][c])));
+const lastWins = (r, c) =>
+  iff(eq(ids13[2], r), G13[2][c], iff(eq(ids13[1], r), G13[1][c], iff(eq(ids13[0], r), G13[0][c], 0)));
+mutated("concept-embedding-scatter", "es-grad-2", "text",
+  after(3200, cat("∂E2 = [", r3(lastWins(2, 0)), ", ", r3(lastWins(2, 1)), "]"), "∂E2 = …"),
+  from({ id0: 2, id2: 2, scatter: "Accumulate (+=)" }, 3200), "repeated row overwritten instead of accumulated",
+  { mustPassElsewhere: at({ id0: 2, id1: 0, id2: 1, scatter: "Accumulate (+=)" }, 4800) });
+mutated("concept-embedding-scatter", "es-x-0", "text", after(1600, "x0 = [1, 0]", "x0 = …"),
+  (c) => c.time === 4800 && c.state.id0 !== 0, "row chosen by position instead of token ID",
+  { mustPassElsewhere: at({ id0: 0 }, 4800) });
+mutated("concept-embedding-scatter", "es-x-2", "text",
+  after(1600, cat("x2 = [", r3(row13(ids13[2], 0)), ", ", r3(row13(ids13[2], 1)), "]"), "x2 = …"),
+  at({ positions: true }, 4800), "position vectors dropped from the input",
+  { mustPassElsewhere: at({ positions: false }, 4800) });
+
+// 14 LoRA
+const sc14 = st("scale"),
+  x314 = st("x3");
+const inner14 = add(1, -3, mul(2, x314));
+mutated("concept-lora-update", "lo-count", "text", cat("rank ", st("rank"), ": ", add(mul(3, st("rank")), 4), " trainable"),
+  (c) => c.state.rank > 1 && c.time === 4800, "A counted once regardless of rank", { mustPassElsewhere: at({ rank: 1 }, 4800) });
+mutated("concept-lora-update", "lo-da", "text",
+  after(4000, cat("∂A = [", ...[1, 2, 3].flatMap((v) => [r3(mul(sc14, 1.5, v)), ", "]), r3(mul(sc14, 1.5, x314)), "]"), "∂A = …"),
+  (c) => c.time >= 4000 && c.state.init === "B starts at zero" && c.state.scale !== 0,
+  "∂A computed with the lesson's B after B started at zero",
+  { mustPassElsewhere: at({ init: "Lesson A and B" }, 4800) });
+mutated("concept-lora-update", "lo-dy", "text",
+  after(2400, cat("Δy = [", r3(mul(2, inner14)), ", ", r3(mul(-1, inner14)), ", ", r3(mul(0.5, inner14)), "]"), "Δy = …"),
+  (c) => c.time >= 2400 && c.state.scale !== 1 && c.state.init === "Lesson A and B" && c.state.x3 !== 1, "scale s ignored",
+  { mustPassElsewhere: at({ scale: 1, init: "Lesson A and B" }, 4800) });
+
+// 15 parallel messages
+const w15 = st("w"),
+  v15 = st("v");
+mutated("concept-parallel-split", "ps-msg", "text",
+  after(5600, cat("sent: ", r3(mul(sub(mul(v15, w15), 4), w15))), "sent: …"),
+  (c) => c.time >= 5600 && c.state.message === "dL/dh (correct)" && c.state.w !== c.state.v && c.state.v * c.state.w !== 4,
+  "stage B returns its weight gradient instead of dL/dh",
+  { mustPassElsewhere: at({ w: 3, v: 3, message: "dL/dh (correct)" }, 6000) });
+mutated("concept-parallel-split", "ps-weighted", "text", after(3200, "weighted = 4", "weighted = …"),
+  (c) => c.time === 6000 && c.state.n2 > 1, "equal average of replica means",
+  { mustPassElsewhere: at({ n2: 1 }, 6000) });
+mutated("concept-parallel-split", "ps-verdict", "text", after(2400, "contract matches", "…"),
+  (c) => c.time === 6000 && (c.state.split === "Output columns") !== (c.state.combine === "Concatenate"),
+  "combine contract never checked", { mustPassElsewhere: at({ split: "Input features", combine: "Sum" }, 6000) });
+
+// 16 streaming log-sum-exp
+const exp16 = (v) => pow(Math.E, v),
+  z316 = st("z3"),
+  tg16 = st("target");
+const pick16 = (vals) => iff(eq(tg16, "z0"), vals[0], iff(eq(tg16, "z1"), vals[1], iff(eq(tg16, "z2"), vals[2], vals[3])));
+const M16 = max(1000, z316),
+  m216 = max(998, z316);
+const s16 = add(exp16(sub(1000, M16)), exp16(sub(999, M16)), exp16(sub(998, M16)), exp16(sub(z316, M16)));
+const ln16 = (sv) => {
+  const u = div(sub(sv, 1), add(sv, 1));
+  return add(...Array.from({ length: 16 }, (_, i) => mul(2 / (2 * i + 1), pow(u, 2 * i + 1))));
+};
+mutated("concept-streaming-lse", "sl-tile", "text",
+  after(800, cat("tile: ", r3(div(mul(4, 256, st("N")), 1048576)), " MiB"), "tile: …"),
+  (c) => c.time === 5200 && c.state.tile === "256 token rows" && c.state.N !== c.state.V, "row tile sized by N instead of V",
+  { mustPassElsewhere: at({ N: 1024, V: 1024, tile: "256 token rows" }, 5200) });
+mutated("concept-streaming-lse", "sl-ok", "text",
+  after(3600, cat("rescaled: ", r3(add(M16, ln16(s16), mul(-1, pick16([1000, 999, 1000, 999]))))), "rescaled: …"),
+  (c) => c.time >= 3600 && (c.state.target === "z2" || c.state.target === "z3"), "target logit read at its tile-local index",
+  { mustPassElsewhere: at({ target: "z0" }, 5200) });
+mutated("concept-streaming-lse", "sl-p", "text",
+  after(4400, cat("p(target) = ", r3(div(exp16(sub(pick16([1000, 999, 998, z316]), pick16([1000, 1000, m216, m216]))),
+    pick16([1, 1, 0, 0].map((tile1) => (tile1 ? add(1, exp16(-1)) : add(exp16(sub(998, m216)), exp16(sub(z316, m216))))))))), "p(target) = …"),
+  (c) => c.time >= 4400, "probability normalized within the target's tile only");
 
 // ------------------------------------------------ runtime contract checks
 for (const scene of scenes) {

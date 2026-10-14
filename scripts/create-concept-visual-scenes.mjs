@@ -1,5 +1,6 @@
-// Private authoring only. Builds eight bounded concept scenes with the released
-// @course-core/visuals package and writes exactly two files:
+// Private authoring only. Builds sixteen bounded concept scenes (two batches of
+// eight) with the released @course-core/visuals package and writes exactly two
+// files:
 //   visuals/concept-scenes.json and content/concept-visuals.json
 // A development build may be selected only through an explicit file: URL to a
 // built dist/headless.js (same convention as the systems and learning scenes).
@@ -1164,6 +1165,939 @@ const budgetScene = (() => {
   });
 })();
 
+// ============================================================ 09 shapes, offsets and bytes
+// fnd-e02-01: shape (2,3,4) row-major; offset b·12 + t·4 + d; bytes = offset × element size.
+const offsetScene = (() => {
+  const b = s("b"),
+    tt = s("t"),
+    d = s("d"),
+    o = s("offset");
+  const size = iff(eq(s("dtype"), "FP32 (4 bytes)"), 4, 2);
+  const off = add(mul(b, 12), mul(tt, 4), d);
+  const rb = floor(div(o, 12)),
+    rt = floor(div(mod(o, 12), 4)),
+    rd = mod(o, 4);
+  const mb = floor(div(o, 12)),
+    mt = floor(div(mod(o, 12), 3)),
+    md = mod(o, 3);
+  const boxes = [];
+  for (let bi = 0; bi < 2; bi++)
+    for (let ti = 0; ti < 3; ti++)
+      for (let di = 0; di < 4; di++) {
+        const k = bi * 12 + ti * 4 + di,
+          x = 16 + 140 * bi + 32 * di,
+          y = 72 + 34 * ti;
+        boxes.push(
+          rect(`to-box-${k}`, x, y, 28, 28, white, 5),
+          { ...rect(`to-idx-${k}`, x, y, 28, 28, gold, 5), opacity: after(800, iff(eq(off, k), 0.45, 0), 0) },
+          { ...rect(`to-rev-${k}`, x, y, 28, 28, purple, 5), opacity: after(3200, iff(eq(o, k), 0.35, 0), 0) },
+          centered(text(`to-n-${k}`, String(k), x + 14, y + 20, 17)),
+        );
+      }
+  const buffer = card("to-buffer", 212, ice, blue, "FLAT BUFFER (2,3,4)", [
+    text("to-b0", "b = 0", 16, 60, 17, muted),
+    text("to-b1", "b = 1", 156, 60, 17, muted),
+    ...boxes,
+    text("to-order", "row-major: d fastest", 16, 196, 17, muted),
+  ]);
+  const sizes = card("to-sizes", 134, mint, teal, "COUNT AND PAYLOAD", [
+    text("to-count", "2·3·4 = 24 elements", 16, 62),
+    text("to-bytes", cat("payload ", mul(24, size), " bytes"), 16, 90),
+    text("to-empty", "(0,4): 0, (): 1 element", 16, 118, 17, muted),
+  ]);
+  const forward = card("to-forward", 228, sand, gold, "INDEX → OFFSET", [
+    text("to-index", cat("(b,t,d) = (", b, ",", tt, ",", d, ")"), 16, 62),
+    text("to-strides", "strides (12, 4, 1)", 16, 90, 17, muted),
+    text("to-sum", after(1600, cat(b, "·12 + ", tt, "·4 + ", d), "b·12 + t·4 + d"), 16, 118),
+    bold("to-offset", after(1600, cat("offset = ", off), "offset = …"), 16, 152, 20, gold),
+    text(
+      "to-range",
+      after(2400, cat("bytes ", mul(off, size), " … ", sub(mul(add(off, 1), size), 1)), "bytes …"),
+      16,
+      184,
+    ),
+    text("to-size", cat("element size ", size, " B"), 16, 212, 17, muted),
+  ]);
+  const reverse = card("to-reverse", 256, lilac, purple, "OFFSET → INDEX", [
+    text("to-o", cat("offset o = ", o), 16, 62),
+    text("to-rb", after(3200, cat("b = o div 12 = ", rb), "b = …"), 16, 90),
+    text("to-rt", after(3200, cat("t = (o mod 12) div 4 = ", rt), "t = …"), 16, 118),
+    text("to-rd", after(3200, cat("d = o mod 4 = ", rd), "d = …"), 16, 146),
+    bold("to-rev", after(3200, cat("(", rb, ",", rt, ",", rd, ")"), "(…)"), 16, 180, 20, purple),
+    text("to-misread", after(4000, cat("as (2,4,3): (", mb, ",", mt, ",", md, ")"), "as (2,4,3): …"), 16, 212),
+    text("to-meaning", "same bytes, other meaning", 16, 240, 17, muted),
+  ]);
+  return build({
+    id: "concept-tensor-offsets",
+    title: "One flat buffer, many readings.",
+    description:
+      "Choose an index (b, t, d) in a (2,3,4) tensor and find its element offset and byte range in the flat row-major buffer. Then decode an offset back into an index, and see the same offset read under a different shape.",
+    state: {
+      b: num("Batch index b", 1, 0, 1, 1),
+      t: num("Time index t", 2, 0, 2, 1),
+      d: num("Feature index d", 3, 0, 3, 1),
+      offset: num("Offset to decode", 17, 0, 23, 1),
+      dtype: choice("Element type", ["FP32 (4 bytes)", "2-byte format"]),
+    },
+    kicker: "09 / SHAPE IS METADATA",
+    subtitle: "buffer, shape, element type",
+    grid: [
+      [buffer, 0],
+      [sizes, 0],
+      [forward, 1],
+      [reverse, 2],
+    ],
+    compactOrder: [buffer, forward, reverse, sizes],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "A (2,3,4) tensor is 24 values in one flat buffer. Predict where index (b, t, d) lives." },
+      { atMs: 800, text: "Row-major order: the last index moves fastest, so each time step is a run of four features." },
+      { atMs: 1600, text: "Offset = b·12 + t·4 + d, using the strides (12, 4, 1)." },
+      { atMs: 2400, text: "Multiply by the element size for the byte range. Offset and allocation size are different quantities." },
+      { atMs: 3200, text: "Reverse it: divide by the strides to decode an offset into (b, t, d)." },
+      { atMs: 4000, text: "Read the same offset as shape (2,4,3) and it names a different element. Size checks cannot catch that." },
+    ],
+    accessible:
+      "Tensor indexing with the lesson's shape (2,3,4): two batch entries, three time steps and four features, 24 elements stored in one flat row-major buffer, drawn as two blocks of three rows of four numbered boxes. The element offset of (b, t, d) is b·12 + t·4 + d. The lesson's (1,2,3) has offset 12 + 8 + 3 = 23, the final element, and (0,2,1) has offset 9. With 4-byte FP32 elements the payload is 96 bytes and offset 23 occupies bytes 92 to 95; with a 2-byte format the payload is 48 bytes and the same element occupies bytes 46 and 47. Decoding reverses the arithmetic: offset 17 gives b = 17 div 12 = 1, t = (17 mod 12) div 4 = 1 and d = 17 mod 4 = 1, the lesson's (1,1,1). Read as shape (2,4,3), the same offset names (1,1,2): equal element counts do not make the shapes agree. A scalar of shape () holds one element and a (0,4) tensor holds none.",
+  });
+})();
+
+// ============================================================ 10 batch mean and one update
+// fnd-e03-04: prediction = w·x with examples (1,3) and (2,2); mean loss and gradient; one step.
+const batchScene = (() => {
+  const w = s("w"),
+    eta = s("eta"),
+    factor = iff(eq(s("reduction"), "Sum"), 1, 0.5);
+  const X = [1, 2],
+    Yt = [3, 2];
+  const res = (wv, i) => sub(mul(wv, X[i]), Yt[i]);
+  const loss = (wv, i) => mul(0.5, res(wv, i), res(wv, i));
+  const g = [0, 1].map((i) => mul(res(w, i), X[i]));
+  const L = [0, 1].map((i) => loss(w, i));
+  const G = mul(factor, add(g[0], g[1])),
+    Lagg = mul(factor, add(L[0], L[1]));
+  const w1 = sub(w, mul(eta, factor, add(g[0], g[1])));
+  const L1 = [0, 1].map((i) => loss(w1, i));
+  const Lagg1 = mul(factor, 0.5, add(mul(res(w1, 0), res(w1, 0)), mul(res(w1, 1), res(w1, 1))));
+  const examples = card("bm-examples", 218, ice, blue, "TWO EXAMPLES, ŷ = w·x", [
+    bold("bm-w", cat("w = ", r3(w)), 16, 64, 20, blue),
+    text("bm-ex1", "ex1: x = 1, y = 3", 16, 94, 17, teal),
+    text("bm-l1", after(800, cat("L1 = ", r3(L[0]), ", g1 = ", r3(g[0])), "L1 = …"), 16, 122),
+    text("bm-ex2", "ex2: x = 2, y = 2", 16, 150, 17, purple),
+    text("bm-l2", after(800, cat("L2 = ", r3(L[1]), ", g2 = ", r3(g[1])), "L2 = …"), 16, 178),
+    text("bm-res", after(800, cat("r = [", r3(res(w, 0)), ", ", r3(res(w, 1)), "]"), "r = …"), 16, 206),
+  ]);
+  const reduce = card("bm-reduce", 202, lilac, purple, "REDUCE, THEN STEP", [
+    text("bm-rule", cat("reduction: ", s("reduction")), 16, 62, 17, muted),
+    text("bm-loss", after(1600, cat("batch loss = ", r3(Lagg)), "batch loss = …"), 16, 92),
+    text("bm-grad", after(1600, cat("batch grad = ", r3(G)), "batch grad = …"), 16, 120),
+    bold("bm-w1", after(2400, cat("w′ = ", r3(w1)), "w′ = …"), 16, 156, 20, purple),
+    text("bm-eta", cat("η = ", r3(eta)), 16, 186, 17, muted),
+  ]);
+  const bar = (id, value, y, fill, opacity) => ({ ...rect(id, 60, y, mul(48, value), 10, fill, 3), opacity });
+  const afterCard = card("bm-after", 280, sand, gold, "AFTER ONE STEP", [
+    text("bm-l1b", after(3200, cat("L1′ = ", r6(L1[0])), "L1′ = …"), 16, 62),
+    text("bm-l2b", after(3200, cat("L2′ = ", r6(L1[1])), "L2′ = …"), 16, 90),
+    bold("bm-agg1", after(3200, cat("batch loss′ = ", r6(Lagg1)), "batch loss′ = …"), 16, 122, 18, gold),
+    text("bm-bar-ex1", "ex1", 16, 162, 17, teal),
+    bar("bm-bar1-before", L[0], 144, line, 1),
+    bar("bm-bar1-after", L1[0], 160, teal, after(3200, 1, 0)),
+    text("bm-bar-ex2", "ex2", 16, 202, 17, purple),
+    bar("bm-bar2-before", L[1], 184, line, 1),
+    bar("bm-bar2-after", L1[1], 200, purple, after(3200, 1, 0)),
+    bold(
+      "bm-verdict",
+      after(
+        4000,
+        iff(
+          lt(Lagg1, sub(Lagg, 1e-12)),
+          "batch loss fell",
+          iff(gt(Lagg1, add(Lagg, 1e-12)), "batch loss rose", "batch loss unchanged"),
+        ),
+        "…",
+      ),
+      16,
+      238,
+      18,
+      gold,
+    ),
+    text(
+      "bm-worse",
+      after(
+        4000,
+        iff(
+          gt(L1[1], add(L[1], 1e-12)),
+          "yet ex2 got worse",
+          iff(gt(L1[0], add(L[0], 1e-12)), "yet ex1 got worse", "no example got worse"),
+        ),
+        "…",
+      ),
+      16,
+      266,
+    ),
+  ]);
+  return build({
+    id: "concept-batch-mean",
+    title: "Average the batch. Watch each example.",
+    description:
+      "Two examples share one weight. Change the weight, the learning rate and the batch reduction, follow the per-example losses and gradients into one update, and compare the batch loss with each example's loss afterwards.",
+    state: {
+      w: num("Weight w", 1, 0, 2, 0.1),
+      eta: num("Learning rate η", 0.1, 0, 0.3, 0.05),
+      reduction: choice("Batch reduction", ["Mean", "Sum"]),
+    },
+    kicker: "10 / AGGREGATES HIDE MEMBERS",
+    subtitle: "loss ½r² per example",
+    grid: [
+      [examples, 0],
+      [reduce, 1],
+      [afterCard, 2],
+    ],
+    compactOrder: [examples, reduce, afterCard],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "Two examples, (x = 1, y = 3) and (x = 2, y = 2), share the weight w. Predict the batch gradient's sign." },
+      { atMs: 800, text: "Each example has its own residual, half squared loss and gradient r·x." },
+      { atMs: 1600, text: "A mean divides the summed losses and gradients by two; a sum does not. Write the reduction down." },
+      { atMs: 2400, text: "One update: w′ = w − η·(batch gradient)." },
+      { atMs: 3200, text: "Recompute each example's loss at w′. The bars compare before (grey) and after." },
+      { atMs: 4000, text: "The batch loss can fall while one example gets worse. Inspect members, not just the average." },
+    ],
+    accessible:
+      "A batch of two examples for prediction = w·x with half squared error: (x = 1, y = 3) and (x = 2, y = 2). At the lesson's w = 1 the predictions are 1 and 2, the residuals −2 and 0, the losses 2 and 0, and the per-example gradients r·x are −2 and 0. With a mean reduction the batch loss is 1 and the batch gradient −1, so one step with η = 0.1 gives w = 1.1. A sum reduction gives batch loss 2 and gradient −2, a different scale, and a step to 1.2. After the lesson's step the losses are 1.805 and 0.02 and their mean is 0.9125: the batch loss fell from 1, yet the second example, which was exactly right, got worse. Bars show each example's loss before (grey) and after the step. Changing w, η or the reduction updates every value; with η = 0 nothing changes.",
+  });
+})();
+
+// ============================================================ 11 tiny autodiff: slots and fan-out
+// fnd-e04-04: u = x·x, z = u + u; reverse mode with +=, both operand slots, reset per call.
+const autodiffScene = (() => {
+  const x = s("x"),
+    k = s("calls"),
+    reset = s("reset"),
+    acc = eq(s("combine"), "+= accumulate"),
+    both = eq(s("slots"), "Both operand slots");
+  const u = mul(x, x),
+    z = add(u, u);
+  const ugrad = iff(acc, iff(reset, 2, mul(2, k)), 1);
+  const xgrad = iff(acc, mul(iff(both, 2, 1), x, iff(reset, 2, mul(k, add(k, 1)))), x);
+  const opText = iff(acc, "+= ", "= ");
+  const h = 0.0001;
+  const zAt = (v) => mul(2, v, v);
+  const central = div(sub(zAt(add(x, h)), zAt(sub(x, h))), 2 * h);
+  const node = (id, label, cx) => [
+    { ...circle(`${id}-node`, cx, 120, 22, white), stroke: ink, strokeWidth: 2 },
+    centered(bold(`${id}-label`, label, cx, 126, 18, ink)),
+  ];
+  const graph = card("af-graph", 234, ice, blue, "GRAPH: z = u + u, u = x·x", [
+    segment("af-xu-a", 66, 110, 56, 0, teal, 3),
+    { ...segment("af-xu-b", 66, 130, 56, 0, teal, 3), opacity: iff(both, 1, 0.25) },
+    segment("af-uz-a", 166, 110, 56, 0, purple, 3),
+    segment("af-uz-b", 166, 130, 56, 0, purple, 3),
+    ...node("af-x", "x", 44),
+    ...node("af-u", "u", 144),
+    ...node("af-z", "z", 244),
+    centered(text("af-xu-a-label", after(2400, cat(opText, r3(mul(x, ugrad))), "…"), 94, 96)),
+    centered(
+      text("af-xu-b-label", after(2400, iff(both, cat(opText, r3(mul(x, ugrad))), "unused"), "…"), 94, 158),
+    ),
+    centered(text("af-uz-a-label", after(1600, cat(opText, 1), "…"), 194, 96)),
+    centered(text("af-uz-b-label", after(1600, cat(opText, 1), "…"), 194, 158)),
+    text("af-slots", "x·x reads x in two slots", 16, 194, 17, muted),
+    text("af-uses", "z = u + u uses u twice", 16, 220, 17, muted),
+  ]);
+  const forward = card("af-forward", 162, mint, teal, "FORWARD", [
+    bold("af-x", cat("x = ", x), 16, 64, 20, teal),
+    text("af-u", after(800, cat("u = x·x = ", r3(u)), "u = …"), 16, 94),
+    text("af-z", after(800, cat("z = u + u = ", r3(z)), "z = …"), 16, 122),
+    text("af-saved", "saved: both operands", 16, 150, 17, muted),
+  ]);
+  const backward = card("af-backward", 262, lilac, purple, "BACKWARD", [
+    text("af-calls", cat("calls ", k, iff(reset, ", reset on", ", no reset")), 16, 62, 17, muted),
+    text("af-ugrad", after(1600, cat("u.grad = ", ugrad), "u.grad = …"), 16, 90),
+    text("af-rule", after(2400, cat("x·x rule gives ", r3(mul(iff(both, 2, 1), x))), "x·x rule gives …"), 16, 118),
+    bold("af-xgrad", after(2400, cat("x.grad = ", r3(xgrad)), "x.grad = …"), 16, 152, 20, purple),
+    text("af-true", after(3200, cat("dz/dx = 4x = ", r3(mul(4, x))), "dz/dx = …"), 16, 184),
+    text("af-central", after(3200, cat("central diff: ", r3(central)), "central diff: …"), 16, 212),
+    bold(
+      "af-verdict",
+      after(4000, iff(lt(abs(sub(xgrad, mul(4, x))), 1e-9), "matches reference", "wrong gradient"), "…"),
+      16,
+      246,
+      18,
+      purple,
+    ),
+  ]);
+  return build({
+    id: "concept-autodiff-fanout",
+    title: "Every slot and every use adds.",
+    description:
+      "Run the lesson's tiny reverse-mode engine on u = x·x and z = u + u. Break the multiplication rule, replace += with assignment, or skip the reset and call backward() again, and compare x.grad with the true derivative 4x.",
+    state: {
+      x: num("Input x", 2, -3, 3, 0.5),
+      slots: choice("Multiply pullback", ["Both operand slots", "One slot only"]),
+      combine: choice("Gradient update", ["+= accumulate", "= overwrite"]),
+      calls: num("backward() calls", 1, 1, 3, 1),
+      reset: flag("Reset grads in backward", true),
+    },
+    kicker: "11 / FAN-OUT ACCUMULATES",
+    subtitle: "the lesson's scalar engine",
+    grid: [
+      [graph, 0],
+      [forward, 1],
+      [backward, 2],
+    ],
+    compactOrder: [graph, forward, backward],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "u = x·x reads x twice; z = u + u uses u twice. Predict dz/dx before running backward." },
+      { atMs: 800, text: "Forward at x = 2 gives u = 4 and z = 8, saving both multiplication operands." },
+      { atMs: 1600, text: "Backward starts with z.grad = 1. Each use of u adds 1, so u.grad = 2." },
+      { atMs: 2400, text: "Each operand slot of x·x adds the other operand times u.grad: x.grad = 2·x·2 = 4x." },
+      { atMs: 3200, text: "Compare with the true derivative 4x and an independent central difference." },
+      { atMs: 4000, text: "A one-slot rule or = instead of += breaks shared inputs. Skipping the reset makes a repeated call accumulate." },
+    ],
+    accessible:
+      "The lesson's scalar reverse-mode engine on u = x·x and z = u + u. At x = 2 the forward pass gives u = 4 and z = 8. Backward sets z.grad = 1; the addition passes 1 to each of its two operand slots, both of which are u, so with += u.grad = 2. The multiplication passes x·u.grad to each of its two slots, both of which are x, so x.grad = 2·2·2 = 8, matching the derivative 4x and a central difference. A one-slot multiplication rule returns half: the lesson's x·x derivative 2 instead of 4, so x.grad = 4. Replacing += with assignment keeps only the last contribution: u.grad = 1 and x.grad = x = 2. The reference resets every reachable gradient at the start of backward(), so repeated calls give 8 again; without that reset a second call would make u.grad 4 and x.grad 24, and a third 6 and 48. The graph shows each edge's contribution; a faded edge is a slot the broken rule ignores.",
+  });
+})();
+
+// ============================================================ 12 residual paths and normalization axes
+// ttf-e05-02: d/dx of L plain F layers is F′^L; with y = x + F(x) it is (1 + F′)^L. Normalize [1, 3].
+const residualScene = (() => {
+  const a = s("slope"),
+    Lk = s("layers"),
+    a2 = s("a2"),
+    perToken = eq(s("axis"), "Per token");
+  const plain = op("pow", a, Lk),
+    skip = op("pow", add(1, a), Lk);
+  const small = (v) => lt(abs(v), 0.0000005);
+  const fmt = (v) => iff(small(v), "≈ 0", iff(lt(abs(v), 1000), r6(v), r3(v)));
+  const residual = card("rn-residual", 200, ice, blue, "STACK OF L LAYERS", [
+    text("rn-setup", cat("F′ = ", r3(a), ", layers ", Lk), 16, 62),
+    text("rn-plain", after(800, cat("plain F′^L: ", fmt(plain)), "plain F′^L: …"), 16, 90),
+    text("rn-skip", after(1600, cat("skip (1+F′)^L: ", fmt(skip)), "skip (1+F′)^L: …"), 16, 118),
+    bold(
+      "rn-verdict",
+      after(
+        2400,
+        iff(
+          small(skip),
+          "skip path cancels",
+          iff(gt(abs(skip), abs(plain)), "skip keeps signal", iff(lt(abs(skip), abs(plain)), "plain is larger", "equal size")),
+        ),
+        "…",
+      ),
+      16,
+      152,
+      18,
+      blue,
+    ),
+    text("rn-form", "y = x + F(x) per layer", 16, 184, 17, muted),
+  ]);
+  const bars = (prefix, base, baseY, fill) =>
+    Array.from({ length: 10 }, (_, i) => {
+      const l = i + 1;
+      const hgt = mul(40, div(op("pow", abs(base), l), max(abs(base), op("pow", abs(base), Lk), 1e-9)));
+      return {
+        ...rect(`${prefix}-${l}`, 16 + 26 * i, sub(baseY, hgt), 22, hgt, fill, 3),
+        opacity: iff(le(l, Lk), after(prefix.endsWith("plain") ? 800 : 1600, 1, 0), 0),
+      };
+    });
+  const barCard = card("rn-bars", 232, mint, teal, "|DERIVATIVE| BY DEPTH", [
+    text("rn-bars-plain-label", "plain", 16, 62, 17, purple),
+    ...bars("rn-bar-plain", a, 112, purple),
+    text("rn-bars-skip-label", "with skip", 16, 140, 17, teal),
+    ...bars("rn-bar-skip", add(1, a), 190, teal),
+    text("rn-bars-note", "rows scaled to own max", 16, 216, 17, muted),
+  ]);
+  const COMP = ["alone", "with [5, 9]", "with [0, 0]"];
+  const comp = s("batch");
+  const cSum = pick(comp, COMP, [0, 14, 0]),
+    cSq = pick(comp, COMP, [0, 106, 0]),
+    count = pick(comp, COMP, [2, 4, 4]);
+  const meanB = div(add(1, a2, cSum), count),
+    varB = sub(div(add(1, mul(a2, a2), cSq), count), mul(meanB, meanB));
+  const meanT = div(add(1, a2), 2),
+    varT = mul(div(sub(1, a2), 2), div(sub(1, a2), 2));
+  const mu = iff(perToken, meanT, meanB),
+    vr = iff(perToken, varT, varB);
+  const nrm = (v, m, vv) => div(sub(v, m), sqrt(add(vv, 0.00001)));
+  const n = [nrm(1, mu, vr), nrm(a2, mu, vr)],
+    alone = [nrm(1, meanT, varT), nrm(a2, meanT, varT)];
+  const close = (p, q) => lt(abs(sub(p, q)), 1e-9);
+  const norm = card("rn-norm", 288, sand, gold, "NORMALIZE TOKEN A", [
+    text("rn-token", cat("token A = [1, ", a2, "]"), 16, 62),
+    text("rn-batch", cat("batch: A ", comp), 16, 90, 17, muted),
+    text("rn-stats", after(3200, cat("mean ", r3(mu), ", var ", r3(vr)), "mean …"), 16, 118),
+    bold("rn-out", after(3200, cat("A → [", r3(n[0]), ", ", r3(n[1]), "]"), "A → …"), 16, 152, 18, gold),
+    text("rn-exact", after(3200, cat("A[1] = ", r6(n[1])), "A[1] = …"), 16, 184),
+    text("rn-alone", after(4000, cat("A alone: [", r3(alone[0]), ", ", r3(alone[1]), "]"), "A alone: …"), 16, 212),
+    bold(
+      "rn-same",
+      after(4000, iff(close(n[0], alone[0]), "same as alone", "batch changed A"), "…"),
+      16,
+      244,
+      18,
+      gold,
+    ),
+    text("rn-eps", "ε = 1e-5 avoids ÷ 0", 16, 272, 17, muted),
+  ]);
+  return build({
+    id: "concept-residual-norm",
+    title: "A skip path and the right axis.",
+    description:
+      "Stack layers whose branch has slope F′ and compare the derivative through the plain stack with the derivative through residual layers y = x + F(x). Then normalize a token's features alone and inside a batch, per token or over the whole batch.",
+    state: {
+      slope: num("Branch slope F′", 0.1, -1, 1, 0.1),
+      layers: num("Layers L", 10, 1, 10, 1),
+      a2: num("Token A feature 2", 3, -3, 5, 1),
+      axis: choice("Normalize over", ["Per token", "Whole batch (bug)"]),
+      batch: choice("Batch companion", COMP),
+    },
+    kicker: "12 / PATHS AND AXES",
+    subtitle: "scalar layers, F(x) = F′·x",
+    grid: [
+      [residual, 0],
+      [barCard, 1],
+      [norm, 2],
+    ],
+    compactOrder: [residual, barCard, norm],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "Each layer applies F(x) = F′·x. Predict the derivative through ten layers with F′ = 0.1." },
+      { atMs: 800, text: "Through the plain stack the local derivatives multiply: F′^L, 0.1^10 = 1e-10." },
+      { atMs: 1600, text: "With y = x + F(x) each local derivative is 1 + F′, so ten layers give 1.1^10 ≈ 2.594." },
+      { atMs: 2400, text: "A direct path is not a guarantee: with F′ = −1 the two paths cancel exactly." },
+      { atMs: 3200, text: "Normalize token A = [1, 3] over its own features: mean 2, variance 1, about [−1, 1]." },
+      { atMs: 4000, text: "Compute the statistics over the whole batch instead, and A's output depends on its neighbours." },
+    ],
+    accessible:
+      "Residual sensitivity and normalization axes with the lesson's numbers. Each scalar layer applies F(x) = F′·x. Through L plain layers the derivative is F′ to the power L; the lesson's F′ = 0.1 and L = 10 give 1e-10, shown as approximately zero. Residual layers y = x + F(x) have local derivative 1 + F′, so ten of them give 1.1^10 ≈ 2.593742. With F′ = −1 the residual derivative is 0: the paths cancel, so a skip path does not guarantee healthy gradients. Bars show the magnitude after each layer, each row scaled to its own maximum. For normalization, token A = [1, 3] has mean 2 and population variance 1; with ε = 1e-5 it becomes [−0.999995, 0.999995], about [−1, 1]. Normalizing per token gives the same result whether A is alone or batched with another token. Normalizing over the whole batch with companion [5, 9] uses mean 4.5 and variance 8.75 and turns A into about [−1.183, −0.507]: the shape is unchanged but the function is wrong, and changing the batch changes A's output.",
+  });
+})();
+
+// ============================================================ 13 embedding gather and scatter-add
+// ttf-e06-01: E rows [1,0],[0,1],[1,1],[−1,0]; ids [2,0,2]; positions; repeated rows accumulate.
+const embeddingScene = (() => {
+  const ids = [s("id0"), s("id1"), s("id2")],
+    pos = s("positions"),
+    acc = eq(s("scatter"), "Accumulate (+=)");
+  const E = [
+    [1, 0],
+    [0, 1],
+    [1, 1],
+    [-1, 0],
+  ];
+  const P = [
+    [0, 0],
+    [0.1, -0.1],
+    [0.2, -0.2],
+  ];
+  const G = [
+    [1, 2],
+    [2, -1],
+    [-0.5, 3],
+  ];
+  const rowOf = (id, c) => iff(eq(id, 0), E[0][c], iff(eq(id, 1), E[1][c], iff(eq(id, 2), E[2][c], E[3][c])));
+  const xv = [0, 1, 2].map((i) => [0, 1].map((c) => add(rowOf(ids[i], c), iff(pos, P[i][c], 0))));
+  const used = (r) => or(...ids.map((id) => eq(id, r)));
+  const gradOf = (r, c) =>
+    iff(
+      acc,
+      add(...[0, 1, 2].map((i) => iff(eq(ids[i], r), G[i][c], 0))),
+      iff(eq(ids[2], r), G[2][c], iff(eq(ids[1], r), G[1][c], iff(eq(ids[0], r), G[0][c], 0))),
+    );
+  const table = card("es-table", 202, ice, blue, "EMBEDDING TABLE (4×2)", [
+    ...[0, 1, 2, 3].flatMap((r) => [
+      { ...rect(`es-hl-${r}`, 8, 44 + 30 * r, 272, 26, blue, 6), opacity: after(800, iff(used(r), 0.18, 0), 0) },
+      text(
+        `es-row-${r}`,
+        cat(
+          `${r}: [${E[r].join(", ")}]`,
+          after(
+            800,
+            iff(
+              used(r),
+              cat(" ← pos", iff(eq(ids[0], r), " 0", ""), iff(eq(ids[1], r), " 1", ""), iff(eq(ids[2], r), " 2", "")),
+              "",
+            ),
+            "",
+          ),
+        ),
+        16,
+        62 + 30 * r,
+      ),
+    ]),
+    text("es-params", "V·D = 4·2 = 8 params", 16, 186, 17, muted),
+  ]);
+  const gather = card("es-gather", 224, mint, teal, "GATHER, THEN ADD POSITION", [
+    text("es-ids", cat("ids = [", ids[0], ", ", ids[1], ", ", ids[2], "]"), 16, 62),
+    ...[0, 1, 2].map((i) =>
+      text(
+        `es-x-${i}`,
+        after(1600, cat(`x${i} = [`, r3(xv[i][0]), ", ", r3(xv[i][1]), "]"), `x${i} = …`),
+        16,
+        92 + 28 * i,
+      ),
+    ),
+    text("es-formula", iff(pos, "x = E[id] + p", "x = E[id], no position"), 16, 180, 17, muted),
+    text(
+      "es-compare",
+      after(2400, cat("x0 vs x2: ", iff(and(eq(xv[0][0], xv[2][0]), eq(xv[0][1], xv[2][1])), "equal", "differ")), "x0 vs x2: …"),
+      16,
+      208,
+    ),
+  ]);
+  const backward = card("es-backward", 284, lilac, purple, "BACKWARD INTO THE TABLE", [
+    text("es-g02", "∂x0 [1, 2], ∂x2 [-0.5, 3]", 16, 62, 17, muted),
+    text("es-g1", "∂x1 [2, -1], invented", 16, 90, 17, muted),
+    ...[0, 1, 2, 3].map((r) =>
+      text(
+        `es-grad-${r}`,
+        after(3200, cat(`∂E${r} = [`, r3(gradOf(r, 0)), ", ", r3(gradOf(r, 1)), "]"), `∂E${r} = …`),
+        16,
+        124 + 28 * r,
+      ),
+    ),
+    bold(
+      "es-touched",
+      after(4000, cat("rows touched: ", add(...[0, 1, 2, 3].map((r) => iff(used(r), 1, 0)))), "rows touched: …"),
+      16,
+      240,
+      18,
+      purple,
+    ),
+    text("es-rule", iff(acc, "repeats add up", "last write wins (bug)"), 16, 268, 17, muted),
+  ]);
+  return build({
+    id: "concept-embedding-scatter",
+    title: "Look up a row. Add back into it.",
+    description:
+      "Choose the token IDs at three positions, gather their rows from the lesson's four-row embedding table, and add position vectors. Then send gradients back: a row looked up twice must receive both contributions.",
+    state: {
+      id0: num("ID at position 0", 2, 0, 3, 1),
+      id1: num("ID at position 1", 0, 0, 3, 1),
+      id2: num("ID at position 2", 2, 0, 3, 1),
+      positions: flag("Add position vectors", true),
+      scatter: choice("Backward into the table", ["Accumulate (+=)", "Overwrite (bug)"]),
+    },
+    kicker: "13 / ONE ROW, MANY USES",
+    subtitle: "an ID picks a row",
+    grid: [
+      [table, 0],
+      [gather, 1],
+      [backward, 2],
+    ],
+    compactOrder: [table, gather, backward],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "The table has V = 4 rows of width D = 2: eight parameters however long the batch is." },
+      { atMs: 800, text: "Each ID selects a row. A repeated ID selects the same row, not a copy." },
+      { atMs: 1600, text: "Gather the rows and add each position's vector, so repeats can differ by position." },
+      { atMs: 2400, text: "Compare positions 0 and 2: same ID, different input once positions are added." },
+      { atMs: 3200, text: "Backward scatters each position's gradient into its row. Repeats must add." },
+      { atMs: 4000, text: "Rows not looked up get no contribution from this lookup. That is not a promise they never change." },
+    ],
+    accessible:
+      "An embedding lookup with the lesson's table: row 0 = [1, 0], row 1 = [0, 1], row 2 = [1, 1], row 3 = [−1, 0], eight parameters. The lesson's IDs [2, 0, 2] gather [1, 1], [1, 0] and [1, 1]; both occurrences of ID 2 read the same parameter row. Adding the position vectors [0, 0], [0.1, −0.1] and [0.2, −0.2] gives [1, 1], [1.1, −0.1] and [1.2, 0.8], so the repeated token differs by position. In backward, the two occurrences of ID 2 receive the lesson's gradients [1, 2] and [−0.5, 3]; scatter-add accumulates them into row 2 as [0.5, 5]. Position 1's gradient [2, −1] is invented for the illustration and goes to row 0. Rows 1 and 3 receive nothing from this lookup, which does not mean weight decay, tied weights or optimizer state cannot change them. The overwrite option keeps only the last contribution, [−0.5, 3], which is wrong whenever an ID repeats. IDs are categories: changing an ID changes which row is read, not a quantity.",
+  });
+})();
+
+// ============================================================ 14 LoRA: a low-rank update
+// ttf-e08-04: ΔW = s·B·A with B (3×1) = [2,−1,0.5], A (1×4) = [1,0,−1,2]; x = [1,2,3,4].
+const loraScene = (() => {
+  const sc = s("scale"),
+    x3 = s("x3"),
+    r = s("rank"),
+    init = s("init");
+  const INITS = ["Lesson A and B", "B starts at zero", "Both start at zero"];
+  const aOn = not(eq(init, INITS[2])),
+    bOn = eq(init, INITS[0]);
+  const A = [1, 0, -1, 2].map((v) => iff(aOn, v, 0)),
+    B = [2, -1, 0.5].map((v) => iff(bOn, v, 0));
+  const xs = [1, 2, 3, x3];
+  const inner = add(...A.map((av, j) => mul(av, xs[j])));
+  const dy = B.map((bv) => mul(sc, bv, inner));
+  const dW = B.map((bv) => A.map((av) => mul(sc, bv, av)));
+  const dense = dW.map((row) => add(...row.map((v, j) => mul(v, xs[j]))));
+  const gy = [1, 0, -1];
+  const btg = add(...B.map((bv, i) => mul(bv, gy[i])));
+  const dB = gy.map((gv) => mul(sc, gv, inner)),
+    dA = xs.map((xv) => mul(sc, btg, xv));
+  const vec = (vals) => cat("[", ...vals.flatMap((v, i) => (i ? [", ", r3(v)] : [r3(v)])), "]");
+  const zero = (vals) => and(...vals.map((v) => lt(abs(v), 1e-12)));
+  const cellText = (id, value, cx, cy, opacity) => ({ ...centered(text(id, value, cx, cy, 17)), opacity });
+  const grid = card("lo-grid", 226, ice, blue, "ΔW = s·B·A (3×4)", [
+    text("lo-a-label", "A →", 16, 64, 17, muted),
+    ...A.flatMap((av, j) => [
+      rect(`lo-a-${j}`, 72 + 50 * j, 44, 46, 28, white, 5),
+      cellText(`lo-a-${j}-v`, av, 95 + 50 * j, 64, 1),
+    ]),
+    ...B.flatMap((bv, i) => [
+      rect(`lo-b-${i}`, 16, 84 + 34 * i, 46, 28, white, 5),
+      cellText(`lo-b-${i}-v`, bv, 39, 104 + 34 * i, 1),
+    ]),
+    ...dW.flatMap((row, i) =>
+      row.flatMap((v, j) => [
+        rect(`lo-w-${i}-${j}`, 72 + 50 * j, 84 + 34 * i, 46, 28, white, 5),
+        {
+          ...rect(`lo-w-${i}-${j}-hl`, 72 + 50 * j, 84 + 34 * i, 46, 28, gold, 5),
+          opacity: after(800, iff(gt(abs(v), 0), 0.3, 0), 0),
+        },
+        cellText(`lo-w-${i}-${j}-v`, r3(v), 95 + 50 * j, 104 + 34 * i, after(800, 1, 0)),
+      ]),
+    ),
+    text("lo-scale", cat("s = ", sc, "; B is a column"), 16, 210, 17, muted),
+  ]);
+  const apply = card("lo-apply", 232, lilac, purple, "APPLY TO x", [
+    text("lo-x", cat("x = [1, 2, 3, ", x3, "]"), 16, 62),
+    text("lo-inner", after(1600, cat("A·x = ", r3(inner)), "A·x = …"), 16, 90),
+    bold("lo-dy", after(2400, cat("Δy = ", vec(dy)), "Δy = …"), 16, 124, 20, purple),
+    text("lo-dense", after(3200, cat("ΔW·x = ", vec(dense)), "ΔW·x = …"), 16, 156),
+    bold(
+      "lo-check",
+      after(3200, iff(zero(dy.map((v, i) => sub(v, dense[i]))), "factored = dense", "mismatch"), "…"),
+      16,
+      188,
+      18,
+      purple,
+    ),
+    text("lo-base", "base W·x is added too", 16, 216, 17, muted),
+  ]);
+  const learn = card("lo-learn", 258, sand, gold, "PARAMETERS AND INIT", [
+    text("lo-count", cat("rank ", r, ": ", mul(7, r), " trainable"), 16, 62),
+    text(
+      "lo-dense-count",
+      cat("dense W has 12: ", iff(lt(mul(7, r), 12), "saves ", "costs "), abs(sub(12, mul(7, r)))),
+      16,
+      90,
+    ),
+    text("lo-gy", "∂y = [1, 0, -1], invented", 16, 118, 17, muted),
+    text("lo-init", cat("init: ", init), 16, 146),
+    text("lo-db", after(4000, cat("∂B = ", vec(dB)), "∂B = …"), 16, 180),
+    text("lo-da", after(4000, cat("∂A = ", vec(dA)), "∂A = …"), 16, 208),
+    bold(
+      "lo-verdict",
+      after(
+        4000,
+        iff(
+          and(zero(dA), zero(dB)),
+          "no factor can learn",
+          iff(zero(dA), "only B can learn", iff(zero(dB), "only A can learn", "both factors learn")),
+        ),
+        "…",
+      ),
+      16,
+      242,
+      18,
+      gold,
+    ),
+  ]);
+  return build({
+    id: "concept-lora-update",
+    title: "A thin update, added beside W.",
+    description:
+      "Build the lesson's rank-one update ΔW = s·B·A, apply it to x through the factors and through the dense matrix, and compare trainable counts by rank. Then start one or both factors at zero and see which factor can receive a gradient.",
+    state: {
+      scale: num("Scale s", 1, 0, 2, 1),
+      x3: num("Input x[3]", 4, -2, 4, 1),
+      rank: num("Rank r (counts only)", 1, 1, 3, 1),
+      init: choice("Factor values", INITS),
+    },
+    kicker: "14 / LOW RANK, SAME BASE",
+    subtitle: "out 3, in 4, rank 1",
+    grid: [
+      [grid, 0],
+      [apply, 1],
+      [learn, 2],
+    ],
+    compactOrder: [grid, apply, learn],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "The base W (3×4) stays fixed. LoRA learns B (3×r) and A (r×4); here r = 1." },
+      { atMs: 800, text: "ΔW = s·B·A is an outer product: every row is a multiple of A." },
+      { atMs: 1600, text: "Apply the factors in order: first A·x, a single number for rank one." },
+      { atMs: 2400, text: "Then Δy = s·B·(A·x), the lesson's [12, −6, 3]. The base output W·x is added separately." },
+      { atMs: 3200, text: "Multiplying by the dense ΔW gives the same vector, at the cost of materializing 12 values." },
+      { atMs: 4000, text: "Each factor's gradient depends on the other factor. If both start at zero, neither can learn." },
+    ],
+    accessible:
+      "Low-rank adaptation with the lesson's numbers. The base matrix W is 3×4 (12 parameters) and stays fixed; LoRA learns B, a 3×1 column [2, −1, 0.5], and A, a 1×4 row [1, 0, −1, 2], seven trainable values at rank 1. In general a rank-r adapter has 7r, so rank 2 needs 14, more than the dense 12. ΔW = s·B·A is drawn as a 3×4 grid of products. For x = [1, 2, 3, 4] and s = 1, A·x = 6 and Δy = s·B·(A·x) = [12, −6, 3], the same as multiplying x by the dense ΔW; the base output W·x is still added. With an invented upstream gradient [1, 0, −1], the factor gradients are ∂B = s·∂y·(A·x) = [6, 0, −6] and ∂A = s·(Bᵀ∂y)·x = [1.5, 3, 4.5, 6]. If B starts at zero, the update and ∂A are zero but ∂B is not, so B learns first and A follows. If both start at zero, both gradients are zero and neither factor can move. The rank control changes only the parameter counts; the drawn factors stay rank one.",
+  });
+})();
+
+// ============================================================ 15 data, tensor and pipeline messages
+// sys-e10-01: [1,2]·W with rows [1,3],[2,4]; column split concatenates, feature split sums;
+// stage A h = w·x, stage B pred = v·h, target 4; the return message is dL/dh.
+const parallelScene = (() => {
+  const x1 = s("x1"),
+    x2 = s("x2"),
+    cols = eq(s("split"), "Output columns"),
+    concat = eq(s("combine"), "Concatenate"),
+    n2 = s("n2"),
+    w = s("w"),
+    v = s("v"),
+    sendGrad = eq(s("message"), "dL/dh (correct)");
+  const y0 = add(x1, mul(2, x2)),
+    y1 = add(mul(3, x1), mul(4, x2));
+  const p0 = [x1, mul(3, x1)],
+    p1 = [mul(2, x2), mul(4, x2)];
+  const got = iff(
+    cols,
+    iff(concat, cat("[", y0, ", ", y1, "]"), cat("[", add(y0, y1), "]")),
+    iff(
+      concat,
+      cat("[", p0[0], ", ", p0[1], ", ", p1[0], ", ", p1[1], "]"),
+      cat("[", add(p0[0], p1[0]), ", ", add(p0[1], p1[1]), "]"),
+    ),
+  );
+  const matches = or(and(cols, concat), and(not(cols), not(concat)));
+  const workers = card("ps-workers", 218, ice, blue, "TENSOR SPLIT, 2 WORKERS", [
+    text("ps-x", cat("x = [", x1, ", ", x2, "]"), 16, 62),
+    text("ps-W", "W rows [1, 3], [2, 4]", 16, 90, 17, muted),
+    text("ps-split", cat("split: ", s("split")), 16, 118),
+    text(
+      "ps-w0",
+      after(800, iff(cols, cat("w0: x·col0 = ", y0), cat("w0: ", x1, "·[1, 3] = [", p0[0], ", ", p0[1], "]")), "w0: …"),
+      16,
+      146,
+    ),
+    text(
+      "ps-w1",
+      after(800, iff(cols, cat("w1: x·col1 = ", y1), cat("w1: ", x2, "·[2, 4] = [", p1[0], ", ", p1[1], "]")), "w1: …"),
+      16,
+      174,
+    ),
+    text("ps-owns", iff(cols, "each owns output columns", "each owns input features"), 16, 202, 17, muted),
+  ]);
+  const combine = card("ps-combine", 178, mint, teal, "COMBINE THE PARTIALS", [
+    text("ps-combine-rule", cat("combine: ", s("combine")), 16, 62),
+    bold("ps-got", after(1600, cat("got ", got), "got …"), 16, 96, 20, teal),
+    text("ps-want", cat("want [", y0, ", ", y1, "]"), 16, 128),
+    bold("ps-verdict", after(2400, iff(matches, "contract matches", "wrong combine"), "…"), 16, 162, 18, teal),
+  ]);
+  const weighted = div(add(2, mul(6, n2)), add(1, n2));
+  const data = card("ps-data", 162, lilac, purple, "DATA REPLICAS", [
+    text("ps-r1", "r1: 1 example, grad 2", 16, 62),
+    text("ps-r2", cat("r2: ", n2, " examples, mean 6"), 16, 90),
+    text("ps-weighted", after(3200, cat("weighted = ", r3(weighted)), "weighted = …"), 16, 118),
+    text("ps-equal", after(3200, "mean of means = 4", "mean of means = …"), 16, 146),
+  ]);
+  const h = w,
+    pred = mul(v, w),
+    rp = sub(pred, 4),
+    lossP = mul(0.5, rp, rp),
+    dv = mul(rp, h),
+    dh = mul(rp, v);
+  const msg = iff(sendGrad, dh, dv);
+  const pipe = card("ps-pipe", 350, sand, gold, "PIPELINE MESSAGE", [
+    rect("ps-stage-a", 16, 46, 112, 34, white, 8),
+    centered(text("ps-stage-a-label", "A: h = w·x", 72, 69)),
+    rect("ps-stage-b", 160, 46, 112, 34, white, 8),
+    centered(text("ps-stage-b-label", "B: v·h", 216, 69)),
+    segment("ps-forward-arrow", 128, 56, 32, 0, teal, 3),
+    { ...segment("ps-back-arrow", 128, 72, 32, 0, purple, 3), opacity: after(5600, 1, 0) },
+    text("ps-params", cat("x = 1, w = ", r3(w), ", v = ", r3(v)), 16, 110),
+    text("ps-forward", after(4000, cat("h = ", r3(h), ", pred = ", r3(pred)), "h = …"), 16, 138),
+    text("ps-loss", after(4000, cat("loss = ", r3(lossP), " (target 4)"), "loss = …"), 16, 166),
+    text("ps-dpred", after(4800, cat("dL/dpred = ", r3(rp)), "dL/dpred = …"), 16, 194),
+    text("ps-dv", after(4800, cat("B: dv = ", r3(dv)), "B: dv = …"), 16, 222),
+    bold("ps-msg", after(5600, cat("sent: ", r3(msg)), "sent: …"), 16, 256, 20, gold),
+    text("ps-dw", after(5600, cat("A: dw = ", r3(msg)), "A: dw = …"), 16, 284),
+    bold(
+      "ps-dw-verdict",
+      after(5600, iff(lt(abs(sub(msg, dh)), 1e-9), "dw is right", "dw is wrong"), "…"),
+      16,
+      312,
+      18,
+      gold,
+    ),
+    text("ps-message", cat("message: ", iff(sendGrad, "dL/dh", "dv (bug)")), 16, 338, 17, muted),
+  ]);
+  return build({
+    id: "concept-parallel-split",
+    title: "Same math, different messages.",
+    description:
+      "Split the lesson's matrix product across two workers by output columns or by input features and choose how to combine their partial results. Weight two data replicas by example count. Then follow a two-stage pipeline and choose what stage B sends back.",
+    state: {
+      x1: num("Input x[0]", 1, -2, 3, 1),
+      x2: num("Input x[1]", 2, -2, 3, 1),
+      split: choice("Tensor split", ["Output columns", "Input features"]),
+      combine: choice("Combine partials by", ["Concatenate", "Sum"]),
+      n2: num("Examples on replica 2", 3, 1, 4, 1),
+      w: num("Stage A weight w", 2, 0, 3, 0.5),
+      v: num("Stage B weight v", 3, 0, 4, 0.5),
+      message: choice("Message back to A", ["dL/dh (correct)", "B's weight gradient"]),
+    },
+    kicker: "15 / NAME EACH MESSAGE",
+    subtitle: "row vector x times W",
+    grid: [
+      [workers, 0],
+      [combine, 1],
+      [data, 1],
+      [pipe, 2],
+    ],
+    compactOrder: [workers, combine, data, pipe],
+    durationMs: 6000,
+    cues: [
+      { atMs: 0, text: "x = [1, 2] times W with rows [1, 3] and [2, 4] is [5, 11]. Two workers share the work." },
+      { atMs: 800, text: "Split output columns and each worker owns a whole output; split input features and each owns a partial vector." },
+      { atMs: 1600, text: "Column results are concatenated; feature partials must be summed. The operations are not interchangeable." },
+      { atMs: 3200, text: "Data replicas: weight each replica's mean gradient by its example count, (1·2 + 3·6)/4 = 5, not 4." },
+      { atMs: 4000, text: "Pipeline: stage A computes h = w·x and sends it to stage B, which predicts v·h against target 4." },
+      { atMs: 4800, text: "Stage B gets dL/dpred and its own weight gradient." },
+      { atMs: 5600, text: "Stage A needs dL/dh = dL/dpred · v, not B's weight gradient. Check A's resulting dw." },
+    ],
+    accessible:
+      "Three partitions of the same computation with the lesson's numbers. Tensor parallelism: the row input [1, 2] times the matrix with rows [1, 3] and [2, 4] is [5, 11]. Splitting output columns lets one worker compute 5 and the other 11, and concatenation gives [5, 11]. Splitting input features gives partial vectors 1·[1, 3] = [1, 3] and 2·[2, 4] = [4, 8], which must be summed to [5, 11]. Summing column results gives [16] and concatenating feature partials gives [1, 3, 4, 8]: both are wrong contracts. Data parallelism: one replica has one example with gradient 2 and another three examples with mean gradient 6, so the full mean is (1·2 + 3·6)/4 = 5, while an equal mean of the two means is 4. Pipeline parallelism: with x = 1, w = 2, v = 3 and target 4, stage A sends h = 2, stage B predicts 6 with half squared loss 2 and output sensitivity 2, so B's weight gradient is 2·2 = 4, while the message to A must be dL/dh = 2·3 = 6, giving A's weight gradient 6. Sending B's weight gradient instead gives A the wrong gradient 4 whenever h differs from v; when they happen to be equal the number coincides but the message still has the wrong meaning.",
+  });
+})();
+
+// ============================================================ 16 streaming log-sum-exp over vocabulary tiles
+// eng-e13-01: logits [1000, 999, 998, 997] in two tiles; running max m and scaled sum s.
+const lseScene = (() => {
+  const N = s("N"),
+    V = s("V"),
+    tile = s("tile"),
+    z3 = s("z3"),
+    target = s("target"),
+    checks = s("checks");
+  const E = Math.E,
+    exp = (v) => op("pow", E, v);
+  const Z = ["z0", "z1", "z2", "z3"];
+  const zt = pick(target, Z, [1000, 999, 998, z3]);
+  const tile1 = or(eq(target, "z0"), eq(target, "z1"));
+  const m2 = max(998, z3),
+    M = max(1000, z3);
+  const s1 = add(1, exp(-1)),
+    s2 = add(exp(sub(998, m2)), exp(sub(z3, m2)));
+  const sOk = add(exp(sub(1000, M)), exp(sub(999, M)), exp(sub(998, M)), exp(sub(z3, M)));
+  const sBad = add(1, exp(-1), exp(sub(998, m2)), exp(sub(z3, m2)));
+  const sTile = iff(tile1, add(1, exp(-1)), s2),
+    mTile = iff(tile1, 1000, m2);
+  // ln via 2·atanh((s − 1)/(s + 1)); here 1 ≤ s ≤ 4, so the 16-term series is exact to ~1e-9.
+  const ln = (sv) => {
+    const u = div(sub(sv, 1), add(sv, 1));
+    return add(...Array.from({ length: 16 }, (_, i) => mul(2 / (2 * i + 1), op("pow", u, 2 * i + 1))));
+  };
+  const lossOk = add(M, ln(sOk), mul(-1, zt)),
+    lossBad = add(M, ln(sBad), mul(-1, zt)),
+    lossTile = add(mTile, ln(sTile), mul(-1, zt));
+  const p = div(exp(sub(zt, M)), sOk);
+  const MiB = 1048576;
+  const full = div(mul(4, N, V), MiB);
+  const tiled = pick(tile, ["No tiling", "256 token rows", "256 vocab columns"], [
+    full,
+    div(mul(4, 256, V), MiB),
+    div(mul(4, N, 256), MiB),
+  ]);
+  const memory = card("sl-memory", 190, ice, blue, "FP32 LOGITS MEMORY", [
+    text("sl-nv", cat("N = ", N, ", V = ", V), 16, 62),
+    text("sl-full", after(800, cat("full: ", r3(full), " MiB"), "full: …"), 16, 90),
+    bold("sl-tile", after(800, cat("tile: ", r3(tiled), " MiB"), "tile: …"), 16, 120, 18, blue),
+    text(
+      "sl-needs",
+      after(
+        800,
+        pick(tile, ["No tiling", "256 token rows", "256 vocab columns"], [
+          "one big array",
+          "rows are independent",
+          "needs global softmax",
+        ]),
+        "…",
+      ),
+      16,
+      148,
+      17,
+      muted,
+    ),
+    text("sl-other", "weights, grads not shrunk", 16, 174, 17, muted),
+  ]);
+  const ledger = card("sl-ledger", 162, mint, teal, "FINITE-CHECK LEDGER", [
+    text("sl-checks", cat(checks, " flag reads × 15 µs"), 16, 62),
+    bold("sl-ms", cat("= ", r3(mul(checks, 0.015)), " ms"), 16, 94, 20, teal),
+    text("sl-four", "4 reads: 0.06 ms", 16, 122, 17, muted),
+    text("sl-model", "modelled, not measured", 16, 148, 17, muted),
+  ]);
+  const cellX = [16, 80, 156, 220];
+  const stream = card("sl-stream", 234, lilac, purple, "STREAM TWO VOCAB TILES", [
+    { ...rect("sl-tile1-bg", 12, 44, 130, 40, line, 8), opacity: 0.6 },
+    { ...rect("sl-tile2-bg", 152, 44, 130, 40, line, 8), opacity: 0.6 },
+    ...cellX.flatMap((x, i) => [
+      rect(`sl-cell-${i}`, x, 50, 58, 28, white, 5),
+      { ...rect(`sl-target-${i}`, x, 50, 58, 28, gold, 5), opacity: iff(eq(target, Z[i]), 0.45, 0) },
+      centered(bold(`sl-z-${i}`, i < 3 ? String(1000 - i) : z3, x + 29, 70, 17)),
+    ]),
+    centered(text("sl-tile1-label", "tile 1", 77, 106, 17, muted)),
+    centered(text("sl-tile2-label", "tile 2", 217, 106, 17, muted)),
+    text("sl-t1", after(1200, "t1: m 1000", "t1: …"), 16, 134),
+    text("sl-t1-s", after(1200, cat("s ", r3(s1)), "s …"), 160, 134),
+    text("sl-t2", after(2000, cat("t2: m ", m2), "t2: …"), 16, 162),
+    text("sl-t2-s", after(2000, cat("s ", r3(s2)), "s …"), 160, 162),
+    text(
+      "sl-rescale",
+      after(2800, cat("×e^(m−M): ", r3(exp(sub(1000, M))), ", ", r3(exp(sub(m2, M)))), "×e^(m−M): …"),
+      16,
+      190,
+    ),
+    bold("sl-run-m", after(2800, cat("M = ", M, ","), "M = …"), 16, 218, 18, purple),
+    bold("sl-run-s", after(2800, cat("s = ", r3(sOk)), "s = …"), 150, 218, 18, purple),
+    ...cellX.map((x, i) =>
+      handle(`sl-pick-${i}`, x, 50, 58, 28, `Make z${i} the target`, { activate: { state: "target", value: Z[i] } }),
+    ),
+  ]);
+  const rules = card("sl-rules", 228, sand, gold, "COMBINE RULES, LOSS", [
+    bold("sl-ok", after(3600, cat("rescaled: ", r3(lossOk)), "rescaled: …"), 16, 64, 18, gold),
+    text("sl-bad", after(3600, cat("no rescale: ", r3(lossBad)), "no rescale: …"), 16, 94),
+    text("sl-tileonly", after(3600, cat("tile only: ", r3(lossTile)), "tile only: …"), 16, 122),
+    text("sl-p", after(4400, cat("p(target) = ", r3(p)), "p(target) = …"), 16, 156),
+    text("sl-dz", after(4400, cat("∂z_t = p − 1 = ", r3(sub(p, 1))), "∂z_t = …"), 16, 184),
+    text(
+      "sl-verdict",
+      after(3600, iff(lt(abs(sub(sBad, sOk)), 1e-12), "no rescale needed here", "only rescaling is right"), "…"),
+      16,
+      212,
+      17,
+      muted,
+    ),
+  ]);
+  return build({
+    id: "concept-streaming-lse",
+    title: "Tile the logits. Keep one denominator.",
+    description:
+      "Size the fp32 logits array and a tile along token rows or vocabulary columns. Then stream the lesson's four logits in two vocabulary tiles with a running maximum and rescaled sum, and compare the cross-entropy with two broken combine rules.",
+    state: {
+      N: num("Token rows N", 1024, 256, 2048, 256),
+      V: num("Vocabulary V", 8192, 1024, 16384, 1024),
+      tile: choice("Tile along", ["No tiling", "256 token rows", "256 vocab columns"], "256 token rows"),
+      z3: num("Logit z3", 997, 995, 1003, 1),
+      target: choice("Target logit", Z, "z2"),
+      checks: num("Finite-flag reads", 64, 1, 64, 1),
+    },
+    kicker: "16 / ONE GLOBAL NORMALIZER",
+    subtitle: "synthetic sizes and costs",
+    grid: [
+      [memory, 0],
+      [ledger, 0],
+      [stream, 1],
+      [rules, 2],
+    ],
+    compactOrder: [memory, stream, rules, ledger],
+    durationMs: 5200,
+    cues: [
+      { atMs: 0, text: "A materialized fp32 logits array takes 4·N·V bytes: 32 MiB at N = 1024, V = 8192." },
+      { atMs: 800, text: "256-row tiles need 8 MiB and stay independent; 256-column tiles need 1 MiB but share one softmax denominator." },
+      { atMs: 1200, text: "Stream the vocabulary: tile 1 has max 1000 and scaled sum 1 + e^−1." },
+      { atMs: 2000, text: "Tile 2 has its own max and scaled sum." },
+      { atMs: 2800, text: "Combine: M = max(m, mt), s = s·e^(m−M) + st·e^(mt−M)." },
+      { atMs: 3600, text: "Loss = M + ln s − z_target: 2.440 for the lesson's logits. Skipping the rescale or the other tile changes the objective." },
+      { atMs: 4400, text: "The gradient of the target logit is its globally normalized probability minus one." },
+    ],
+    accessible:
+      "Head and loss tiling with the lesson's numbers. A materialized fp32 logits array for N token rows and V vocabulary entries takes 4·N·V bytes: 32 MiB at N = 1024 and V = 8192. Tiles of 256 token rows take 8 MiB and each row's softmax stays inside its tile; tiles of 256 vocabulary columns take 1 MiB but every row's normalization spans all tiles. Weights, gradients and optimizer state are not shrunk by tiling the logits. The streaming loss uses the lesson's logits [1000, 999, 998, 997] in two tiles. Tile 1 has maximum 1000 and scaled sum 1 + e^−1 ≈ 1.368; tile 2 has maximum 998 and, relative to it, scaled sum 1.368. Combining with M = max(m, mt) and s = s·e^(m−M) + st·e^(mt−M) gives M = 1000 and s ≈ 1.553, and the loss for target z2 is M + ln s − 998 ≈ 2.440, the lesson's 2.4401897. Adding the tile sums without rescaling gives about 3.006, and a softmax inside the target's tile only gives about 0.313: neither is the original objective. The target's probability is about 0.087 and its logit gradient p − 1 about −0.913. The z3 control and target choice change the logits; the scene computes ln with a convergent series. The finite-check ledger is synthetic: 64 synchronizing flag reads at 15 µs cost 0.96 ms, four would cost 0.06 ms.",
+  });
+})();
+
 // ---------------------------------------------------------------- assemble
 const authored = [
   matmulScene,
@@ -1174,6 +2108,14 @@ const authored = [
   ropeScene,
   treeScene,
   budgetScene,
+  offsetScene,
+  batchScene,
+  autodiffScene,
+  residualScene,
+  embeddingScene,
+  loraScene,
+  parallelScene,
+  lseScene,
 ];
 const depthOf = (e) =>
   e && typeof e === "object" && "op" in e ? 1 + Math.max(0, ...e.args.map(depthOf)) : 0;
@@ -1213,6 +2155,14 @@ const bindings = [
   ["concept-rope-gqa", "ttf-e07-03", "ttf-07-03-text-2"],
   ["concept-tree-reduction", "sys-e09-01", "sys-09-01-text-1"],
   ["concept-transfer-budget", "eng-e14-03", "eng-14-03-lesson"],
+  ["concept-tensor-offsets", "fnd-e02-01", "fnd-02-01-text-2"],
+  ["concept-batch-mean", "fnd-e03-04", "fnd-03-04-text-1"],
+  ["concept-autodiff-fanout", "fnd-e04-04", "fnd-04-04-text-2"],
+  ["concept-residual-norm", "ttf-e05-02", "ttf-05-02-text-2"],
+  ["concept-embedding-scatter", "ttf-e06-01", "ttf-06-01-text-2"],
+  ["concept-lora-update", "ttf-e08-04", "ttf-08-04-text-2"],
+  ["concept-parallel-split", "sys-e10-01", "sys-10-01-text-2"],
+  ["concept-streaming-lse", "eng-e13-01", "eng-13-01-lesson"],
 ].map(([visualId, episodeId, afterBlockId]) => ({ visualId, episodeId, afterBlockId }));
 assert.deepEqual(
   bindings.map((b) => b.visualId),
@@ -1347,7 +2297,7 @@ const extension = {
     keyboard: true,
     reducedMotion: true,
     textAlternative:
-      "All eight concept scenes state their arithmetic, show live readouts, and include complete text equivalents.",
+      "All sixteen concept scenes state their arithmetic, show live readouts, and include complete text equivalents.",
   },
 };
 // The assembler accepts an overlay only if its renderer declaration matches the

@@ -1,4 +1,4 @@
-"""Independent CPU oracle for the eight concept scenes.
+"""Independent CPU oracle for the sixteen concept scenes (two batches of eight).
 
 Python standard library only. It never reads scene JSON and never evaluates the
 scene expression AST: every expected readout is recomputed here from the
@@ -13,6 +13,7 @@ import cmath
 import json
 import math
 import statistics
+import struct
 from decimal import Decimal
 from fractions import Fraction
 from itertools import product
@@ -703,5 +704,614 @@ for mib in [10, 100]:
                                  dict(mib=mib, mbps=mbps, compute=compute, merge=merge, schedule=sched, attempts=attempts),
                                  time, numeric, exact, geometry)
 CHECKS.append('exact rational MiB-to-bits transfer time vs decimal MB; event-time schedules; attempt log vs unique contributions')
+
+# =========================================================== second batch (09-16)
+def r6(x):
+    return js_round(float(x) * 1000000) / 1000000
+
+
+# ----------------------------------------------------------- 09 shapes, offsets and bytes
+ROW_MAJOR = list(product(range(2), range(3), range(4)))  # enumeration order of a contiguous (2,3,4)
+MISREAD = list(product(range(2), range(4), range(3)))
+ELEMENT = {'FP32 (4 bytes)': struct.calcsize('<f'), '2-byte format': struct.calcsize('<e')}
+assert ELEMENT == {'FP32 (4 bytes)': 4, '2-byte format': 2}
+assert ROW_MAJOR.index((1, 2, 3)) == 23 and ROW_MAJOR.index((0, 2, 1)) == 9
+assert ROW_MAJOR[17] == (1, 1, 1) and MISREAD[17] == (1, 1, 2)
+
+
+def byte_range(offset, size):
+    """Write a marker element into a zeroed buffer and report which bytes changed."""
+    buf = bytearray(24 * size)
+    fmt = '<f' if size == 4 else '<e'
+    struct.pack_into(fmt, buf, offset * size, -1.2345678)  # no zero byte in either encoding
+    touched = [i for i, v in enumerate(buf) if v]
+    return touched[0], touched[-1], len(buf)
+
+
+assert byte_range(23, 4) == (92, 95, 96) and byte_range(23, 2) == (46, 47, 48)
+for b, tt, d in ROW_MAJOR:
+    off = ROW_MAJOR.index((b, tt, d))
+    for o in [0, 9, 12, 17, 23]:
+        rb, rt, rd = ROW_MAJOR[o]
+        mb, mt, md = MISREAD[o]
+        for dtype, size in ELEMENT.items():
+            first, last, payload = byte_range(off, size)
+            for time in [0, 799, 800, 1600, 2400, 3200, 4000, 4800]:
+                exact = {'to-index': f'(b,t,d) = ({b},{tt},{d})', 'to-size': f'element size {size} B',
+                         'to-bytes': f'payload {payload} bytes', 'to-o': f'offset o = {o}',
+                         'to-sum': f'{b}·12 + {tt}·4 + {d}' if time >= 1600 else 'b·12 + t·4 + d',
+                         'to-offset': f'offset = {off}' if time >= 1600 else 'offset = …',
+                         'to-range': f'bytes {first} … {last}' if time >= 2400 else 'bytes …'}
+                if time >= 3200:
+                    exact.update({'to-rb': f'b = o div 12 = {rb}', 'to-rt': f't = (o mod 12) div 4 = {rt}',
+                                  'to-rd': f'd = o mod 4 = {rd}', 'to-rev': f'({rb},{rt},{rd})'})
+                else:
+                    exact.update({'to-rb': 'b = …', 'to-rt': 't = …', 'to-rd': 'd = …', 'to-rev': '(…)'})
+                exact['to-misread'] = f'as (2,4,3): ({mb},{mt},{md})' if time >= 4000 else 'as (2,4,3): …'
+                geometry = {}
+                for k in range(24):
+                    geometry[f'to-idx-{k}'] = {'opacity': 0.45 if (time >= 800 and k == off) else 0.0}
+                    geometry[f'to-rev-{k}'] = {'opacity': 0.35 if (time >= 3200 and k == o) else 0.0}
+                case('concept-tensor-offsets', dict(b=b, t=tt, d=d, offset=o, dtype=dtype), time, {}, exact, geometry)
+CHECKS.append('row-major enumeration by itertools.product (index lookup, not the stride formula); struct element sizes and a byte buffer written with pack_into')
+
+# ----------------------------------------------------------- 10 batch mean and one update
+BATCH = [(1, 3), (2, 2)]
+
+
+def batch_step(w, eta, reduction):
+    losses = [Fraction(1, 2) * (w * x - y) ** 2 for x, y in BATCH]
+    grads = [(w * x - y) * x for x, y in BATCH]
+    scale = 1 if reduction == 'Sum' else Fraction(1, len(BATCH))
+    loss, grad = scale * sum(losses), scale * sum(grads)
+    w1 = w - eta * grad
+    after_losses = [Fraction(1, 2) * (w1 * x - y) ** 2 for x, y in BATCH]
+    return losses, grads, loss, grad, w1, after_losses, scale * sum(after_losses)
+
+
+ref10 = batch_step(Fraction(1), Fraction(1, 10), 'Mean')
+assert ref10[2] == 1 and ref10[3] == -1 and ref10[4] == Fraction(11, 10)
+assert ref10[5] == [Fraction(1805, 1000), Fraction(2, 100)] and ref10[6] == Fraction(9125, 10000)
+for w in [0, 0.2, 0.5, 1, 1.4, 1.7, 2]:
+    for eta in [0, 0.1, 0.3]:
+        for reduction in ['Mean', 'Sum']:
+            W, ETA = Fraction(str(w)), Fraction(str(eta))
+            losses, grads, loss, grad, w1, after_l, after_loss = batch_step(W, ETA, reduction)
+            residuals = [W * x - y for x, y in BATCH]
+            for time in [0, 799, 800, 1600, 2400, 3200, 4000, 4800]:
+                exact = {'bm-w': f'w = {js(r3(W))}', 'bm-rule': f'reduction: {reduction}', 'bm-eta': f'η = {js(r3(ETA))}'}
+                numeric, precise = {}, {}
+                if time >= 800:
+                    exact['bm-l1'] = f'L1 = {js(r3(losses[0]))}, g1 = {js(r3(grads[0]))}'
+                    exact['bm-l2'] = f'L2 = {js(r3(losses[1]))}, g2 = {js(r3(grads[1]))}'
+                    exact['bm-res'] = f'r = [{js(r3(residuals[0]))}, {js(r3(residuals[1]))}]'
+                else:
+                    exact.update({'bm-l1': 'L1 = …', 'bm-l2': 'L2 = …', 'bm-res': 'r = …'})
+                for node, at, val, label in [('bm-loss', 1600, loss, 'batch loss = …'), ('bm-grad', 1600, grad, 'batch grad = …'),
+                                             ('bm-w1', 2400, w1, 'w′ = …')]:
+                    if time >= at:
+                        numeric[node] = float(val)
+                    else:
+                        exact[node] = label
+                for node, val, label in [('bm-l1b', after_l[0], 'L1′ = …'), ('bm-l2b', after_l[1], 'L2′ = …'),
+                                         ('bm-agg1', after_loss, 'batch loss′ = …')]:
+                    if time >= 3200:
+                        precise[node] = float(val)
+                    else:
+                        exact[node] = label
+                if time >= 4000:
+                    exact['bm-verdict'] = ('batch loss fell' if after_loss < loss else
+                                           'batch loss rose' if after_loss > loss else 'batch loss unchanged')
+                    exact['bm-worse'] = ('yet ex2 got worse' if after_l[1] > losses[1] else
+                                         'yet ex1 got worse' if after_l[0] > losses[0] else 'no example got worse')
+                else:
+                    exact['bm-verdict'] = exact['bm-worse'] = '…'
+                geometry = {'bm-bar1-before': {'width': 48 * float(losses[0]), 'opacity': 1.0},
+                            'bm-bar2-before': {'width': 48 * float(losses[1]), 'opacity': 1.0},
+                            'bm-bar1-after': {'width': 48 * float(after_l[0]), 'opacity': float(time >= 3200)},
+                            'bm-bar2-after': {'width': 48 * float(after_l[1]), 'opacity': float(time >= 3200)}}
+                case('concept-batch-mean', dict(w=w, eta=eta, reduction=reduction), time, numeric, exact, geometry, precise)
+CHECKS.append('exact Fraction per-example losses and gradients, explicit mean/sum reduction, one update and per-example losses afterwards')
+
+
+# ----------------------------------------------------------- 11 tiny autodiff: slots and fan-out
+class Node:
+    """The lesson's scalar engine, with switchable defects for the scene's options."""
+
+    def __init__(self, value, parents=(), engine=None):
+        self.value, self.grad, self.parents, self.engine = value, Fraction(0), parents, engine
+        self.pullback = lambda: None
+
+    def _put(self, target, contribution, log, slot):
+        if self.engine['overwrite']:
+            target.grad = contribution
+        else:
+            target.grad += contribution
+        log.append((slot, contribution))
+
+    def add(self, other, log):
+        out = Node(self.value + other.value, (self, other), self.engine)
+
+        def pullback():
+            out._put(self, out.grad, log, 'add-a')
+            out._put(other, out.grad, log, 'add-b')
+        out.pullback = pullback
+        return out
+
+    def mul(self, other, log):
+        a, b = self.value, other.value
+        out = Node(a * b, (self, other), self.engine)
+
+        def pullback():
+            out._put(self, b * out.grad, log, 'mul-a')
+            if not self.engine['one_slot']:
+                out._put(other, a * out.grad, log, 'mul-b')
+        out.pullback = pullback
+        return out
+
+    def backward(self):
+        order, seen = [], set()
+
+        def visit(node):
+            if id(node) in seen:
+                return
+            seen.add(id(node))
+            for parent in node.parents:
+                visit(parent)
+            order.append(node)
+        visit(self)
+        if self.engine['reset']:
+            for node in order:
+                node.grad = Fraction(0)
+        self.grad = Fraction(1)
+        for node in reversed(order):
+            node.pullback()
+
+
+def run_engine(x, one_slot, overwrite, calls, reset):
+    engine = dict(one_slot=one_slot, overwrite=overwrite, reset=reset)
+    log = []
+    X = Node(x, engine=engine)
+    U = X.mul(X, log)
+    Z = U.add(U, log)
+    for _ in range(calls):
+        log.clear()
+        Z.backward()
+    return X, U, Z, dict(log)
+
+
+_X, _U, _Z, _ = run_engine(Fraction(2), False, False, 1, True)
+assert (_Z.value, _U.grad, _X.grad) == (8, 2, 8)
+assert run_engine(Fraction(2), False, False, 2, True)[0].grad == 8
+assert run_engine(Fraction(2), True, False, 1, True)[0].grad == 4
+for x in [-3, -1.5, 0, 0.5, 2, 3]:
+    X0 = Fraction(str(x))
+    true = (2 * (X0 + Fraction(1, 7)) ** 2 - 2 * (X0 - Fraction(1, 7)) ** 2) / Fraction(2, 7)  # exact for a quadratic
+    assert true == 4 * X0
+    for slots in ['Both operand slots', 'One slot only']:
+        for combine in ['+= accumulate', '= overwrite']:
+            for calls in [1, 2, 3]:
+                for reset in [True, False]:
+                    Xn, Un, Zn, last = run_engine(X0, slots == 'One slot only', combine == '= overwrite', calls, reset)
+                    op_text = '+= ' if combine == '+= accumulate' else '= '
+                    for time in [0, 799, 800, 1600, 2400, 3200, 4000, 4800]:
+                        exact = {'af-x': f'x = {js(x)}',
+                                 'af-calls': f'calls {calls}' + (', reset on' if reset else ', no reset')}
+                        numeric = {}
+                        if time >= 800:
+                            numeric.update({'af-u': Un.value, 'af-z': Zn.value})
+                        else:
+                            exact.update({'af-u': 'u = …', 'af-z': 'z = …'})
+                        if time >= 1600:
+                            exact['af-ugrad'] = f'u.grad = {js(Un.grad)}'
+                            exact['af-uz-a-label'] = f'{op_text}{js(last["add-a"])}'
+                            exact['af-uz-b-label'] = f'{op_text}{js(last["add-b"])}'
+                        else:
+                            exact.update({'af-ugrad': 'u.grad = …', 'af-uz-a-label': '…', 'af-uz-b-label': '…'})
+                        if time >= 2400:
+                            # per-unit derivative the multiply rule hands to x
+                            rule = (2 if slots == 'Both operand slots' else 1) * X0
+                            numeric.update({'af-rule': rule, 'af-xgrad': Xn.grad})
+                            exact['af-xu-a-label'] = f'{op_text}{js(r3(last["mul-a"]))}'
+                            exact['af-xu-b-label'] = (f'{op_text}{js(r3(last["mul-b"]))}' if 'mul-b' in last else 'unused')
+                        else:
+                            exact.update({'af-rule': 'x·x rule gives …', 'af-xgrad': 'x.grad = …',
+                                          'af-xu-a-label': '…', 'af-xu-b-label': '…'})
+                        if time >= 3200:
+                            numeric.update({'af-true': true, 'af-central': true})
+                        else:
+                            exact.update({'af-true': 'dz/dx = …', 'af-central': 'central diff: …'})
+                        exact['af-verdict'] = (('matches reference' if Xn.grad == true else 'wrong gradient')
+                                               if time >= 4000 else '…')
+                        numeric = {k: float(v) for k, v in numeric.items()}
+                        geometry = {'af-xu-b': {'opacity': 1.0 if slots == 'Both operand slots' else 0.25}}
+                        case('concept-autodiff-fanout', dict(x=x, slots=slots, combine=combine, calls=calls, reset=reset),
+                             time, numeric, exact, geometry)
+CHECKS.append("the lesson's Value engine with switchable one-slot, overwrite and no-reset defects, run for repeated backward calls; exact quadratic central difference")
+
+# ----------------------------------------------------------- 12 residual paths and normalization axes
+def chain_derivative(local, layers):
+    d = Fraction(1)
+    for _ in range(layers):
+        d *= local
+    return d
+
+
+assert chain_derivative(Fraction(1, 10), 10) == Fraction(1, 10 ** 10)
+assert abs(float(chain_derivative(Fraction(11, 10), 10)) - 2.59374246) < 1e-8
+assert chain_derivative(Fraction(0), 3) == 0
+
+
+def normalize(vec, stats_over, eps=1e-5):
+    mean = statistics.fmean(stats_over)
+    var = statistics.pvariance(stats_over)
+    return [(v - mean) / math.sqrt(var + eps) for v in vec], mean, var
+
+
+assert normalize([1.0, 3.0], [1.0, 3.0])[0][1] == 0.9999950000374997
+COMPANIONS = {'alone': [], 'with [5, 9]': [5.0, 9.0], 'with [0, 0]': [0.0, 0.0]}
+assert abs(normalize([1.0, 3.0], [1.0, 3.0, 5.0, 9.0])[2] - 8.75) < 1e-12
+SMALL = Fraction(5, 10 ** 7)
+
+
+def fmt_derivative(label, value):
+    if abs(value) < SMALL:
+        return 'exact', f'{label}≈ 0'
+    return ('precise' if abs(value) < 1000 else 'numeric'), float(value)
+
+
+for slope in [-1, -0.5, 0, 0.1, 0.5, 1]:
+    for layers in [1, 2, 5, 10]:
+        a = Fraction(str(slope))
+        plain, skip = chain_derivative(a, layers), chain_derivative(1 + a, layers)
+        verdict = ('skip path cancels' if abs(skip) < SMALL else 'skip keeps signal' if abs(skip) > abs(plain)
+                   else 'plain is larger' if abs(skip) < abs(plain) else 'equal size')
+        for a2 in [-3, 1, 3, 5]:
+            for axis in ['Per token', 'Whole batch (bug)']:
+                for comp, others in COMPANIONS.items():
+                    token = [1.0, float(a2)]
+                    stats_over = token if axis == 'Per token' else token + others
+                    out, mean, var = normalize(token, stats_over)
+                    alone = normalize(token, token)[0]
+                    for time in [0, 800, 1600, 2400, 3200, 4000, 4800]:
+                        exact = {'rn-setup': f'F′ = {js(r3(a))}, layers {layers}', 'rn-token': f'token A = [1, {a2}]',
+                                 'rn-batch': f'batch: A {comp}'}
+                        numeric, precise, lists = {}, {}, {}
+                        for node, at, label, value in [('rn-plain', 800, 'plain F′^L: ', plain),
+                                                       ('rn-skip', 1600, 'skip (1+F′)^L: ', skip)]:
+                            if time < at:
+                                exact[node] = label + '…'
+                                continue
+                            kind, shown = fmt_derivative(label, value)
+                            {'exact': exact, 'precise': precise, 'numeric': numeric}[kind][node] = shown
+                        exact['rn-verdict'] = verdict if time >= 2400 else '…'
+                        if time >= 3200:
+                            lists['rn-stats'] = [mean, var]
+                            lists['rn-out'] = out
+                            precise['rn-exact'] = out[1]
+                        else:
+                            exact.update({'rn-stats': 'mean …', 'rn-out': 'A → …', 'rn-exact': 'A[1] = …'})
+                        if time >= 4000:
+                            lists['rn-alone'] = alone
+                            exact['rn-same'] = 'same as alone' if abs(out[0] - alone[0]) < 1e-9 else 'batch changed A'
+                        else:
+                            exact.update({'rn-alone': 'A alone: …', 'rn-same': '…'})
+                        geometry = {}
+                        for row, base, base_y, at in [('plain', float(a), 112, 800), ('skip', float(1 + a), 190, 1600)]:
+                            top = max(abs(base), abs(base) ** layers, 1e-9)
+                            for l in range(1, 11):
+                                h = 40 * abs(base) ** l / top
+                                geometry[f'rn-bar-{row}-{l}'] = {'height': h, 'y': base_y - h,
+                                                                 'opacity': float(l <= layers and time >= at)}
+                        case('concept-residual-norm', dict(slope=slope, layers=layers, a2=a2, axis=axis, batch=comp),
+                             time, numeric, exact, geometry, precise, lists)
+CHECKS.append('layer-by-layer Fraction products of local derivatives (plain vs residual); statistics.fmean/pvariance two-pass normalization per token and over the batch')
+
+# ----------------------------------------------------------- 13 embedding gather and scatter-add
+EMB = [[1, 0], [0, 1], [1, 1], [-1, 0]]
+POS = [[0, 0], [0.1, -0.1], [0.2, -0.2]]
+UPSTREAM = [[1, 2], [2, -1], [-0.5, 3]]  # positions 0 and 2 from the lesson; position 1 invented
+
+
+def lookup_and_scatter(ids, add_positions, accumulate):
+    gathered = [list(EMB[i]) for i in ids]  # copies of selected rows
+    xs = [[g + (p if add_positions else 0) for g, p in zip(row, POS[k])] for k, row in enumerate(gathered)]
+    table_grad = [[0, 0] for _ in EMB]
+    for k, token in enumerate(ids):
+        for c in range(2):
+            if accumulate:
+                table_grad[token][c] = table_grad[token][c] + UPSTREAM[k][c]
+            else:
+                table_grad[token][c] = UPSTREAM[k][c]
+    return xs, table_grad
+
+
+_xs, _tg = lookup_and_scatter([2, 0, 2], True, True)
+assert [[r3(v) for v in row] for row in _xs] == [[1, 1], [1.1, -0.1], [1.2, 0.8]] and _tg[2] == [0.5, 5]
+for id0 in range(4):
+    for id1 in [0, 2, 3]:
+        for id2 in range(4):
+            ids = [id0, id1, id2]
+            for positions in [True, False]:
+                for scatter in ['Accumulate (+=)', 'Overwrite (bug)']:
+                    xs, table_grad = lookup_and_scatter(ids, positions, scatter == 'Accumulate (+=)')
+                    used = sorted(set(ids))
+                    for time in [0, 799, 800, 1600, 2400, 3200, 4000, 4800]:
+                        exact = {'es-ids': f'ids = [{id0}, {id1}, {id2}]',
+                                 'es-formula': 'x = E[id] + p' if positions else 'x = E[id], no position',
+                                 'es-rule': 'repeats add up' if scatter == 'Accumulate (+=)' else 'last write wins (bug)'}
+                        for r in range(4):
+                            label = f'{r}: [{EMB[r][0]}, {EMB[r][1]}]'
+                            if time >= 800 and r in used:
+                                label += ' ← pos' + ''.join(f' {k}' for k in range(3) if ids[k] == r)
+                            exact[f'es-row-{r}'] = label
+                            exact[f'es-grad-{r}'] = (f'∂E{r} = [{js(r3(table_grad[r][0]))}, {js(r3(table_grad[r][1]))}]'
+                                                     if time >= 3200 else f'∂E{r} = …')
+                        for k in range(3):
+                            exact[f'es-x-{k}'] = (f'x{k} = [{js(r3(xs[k][0]))}, {js(r3(xs[k][1]))}]' if time >= 1600
+                                                  else f'x{k} = …')
+                        exact['es-compare'] = (('x0 vs x2: ' + ('equal' if xs[0] == xs[2] else 'differ')) if time >= 2400
+                                               else 'x0 vs x2: …')
+                        exact['es-touched'] = f'rows touched: {len(used)}' if time >= 4000 else 'rows touched: …'
+                        geometry = {f'es-hl-{r}': {'opacity': 0.18 if (time >= 800 and r in used) else 0.0} for r in range(4)}
+                        case('concept-embedding-scatter',
+                             dict(id0=id0, id1=id1, id2=id2, positions=positions, scatter=scatter), time, {}, exact, geometry)
+CHECKS.append('row copies gathered by ID, position vectors added per position, explicit scatter loop into a gradient table (accumulate vs overwrite)')
+
+# ----------------------------------------------------------- 14 LoRA: a low-rank update
+LORA_A, LORA_B, GY = [1, 0, -1, 2], [2, -1, Fraction(1, 2)], [1, 0, -1]
+INITS = {'Lesson A and B': (True, True), 'B starts at zero': (True, False), 'Both start at zero': (False, False)}
+
+
+def lora_forward(Bcol, Arow, x, scale):
+    inner = sum(a * v for a, v in zip(Arow, x))          # A·x first (rank one)
+    delta = [scale * b * inner for b in Bcol]
+    dense = [[scale * b * a for a in Arow] for b in Bcol]  # materialized ΔW
+    via_dense = [sum(w * v for w, v in zip(row, x)) for row in dense]
+    return inner, delta, dense, via_dense
+
+
+def lora_grads(Bcol, Arow, x, scale):
+    """Gradients of gy·Δy by exact one-at-a-time perturbation (Δy is linear in each factor)."""
+    def objective(B_, A_):
+        return sum(g * d for g, d in zip(GY, lora_forward(B_, A_, x, scale)[1]))
+    base = objective(Bcol, Arow)
+    dB = [objective([b + (1 if j == i else 0) for j, b in enumerate(Bcol)], Arow) - base for i in range(3)]
+    dA = [objective(Bcol, [a + (1 if j == i else 0) for j, a in enumerate(Arow)]) - base for i in range(4)]
+    return dB, dA
+
+
+def trainable(out, inp, rank):
+    shapes = {'B': (out, rank), 'A': (rank, inp)}
+    return sum(r * c for r, c in shapes.values())
+
+
+assert lora_forward(LORA_B, LORA_A, [1, 2, 3, 4], 1)[:2] == (6, [12, -6, 3]) and trainable(3, 4, 1) == 7
+assert lora_grads(LORA_B, LORA_A, [1, 2, 3, 4], 1) == ([6, 0, -6], [Fraction(3, 2), 3, Fraction(9, 2), 6])
+vecs = lambda vals: '[' + ', '.join(js(r3(v)) for v in vals) + ']'
+for scale in [0, 1, 2]:
+    for x3 in [-2, 0, 1, 4]:
+        x = [1, 2, 3, x3]
+        for rank in [1, 2, 3]:
+            for init, (a_on, b_on) in INITS.items():
+                Arow = LORA_A if a_on else [0, 0, 0, 0]
+                Bcol = LORA_B if b_on else [0, 0, 0]
+                inner, delta, dense, via_dense = lora_forward(Bcol, Arow, x, scale)
+                dB, dA = lora_grads(Bcol, Arow, x, scale)
+                count = trainable(3, 4, rank)
+                zero = lambda vals: all(v == 0 for v in vals)
+                verdict = ('no factor can learn' if zero(dA) and zero(dB) else 'only B can learn' if zero(dA)
+                           else 'only A can learn' if zero(dB) else 'both factors learn')
+                for time in [0, 799, 800, 1600, 2400, 3200, 4000, 4800]:
+                    exact = {'lo-x': f'x = [1, 2, 3, {x3}]', 'lo-count': f'rank {rank}: {count} trainable',
+                             'lo-dense-count': f'dense W has 12: {"saves" if count < 12 else "costs"} {abs(12 - count)}',
+                             'lo-init': f'init: {init}', 'lo-scale': f's = {scale}; B is a column'}
+                    for j in range(4):
+                        exact[f'lo-a-{j}-v'] = js(Arow[j])
+                    for i in range(3):
+                        exact[f'lo-b-{i}-v'] = js(r3(Bcol[i]))
+                    geometry = {}
+                    for i, j in product(range(3), range(4)):
+                        exact[f'lo-w-{i}-{j}-v'] = js(r3(dense[i][j]))
+                        geometry[f'lo-w-{i}-{j}-v'] = {'opacity': float(time >= 800)}
+                        geometry[f'lo-w-{i}-{j}-hl'] = {'opacity': 0.3 if (time >= 800 and dense[i][j] != 0) else 0.0}
+                    exact['lo-inner'] = f'A·x = {js(r3(inner))}' if time >= 1600 else 'A·x = …'
+                    exact['lo-dy'] = f'Δy = {vecs(delta)}' if time >= 2400 else 'Δy = …'
+                    exact['lo-dense'] = f'ΔW·x = {vecs(via_dense)}' if time >= 3200 else 'ΔW·x = …'
+                    exact['lo-check'] = (('factored = dense' if delta == via_dense else 'mismatch') if time >= 3200 else '…')
+                    exact['lo-db'] = f'∂B = {vecs(dB)}' if time >= 4000 else '∂B = …'
+                    exact['lo-da'] = f'∂A = {vecs(dA)}' if time >= 4000 else '∂A = …'
+                    exact['lo-verdict'] = verdict if time >= 4000 else '…'
+                    case('concept-lora-update', dict(scale=scale, x3=x3, rank=rank, init=init), time, {}, exact, geometry)
+CHECKS.append('LoRA: factor-order forward vs materialized dense ΔW, gradients by exact one-at-a-time perturbation, trainable counts from factor shapes')
+
+# ----------------------------------------------------------- 15 data, tensor and pipeline messages
+WP = [[1, 3], [2, 4]]
+
+
+def row_times(x, W):
+    return [sum(x[i] * W[i][j] for i in range(len(x))) for j in range(len(W[0]))]
+
+
+def tensor_parallel(x, split, combine):
+    if split == 'Output columns':
+        parts = [[sum(x[i] * WP[i][j] for i in range(2))] for j in range(2)]  # worker j owns column j
+    else:
+        parts = [[x[i] * w for w in WP[i]] for i in range(2)]                  # worker i owns input feature i
+    if combine == 'Concatenate':
+        return parts, parts[0] + parts[1]
+    return parts, [a + b for a, b in zip(parts[0], parts[1])]
+
+
+def pipeline(w, v, x=1, target=4, message='dL/dh (correct)'):
+    h = w * x                      # stage A forward
+    pred = v * h                   # stage B forward
+    loss = (pred - target) ** 2 / 2
+    dpred = pred - target
+    dv = dpred * h                 # stays on stage B
+    dh = dpred * v                 # the activation sensitivity A needs
+    sent = dh if message == 'dL/dh (correct)' else dv
+    dw = sent * x
+    central = (((v * (w + Fraction(1, 3)) * x - target) ** 2 - (v * (w - Fraction(1, 3)) * x - target) ** 2) / 2) / Fraction(2, 3)
+    return dict(h=h, pred=pred, loss=loss, dpred=dpred, dv=dv, dh=dh, sent=sent, dw=dw, central=central)
+
+
+assert row_times([1, 2], WP) == [5, 11]
+assert tensor_parallel([1, 2], 'Input features', 'Sum') == ([[1, 3], [4, 8]], [5, 11])
+_pp = pipeline(Fraction(2), Fraction(3))
+assert (_pp['pred'], _pp['loss'], _pp['dpred'], _pp['dv'], _pp['dh'], _pp['dw']) == (6, 2, 2, 4, 6, 6) and _pp['central'] == 6
+assert statistics.fmean([2] + [6] * 3) == 5
+states15 = []
+for x1 in [-2, 1, 3]:
+    for x2 in [-2, 0, 2]:
+        for split in ['Output columns', 'Input features']:
+            for combine in ['Concatenate', 'Sum']:
+                for n2 in [1, 3, 4]:
+                    for message in ['dL/dh (correct)', "B's weight gradient"]:
+                        states15.append(dict(x1=x1, x2=x2, split=split, combine=combine, n2=n2, w=2, v=3, message=message))
+for w in [0, 1.5, 2, 3]:
+    for v in [0, 2.5, 3, 4]:
+        for message in ['dL/dh (correct)', "B's weight gradient"]:
+            for split, combine in [('Output columns', 'Sum'), ('Input features', 'Concatenate')]:
+                states15.append(dict(x1=1, x2=2, split=split, combine=combine, n2=3, w=w, v=v, message=message))
+for state in states15:
+    x = [state['x1'], state['x2']]
+    want = row_times(x, WP)
+    parts, got = tensor_parallel(x, state['split'], state['combine'])
+    per_example = [2] + [6] * state['n2']
+    weighted = statistics.fmean(per_example)
+    equal = statistics.fmean([statistics.fmean([2]), statistics.fmean([6] * state['n2'])])
+    assert equal == 4
+    pp = pipeline(Fraction(str(state['w'])), Fraction(str(state['v'])), message=state['message'])
+    assert pp['dh'] * 1 == pp['central']
+    cols = state['split'] == 'Output columns'
+    for time in [0, 799, 800, 1600, 2400, 3200, 4000, 4800, 5600, 6000]:
+        exact = {'ps-x': f'x = [{x[0]}, {x[1]}]', 'ps-split': f'split: {state["split"]}',
+                 'ps-combine-rule': f'combine: {state["combine"]}', 'ps-want': f'want [{want[0]}, {want[1]}]',
+                 'ps-r2': f'r2: {state["n2"]} examples, mean 6',
+                 'ps-params': f'x = 1, w = {js(r3(state["w"]))}, v = {js(r3(state["v"]))}',
+                 'ps-message': 'message: ' + ('dL/dh' if state['message'] == 'dL/dh (correct)' else 'dv (bug)')}
+        if time >= 800:
+            if cols:
+                exact['ps-w0'], exact['ps-w1'] = f'w0: x·col0 = {parts[0][0]}', f'w1: x·col1 = {parts[1][0]}'
+            else:
+                exact['ps-w0'] = f'w0: {x[0]}·[1, 3] = [{parts[0][0]}, {parts[0][1]}]'
+                exact['ps-w1'] = f'w1: {x[1]}·[2, 4] = [{parts[1][0]}, {parts[1][1]}]'
+        else:
+            exact['ps-w0'], exact['ps-w1'] = 'w0: …', 'w1: …'
+        exact['ps-got'] = ('got [' + ', '.join(str(g) for g in got) + ']') if time >= 1600 else 'got …'
+        exact['ps-verdict'] = ('contract matches' if got == want else 'wrong combine') if time >= 2400 else '…'
+        numeric = {}
+        if time >= 3200:
+            numeric['ps-weighted'] = weighted
+            exact['ps-equal'] = f'mean of means = {js(equal)}'
+        else:
+            exact.update({'ps-weighted': 'weighted = …', 'ps-equal': 'mean of means = …'})
+        if time >= 4000:
+            exact['ps-forward'] = f'h = {js(r3(pp["h"]))}, pred = {js(r3(pp["pred"]))}'
+            exact['ps-loss'] = f'loss = {js(r3(pp["loss"]))} (target 4)'
+        else:
+            exact.update({'ps-forward': 'h = …', 'ps-loss': 'loss = …'})
+        for node, at, key, label in [('ps-dpred', 4800, 'dpred', 'dL/dpred = …'), ('ps-dv', 4800, 'dv', 'B: dv = …'),
+                                     ('ps-msg', 5600, 'sent', 'sent: …'), ('ps-dw', 5600, 'dw', 'A: dw = …')]:
+            if time >= at:
+                numeric[node] = float(pp[key])
+            else:
+                exact[node] = label
+        exact['ps-dw-verdict'] = (('dw is right' if pp['dw'] == pp['central'] else 'dw is wrong') if time >= 5600 else '…')
+        geometry = {'ps-back-arrow': {'opacity': float(time >= 5600)}}
+        case('concept-parallel-split', state, time, numeric, exact, geometry)
+CHECKS.append('explicit column-owned and feature-owned worker partials with concat/sum; fmean over per-example gradients; two-stage pipeline messages checked by an exact central difference')
+
+# ----------------------------------------------------------- 16 streaming log-sum-exp over vocabulary tiles
+def streaming_loss(z, target, rule):
+    """The lesson's running max/sum loop over two vocabulary tiles, plus the two broken combines."""
+    tiles = [z[:2], z[2:]]
+    if rule == 'tile only':
+        k = 0 if target < 2 else 1
+        mt = max(tiles[k])
+        st = sum(math.exp(v - mt) for v in tiles[k])
+        return mt + math.log(st) - z[target], mt, st
+    m, s = -math.inf, 0.0
+    for tile in tiles:
+        mt = max(tile)
+        st = sum(math.exp(v - mt) for v in tile)
+        M = max(m, mt)
+        if rule == 'rescale':
+            s = s * math.exp(m - M) + st * math.exp(mt - M)
+        else:
+            s = s + st
+        m = M
+    return m + math.log(s) - z[target], m, s
+
+
+assert abs(streaming_loss([1000., 999., 998., 997.], 2, 'rescale')[0] - 2.4401896985611953) < 1e-10
+
+
+def reference_loss(z, target):
+    m = max(z)
+    return m + math.log(math.fsum(math.exp(v - m) for v in z)) - z[target]
+
+
+TILES = {'No tiling': None, '256 token rows': 'rows', '256 vocab columns': 'cols'}
+NEEDS = {'No tiling': 'one big array', '256 token rows': 'rows are independent', '256 vocab columns': 'needs global softmax'}
+assert Fraction(4 * 1024 * 8192, 2 ** 20) == 32 and Fraction(4 * 256 * 8192, 2 ** 20) == 8 and Fraction(4 * 1024 * 256, 2 ** 20) == 1
+assert abs(64 * 0.015 - 0.96) < 1e-12 and abs(4 * 0.015 - 0.06) < 1e-12
+states16 = [dict(N=N, V=V, tile=tile, z3=997, target='z2', checks=checks)
+            for N in [256, 1024, 2048] for V in [1024, 8192, 16384] for tile in TILES for checks in [1, 64]]
+states16 += [dict(N=1024, V=8192, tile=tile, z3=z3, target=target, checks=4)
+             for z3 in [995, 997, 998, 1000, 1001, 1003] for target in ['z0', 'z1', 'z2', 'z3']
+             for tile in ['256 token rows', '256 vocab columns']]
+for state in states16:
+    N, V, z3 = state['N'], state['V'], state['z3']
+    full = Fraction(4 * N * V, 2 ** 20)
+    tile_bytes = {'No tiling': 4 * N * V, '256 token rows': 4 * 256 * V, '256 vocab columns': 4 * N * 256}[state['tile']]
+    z = [1000.0, 999.0, 998.0, float(z3)]
+    tgt = int(state['target'][1])
+    ok, M, s_ok = streaming_loss(z, tgt, 'rescale')
+    bad, _, s_bad = streaming_loss(z, tgt, 'no rescale')
+    only = streaming_loss(z, tgt, 'tile only')[0]
+    ref = reference_loss(z, tgt)
+    assert abs(ok - ref) < 1e-12
+    m1, m2 = max(z[:2]), max(z[2:])
+    s1, s2 = sum(math.exp(v - m1) for v in z[:2]), sum(math.exp(v - m2) for v in z[2:])
+    probs = [math.exp(v - M) / s_ok for v in z]
+    for time in [0, 799, 800, 1200, 2000, 2800, 3600, 4400, 5200]:
+        exact = {'sl-nv': f'N = {N}, V = {V}', 'sl-checks': f'{state["checks"]} flag reads × 15 µs'}
+        numeric, lists = {'sl-ms': state['checks'] * 0.015}, {}
+        if time >= 800:
+            numeric.update({'sl-full': float(full), 'sl-tile': tile_bytes / 2 ** 20})
+            exact['sl-needs'] = NEEDS[state['tile']]
+        else:
+            exact.update({'sl-full': 'full: …', 'sl-tile': 'tile: …', 'sl-needs': '…'})
+        if time >= 1200:
+            exact['sl-t1'] = f't1: m {js(m1)}'
+            numeric['sl-t1-s'] = s1
+        else:
+            exact.update({'sl-t1': 't1: …', 'sl-t1-s': 's …'})
+        if time >= 2000:
+            exact['sl-t2'] = f't2: m {js(m2)}'
+            numeric['sl-t2-s'] = s2
+        else:
+            exact.update({'sl-t2': 't2: …', 'sl-t2-s': 's …'})
+        if time >= 2800:
+            lists['sl-rescale'] = [math.exp(m1 - M), math.exp(m2 - M)]
+            exact['sl-run-m'] = f'M = {js(M)},'
+            numeric['sl-run-s'] = s_ok
+        else:
+            exact.update({'sl-rescale': '×e^(m−M): …', 'sl-run-m': 'M = …', 'sl-run-s': 's = …'})
+        if time >= 3600:
+            numeric.update({'sl-ok': ok, 'sl-bad': bad, 'sl-tileonly': only})
+            exact['sl-verdict'] = 'no rescale needed here' if abs(s_bad - s_ok) < 1e-12 else 'only rescaling is right'
+        else:
+            exact.update({'sl-ok': 'rescaled: …', 'sl-bad': 'no rescale: …', 'sl-tileonly': 'tile only: …', 'sl-verdict': '…'})
+        if time >= 4400:
+            numeric.update({'sl-p': probs[tgt], 'sl-dz': probs[tgt] - 1})
+        else:
+            exact.update({'sl-p': 'p(target) = …', 'sl-dz': '∂z_t = …'})
+        exact['sl-z-3'] = str(z3)
+        geometry = {f'sl-target-{i}': {'opacity': 0.45 if i == tgt else 0.0} for i in range(4)}
+        case('concept-streaming-lse', state, time, numeric, exact, geometry, lists=lists)
+CHECKS.append("the lesson's streaming running-max/scaled-sum loop over two vocab tiles (math.exp/log), versus a direct fsum log-sum-exp, a no-rescale sum and a target-tile-only softmax; logits memory from 4·N·V bytes")
 
 print(json.dumps({'cases': CASES, 'independentChecks': CHECKS}, allow_nan=False, separators=(',', ':')))
