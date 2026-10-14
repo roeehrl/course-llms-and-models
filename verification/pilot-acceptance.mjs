@@ -4,16 +4,15 @@
 // desktop. The operator is never enrolled. Author keys stay in this driver.
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
-import {execFile} from 'node:child_process';
-import {promisify} from 'node:util';
 import path from 'node:path';
 import {chromium} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import pg from 'pg';
 import {verifyWorkedPackage} from '../scripts/package-worked-course.mjs';
+import {harnessPassword,runWithPassword} from './password-login.mjs';
 
-const exec=promisify(execFile);
 const args=Object.fromEntries(process.argv.slice(2).reduce((pairs,value,index,all)=>index%2?pairs:[...pairs,[value,all[index+1]]],[]));
-assert(args['--origin']&&args['--runtime']&&args['--state']&&args['--package'],'Usage: pilot-acceptance.mjs --origin <url> --runtime <released root> --state <pilot state> --package <verified course dir>');
+assert(args['--origin']&&args['--runtime']&&args['--state']&&args['--package'],'Usage: pilot-acceptance.mjs --origin <url> --runtime <released root> --state <pilot state> --package <verified course dir> [--operator-login <login name> (password on standard input)]');
 const origin=new URL(args['--origin']).origin,state=path.resolve(args['--state']),runtime=path.resolve(args['--runtime']);
 await verifyWorkedPackage(path.resolve(args['--package']));
 const course=JSON.parse(await readFile(path.join(args['--package'],'course.manifest.json'),'utf8'));
@@ -23,19 +22,38 @@ const QA_SUBJECT='qa:pilot-learner';
 // Explicitly named, already-fixed-upstream defects are reported, never hidden.
 const knownAxe=new Set((args['--known-axe']??'').split(',').filter(Boolean));const observedKnown=new Set();
 
-async function code(subject,name){
-  const {stdout}=await exec(process.execPath,['dist/bootstrap-cli.js','llms-and-models',subject,name],{cwd:path.join(runtime,'services/api'),env:{PATH:process.env.PATH,DATABASE_URL:config.databaseUrl,PUBLIC_ORIGIN:origin}});
-  return JSON.parse(stdout);
-}
+// Core 0.1.36+ pilots keep one-time sign-in codes off (the default). The dedicated QA
+// account signs in through the password form with a random password this driver sets
+// for it on every run (standard input only; never printed or stored). The operator's
+// password belongs to the operator: it is used only when --operator-login is given and
+// the password arrives on standard input. Without it, the QA-role and operator-unenrolled
+// checks run in a READ ONLY transaction against the pilot database and the administration
+// sign-in page is checked signed out. This driver never edits memberships.
 const operator=JSON.parse(await readFile(path.join(state,'bootstrap.json'),'utf8'));
-const qa=await code(QA_SUBJECT,'QA learner');
-assert(qa.userId!==operator.userId&&qa.workspaceId===operator.workspaceId,'QA identity must be distinct from the operator');
+const qaPassword=harnessPassword();
+const qa=JSON.parse(await runWithPassword(process.execPath,['dist/set-password-cli.js','llms-and-models',QA_SUBJECT],{cwd:path.join(runtime,'services/api'),env:{PATH:process.env.PATH,DATABASE_URL:config.databaseUrl},password:qaPassword}));
+assert(qa.mustChangeOnNextSignIn===false&&qa.loginName,'QA password was not set');
+let operatorPassword;
+if(args['--operator-login']){let text='';for await(const chunk of process.stdin)text+=chunk;operatorPassword=text.replace(/\r?\n$/,'');assert(operatorPassword,'Operator password expected on standard input');}
+async function readOnly(query){
+  const db=new pg.Client({connectionString:config.databaseUrl});await db.connect();
+  try{await db.query('BEGIN READ ONLY');return await query(db);}finally{await db.query('ROLLBACK').catch(()=>{});await db.end();}
+}
+const qaWorkspace=await readOnly(async db=>(await db.query('SELECT m.workspace_id FROM memberships m JOIN workspaces w ON w.id=m.workspace_id WHERE w.slug=$1 AND m.user_id=$2',['llms-and-models',qa.userId])).rows[0]?.workspace_id);
+assert(qa.userId!==operator.userId&&qaWorkspace===operator.workspaceId,'QA identity must be distinct from the operator');
+async function operatorSignIn(){
+  const signed=await fetch(origin+'/auth/login',{method:'POST',headers:{origin,'content-type':'application/json'},body:JSON.stringify({login:args['--operator-login'],password:operatorPassword})});
+  assert(signed.ok,'Operator sign-in failed');return signed;
+}
 // The QA account must already be a learner. Core 0.1.23+ manages roles through
 // the authenticated People API; this driver never edits memberships itself.
 async function assertQaRole(){
-  const record=await code('operator:owner','Course operator');
-  const signed=await fetch(origin+'/auth/redeem',{method:'POST',headers:{origin,'content-type':'application/json'},body:JSON.stringify({token:new URL(record.oneTimeSignInUrl).hash.slice('#signin='.length)})});
-  assert(signed.ok,'Operator sign-in failed');
+  if(!operatorPassword){
+    const role=await readOnly(async db=>(await db.query('SELECT role FROM memberships WHERE workspace_id=$1 AND user_id=$2',[operator.workspaceId,qa.userId])).rows[0]?.role);
+    assert.equal(role,'learner','QA account must have the learner role; change it under People & roles');
+    return 'verified_read_only_in_database';
+  }
+  const signed=await operatorSignIn();
   const cookie=signed.headers.getSetCookie().map(c=>c.split(';')[0]).join('; ');
   const people=await fetch(`${origin}/api/admin/workspaces/${operator.workspaceId}/people`,{headers:{cookie}});
   if(people.status===404)return 'people_api_unavailable';
@@ -54,10 +72,13 @@ async function context(name,width,height){
   const ctx=await browser.newContext({baseURL:origin,viewport:{width,height},isMobile:name==='phone',hasTouch:name!=='desktop'}),page=await ctx.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));return {ctx,page,errors};
 }
-async function signIn(page,subject,name){
-  const record=await code(subject,name),redeemed=page.waitForResponse(r=>new URL(r.url()).pathname==='/auth/redeem'&&r.request().method()==='POST');
-  await page.goto(record.oneTimeSignInUrl);const login=await (await redeemed).json();
-  assert(!page.url().includes('signin='),'Sign-in token remained in the address bar');return login.csrfToken;
+async function signIn(page){
+  const loggedIn=page.waitForResponse(r=>new URL(r.url()).pathname==='/auth/login'&&r.request().method()==='POST');
+  await page.goto(origin+'/');await page.getByLabel('Username',{exact:true}).waitFor();
+  assert.equal(await page.getByLabel('One-time sign-in code',{exact:true}).count(),0,'One-time code field shown while codes are off');
+  await page.getByLabel('Username',{exact:true}).fill(qa.loginName);await page.getByLabel('Password',{exact:true}).fill(qaPassword);
+  await page.getByRole('button',{name:'Sign in',exact:true}).click();const response=await loggedIn;assert(response.ok(),'QA password sign-in failed');
+  assert(!page.url().includes(qaPassword),'Password in the address bar');return (await response.json()).csrfToken;
 }
 async function quality(page,name,label){
   const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
@@ -70,7 +91,7 @@ try{
   // Phone: enroll and complete the first episode with independent checks.
   {
     const {ctx,page,errors}=await context('phone',390,844);
-    const csrf=await signIn(page,QA_SUBJECT,'QA learner');
+    const csrf=await signIn(page);
     await page.getByRole('heading',{name:'Your courses',exact:true}).waitFor();
     // Preserve an existing QA enrollment rather than creating another one.
     const existing=await (await page.request.get('/api/enrollments')).json();
@@ -122,7 +143,7 @@ try{
   // Tablet and desktop resume the SAME saved enrollment.
   for(const [name,width,height] of [['tablet',834,1112],['desktop',1440,960]]){
     const {ctx,page,errors}=await context(name,width,height);
-    await signIn(page,QA_SUBJECT,'QA learner');
+    await signIn(page);
     await page.getByRole('heading',{name:'Your courses',exact:true}).waitFor();
     for(let step=0;step<2;step++)await page.getByRole('button',{name:'Continue learning →',exact:true}).first().click();
     await page.getByRole('heading',{name:second.title,exact:true}).waitFor();
@@ -133,15 +154,21 @@ try{
   // Operator administration loads, and the operator remains unenrolled.
   {
     const {ctx,page,errors}=await context('desktop',1440,960);
-    const record=await code(operator.userId?'operator:owner':'operator:owner','Course operator');
-    await page.goto(origin+'/admin/');
-    await page.getByLabel('One-time sign-in code').fill(new URL(record.oneTimeSignInUrl).hash.slice('#signin='.length));
-    await page.getByRole('button',{name:'Sign in',exact:true}).click();
-    await page.getByRole('heading',{name:'Course & releases',level:1}).waitFor();
-    await page.getByText('Selected for new learners',{exact:true}).waitFor();
-    await quality(page,'admin','course');
-    const enrollments=await (await page.request.get('/api/enrollments')).json();
-    report.operatorEnrolled=enrollments.length>0;assert.equal(report.operatorEnrolled,false,'Operator must remain unenrolled');
+    await page.goto(origin+'/admin/');await page.getByLabel('Username',{exact:true}).waitFor();
+    assert.equal(await page.getByLabel('One-time sign-in code',{exact:true}).count(),0,'Admin one-time code field shown while codes are off');
+    if(operatorPassword){
+      await page.getByLabel('Username',{exact:true}).fill(args['--operator-login']);await page.getByLabel('Password',{exact:true}).fill(operatorPassword);
+      await page.getByRole('button',{name:'Sign in',exact:true}).click();
+      await page.getByRole('heading',{name:'Course & releases',level:1}).waitFor();
+      await page.getByText('Selected for new learners',{exact:true}).waitFor();
+      await quality(page,'admin','course');
+      const enrollments=await (await page.request.get('/api/enrollments')).json();
+      report.operatorEnrolled=enrollments.length>0;report.adminSignedIn=true;
+    }else{
+      await quality(page,'admin','sign-in');report.adminSignedIn=false;
+      report.operatorEnrolled=await readOnly(async db=>Number((await db.query('SELECT count(*) FROM enrollments WHERE user_id=$1',[operator.userId])).rows[0].count)>0);
+    }
+    assert.equal(report.operatorEnrolled,false,'Operator must remain unenrolled');
     assert.deepEqual(errors,[]);await ctx.close();
   }
 }finally{await browser.close();}

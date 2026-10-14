@@ -18,6 +18,7 @@ import {stageWorkedExamples} from '../scripts/stage-worked-examples.mjs';
 import {writtenAnswers} from './written-answers.mjs';
 import {instantiateNumericalRecipe} from '@course-core/sdk';
 import {startSyntheticModel} from './synthetic-model.mjs';
+import {harnessPassword,runWithPassword} from './password-login.mjs';
 const exec=promisify(execFile),root=fileURLToPath(new URL('../',import.meta.url));
 class Failure extends Error {constructor(code){super(code);this.code=code;}}
 const check=(condition,code)=>{if(!condition)throw new Failure(code);};
@@ -57,7 +58,10 @@ const model=await startSyntheticModel(path.join(state,'model'),prompt=>{
 });
 
 const baseEnv={PATH:process.env.PATH,DATABASE_URL:url.href,PUBLIC_ORIGIN:origin};
-const bootstrapOwner=JSON.parse((await exec(process.execPath,['services/api/dist/bootstrap-cli.js','feature-flow','feature-flow-owner','Acceptance owner'],{cwd:runtime,env:baseEnv,maxBuffer:65536})).stdout);
+// Core 0.1.36+: password sign-in; one-time codes stay at Core's default (off).
+const ownerPassword=harnessPassword();
+const bootstrapOwner=JSON.parse(await runWithPassword(process.execPath,['services/api/dist/bootstrap-cli.js','feature-flow','feature-flow-owner','Acceptance owner','--password','--login','feature-flow-owner'],{cwd:runtime,env:baseEnv,password:ownerPassword}));
+check(bootstrapOwner.loginName==='feature-flow-owner'&&!('oneTimeSignInUrl' in bootstrapOwner),'bootstrap_password_account');
 const workspaceId=bootstrapOwner.workspaceId;
 const childEnv={...baseEnv,API_HOST:'127.0.0.1',PORT:String(port),CORE_INSTANCE_ID:instanceId,LEARNER_WEB_DIR:path.join(runtime,'apps/learner/dist'),
   CODE_FIXTURE_FILES:JSON.stringify(registryMetadata.registries.map(r=>path.join(root,r.file))),TEACHING_VERIFIER_FILES:JSON.stringify([verifierFile]),
@@ -74,14 +78,14 @@ async function request(session,method,route,body,extra={}){
 }
 const requireOk=(r,code)=>{check(r.status===200,`${code}_${r.status}_${r.value?.error??'failed'}`);return r.value;};
 const refused=(r,status,error,code)=>check(r.status===status&&r.value?.error===error,`${code}_${r.status}_${r.value?.error??'accepted'}`);
-async function redeem(code,extra={}){const r=await request(null,'POST','/auth/redeem',{token:code});requireOk(r,'sign_in');return {...extra,cookie:r.cookies.map(c=>c.split(';')[0]).join('; '),csrf:r.value.csrfToken,exposed:new Set()};}
+async function signIn(login,password,extra={},newPassword){const r=await request(null,'POST','/auth/login',{login,password,...(newPassword?{newPassword}:{})});requireOk(r,'sign_in');return {...extra,cookie:r.cookies.map(c=>c.split(';')[0]).join('; '),csrf:r.value.csrfToken,exposed:new Set()};}
 const bridge=async body=>{const r=await request(null,'POST','/v1/supervisor/bridge',body,{authorization:'Bearer '+serviceToken});return requireOk(r,'bridge_'+(body.command?.type??body.method));};
 async function setClock(ms){await writeFile(clockFile,String(ms),{mode:0o600});server.kill('SIGUSR2');await pause(300);}
 
 const reports={};let owner;
 try{
   await ready();
-  owner=await redeem(new URL(bootstrapOwner.oneTimeSignInUrl).hash.slice('#signin='.length),{userId:bootstrapOwner.userId});
+  owner=await signIn(bootstrapOwner.loginName,ownerPassword,{userId:bootstrapOwner.userId});
   const adapters=requireOk(await request(owner,'GET','/api/runtime/adaptation-adapters'),'runtime_descriptors').adapters;
   check(configuration.profiles.every(p=>adapters.some(a=>a.id===p.adapterId&&a.implementationDigest===p.adapterDigest)),'installed_creator_digest_mismatch');
   const extensions=requireOk(await request(owner,'GET','/api/runtime/extensions'),'runtime_extensions').extensions;
@@ -105,7 +109,13 @@ try{
   }
   requireOk(await request(owner,'POST',`/api/admin/releases/${releaseId}/adaptation-registry`,{expectedRegistryRevision:0,configuration}),'approve_registry');
   // Accounts are created over the People API: a reviewer, an instructor and learners.
-  const invite=async(role,displayName)=>{const v=requireOk(await request(owner,'POST',`/api/admin/workspaces/${workspaceId}/people`,{displayName,role,idempotencyKey:randomUUID()}),'invite_'+role);return redeem(v.signIn.code,{userId:v.userId,role});};
+  // Invitations carry a login name and a server-generated temporary password that must be changed at first sign-in.
+  const invite=async(role,displayName)=>{
+    const loginName=`ff-${role}-${randomUUID().slice(0,8)}`,v=requireOk(await request(owner,'POST',`/api/admin/workspaces/${workspaceId}/people`,{displayName,role,loginName,idempotencyKey:randomUUID()}),'invite_'+role);
+    check(!('signIn' in v)&&v.password?.loginName===loginName&&v.password.mustChangeOnNextSignIn===true,'invite_temporary_password');
+    const temporary=v.password.temporaryPassword;refused(await request(null,'POST','/auth/login',{login:loginName,password:temporary}),409,'PASSWORD_CHANGE_REQUIRED','temporary_password_must_change');
+    return signIn(loginName,temporary,{userId:v.userId,role},harnessPassword());
+  };
   const snapshot=async l=>requireOk(await request(l,'GET',`/api/enrollments/${l.enrollmentId}`),'snapshot');
   const command=async(l,action,body)=>{const s=await snapshot(l);return requireOk(await request(l,'POST',`/api/enrollments/${l.enrollmentId}/${action}`,{expectedRevision:s.revision,idempotencyKey:randomUUID(),...body}),action.replaceAll('/','_'));};
   const attempt=async(l,action,body)=>{const s=await snapshot(l);return request(l,'POST',`/api/enrollments/${l.enrollmentId}/${action}`,{expectedRevision:s.revision,idempotencyKey:randomUUID(),...body});};

@@ -11,6 +11,7 @@ import pg from 'pg';
 import {verifyReleasedRuntime,expectedCoreRelease} from './released-runtime.mjs';
 import {stageWorkedExamples} from '../scripts/stage-worked-examples.mjs';
 import {writtenAnswers} from './written-answers.mjs';
+import {harnessPassword,runWithPassword} from './password-login.mjs';
 const exec=promisify(execFile),root=fileURLToPath(new URL('../',import.meta.url));
 class Failure extends Error {constructor(code){super(code);this.code=code;}}
 const check=(condition,code)=>{if(!condition)throw new Failure(code);};
@@ -39,22 +40,31 @@ const server=spawn(process.execPath,['--max-old-space-size=512','services/api/di
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 async function ready(){for(let n=0;n<120;n++){check(!childExit,'released_api_startup_failed');try{const r=await fetch(origin+'/health',{signal:AbortSignal.timeout(1000)});if(r.ok&&(await r.json()).instanceId===instanceId)return;}catch{}await pause(100);}throw new Failure('released_api_readiness_timeout');}
 async function request(session,method,route,body,extra={}){
-  const response=await fetch(origin+route,{method,headers:{origin,cookie:session?.cookie??'','x-csrf-token':session?.csrf??'','content-type':'application/json',...extra},...(body===undefined?{}:{body:JSON.stringify(body)}),signal:AbortSignal.timeout(15000)});let value;try{value=await response.json();}catch{throw new Failure('invalid_api_response');}
+  const response=await fetch(origin+route,{method,headers:{origin,cookie:session?.cookie??'','x-csrf-token':session?.csrf??'','content-type':'application/json',...extra},...(body===undefined?{}:{body:JSON.stringify(body)}),signal:AbortSignal.timeout(15000)}).catch(error=>{throw new Error(`${method} ${route.replace(/[0-9a-f-]{36}/g,':id')}: ${error?.name}: ${error?.message}`,{cause:error});});let value;try{value=await response.json();}catch{throw new Failure('invalid_api_response');}
   return {status:response.status,value,cookies:response.headers.getSetCookie()};
 }
 const requireOk=(r,code)=>{check(r.status===200,`${code}_${r.status}_${r.value?.error??'failed'}`);return r.value;};
-async function bootstrap(subject,role,redeem=true){
-  const result=await exec(process.execPath,['services/api/dist/bootstrap-cli.js','private-flow',subject,'Acceptance learner'],{cwd:runtime,env:childEnv,maxBuffer:65536});const record=JSON.parse(result.stdout);
+// Core 0.1.36+: password sign-in. One-time codes stay at Core's default (off).
+async function bootstrap(subject,role,signIn=true){
+  const password=harnessPassword();
+  const record=JSON.parse(await runWithPassword(process.execPath,['services/api/dist/bootstrap-cli.js','private-flow',subject,'Acceptance learner','--password','--login',subject],{cwd:runtime,env:childEnv,password}));
+  check(record.loginName===subject&&!('oneTimeSignInUrl' in record),'bootstrap_password_account');
   if(role==='learner')await db.query("UPDATE memberships SET role='learner' WHERE workspace_id=$1 AND user_id=$2",[record.workspaceId,record.userId]);
-  if(!redeem)return record;
-  const token=new URL(record.oneTimeSignInUrl).hash.slice('#signin='.length),r=await request(null,'POST','/auth/redeem',{token});requireOk(r,'sign_in');
+  if(!signIn)return {...record,password};
+  const r=await request(null,'POST','/auth/login',{login:record.loginName,password});requireOk(r,'sign_in');
   return {...record,cookie:r.cookies.map(c=>c.split(';')[0]).join('; '),csrf:r.value.csrfToken};
+}
+async function signInChecks(){
+  const options=requireOk(await request(null,'GET','/auth/options'),'auth_options');check(options.loginCodes===false,'login_codes_not_off_by_default');
+  const code=await request(null,'POST','/auth/redeem',{token:'A'.repeat(43)});check(code.status===403&&code.value?.error==='LOGIN_CODES_DISABLED','login_codes_not_refused');
+  const owner=await bootstrap('private-signin-probe','learner',false),wrong=await request(null,'POST','/auth/login',{login:owner.loginName,password:harnessPassword()});
+  check(wrong.status===401&&wrong.value?.error==='LOGIN_FAILED'&&!wrong.cookies.length,'wrong_password_not_refused');
 }
 
 let releaseId,teacher,browser;
 const reports=[];
 try{
-  await ready();teacher=await bootstrap('private-acceptance-owner','owner');
+  await ready();await signInChecks();teacher=await bootstrap('private-acceptance-owner','owner');
   const adapters=requireOk(await request(teacher,'GET','/api/runtime/adaptation-adapters'),'runtime_descriptors').adapters;
   check(configuration.profiles.every(p=>adapters.some(a=>a.id===p.adapterId&&a.implementationDigest===p.adapterDigest)),'installed_creator_digest_mismatch');
   const extensions=requireOk(await request(teacher,'GET','/api/runtime/extensions'),'runtime_extensions').extensions;check(registryMetadata.registries.every(r=>extensions.some(e=>e.id===r.id&&e.codeReady&&e.integrity==='sha256-'+r.sha256)),'code_grader_not_ready');

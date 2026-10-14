@@ -14,9 +14,13 @@ export async function browserAcceptance({origin,bootstrap,request,requireOk,cour
       page.on('pageerror',e=>errors.push(e.message));
       await context.tracing.start({screenshots:true,snapshots:true});
       try{
-        const record=await bootstrap('private-browser-'+name,'learner',false),redeemed=page.waitForResponse(r=>new URL(r.url()).pathname==='/auth/redeem'&&r.request().method()==='POST');
-        await page.goto(record.oneTimeSignInUrl);const login=await (await redeemed).json();
-        await page.getByRole('heading',{name:'Your courses',exact:true}).waitFor();check(!page.url().includes('signin='),'browser_token_not_removed');
+        // Core 0.1.36+: the learner signs in through the username and password form; one-time codes are off.
+        const record=await bootstrap('private-browser-'+name,'learner',false),loggedIn=page.waitForResponse(r=>new URL(r.url()).pathname==='/auth/login'&&r.request().method()==='POST');
+        await page.goto(origin+'/');await page.getByLabel('Username',{exact:true}).waitFor();
+        check(await page.getByLabel('One-time sign-in code',{exact:true}).count()===0,'browser_code_field_shown_while_disabled');
+        await page.getByLabel('Username',{exact:true}).fill(record.loginName);await page.getByLabel('Password',{exact:true}).fill(record.password);
+        await page.getByRole('button',{name:'Sign in',exact:true}).click();const loginResponse=await loggedIn;check(loginResponse.ok(),'browser_password_sign_in_failed');const login=await loginResponse.json();
+        await page.getByRole('heading',{name:'Your courses',exact:true}).waitFor();check(!page.url().includes(record.password),'browser_password_in_url');
         const session={cookie:(await context.cookies()).map(c=>`${c.name}=${c.value}`).join('; '),csrf:login.csrfToken};
         await page.getByRole('button',{name:'Open course',exact:true}).click();
         const enrolled=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/enrollments'&&r.request().method()==='POST');
