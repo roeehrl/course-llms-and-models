@@ -1,5 +1,5 @@
-// Private authoring only. Builds sixteen bounded concept scenes (two batches of
-// eight) with the released @course-core/visuals package and writes exactly two
+// Private authoring only. Builds twenty-four bounded concept scenes (three batches
+// of eight) with the released @course-core/visuals package and writes exactly two
 // files:
 //   visuals/concept-scenes.json and content/concept-visuals.json
 // A development build may be selected only through an explicit file: URL to a
@@ -2107,6 +2107,1027 @@ const lseScene = (() => {
   });
 })();
 
+// ============================================================ 17 text → IDs → a greedy next token
+// fnd-e01-03: vocab a→0, b→1, space→2 (drawn ␣); an invented next-token table indexed by
+// the last ID; greedy choice, append, decode; next-token targets are the shifted sequence.
+const tokenScene = (() => {
+  const PROMPTS = ["ab␣a", "b␣a", "ab␣", "ba␣b"];
+  const prompt = s("prompt"),
+    steps = s("steps"),
+    swapped = eq(s("tokenizer"), "a, b IDs swapped"),
+    copy = eq(s("targets"), "Current token (bug)");
+  const NEXT = [
+    [0.1, 0.7, 0.2],
+    [0.2, 0.2, 0.6],
+    [0.8, 0.1, 0.1],
+  ];
+  const MAPS = [
+    { ids: { a: 0, b: 1, "␣": 2 }, chars: ["a", "b", "␣"] },
+    { ids: { a: 1, b: 0, "␣": 2 }, chars: ["b", "a", "␣"] },
+  ];
+  // Authoring-time greedy loop per prompt and tokenizer (the oracle re-runs it independently).
+  const run = (p, m) => {
+    const ids = [...p].map((c) => m.ids[c]);
+    const gen = [];
+    for (let last = ids.at(-1), k = 0; k < 3; k++) {
+      const row = NEXT[last];
+      const next = row.indexOf(Math.max(...row));
+      gen.push({ id: next, ch: m.chars[next] });
+      last = next;
+    }
+    return { p: [...p], ids, gen };
+  };
+  const by = (fn) =>
+    pick(
+      prompt,
+      PROMPTS,
+      PROMPTS.map((p) => iff(swapped, fn(run(p, MAPS[1])), fn(run(p, MAPS[0])))),
+    );
+  // In-scene arithmetic for the first prediction: the row is read by the last ID.
+  const lastChar = pick(prompt, PROMPTS, PROMPTS.map((p) => [...p].at(-1)));
+  const lastId = iff(eq(lastChar, "␣"), 2, iff(eq(lastChar, "a"), iff(swapped, 1, 0), iff(swapped, 0, 1)));
+  const rowVal = (j) => iff(eq(lastId, 0), NEXT[0][j], iff(eq(lastId, 1), NEXT[1][j], NEXT[2][j]));
+  const r = [0, 1, 2].map(rowVal);
+  const greedy = iff(and(ge(r[1], r[0]), ge(r[1], r[2])), 1, iff(ge(r[0], r[2]), 0, 2));
+  const slot = (i) => by((t) => (i < t.p.length ? 0 : i - t.p.length + 1)); // 0 = prompt, k = k-th generated
+  const boxes = [];
+  for (let i = 0; i < 7; i++) {
+    const k = slot(i),
+      x = 16 + 37 * i;
+    const shown = iff(eq(k, 0), 1, after(2400, iff(le(k, steps), 1, 0), 0));
+    boxes.push(
+      { ...rect(`tk-box-${i}`, x, 76, 33, 54, white, 6), opacity: shown },
+      { ...rect(`tk-gen-${i}`, x, 76, 33, 54, purple, 6), opacity: iff(eq(k, 0), 0, mul(0.3, shown)) },
+      {
+        ...centered(bold(`tk-ch-${i}`, by((t) => (i < t.p.length ? t.p[i] : (t.gen[i - t.p.length]?.ch ?? ""))), x + 16.5, 100, 18)),
+        opacity: shown,
+      },
+      {
+        ...centered(
+          text(`tk-id-${i}`, by((t) => String(i < t.p.length ? t.ids[i] : (t.gen[i - t.p.length]?.id ?? ""))), x + 16.5, 122, 17, muted),
+        ),
+        opacity: shown,
+      },
+    );
+  }
+  const encode = card("tk-encode", 200, ice, blue, "TEXT → IDS", [
+    text("tk-map", iff(swapped, "a→1, b→0, ␣→2 (swapped)", "a→0, b→1, ␣→2"), 16, 62),
+    ...boxes,
+    text("tk-legend", "lilac boxes: generated", 16, 156, 17, muted),
+    text("tk-ids", by((t) => `IDs [${t.ids.join(", ")}]`), 16, 184),
+  ]);
+  const generatedText = iff(
+    eq(steps, 0),
+    by((t) => t.p.join("")),
+    iff(
+      eq(steps, 1),
+      by((t) => t.p.join("") + t.gen[0].ch),
+      iff(eq(steps, 2), by((t) => t.p.join("") + t.gen[0].ch + t.gen[1].ch), by((t) => t.p.join("") + t.gen.map((g) => g.ch).join(""))),
+    ),
+  );
+  const predict = card("tk-predict", 256, lilac, purple, "THE LAST ID PICKS A ROW", [
+    text("tk-last", cat("last '", lastChar, "' → ID ", lastId), 16, 62),
+    text("tk-row", after(800, cat("row ", lastId, ": [", r[0], ", ", r[1], ", ", r[2], "]"), "row …"), 16, 90),
+    text("tk-greedy", after(1600, cat("greedy ID ", greedy, ", p = ", max(...r)), "greedy …"), 16, 118),
+    text("tk-decode", after(2400, by((t) => `decodes to '${t.gen[0].ch}'`), "decodes to …"), 16, 146),
+    bold("tk-text", after(3200, cat("text: ", generatedText), "text: …"), 16, 180, 18, purple),
+    bold(
+      "tk-verdict",
+      after(
+        4000,
+        // Name the cause: with a swapped tokenizer a final ␣ still reads the right row
+        // (its ID is unchanged); only the decoding of the chosen ID is wrong.
+        iff(swapped, iff(eq(lastChar, "␣"), "right row, wrong decode", "wrong row: a, b swapped"), "row and decode match"),
+        "…",
+      ),
+      16,
+      212,
+      17,
+      purple,
+    ),
+    text("tk-fixed", "the table never changes", 16, 240, 17, muted),
+  ]);
+  const pairs = card("tk-pairs", 224, sand, gold, "NEXT-TOKEN PAIRS", [
+    text("tk-rule", cat("targets: ", iff(copy, "current (bug)", "shift by one")), 16, 62),
+    text("tk-inputs", after(4000, by((t) => `inputs [${t.ids.slice(0, -1).join(", ")}]`), "inputs …"), 16, 90),
+    text(
+      "tk-targets",
+      after(
+        4000,
+        iff(copy, by((t) => `targets [${t.ids.slice(0, -1).join(", ")}]`), by((t) => `targets [${t.ids.slice(1).join(", ")}]`)),
+        "targets …",
+      ),
+      16,
+      118,
+    ),
+    bold("tk-leak", after(4000, iff(copy, "leak: target = input", "target = next token"), "…"), 16, 152, 17, gold),
+    text("tk-count", by((t) => `${t.p.length - 1} pairs from ${t.p.length} IDs`), 16, 180, 17, muted),
+    text("tk-labels", "IDs are labels, not sizes", 16, 208, 17, muted),
+  ]);
+  return build({
+    id: "concept-token-ids",
+    title: "Text in, IDs through, text out.",
+    description:
+      "Encode a short text with the lesson's three-symbol vocabulary, read the invented next-token row chosen by the last ID, append greedy choices and decode them. Then swap two tokenizer IDs, or build training targets without the shift, and see which boundary broke.",
+    state: {
+      prompt: choice("Prompt text", PROMPTS),
+      steps: num("Greedy tokens appended", 1, 0, 3, 1),
+      tokenizer: choice("Tokenizer", ["Matches the model", "a, b IDs swapped"]),
+      targets: choice("Training targets", ["Next token (shift)", "Current token (bug)"]),
+    },
+    kicker: "17 / TEXT BECOMES IDS",
+    subtitle: "invented next-token table",
+    grid: [
+      [encode, 0],
+      [predict, 1],
+      [pairs, 2],
+    ],
+    compactOrder: [encode, predict, pairs],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "The vocabulary is a, b and space (␣) with IDs 0, 1 and 2. Encode the prompt first." },
+      { atMs: 800, text: "This toy model consults only the last ID: it selects one row of an invented probability table." },
+      { atMs: 1600, text: "Greedy decoding takes the most probable ID in that row." },
+      { atMs: 2400, text: "Decode the chosen ID back to a character and append it. The table itself does not change." },
+      { atMs: 3200, text: "Repeat: each appended token becomes the new last token." },
+      { atMs: 4000, text: "Training pairs shift by one: each input position's target is the following token." },
+    ],
+    accessible:
+      "Tokenization and next-token prediction with the lesson's vocabulary a, b and space (shown as ␣), whose IDs are 0, 1 and 2. The prompt ab␣a encodes to [0, 1, 2, 0]. An invented next-token table, not a trained model, gives one probability row per last ID: after a [0.1, 0.7, 0.2], after b [0.2, 0.2, 0.6], after space [0.8, 0.1, 0.1]. The last ID 0 selects the first row, the greedy choice is ID 1 with probability 0.7, and it decodes to b. Appending b makes ID 1 the last token, so the next greedy choice is a space with probability 0.6, then a. Generation changes the context; it never changes the table. If the tokenizer swaps the IDs of a and b while the table stays the same, the code still runs: a prompt ending in a or b now reads the wrong row, and a prompt ending in a space reads the right row (its ID is unchanged) but decodes the chosen ID 0 as b instead of a. Training pairs come from shifting the sequence: inputs [0, 1, 2] pair with targets [1, 2, 0]. Copying the current token as its own target leaks the answer into the input. IDs are categorical labels, not quantities.",
+  });
+})();
+
+// ============================================================ 18 a training loop is a state machine
+// ttf-e05-04: prediction w·x with x = 2, target 4, half squared error, η = 0.1 and w = 1 give
+// weights 1.4 then 1.64; a flipped sign gives 0.6; an uncleared gradient gives 2.04.
+const loopScene = (() => {
+  const VARIANTS = ["Correct loop", "Sign flipped", "Gradient not cleared"];
+  const w0 = s("w0"),
+    eta = s("eta"),
+    K = s("steps"),
+    variant = s("variant");
+  const flipped = eq(variant, VARIANTS[1]),
+    stale = eq(variant, VARIANTS[2]);
+  // With w* = y/x = 2 the gradient is (2w − 4)·2 = 4·(w − 2), so every loop keeps w − 2 = d0·c_k.
+  // The coefficients are the expanded products of the update; the oracle runs the loop itself.
+  const d0 = sub(w0, 2);
+  const e4 = mul(4, eta);
+  const cRef = [1, sub(1, e4), op("pow", sub(1, e4), 2), op("pow", sub(1, e4), 3)];
+  const cFlip = [1, add(1, e4), op("pow", add(1, e4), 2), op("pow", add(1, e4), 3)];
+  const cStale = [
+    1,
+    sub(1, e4),
+    add(1, mul(-12, eta), mul(16, eta, eta)),
+    add(1, mul(-24, eta), mul(80, eta, eta), mul(-64, eta, eta, eta)),
+  ];
+  const wRef = cRef.map((c) => add(2, mul(d0, c))),
+    gRef = [1, 2, 3].map((k) => mul(4, d0, cRef[k - 1]));
+  const cVar = [0, 1, 2, 3].map((k) => pick(variant, VARIANTS, [cRef[k], cFlip[k], cStale[k]]));
+  const wVar = cVar.map((c) => add(2, mul(d0, c)));
+  // What the chosen loop applies at step k: the fresh gradient, or the uncleared running sum.
+  const used = [1, 2, 3].map((k) =>
+    iff(stale, mul(4, d0, k === 1 ? 1 : add(...cStale.slice(0, k))), mul(4, d0, iff(flipped, cFlip[k - 1], cRef[k - 1]))),
+  );
+  const atK = (list) => iff(eq(K, 1), list[1], iff(eq(K, 2), list[2], list[3]));
+  const loss = (c) => mul(2, d0, d0, c, c);
+  const L0 = mul(2, d0, d0),
+    Lref = atK(cRef.map(loss)),
+    Lvar = atK(cVar.map(loss));
+  const rowOpacity = (k) => iff(le(k, K), 1, 0);
+  const reference = card("lp-ref", 218, ice, blue, "REFERENCE: w −= η·g", [
+    text("lp-setup", cat("x 2, y 4, η ", r3(eta)), 16, 62, 17, muted),
+    text("lp-start", cat("w0 = ", w0, ", L = ", r3(L0)), 16, 90),
+    ...[1, 2, 3].map((k) => ({
+      ...text(`lp-ref-${k}`, after(800 * k, cat(`${k}: g `, r3(gRef[k - 1]), " → w ", r3(wRef[k])), `${k}: …`), 16, 90 + 28 * k),
+      opacity: rowOpacity(k),
+    })),
+    bold("lp-ref-loss", after(2400, cat("loss → ", r3(Lref)), "loss → …"), 16, 206, 18, blue),
+  ]);
+  const chosen = card("lp-var", 196, lilac, purple, "CHOSEN LOOP", [
+    text("lp-rule", pick(variant, VARIANTS, ["w −= η·g", "w += η·g (bug)", "w −= η·Σg (bug)"]), 16, 62),
+    ...[1, 2, 3].map((k) => ({
+      ...text(
+        `lp-var-${k}`,
+        after(800 * k, cat(`${k}: `, iff(stale, "buf ", "g "), r3(used[k - 1]), " → w ", r3(wVar[k])), `${k}: …`),
+        16,
+        62 + 28 * k,
+      ),
+      opacity: rowOpacity(k),
+    })),
+    bold("lp-var-loss", after(2400, cat("loss ", r3(L0), " → ", r3(Lvar)), "loss …"), 16, 180, 18, purple),
+  ]);
+  const xOf = (w) => add(24, mul(40, add(op("clamp", w, -2, 4), 2)));
+  const dot = (id, w, y, fill, opacity) => ({ ...circle(id, xOf(w), y, 6, fill), opacity });
+  const same = and(
+    ...[1, 2, 3].map((k) => or(gt(k, K), lt(abs(sub(wVar[k], wRef[k])), 0.000000001))),
+  );
+  const track = card("lp-line", 240, sand, gold, "WHERE w GOES (−2 … 4)", [
+    segment("lp-axis", 24, 116, 240, 0, line, 2),
+    segment("lp-target", 184, 52, 0, 64, gold, 2),
+    dot("lp-ref-dot-0", wRef[0], 70, teal, 1),
+    dot("lp-var-dot-0", wVar[0], 98, purple, 1),
+    ...[1, 2, 3].flatMap((k) => [
+      dot(`lp-ref-dot-${k}`, wRef[k], 70, teal, after(800 * k, rowOpacity(k), 0)),
+      dot(`lp-var-dot-${k}`, wVar[k], 98, purple, after(800 * k, rowOpacity(k), 0)),
+    ]),
+    ...[-2, 0, 2, 4].map((v) => centered(text(`lp-tick-${v < 0 ? "m2" : v}`, String(v), 24 + 40 * (v + 2), 138, 17, muted))),
+    text("lp-legend", "teal ref, purple chosen", 16, 164, 17, muted),
+    bold(
+      "lp-verdict",
+      after(
+        3200,
+        // Name what actually differs: the transition, or what hides it in this state.
+        iff(
+          eq(variant, VARIANTS[0]),
+          "matches the reference",
+          iff(
+            same,
+            iff(eq(w0, 2), "hidden: gradient is 0", "same: 1 step, no stale g"),
+            iff(flipped, "wrong: sign flipped", "wrong: buffer not cleared"),
+          ),
+        ),
+        "…",
+      ),
+      16,
+      196,
+      17,
+      gold,
+    ),
+    text(
+      "lp-loss-note",
+      after(
+        3200,
+        iff(
+          lt(Lvar, sub(L0, 0.000000000001)),
+          iff(or(eq(variant, VARIANTS[0]), same), "loss fell", "loss fell, still wrong"),
+          iff(gt(Lvar, add(L0, 0.000000000001)), "loss rose", "loss unchanged"),
+        ),
+        "…",
+      ),
+      16,
+      224,
+    ),
+  ]);
+  return build({
+    id: "concept-loop-states",
+    title: "Order the steps. Then judge them.",
+    description:
+      "Run the lesson's one-weight training loop next to a chosen variant: the correct update, a flipped sign, or a gradient buffer that is never cleared. Change the start weight, the learning rate and the number of steps, and see whether the loss alone could tell them apart.",
+    state: {
+      w0: num("Start weight w0", 1, 0, 3, 0.5),
+      eta: num("Learning rate η", 0.1, 0.05, 0.3, 0.05),
+      steps: num("Update steps", 2, 1, 3, 1),
+      variant: choice("Loop variant", VARIANTS, VARIANTS[2]),
+    },
+    kicker: "18 / ORDER IS STATE",
+    subtitle: "w·x, x = 2, target 4",
+    grid: [
+      [reference, 0],
+      [chosen, 1],
+      [track, 2],
+    ],
+    compactOrder: [reference, chosen, track],
+    durationMs: 4000,
+    cues: [
+      { atMs: 0, text: "Prediction w·x with x = 2 and target 4, half squared error. Predict the first gradient at w = 1." },
+      { atMs: 800, text: "Step 1: the gradient is −4, so w moves to 1.4 in the reference loop." },
+      { atMs: 1600, text: "Step 2 recomputes the gradient at the new weight (−2.4) and reaches 1.64. A loop that kept the old gradient adds both." },
+      { atMs: 2400, text: "Compare losses: the uncleared buffer reaches 2.04, and its loss is small here." },
+      { atMs: 3200, text: "Judge the transition, not the loss: a wrong update can still lower the loss." },
+    ],
+    accessible:
+      "A one-weight training loop with the lesson's numbers: prediction w·x with input 2, target 4, half squared error and learning rate 0.1, starting at w = 1. The reference loop subtracts the learning rate times the fresh gradient: the first gradient is −4, so w becomes 1.4; at that weight the gradient is −2.4, so w becomes 1.64, and the loss falls from 2 to 0.72 and then 0.2592. Adding instead of subtracting sends w to 0.6 after one step, where the loss is 3.92. Keeping the first gradient in an uncleared buffer adds it to the second: the second step uses −6.4 and sends w from 1.4 to 2.04. Its loss, 0.0032, is lower than the reference's, yet the state transition is wrong: loss improvement does not validate the algorithm. The verdict names the cause. With w0 = 2 every gradient is zero, so all three loops agree and the bug is hidden by the zero gradient; with one step the uncleared buffer has nothing stale in it yet, so it agrees with the reference for that reason. The number line shows each loop's weights from −2 to 4 (values beyond are pinned to the ends), with the target weight 2 marked.",
+  });
+})();
+
+// ============================================================ 19 queries, keys and values
+// ttf-e07-01: X rows [1,0],[0,2]; Wq [[1,1],[0,1]], Wk [[1,0],[1,1]], Wv [[2,0],[0,3]];
+// Q·Kᵀ = [[1,4],[0,4]]; swapping Q and K gives the transpose; ∂X adds all three routes.
+const qkvScene = (() => {
+  const FIX = ["Lesson X", "Identity X", "All-ones X"];
+  const XS = [
+    [
+      [1, 0],
+      [0, 2],
+    ],
+    [
+      [1, 0],
+      [0, 1],
+    ],
+    [
+      [1, 1],
+      [1, 1],
+    ],
+  ];
+  const fx = s("fixture"),
+    qi = s("query"),
+    swap = eq(s("order"), "K·Qᵀ (swapped)"),
+    dropV = eq(s("branches"), "V branch dropped");
+  const X = [0, 1].map((i) => [0, 1].map((j) => pick(fx, FIX, XS.map((m) => m[i][j]))));
+  const Wq = [
+      [1, 1],
+      [0, 1],
+    ],
+    Wk = [
+      [1, 0],
+      [1, 1],
+    ],
+    Wv = [
+      [2, 0],
+      [0, 3],
+    ];
+  const proj = (W) => [0, 1].map((i) => [0, 1].map((j) => add(mul(X[i][0], W[0][j]), mul(X[i][1], W[1][j]))));
+  const Q = proj(Wq),
+    K = proj(Wk),
+    V = proj(Wv);
+  const S = [0, 1].map((i) => [0, 1].map((j) => add(mul(Q[i][0], K[j][0]), mul(Q[i][1], K[j][1]))));
+  const shown = [0, 1].map((i) => [0, 1].map((j) => iff(swap, S[j][i], S[i][j])));
+  const symmetric = eq(S[0][1], S[1][0]);
+  const m2 = (M) => cat("[[", M[0][0], ",", M[0][1], "], [", M[1][0], ",", M[1][1], "]]");
+  const project = card("qk-project", 190, ice, blue, "PROJECT X THREE WAYS", [
+    text("qk-x", cat("X = ", m2(X)), 16, 62),
+    text("qk-q", after(800, cat("Q = X·Wq = ", m2(Q)), "Q = …"), 16, 90),
+    text("qk-k", after(800, cat("K = X·Wk = ", m2(K)), "K = …"), 16, 118),
+    text("qk-v", after(800, cat("V = X·Wv = ", m2(V)), "V = …"), 16, 146),
+    text("qk-count", "3 × (2×2) = 12 weights", 16, 174, 17, muted),
+  ]);
+  const cellX = [96, 172];
+  const scores = card("qk-scores", 276, lilac, purple, "SCORES: ROW = QUERY", [
+    text("qk-order", cat("order: ", iff(swap, "K·Qᵀ (swapped)", "Q·Kᵀ")), 16, 62),
+    centered(text("qk-k0", "k0", cellX[0] + 34, 92, 17, muted)),
+    centered(text("qk-k1", "k1", cellX[1] + 34, 92, 17, muted)),
+    ...[0, 1].flatMap((i) => [
+      text(`qk-q${i}`, `q${i}`, 40, 126 + 36 * i, 17, muted),
+      ...[0, 1].flatMap((j) => [
+        rect(`qk-s-${i}-${j}`, cellX[j], 104 + 36 * i, 68, 30, white, 6),
+        {
+          ...rect(`qk-s-${i}-${j}-hl`, cellX[j], 104 + 36 * i, 68, 30, purple, 6),
+          opacity: after(1600, iff(eq(qi, i), 0.3, 0), 0),
+        },
+        centered(bold(`qk-s-${i}-${j}-v`, after(1600, shown[i][j], "…"), cellX[j] + 34, 126 + 36 * i, 18)),
+      ]),
+    ]),
+    text(
+      "qk-row",
+      after(2400, cat("row ", qi, ": [", iff(eq(qi, 0), shown[0][0], shown[1][0]), ", ", iff(eq(qi, 0), shown[0][1], shown[1][1]), "]"), "row …"),
+      16,
+      204,
+    ),
+    bold(
+      "qk-verdict",
+      after(
+        3200,
+        // A swap is invisible exactly when S is symmetric: name the fixture, not "correct".
+        iff(swap, iff(symmetric, "swap hidden: S symmetric", "swapped: this is Sᵀ"), "rows are queries"),
+        "…",
+      ),
+      16,
+      236,
+      17,
+      purple,
+    ),
+    text("qk-sym", after(3200, cat("S is ", iff(symmetric, "symmetric", "not symmetric")), "S is …"), 16, 264, 17, muted),
+  ]);
+  const T = (W) => [0, 1].map((i) => [0, 1].map((j) => W[j][i]));
+  const WqT = T(Wq),
+    WkT = T(Wk),
+    WvT = T(Wv);
+  const dX = [0, 1].map((i) => [0, 1].map((j) => add(WqT[i][j], WkT[i][j], iff(dropV, 0, WvT[i][j]))));
+  const backward = card("qk-backward", 224, sand, gold, "BACKWARD INTO X", [
+    text("qk-upstream", "invented: ∂Q=∂K=∂V=I", 16, 62, 17, muted),
+    text("qk-dwq", after(4000, cat("∂Wq = Xᵀ = ", m2(T(X))), "∂Wq = …"), 16, 90),
+    text("qk-routes", cat("routes: ", iff(dropV, "Q, K (V dropped)", "Q, K and V")), 16, 118),
+    text("qk-dx", after(4000, cat("∂X = ", m2(dX)), "∂X = …"), 16, 146),
+    bold("qk-dx-verdict", after(4000, iff(dropV, "V route missing in ∂X", "all three routes added"), "…"), 16, 180, 17, gold),
+    text("qk-sum", "sum ∂P·Wpᵀ over Q, K, V", 16, 208, 17, muted),
+  ]);
+  return build({
+    id: "concept-qkv-scores",
+    title: "Three projections, one score grid.",
+    description:
+      "Project the lesson's two-token X into queries, keys and values with three learned matrices, then read the score grid row by row. Swap the order of Q and K, try a symmetric fixture, and drop one route from the input gradient.",
+    state: {
+      fixture: choice("Input X", FIX),
+      query: num("Query row i", 0, 0, 1, 1),
+      order: choice("Score order", ["Q·Kᵀ", "K·Qᵀ (swapped)"]),
+      branches: choice("Routes back to X", ["Q, K and V", "V branch dropped"]),
+    },
+    kicker: "19 / QUERIES MEET KEYS",
+    subtitle: "row vectors, no biases",
+    grid: [
+      [project, 0],
+      [scores, 1],
+      [backward, 2],
+    ],
+    compactOrder: [project, scores, backward],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "X has one row per token. Wq, Wk and Wv are learned 2×2 matrices: twelve weights." },
+      { atMs: 800, text: "Q = X·Wq, K = X·Wk and V = X·Wv: the same rows, three different projections." },
+      { atMs: 1600, text: "Score S[i, j] compares query i with key j: S = Q·Kᵀ." },
+      { atMs: 2400, text: "Row i is what query i sees across the candidate source positions." },
+      { atMs: 3200, text: "Swapping Q and K gives the transpose. A symmetric fixture hides that mistake." },
+      { atMs: 4000, text: "Backward: X receives a contribution through Q, K and V. Dropping one route corrupts ∂X." },
+    ],
+    accessible:
+      "Queries, keys and values with the lesson's numbers in row-vector notation. X has rows [1, 0] and [0, 2]. Wq has rows [1, 1] and [0, 1], Wk has rows [1, 0] and [1, 1], and Wv has rows [2, 0] and [0, 3]: twelve learned weights without biases. Then Q = X·Wq = [[1, 1], [0, 2]], K = X·Wk = [[1, 0], [2, 2]] and V = X·Wv = [[2, 0], [0, 6]]. The unscaled scores Q·Kᵀ are [[1, 4], [0, 4]]: row i belongs to query i and column j to key j. Computing K·Qᵀ instead gives the transpose [[1, 0], [4, 4]], a valid matrix that answers different questions. With the all-ones fixture the score matrix is all 4s, which is symmetric, so the swap is invisible: the verdict says the fixture hides it rather than calling the order correct. With the identity fixture S = [[1, 2], [0, 1]] and the swap shows. For the backward pass, an invented upstream gradient I for each of Q, K and V gives ∂Wq = Xᵀ and ∂X = Wqᵀ + Wkᵀ + Wvᵀ = [[4, 1], [1, 5]]; dropping the V route gives [[2, 1], [1, 2]], which is wrong.",
+  });
+})();
+
+// ============================================================ 20 asynchronous devices and timer boundaries
+// ttf-e08-02: invented timeline; the host submits from 0 to 0.2 ms and the result is ready at 5.2 ms.
+// The submission duration is 0.2 ms, completion latency 5.2 ms. C = [[4,4],[10,8]].
+const asyncScene = (() => {
+  const sb = s("submit"),
+    run = s("run"),
+    q = s("queued");
+  const startSync = eq(s("start"), "After earlier work"),
+    stopSync = eq(s("stop"), "After device sync"),
+    permuted = eq(s("layout"), "Row 1 permuted (bug)");
+  const t0 = iff(startSync, q, 0);
+  const submitted = add(t0, sb);
+  const begin = max(submitted, q);
+  const ready = add(begin, run);
+  const t1 = iff(stopSync, ready, submitted);
+  const measured = sub(t1, t0),
+    latency = add(sb, run);
+  const X0 = 84,
+    PX = 11;
+  const xAt = (tv) => add(X0, mul(PX, tv));
+  const timeline = card("as-timeline", 168, ice, blue, "INVENTED TIMELINE (ms)", [
+    text("as-host-label", "host", 16, 64, 17, muted),
+    { ...rect("as-host", xAt(t0), 50, mul(PX, sb), 16, blue, 3), opacity: after(800, 1, 0) },
+    text("as-device-label", "device", 16, 98, 17, muted),
+    { ...rect("as-earlier", X0, 84, mul(PX, q), 16, gold, 3), opacity: after(1600, 1, 0) },
+    { ...rect("as-kernel", xAt(begin), 84, mul(PX, run), 16, purple, 3), opacity: after(1600, 1, 0) },
+    text("as-timer-label", "timer", 16, 132, 17, muted),
+    { ...segment("as-timer", xAt(t0), 126, mul(PX, measured), 0, teal, 4), opacity: after(2400, 1, 0) },
+    ...[0, 5, 10, 15].map((v) => centered(text(`as-tick-${v}`, String(v), X0 + PX * v, 158, 17, muted))),
+  ]);
+  const timer = card("as-timer-card", 224, lilac, purple, "WHAT THE TIMER SAW", [
+    text("as-start", cat("start: ", iff(startSync, "after earlier work", "immediately")), 16, 62),
+    text("as-stop", cat("stop: ", iff(stopSync, "after device sync", "call returns")), 16, 90),
+    text("as-measured", after(2400, cat("timer: ", r3(measured), " ms"), "timer: …"), 16, 118),
+    text("as-latency", after(3200, cat("latency s + d: ", r3(latency), " ms"), "latency s + d: …"), 16, 146),
+    bold(
+      "as-verdict",
+      after(
+        4000,
+        // The cause of a wrong reading is the boundary that was crossed, not the device.
+        iff(
+          not(stopSync),
+          "submit only: no end sync",
+          iff(
+            lt(abs(sub(measured, latency)), 0.000000001),
+            iff(or(startSync, eq(q, 0)), "completion latency", "matches: queue drained"),
+            "includes earlier work",
+          ),
+        ),
+        "…",
+      ),
+      16,
+      180,
+      17,
+      purple,
+    ),
+    text("as-invented", "numbers are invented", 16, 208, 17, muted),
+  ]);
+  const C = [
+    [add(mul(1, 2), mul(2, 1)), add(mul(1, 0), mul(2, 2))],
+    [add(mul(3, 2), mul(4, 1)), add(mul(3, 0), mul(4, 2))],
+  ];
+  const k1 = [iff(permuted, C[1][1], C[1][0]), iff(permuted, C[1][0], C[1][1])];
+  const err = max(abs(sub(k1[0], C[1][0])), abs(sub(k1[1], C[1][1])));
+  const mapping = card("as-mapping", 196, sand, gold, "SAME INDEX MAPPING", [
+    text("as-c", cat("A·B = [[", C[0][0], ",", C[0][1], "], [", C[1][0], ",", C[1][1], "]]"), 16, 62),
+    text("as-row1", cat("kernel row 1: [", k1[0], ", ", k1[1], "]"), 16, 90),
+    text("as-err", cat("max |error| = ", err), 16, 118),
+    bold("as-map-verdict", iff(gt(err, 0), "permutation, not rounding", "same index mapping"), 16, 152, 17, gold),
+    text("as-loops", "loops or tiles: same C", 16, 180, 17, muted),
+  ]);
+  return build({
+    id: "concept-async-timer",
+    title: "Returning is not finishing.",
+    description:
+      "On an invented timeline the host submits work and returns while the device is still running. Move the timer's start and stop boundaries, add earlier queued work, and compare what the timer reads with the completion latency. Then permute one output row and see why that is not rounding.",
+    state: {
+      submit: num("Submit time s (ms)", 0.2, 0.1, 1, 0.1),
+      run: num("Device run time d (ms)", 5, 1, 10, 1),
+      queued: num("Earlier queued work (ms)", 0, 0, 6, 1),
+      start: choice("Timer starts", ["After earlier work", "Immediately"]),
+      stop: choice("Timer stops", ["When the call returns", "After device sync"]),
+      layout: choice("Kernel output", ["Index mapping kept", "Row 1 permuted (bug)"]),
+    },
+    kicker: "20 / SUBMIT IS NOT DONE",
+    subtitle: "invented times, no device",
+    grid: [
+      [timeline, 0],
+      [timer, 1],
+      [mapping, 2],
+    ],
+    compactOrder: [timeline, timer, mapping],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "A Python call can enqueue device work and return before that work finishes." },
+      { atMs: 800, text: "The host spends s milliseconds submitting: 0.2 ms in the lesson's invented timeline." },
+      { atMs: 1600, text: "The device runs the work afterwards, behind anything queued earlier; the result is ready at 5.2 ms." },
+      { atMs: 2400, text: "The timer reads the gap between its start and stop boundaries." },
+      { atMs: 3200, text: "Completion latency needs a sync before starting and a sync before stopping: s + d." },
+      { atMs: 4000, text: "Name the boundary that made a reading wrong. A permuted output row is a semantic bug, not rounding." },
+    ],
+    accessible:
+      "Timing an asynchronous device with the lesson's invented timeline. The host starts at 0 ms and finishes submitting at 0.2 ms; the device runs the work for 5 ms, so the result is ready at 5.2 ms. A timer that stops when the call returns reads 0.2 ms, the submission time only. Waiting for earlier work before starting and syncing on the device before stopping reads 5.2 ms, the completion latency s + d. If earlier work is still queued and the timer starts immediately, a synced stop also counts that earlier work: with 3 ms queued it reads 8 ms. Starting immediately happens to read the right value when nothing is queued, or when the earlier work drains before submission ends; the verdict says so. Bars show host submission, earlier device work, this work and the timer interval on a millisecond axis. Separately, the lesson's product of A = [[1, 2], [3, 4]] and B = [[2, 0], [1, 2]] is [[4, 4], [10, 8]]. A kernel that writes the second row as [8, 10] has maximum error 2: that is a permutation of indices, not floating-point rounding, and no tolerance should accept it. All times are invented, not measurements of any device.",
+  });
+})();
+
+// ============================================================ 21 memory budget and Amdahl's limit
+// sys-e09-04: fictional 24 GiB with 6 GiB reserved; parameters 5, gradients 5, optimizer 10,
+// activations 3 → need 23 of 18. A 10 s step with 4 s compute and 6 s waiting.
+const memoryScene = (() => {
+  const act = s("act"),
+    half = s("half"),
+    partial = eq(s("count"), "Parameters only (bug)"),
+    k = s("speedup");
+  const P = iff(half, 2.5, 5);
+  const need = add(P, 5, 10, act),
+    counted = iff(partial, P, need);
+  const PX = 10,
+    X0 = 16;
+  const seg = (id, x, w, fill) => ({ ...rect(id, x, 48, w, 24, fill, 3), opacity: 1 });
+  const ledger = card("mb-ledger", 206, ice, blue, "MEMORY LEDGER (GiB)", [
+    seg("mb-params", X0, mul(PX, P), blue),
+    seg("mb-grads", add(X0, mul(PX, P)), 50, teal),
+    seg("mb-opt", add(X0 + 50, mul(PX, P)), 100, gold),
+    seg("mb-act", add(X0 + 150, mul(PX, P)), mul(PX, act), purple),
+    { ...segment("mb-budget", X0 + 180, 42, 0, 36, red, 3), opacity: after(800, 1, 0) },
+    { ...segment("mb-physical", X0 + 240, 42, 0, 36, ink, 2), opacity: after(800, 1, 0) },
+    text("mb-l-params", "params", 16, 100, 17, blue),
+    text("mb-l-grads", "grads", 92, 100, 17, teal),
+    text("mb-l-opt", "opt", 160, 100, 17, gold),
+    text("mb-l-act", "act", 212, 100, 17, purple),
+    text("mb-sum", after(1600, cat(P, " + 5 + 10 + ", act, " = ", need), "sum …"), 16, 128),
+    text("mb-avail", "24 − 6 reserved = 18", 16, 156, 17, muted),
+    text("mb-lines", "red line: 18, black: 24", 16, 184, 17, muted),
+  ]);
+  const budget = card("mb-budget-card", 224, lilac, purple, "DOES IT FIT?", [
+    text("mb-count", cat("count: ", iff(partial, "parameters only", "all training state")), 16, 62),
+    text("mb-counted", after(2400, cat("counted need ", counted, " GiB"), "counted need …"), 16, 90),
+    text("mb-real", after(2400, cat("real need ", need, " of 18"), "real need …"), 16, 118),
+    bold(
+      "mb-verdict",
+      after(3200, iff(gt(need, 18), cat("short by ", sub(need, 18), " GiB"), cat("fits: ", sub(18, need), " GiB spare")), "…"),
+      16,
+      152,
+      17,
+      purple,
+    ),
+    text(
+      "mb-cause",
+      after(
+        3200,
+        iff(
+          partial,
+          iff(gt(need, 18), "params-only count hid it", "fits, but count partial"),
+          iff(gt(need, 18), cat("weights: ", P, " of ", need, " GiB"), "every state type counted"),
+        ),
+        "…",
+      ),
+      16,
+      180,
+    ),
+    text("mb-half", iff(half, "half-size weights: −2.5", "weights at full size"), 16, 208, 17, muted),
+  ]);
+  const compute = div(4, k),
+    step = add(compute, 6);
+  const amdahl = card("mb-amdahl", 276, sand, gold, "AMDAHL, ONE STEP", [
+    text("mb-split", "compute 4 s + wait 6 s", 16, 62),
+    text("mb-speed", cat("GPU ", k, "× faster"), 16, 90),
+    rect("mb-before-c", 16, 104, 96, 14, teal, 3),
+    rect("mb-before-w", 112, 104, 144, 14, gold, 3),
+    { ...rect("mb-after-c", 16, 126, mul(24, compute), 14, teal, 3), opacity: after(3200, 1, 0) },
+    { ...rect("mb-after-w", add(16, mul(24, compute)), 126, 144, 14, gold, 3), opacity: after(3200, 1, 0) },
+    text("mb-step", after(3200, cat("step ", r3(step), " s"), "step …"), 16, 172),
+    text("mb-speedup", after(3200, cat("speedup ", r3(div(10, step)), "×"), "speedup …"), 16, 200),
+    bold("mb-amdahl-verdict", after(4000, iff(eq(k, 1), "no change at 1×", "wait-bound: 6 s floor"), "…"), 16, 232, 17, gold),
+    text("mb-limit", "∞ compute: 1.667× max", 16, 260, 17, muted),
+  ]);
+  return build({
+    id: "concept-memory-budget",
+    title: "Count every state. Find the floor.",
+    description:
+      "Stack the lesson's fictional training state against an 18 GiB working budget: parameters, gradients, optimizer buffers and live activations. Shrink activations or store weights at half size, count only parameters by mistake, then speed up the GPU part of a step and see where Amdahl's law stops you.",
+    state: {
+      act: num("Live activations (GiB)", 3, 0, 6, 1),
+      half: flag("Store weights at half size"),
+      count: choice("Count in the budget", ["All training state", "Parameters only (bug)"]),
+      speedup: num("GPU speedup ×", 2, 1, 8, 1),
+    },
+    kicker: "21 / BUDGETS AND BOUNDS",
+    subtitle: "fictional machine, GiB",
+    grid: [
+      [ledger, 0],
+      [budget, 1],
+      [amdahl, 2],
+    ],
+    compactOrder: [ledger, budget, amdahl],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "A fictional machine has 24 GiB. Predict whether training state of 5 + 5 + 10 + 3 GiB fits." },
+      { atMs: 800, text: "Reserve 6 GiB for the system and other work: the budget is 18 GiB." },
+      { atMs: 1600, text: "Training needs parameters, gradients, optimizer buffers and live activations: 23 GiB." },
+      { atMs: 2400, text: "Counting only the parameters would report 5 GiB and plenty of headroom." },
+      { atMs: 3200, text: "Half-size weights shrink one bar, not gradients or optimizer moments. Then speed up compute." },
+      { atMs: 4000, text: "Doubling compute turns 10 s into 8 s, 1.25×. The 6 s of waiting is a floor." },
+    ],
+    accessible:
+      "A memory budget and Amdahl's law with the lesson's fictional numbers. A machine has 24 GiB; 6 GiB is reserved for the operating system and other activity, leaving 18 GiB. Training state is parameters 5 GiB, gradients 5 GiB, optimizer buffers 10 GiB and live activations 3 GiB: 23 GiB, a 5 GiB deficit. Counting only the parameters would wrongly report 5 GiB and 13 GiB of headroom; the verdict names that counting error. Storing weights at half size saves 2.5 GiB of parameters but does not shrink gradients or optimizer moments, so the need is still 20.5 GiB. Reducing live activations, for example by recomputation, shrinks only the activation bar; at 0 GiB with half-size weights the need is 17.5 GiB and fits with 0.5 GiB spare. A stacked bar shows each part with a line at 18 GiB and another at 24 GiB. For time, a 10 s step spends 4 s computing and 6 s waiting. Making the GPU twice as fast gives 2 + 6 = 8 s, a 1.25× speedup; eight times faster gives 6.5 s. Even infinitely fast compute leaves 6 s, so the speedup can never exceed 10/6 ≈ 1.667× under this serial-wait model.",
+  });
+})();
+
+// ============================================================ 22 pseudo-gradients and the outer merge
+// sys-10-04: old [10,20]; local A [9,18] and B [8,21]; Δ = old − local = [1,2], [2,−1];
+// mean [1.5,0.5]; outer Nesterov with β = 0.5, rate 0.2 → [9.55,19.85]. Ten values, count 3 → 4, 4, 2.
+const mergeScene = (() => {
+  const VALID = ["A and B", "A only", "None"];
+  const valid = s("valid"),
+    flipped = eq(s("sign"), "local − old (flipped)"),
+    beta = s("beta"),
+    lr = s("lr"),
+    kc = s("chunks"),
+    divides = eq(s("countUse"), "Also divides g (bug)");
+  const old = [10, 20],
+    A = [9, 18],
+    B = [8, 21];
+  const none = eq(valid, "None"),
+    aOnly = eq(valid, "A only");
+  const signed = (v) => iff(flipped, -v, v);
+  const dA = [0, 1].map((i) => signed(old[i] - A[i])),
+    dB = [0, 1].map((i) => signed(old[i] - B[i]));
+  const g = [0, 1].map((i) => div(iff(aOnly, dA[i], div(add(dA[i], dB[i]), 2)), iff(divides, kc, 1)));
+  const dir = g.map((v) => mul(add(1, beta), v));
+  const nw = [0, 1].map((i) => iff(none, old[i], sub(old[i], mul(lr, dir[i]))));
+  const vec = (a, b, lead = "") => cat(lead, "[", r3(a), ", ", r3(b), "]");
+  const local = card("om-local", 190, ice, blue, "LOCAL RESULTS", [
+    text("om-old", "old w [10, 20]", 16, 62),
+    text("om-a", after(800, iff(none, "A [9, 18]: invalid", vec(dA[0], dA[1], "A [9, 18]: Δ ")), "A …"), 16, 90),
+    text(
+      "om-b",
+      after(800, iff(eq(valid, "A and B"), vec(dB[0], dB[1], "B [8, 21]: Δ "), "B [8, 21]: invalid"), "B …"),
+      16,
+      118,
+    ),
+    text("om-g", after(1600, iff(none, "mean g: no valid input", vec(g[0], g[1], "mean g ")), "mean g …"), 16, 146),
+    text("om-sign", cat("Δ = ", iff(flipped, "local − old (bug)", "old − local")), 16, 174, 17, muted),
+  ]);
+  const L = mul(-1, floor(div(-10, kc))); // ceiling division, as the chunking code does
+  const len = [0, 1, 2, 3, 4].map((i) => op("clamp", sub(10, mul(i, L)), 0, L));
+  const slices = cat(
+    len[0],
+    ...[1, 2, 3, 4].map((i) => iff(gt(len[i], 0), cat(", ", len[i]), "")),
+  );
+  const chunks = card("om-chunks", 140, mint, teal, "CHUNKS OF 10 VALUES", [
+    ...Array.from({ length: 10 }, (_, j) => [
+      rect(`om-cell-${j}`, 16 + 26 * j, 44, 22, 22, white, 4),
+      {
+        ...rect(`om-cell-${j}-hl`, 16 + 26 * j, 44, 22, 22, teal, 4),
+        opacity: after(4000, iff(eq(mod(floor(div(j, L)), 2), 0), 0.5, 0.15), 0),
+      },
+    ]).flat(),
+    text("om-length", cat("count ", kc, ": length ", L), 16, 96),
+    text("om-slices", cat("slices ", slices), 16, 124),
+  ]);
+  const outer = card("om-outer", 256, lilac, purple, "OUTER STEP", [
+    text("om-params", cat("β ", r3(beta), ", rate ", r3(lr)), 16, 62),
+    text("om-m", "m = g, since old m = 0", 16, 90, 17, muted),
+    text("om-dir", after(2400, iff(none, "dir: none", vec(dir[0], dir[1], "dir ")), "dir …"), 16, 118),
+    bold("om-new", after(3200, vec(nw[0], nw[1], "new "), "new …"), 16, 152, 18, purple),
+    bold(
+      "om-verdict",
+      after(
+        4000,
+        iff(none, "rejected: no valid input", iff(flipped, "moves away: sign flipped", iff(aOnly, "moves toward A", "moves toward A and B"))),
+        "…",
+      ),
+      16,
+      184,
+      17,
+      purple,
+    ),
+    text(
+      "om-count",
+      after(
+        4000,
+        // The batch-count setting only partitions the vector; dividing by it is the misreading.
+        iff(none, "count unused: rejected", iff(divides, iff(eq(kc, 1), "÷ 1 hides the misread", cat("g ÷ ", kc, ": count misread")), "count only sets chunks")),
+        "…",
+      ),
+      16,
+      212,
+    ),
+    text("om-dir-rule", "dir = (1+β)·g", 16, 240, 17, muted),
+  ]);
+  const px = (w) => add(16, mul(32, sub(w, 6))),
+    py = (w) => add(44, mul(18, sub(24, w)));
+  const plane = card("om-plane", 236, sand, gold, "WEIGHT PLANE (w0, w1)", [
+    { ...rect("om-area", 16, 44, 256, 144, white, 6), opacity: 0.6 },
+    { ...segment("om-move", px(10), py(20), mul(32, sub(nw[0], 10)), mul(-18, sub(nw[1], 20)), gold, 3), opacity: after(3200, 1, 0) },
+    circle("om-p-old", px(10), py(20), 6, ink),
+    { ...circle("om-p-a", px(9), py(18), 6, teal), opacity: iff(none, 0.3, 1) },
+    { ...circle("om-p-b", px(8), py(21), 6, purple), opacity: iff(eq(valid, "A and B"), 1, 0.3) },
+    { ...circle("om-p-new", px(nw[0]), py(nw[1]), 6, gold), opacity: after(3200, 1, 0) },
+    text("om-key-old", "● old", 16, 214, 17, ink),
+    text("om-key-a", "● A", 88, 214, 17, teal),
+    text("om-key-b", "● B", 140, 214, 17, purple),
+    text("om-key-new", "● new", 192, 214, 17, gold),
+  ]);
+  return build({
+    id: "concept-outer-merge",
+    title: "Average the moves, then step once.",
+    description:
+      "Two local runs start from the same old weights. Form each pseudo-gradient as old minus local, average the valid ones and apply an outer momentum step, drawn on the weight plane. Flip the sign, drop contributors, and misread the batch-count setting as a divisor.",
+    state: {
+      valid: choice("Valid contributors", VALID),
+      sign: choice("Pseudo-gradient", ["old − local (source)", "local − old (flipped)"]),
+      beta: num("Outer momentum β", 0.5, 0, 0.9, 0.1),
+      lr: num("Outer rate", 0.2, 0.1, 1, 0.1),
+      chunks: num("Batch-count setting", 3, 1, 5, 1),
+      countUse: choice("Batch-count use", ["Chunks only (source)", "Also divides g (bug)"]),
+    },
+    kicker: "22 / MERGE DISPLACEMENTS",
+    subtitle: "illustrative coefficients",
+    grid: [
+      [local, 0],
+      [chunks, 0],
+      [outer, 1],
+      [plane, 2],
+    ],
+    compactOrder: [local, outer, plane, chunks],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "Both workers start at [10, 20]. A ends at [9, 18] and B at [8, 21] after local training." },
+      { atMs: 800, text: "A pseudo-gradient is old minus local: [1, 2] for A and [2, −1] for B." },
+      { atMs: 1600, text: "Average the valid contributions: [1.5, 0.5]." },
+      { atMs: 2400, text: "Outer momentum from zero: m = g, direction g + β·m = (1 + β)·g = [2.25, 0.75]." },
+      { atMs: 3200, text: "New weights = old − rate · direction = [9.55, 19.85]: toward the local results." },
+      { atMs: 4000, text: "An empty valid set is rejected, not a zero update. The batch-count setting only chunks the vector." },
+    ],
+    accessible:
+      "An outer merge with the lesson's illustrative numbers. Two local runs start from old weights [10, 20]; A ends at [9, 18] and B at [8, 21]. Each pseudo-gradient is old minus local: [1, 2] for A and [2, −1] for B. Their equal-weight mean is [1.5, 0.5]. With the old momentum buffer at zero, momentum coefficient 0.5 and outer rate 0.2, the new buffer is g, the Nesterov-style direction is g + 0.5·g = [2.25, 0.75], and the new weights are [10 − 0.45, 20 − 0.15] = [9.55, 19.85], which moves toward the local results on the weight plane. Using local minus old flips the sign and the step moves away. If only A is valid the mean is A's [1, 2]; if no contributor is valid the merge is rejected rather than treated as a zero update. The batch-count setting partitions the flat vector into chunks of length ceil(10 / count): count 3 gives slices of 4, 4 and 2. It is not a divisor; dividing g by it shrinks the step, and with count 1 the misreading is hidden. These coefficients are illustrative, not runtime settings.",
+  });
+})();
+
+// ============================================================ 23 ready queue, activation cache and the optimizer boundary
+// sys-11-03: cache capacity 2 and threshold 3; F(A), F(B), then a ready B(A) is chosen before
+// F(C); after B(B) and B(C) the counter reaches three and one optimizer step is eligible.
+const cacheScene = (() => {
+  const cap = s("capacity"),
+    T = s("threshold"),
+    backFirst = eq(s("policy"), "Ready backward first"),
+    freeLate = eq(s("release"), "After its backward"),
+    slices = eq(s("counting"), "Slices, 3 each (bug)");
+  // Authoring-time trace per setting; the oracle re-simulates it independently. Return delays
+  // (A +2, B +3, C +2 scheduler steps after each forward) are invented for the illustration.
+  const simulate = (capacity, preferBackward, keepUntilBackward) => {
+    const names = ["A", "B", "C"],
+      delay = { A: 2, B: 3, C: 2 };
+    const cache = new Set(),
+      readyAt = {},
+      done = new Set(),
+      rows = [];
+    let next = 0,
+      ok = 0,
+      failed = 0,
+      idle = 0;
+    for (let step = 1; step <= 10; step++) {
+      const ready = names.filter((n) => readyAt[n] !== undefined && readyAt[n] <= step && !done.has(n));
+      const canForward = next < names.length && cache.size < capacity;
+      const backward = () => {
+        const n = ready[0];
+        done.add(n);
+        if (cache.has(n)) {
+          cache.delete(n);
+          ok++;
+          return `B(${n})`;
+        }
+        failed++;
+        return `B(${n}) ✗`;
+      };
+      const forward = () => {
+        const n = names[next++];
+        readyAt[n] = step + delay[n];
+        if (keepUntilBackward) cache.add(n);
+        return `F(${n})`;
+      };
+      let action;
+      if (preferBackward) action = ready.length ? backward() : canForward ? forward() : null;
+      else action = canForward ? forward() : ready.length ? backward() : null;
+      if (!action) {
+        action = done.size === names.length ? "done" : "idle";
+        if (action === "idle") idle++;
+      }
+      rows.push(`${step}: ${action} {${[...cache].sort().join(",")}} ok ${ok}`);
+    }
+    return { rows, ok, failed, idle };
+  };
+  const by = (fn) =>
+    pick(
+      cap,
+      [1, 2, 3],
+      [1, 2, 3].map((c) =>
+        iff(
+          backFirst,
+          iff(freeLate, fn(simulate(c, true, true)), fn(simulate(c, true, false))),
+          iff(freeLate, fn(simulate(c, false, true)), fn(simulate(c, false, false))),
+        ),
+      ),
+    );
+  const settings = card("cq-settings", 190, ice, blue, "QUEUE SETTINGS", [
+    text("cq-cap", cat("cache capacity ", cap), 16, 62),
+    text("cq-threshold", cat("threshold ", T, " ", iff(slices, "slices", "activations")), 16, 90),
+    text("cq-policy", iff(backFirst, "prefer ready backward", "prefer forward"), 16, 118),
+    text("cq-release", iff(freeLate, "free cache after backward", "free at forward end (bug)"), 16, 146),
+    text("cq-delays", "returns: A +2, B +3, C +2", 16, 174, 17, muted),
+  ]);
+  const trace = card("cq-trace", 288, lilac, purple, "SCHEDULER TRACE", [
+    ...Array.from({ length: 10 }, (_, k) =>
+      text(`cq-row-${k + 1}`, after(400 * (k + 1), by((r) => r.rows[k]), `${k + 1}: …`), 16, 60 + 24 * k),
+    ),
+  ]);
+  const okF = by((r) => r.ok),
+    failF = by((r) => r.failed),
+    idleF = by((r) => r.idle);
+  const u = iff(slices, 3, 1);
+  const per = mul(-1, floor(div(mul(-1, T), u))); // backwards needed per optimizer step
+  const stepsF = floor(div(okF, per)),
+    left = mul(u, mod(okF, per));
+  const trueSteps = floor(div(okF, T));
+  const summary = card("cq-summary", 228, sand, gold, "COUNTER AND STEP", [
+    text("cq-okfail", after(4400, cat("backward ok ", okF, ", failed ", failF), "backward …"), 16, 62),
+    text("cq-unit", after(4400, cat("counter +", u, " each, need ", T), "counter …"), 16, 90),
+    bold("cq-steps", after(4400, cat("optimizer steps: ", stepsF), "optimizer steps: …"), 16, 124, 18, gold),
+    text("cq-left", after(4400, cat("counter left: ", left), "counter left: …"), 16, 152),
+    text("cq-idle", after(4400, cat("idle ", idleF, iff(gt(idleF, 0), ": awaiting returns", "")), "idle …"), 16, 180),
+    bold(
+      "cq-verdict",
+      after(
+        4800,
+        // Failed backwards come from the freed input, never from capacity or counting.
+        iff(
+          gt(failF, 0),
+          "failed: input freed early",
+          iff(
+            slices,
+            iff(eq(stepsF, trueSteps), "same count; slices wrong", "slices counted as work"),
+            cat(stepsF, iff(eq(stepsF, 1), " step", " steps"), " from ", okF, " backwards"),
+          ),
+        ),
+        "…",
+      ),
+      16,
+      212,
+      17,
+      gold,
+    ),
+  ]);
+  return build({
+    id: "concept-cache-queue",
+    title: "Hold the input until its backward.",
+    description:
+      "Schedule three activations through a ready queue with a limited activation cache, an invented return delay for each, and an accumulation threshold for the local optimizer. Change the capacity and the queue preference, free cache entries too early, or count backward slices as completed work.",
+    state: {
+      capacity: num("Cache capacity", 2, 1, 3, 1),
+      threshold: num("Optimizer threshold", 3, 1, 4, 1),
+      policy: choice("Queue preference", ["Ready backward first", "Forward first"]),
+      release: choice("Free a cache entry", ["After its backward", "When forward ends (bug)"]),
+      counting: choice("Counter unit", ["Activations", "Slices, 3 each (bug)"]),
+    },
+    kicker: "23 / CACHE OUTLIVES THE POP",
+    subtitle: "synthetic trace, 3 items",
+    grid: [
+      [settings, 0],
+      [trace, 1],
+      [summary, 2],
+    ],
+    compactOrder: [settings, trace, summary],
+    durationMs: 5200,
+    cues: [
+      { atMs: 0, text: "Three activations A, B and C. The cache holds two forward inputs; the threshold is three completed backwards." },
+      { atMs: 400, text: "F(A) and F(B) fill both cache slots." },
+      { atMs: 1200, text: "B(A) is ready and is chosen ahead of F(C). It frees A's slot and counts one completion." },
+      { atMs: 1600, text: "Now F(C) can enter the cache." },
+      { atMs: 2400, text: "Backwards for B and C complete; the counter reaches three." },
+      { atMs: 4400, text: "One optimizer step is eligible. Idle steps mean waiting for returns, not computing." },
+      { atMs: 4800, text: "Freeing an input when its forward ends makes its backward fail; counting slices inflates steps." },
+    ],
+    accessible:
+      "A synthetic scheduler trace with the lesson's fixture: cache capacity two and optimizer threshold three. Activations A, B and C each need a forward and, later, a backward that uses the cached forward input. Invented return delays make A's backward ready two scheduler steps after its forward, B's three and C's two. With a ready backward preferred: step 1 F(A), step 2 F(B) fills the cache, step 3 B(A) is chosen ahead of F(C) and frees A's slot (one completion), step 4 F(C), step 5 B(B), step 6 B(C). The counter reaches three and one local optimizer step is eligible, with nothing left in the cache. With capacity one the forwards must wait for returns and the trace has idle steps: waiting, not computing. Preferring forwards with capacity two puts F(C) behind a full cache anyway. If a cache entry is freed when its forward ends instead of after its backward, every backward finds its input gone and fails, so no optimizer step happens: the cause is the early release. Counting three slices per backward instead of one completed activation makes the counter reach the threshold sooner and reports more optimizer steps than completed work justifies; with threshold one the totals happen to agree.",
+  });
+})();
+
+// ============================================================ 24 path coverage and the logical batch
+// eng-e12-03: a candidate kernel restricted to local batch 4, calibration that can choose 1, 2 or
+// 4, a startup self-test that can latch the path off; gradients [2,8,8] in microbatches of 1 and 2.
+const pathScene = (() => {
+  const calib = s("calib"),
+    hookBad = eq(s("selftest"), "Hook drops saved values"),
+    forced = s("forced"),
+    n = s("steps"),
+    bySize = eq(s("combine"), "Weight by size");
+  const notFour = not(eq(calib, "4"));
+  // Order matters for the cause: a forced control or a startup latch decides before calibration.
+  const active = and(not(forced), not(hookBad), not(notFour));
+  const ran = iff(forced, "reference (forced)", iff(hookBad, "upstream (latched)", iff(notFour, "grouped fallback", "candidate")));
+  const reason = iff(forced, "forced control", iff(hookBad, "self-test failed", iff(notFour, cat("batch ", calib, " ≠ 4"), "none")));
+  const hits = iff(active, n, 0);
+  const path = card("pc-path", 190, ice, blue, "DISPATCH PATH", [
+    text("pc-requested", "requested: candidate", 16, 62),
+    text("pc-calib", cat("calibration: batch ", calib), 16, 90),
+    text("pc-selftest", cat("self-test: ", iff(hookBad, "hook dropped", "intact")), 16, 118),
+    bold("pc-ran", after(800, cat("ran: ", ran), "ran: …"), 16, 148, 18, blue),
+    text("pc-reason", after(800, cat("disable: ", reason), "disable: …"), 16, 176, 17, muted),
+  ]);
+  const record = card("pc-record", 224, lilac, purple, "WHAT THE RUN RECORDED", [
+    text("pc-steps", cat(n, " steps, exit code 0"), 16, 62),
+    text("pc-fwd", after(1600, cat("forward hits ", hits), "forward hits …"), 16, 90),
+    text("pc-bwd", after(1600, cat("backward hits ", hits), "backward hits …"), 16, 118),
+    text("pc-finite", "outputs finite ✓", 16, 146),
+    bold(
+      "pc-coverage",
+      after(
+        2400,
+        iff(
+          active,
+          "candidate ran: hits > 0",
+          iff(forced, "reject: forced control", iff(hookBad, "reject: latched at start", cat("reject: batch ", calib, " fallback"))),
+        ),
+        "…",
+      ),
+      16,
+      180,
+      17,
+      purple,
+    ),
+    text("pc-exit", "exit 0 is not coverage", 16, 208, 17, muted),
+  ]);
+  const combined = iff(bySize, div(add(mul(1, 2), mul(2, 8)), 3), div(add(2, 8), 2));
+  const full = div(add(2, 8, 8), 3);
+  const objOk = lt(abs(sub(combined, full)), 0.000000001);
+  const batch = card("pc-batch", 236, sand, gold, "LOGICAL BATCH [2, 8, 8]", [
+    text("pc-micro", "micro [2] and [8, 8]", 16, 62),
+    text("pc-means", after(3200, "means 2 and 8", "means …"), 16, 90),
+    text("pc-combined", after(3200, cat("combined: ", r3(combined)), "combined: …"), 16, 118),
+    text("pc-full", cat("full batch mean: ", r3(full)), 16, 146),
+    bold(
+      "pc-objective",
+      after(4000, iff(objOk, "matches full batch", cat("mean of means: ", r3(combined), " ≠ ", r3(full))), "…"),
+      16,
+      180,
+      17,
+      gold,
+    ),
+    bold(
+      "pc-claim",
+      after(4000, iff(not(active), "claim fails: path", iff(not(objOk), "claim fails: objective", "both gates pass")), "…"),
+      16,
+      212,
+      17,
+      gold,
+    ),
+  ]);
+  return build({
+    id: "concept-path-coverage",
+    title: "Which path ran, and on what batch?",
+    description:
+      "A candidate kernel is requested, but calibration, a startup self-test or a forced control can route the work elsewhere while the process still exits cleanly. Read the resolved path and hit counts, then combine unequal microbatches and compare with the full logical batch.",
+    state: {
+      calib: choice("Calibrated local batch", ["4", "2", "1"]),
+      selftest: choice("Startup self-test", ["Reference backward intact", "Hook drops saved values"]),
+      forced: flag("Control: force reference"),
+      steps: num("Training steps run", 3, 1, 4, 1),
+      combine: choice("Microbatch combine", ["Weight by size", "Mean of means (bug)"]),
+    },
+    kicker: "24 / CALLED IS NOT TESTED",
+    subtitle: "anonymized path rules",
+    grid: [
+      [path, 0],
+      [record, 1],
+      [batch, 2],
+    ],
+    compactOrder: [path, record, batch],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "The run requests the candidate path. It only supports local batch 4." },
+      { atMs: 800, text: "Resolution order: a forced control, then a startup latch, then calibration decides which path actually runs." },
+      { atMs: 1600, text: "Forward and backward hit counts show whether the candidate executed." },
+      { atMs: 2400, text: "A clean exit and finite outputs say nothing about coverage. Name the reason the candidate did not run." },
+      { atMs: 3200, text: "Gradients [2, 8, 8] in microbatches of sizes 1 and 2 have means 2 and 8." },
+      { atMs: 4000, text: "Weighted by size they give 6, the full-batch mean; averaging the means gives 5." },
+    ],
+    accessible:
+      "Path coverage and logical-batch arithmetic based on the lesson's anonymized rules. A candidate kernel supports only local batch 4. Calibration can choose 1, 2 or 4, and smaller batches take a grouped fallback. A startup self-test whose saved-tensor hook drops values that the reference backward needs latches the candidate off, and the upstream path runs. A deliberate control can force the reference path. In every case the process exits with code 0 and its outputs are finite, so neither shows that the candidate was tested. The scene resolves the path in that order, shows the forward and backward hit counts (equal to the steps run only when the candidate executes) and names the reason for a rejection: the forced control, the startup latch, or the calibrated batch. When the self-test fails, calibration is irrelevant and the verdict blames the latch. Separately, a logical batch with gradients [2, 8, 8] split into microbatches of sizes 1 and 2 has local means 2 and 8. Weighting each mean by its size gives (1·2 + 2·8)/3 = 6, the full-batch mean; averaging the two means gives 5. A claim of validation needs both gates: the candidate path must have run and the objective must match the full logical batch.",
+  });
+})();
+
 // ---------------------------------------------------------------- assemble
 const authored = [
   matmulScene,
@@ -2125,6 +3146,14 @@ const authored = [
   loraScene,
   parallelScene,
   lseScene,
+  tokenScene,
+  loopScene,
+  qkvScene,
+  asyncScene,
+  memoryScene,
+  mergeScene,
+  cacheScene,
+  pathScene,
 ];
 const depthOf = (e) =>
   e && typeof e === "object" && "op" in e ? 1 + Math.max(0, ...e.args.map(depthOf)) : 0;
@@ -2172,6 +3201,14 @@ const bindings = [
   ["concept-lora-update", "ttf-e08-04", "ttf-08-04-text-2"],
   ["concept-parallel-split", "sys-e10-01", "sys-10-01-text-2"],
   ["concept-streaming-lse", "eng-e13-01", "eng-13-01-lesson"],
+  ["concept-token-ids", "fnd-e01-03", "fnd-01-03-text-2"],
+  ["concept-loop-states", "ttf-e05-04", "ttf-05-04-text-1"],
+  ["concept-qkv-scores", "ttf-e07-01", "ttf-07-01-text-2"],
+  ["concept-async-timer", "ttf-e08-02", "ttf-08-02-text-2"],
+  ["concept-memory-budget", "sys-e09-04", "sys-09-04-text-2"],
+  ["concept-outer-merge", "sys-e10-04", "sys-10-04-text-2"],
+  ["concept-cache-queue", "sys-e11-03", "sys-11-03-text-2"],
+  ["concept-path-coverage", "eng-e12-03", "eng-12-03-lesson"],
 ].map(([visualId, episodeId, afterBlockId]) => ({ visualId, episodeId, afterBlockId }));
 assert.deepEqual(
   bindings.map((b) => b.visualId),
@@ -2306,7 +3343,7 @@ const extension = {
     keyboard: true,
     reducedMotion: true,
     textAlternative:
-      "All sixteen concept scenes state their arithmetic, show live readouts, and include complete text equivalents.",
+      "All twenty-four concept scenes state their arithmetic, show live readouts, and include complete text equivalents.",
   },
 };
 // The assembler accepts an overlay only if its renderer declaration matches the

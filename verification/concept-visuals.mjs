@@ -1,4 +1,4 @@
-// Read-only verification of the sixteen concept scenes, except optional private
+// Read-only verification of the twenty-four concept scenes, except optional private
 // temporary browser screenshots. Default consumption: the released package.
 import assert from "node:assert/strict";
 import { readFile, mkdtemp, writeFile, chmod } from "node:fs/promises";
@@ -31,7 +31,7 @@ const overlay = await read("content/concept-visuals.json");
 const scenes = overlay.visuals.map(fromVisualExperience);
 assert.deepEqual(scenes, data.scenes, "Delivered overlay differs from authored scenes");
 assert.deepEqual(overlay.bindings, data.bindings);
-assert.equal(scenes.length, 16);
+assert.equal(scenes.length, 24);
 
 // ------------------------------------------------ full-curriculum integration
 // Same overlays and order as scripts/assemble.mjs, compiled in memory through
@@ -542,6 +542,181 @@ mutated("concept-streaming-lse", "sl-p", "text",
   after(4400, cat("p(target) = ", r3(div(exp16(sub(pick16([1000, 999, 998, z316]), pick16([1000, 1000, m216, m216]))),
     pick16([1, 1, 0, 0].map((tile1) => (tile1 ? add(1, exp16(-1)) : add(exp16(sub(998, m216)), exp16(sub(z316, m216))))))))), "p(target) = …"),
   (c) => c.time >= 4400, "probability normalized within the target's tile only");
+
+// ------------------------------------------------ third batch (17-24)
+const le = (a, b) => op("lte", a, b),
+  gt = (a, b) => op("gt", a, b),
+  and = (...v) => op("and", ...v),
+  not = (v) => op("not", v),
+  abs = (v) => op("abs", v);
+const final = (state, time) => at(state, time);
+
+// 17 text → IDs
+const P17 = ["ab␣a", "b␣a", "ab␣", "ba␣b"],
+  sw17 = eq(st("tokenizer"), "a, b IDs swapped");
+const pick17 = (vals) => iff(eq(st("prompt"), P17[0]), vals[0], iff(eq(st("prompt"), P17[1]), vals[1], iff(eq(st("prompt"), P17[2]), vals[2], vals[3])));
+const id17 = (ch) => (ch === "␣" ? 2 : ch === "a" ? iff(sw17, 1, 0) : iff(sw17, 0, 1));
+const NEXT17 = [[0.1, 0.7, 0.2], [0.2, 0.2, 0.6], [0.8, 0.1, 0.1]];
+const first17 = pick17(P17.map((p) => id17([...p][0])));
+const row17 = (j) => iff(eq(first17, 0), NEXT17[0][j], iff(eq(first17, 1), NEXT17[1][j], NEXT17[2][j]));
+mutated("concept-token-ids", "tk-row", "text",
+  after(800, cat("row ", first17, ": [", row17(0), ", ", row17(1), ", ", row17(2), "]"), "row …"),
+  (c) => c.time >= 800 && (c.state.prompt === "b␣a" || c.state.prompt === "ab␣"), "next ID read from the first token's row",
+  { mustPassElsewhere: final({ prompt: "ab␣a" }, 4800) });
+const ids17 = (p, swapped) => [...p].map((ch) => (ch === "␣" ? 2 : (ch === "a") !== swapped ? 0 : 1));
+mutated("concept-token-ids", "tk-targets", "text",
+  after(4000, pick17(P17.map((p) => iff(sw17, `targets [${ids17(p, true).slice(0, -1).join(", ")}]`,
+    `targets [${ids17(p, false).slice(0, -1).join(", ")}]`))), "targets …"),
+  from({ targets: "Next token (shift)" }, 4000), "targets copied from the inputs",
+  { mustPassElsewhere: final({ targets: "Current token (bug)" }, 4800) });
+mutated("concept-token-ids", "tk-verdict", "text",
+  after(4000, iff(sw17, "wrong row: a, b swapped", "row and decode match"), "…"),
+  from({ tokenizer: "a, b IDs swapped", prompt: "ab␣" }, 4000), "a swapped final ␣ blamed on the row instead of the decode",
+  { mustPassElsewhere: final({ tokenizer: "a, b IDs swapped", prompt: "ab␣a" }, 4800) });
+
+// 18 training-loop states
+const w018 = st("w0"),
+  eta18 = st("eta"),
+  K18 = st("steps"),
+  var18 = st("variant");
+const d018 = sub(w018, 2),
+  c118 = sub(1, mul(4, eta18));
+const stale18 = eq(var18, "Gradient not cleared");
+mutated("concept-loop-states", "lp-var-2", "text",
+  after(1600, cat("2: ", iff(stale18, "buf ", "g "), r3(mul(4, d018, c118)), " → w ", r3(add(2, mul(d018, c118, c118)))), "2: …"),
+  (c) => c.time >= 1600 && c.state.variant === "Gradient not cleared" && c.state.w0 !== 2, "uncleared buffer drawn as the fresh gradient",
+  { mustPassElsewhere: final({ variant: "Correct loop" }, 4000) });
+mutated("concept-loop-states", "lp-ref-2", "text",
+  after(1600, cat("2: g ", r3(mul(4, d018)), " → w ", r3(add(2, mul(d018, sub(1, mul(8, eta18)))))), "2: …"),
+  (c) => c.time >= 1600 && c.state.w0 !== 2, "reference gradient taken at the start weight every step",
+  { mustPassElsewhere: final({ w0: 2 }, 4000) });
+const cv18 = (k) => iff(eq(var18, "Correct loop"), pow(c118, k), iff(eq(var18, "Sign flipped"), pow(add(1, mul(4, eta18)), k),
+  [null, c118, add(1, mul(-12, eta18), mul(16, eta18, eta18)), add(1, mul(-24, eta18), mul(80, eta18, eta18), mul(-64, eta18, eta18, eta18))][k]));
+const Lv18 = mul(2, d018, d018, iff(eq(K18, 1), mul(cv18(1), cv18(1)), iff(eq(K18, 2), mul(cv18(2), cv18(2)), mul(cv18(3), cv18(3)))));
+mutated("concept-loop-states", "lp-verdict", "text",
+  (old) => iff(and(ge(t, 3200), lt(Lv18, mul(2, d018, d018))), "matches the reference", old),
+  (c) => c.time >= 3200 && c.exact["lp-loss-note"] === "loss fell, still wrong", "loop judged by its loss instead of its transition",
+  { mustPassElsewhere: final({ variant: "Correct loop", w0: 1 }, 4000) });
+
+// 19 queries, keys and values
+const fx19 = st("fixture"),
+  XS19 = { "Lesson X": [[1, 0], [0, 2]], "Identity X": [[1, 0], [0, 1]], "All-ones X": [[1, 1], [1, 1]] };
+const S19 = (i, j) => iff(eq(fx19, "Lesson X"), [[1, 4], [0, 4]][i][j], iff(eq(fx19, "Identity X"), [[1, 2], [0, 1]][i][j], 4));
+assert.deepEqual(Object.keys(XS19), ["Lesson X", "Identity X", "All-ones X"]);
+mutated("concept-qkv-scores", "qk-s-0-1-v", "text",
+  after(1600, iff(eq(st("order"), "Q·Kᵀ"), S19(1, 0), S19(0, 1)), "…"),
+  (c) => c.time >= 1600 && c.state.order === "Q·Kᵀ" && c.state.fixture !== "All-ones X", "score cell read as K·Qᵀ under the Q·Kᵀ label",
+  { mustPassElsewhere: final({ order: "Q·Kᵀ", fixture: "All-ones X" }, 4800) });
+mutated("concept-qkv-scores", "qk-verdict", "text",
+  after(3200, iff(eq(st("order"), "K·Qᵀ (swapped)"), iff(eq(fx19, "All-ones X"), "rows are queries", "swapped: this is Sᵀ"), "rows are queries"), "…"),
+  from({ order: "K·Qᵀ (swapped)", fixture: "All-ones X" }, 3200), "swap on a symmetric fixture reported as correct",
+  { mustPassElsewhere: final({ order: "Q·Kᵀ" }, 4800) });
+mutated("concept-qkv-scores", "qk-dx", "text", after(4000, "∂X = [[2,1], [1,2]]", "∂X = …"),
+  from({ branches: "Q, K and V" }, 4000), "V route silently dropped from ∂X",
+  { mustPassElsewhere: final({ branches: "V branch dropped" }, 4800) });
+
+// 20 asynchronous timer
+const sb20 = st("submit"),
+  run20 = st("run"),
+  q20 = st("queued");
+const sync0 = eq(st("start"), "After earlier work"),
+  sync1 = eq(st("stop"), "After device sync");
+const t020 = iff(sync0, q20, 0),
+  ready20 = add(max(add(t020, sb20), q20), run20);
+const measured20 = sub(iff(sync1, ready20, add(t020, sb20)), t020);
+mutated("concept-async-timer", "as-measured", "text",
+  after(2400, cat("timer: ", r3(iff(sync1, add(sb20, run20), sb20)), " ms"), "timer: …"),
+  (c) => c.time >= 2400 && c.state.start === "Immediately" && c.state.stop === "After device sync" && c.state.queued > c.state.submit,
+  "timer ignores earlier queued work", { mustPassElsewhere: final({ start: "Immediately", stop: "After device sync", queued: 0 }, 4800) });
+mutated("concept-async-timer", "as-measured", "text",
+  after(2400, cat("timer: ", r3(iff(sync1, measured20, add(sb20, run20))), " ms"), "timer: …"),
+  from({ stop: "When the call returns" }, 2400), "call return reported as completion",
+  { mustPassElsewhere: final({ start: "After earlier work", stop: "After device sync" }, 4800) });
+mutated("concept-async-timer", "as-map-verdict", "text",
+  iff(eq(st("layout"), "Row 1 permuted (bug)"), "rounding difference", "same index mapping"),
+  at({ layout: "Row 1 permuted (bug)" }), "row permutation passed as rounding",
+  { mustPassElsewhere: final({ layout: "Index mapping kept" }, 4800) });
+
+// 21 memory budget and Amdahl
+const half21 = st("half"),
+  act21 = st("act"),
+  P21 = iff(half21, 2.5, 5);
+mutated("concept-memory-budget", "mb-real", "text",
+  after(2400, cat("real need ", iff(half21, add(2.5, 2.5, 5, act21), add(20, act21)), " of 18"), "real need …"),
+  from({ half: true }, 2400), "half-size storage applied to gradients and optimizer too",
+  { mustPassElsewhere: final({ half: false }, 4800) });
+mutated("concept-memory-budget", "mb-verdict", "text",
+  (old) => iff(and(ge(t, 3200), eq(st("count"), "Parameters only (bug)")), cat("fits: ", sub(18, P21), " GiB spare"), old),
+  from({ count: "Parameters only (bug)" }, 3200), "parameters-only count reported as fitting",
+  { mustPassElsewhere: final({ count: "All training state" }, 4800) });
+mutated("concept-memory-budget", "mb-step", "text",
+  after(3200, cat("step ", r3(div(10, st("speedup"))), " s"), "step …"),
+  (c) => c.time >= 3200 && c.state.speedup > 1, "speedup applied to the whole step",
+  { mustPassElsewhere: final({ speedup: 1 }, 4800) });
+
+// 22 outer merge
+const v22 = st("valid"),
+  fl22 = eq(st("sign"), "local − old (flipped)"),
+  div22 = iff(eq(st("countUse"), "Also divides g (bug)"), st("chunks"), 1);
+const sgn22 = (v) => iff(fl22, -v, v);
+const g22 = (i) => div(div(add(sgn22([1, 2][i]), iff(eq(v22, "A only"), 0, sgn22([2, -1][i]))), 2), div22);
+mutated("concept-outer-merge", "om-g", "text",
+  after(1600, iff(eq(v22, "None"), "mean g: no valid input", cat("mean g [", r3(g22(0)), ", ", r3(g22(1)), "]")), "mean g …"),
+  from({ valid: "A only" }, 1600), "invalid B averaged in as zero",
+  { mustPassElsewhere: final({ valid: "A and B" }, 4800) });
+const gOk22 = (i) => div(iff(eq(v22, "A only"), sgn22([1, 2][i]), div(add(sgn22([1, 2][i]), sgn22([2, -1][i])), 2)), div22);
+mutated("concept-outer-merge", "om-dir", "text",
+  after(2400, iff(eq(v22, "None"), "dir: none", cat("dir [", r3(gOk22(0)), ", ", r3(gOk22(1)), "]")), "dir …"),
+  (c) => c.time >= 2400 && c.state.beta > 0 && c.state.valid !== "None", "momentum term omitted from the direction",
+  { mustPassElsewhere: final({ beta: 0, valid: "A and B" }, 4800) });
+mutated("concept-outer-merge", "om-verdict", "text",
+  (old) => iff(and(ge(t, 4000), eq(v22, "None")), "no change: zero update", old),
+  from({ valid: "None" }, 4000), "empty valid set reported as a zero update",
+  { mustPassElsewhere: final({ valid: "A and B" }, 4800) });
+
+// 23 cache and queue
+const bug23 = eq(st("release"), "When forward ends (bug)");
+mutated("concept-cache-queue", "cq-okfail", "text",
+  (old) => iff(and(ge(t, 4400), bug23), "backward ok 3, failed 0", old),
+  from({ release: "When forward ends (bug)" }, 4400), "freed input not detected at backward",
+  { mustPassElsewhere: final({ release: "After its backward" }, 5200) });
+mutated("concept-cache-queue", "cq-steps", "text",
+  (old) => {
+    // Same completed-backward count, divided by the slice-based requirement ceil(T/3).
+    const m = structuredClone(old);
+    m.args[1].args[1].args[0].args[1] = mul(-1, floor(div(mul(-1, st("threshold")), 3)));
+    return m;
+  },
+  (c) => {
+    const ok = Number(c.exact["cq-okfail"]?.match(/ok (\d+)/)?.[1]);
+    return c.time >= 4400 && c.state.counting === "Activations" &&
+      Math.floor(ok / c.state.threshold) !== Math.floor(ok / Math.ceil(c.state.threshold / 3));
+  },
+  "backward slices counted as completed activations",
+  { mustPassElsewhere: final({ counting: "Activations", threshold: 1 }, 5200) });
+mutated("concept-cache-queue", "cq-verdict", "text",
+  (old) => iff(and(ge(t, 4800), bug23), "failed: cache was full", old),
+  from({ release: "When forward ends (bug)" }, 4800), "failed backwards blamed on cache capacity",
+  { mustPassElsewhere: final({ release: "After its backward" }, 5200) });
+
+// 24 path coverage
+const calib24 = st("calib"),
+  hook24 = eq(st("selftest"), "Hook drops saved values"),
+  forced24 = st("forced");
+const notFour24 = not(eq(calib24, "4")),
+  active24 = and(not(forced24), not(hook24), not(notFour24));
+mutated("concept-path-coverage", "pc-coverage", "text",
+  after(2400, iff(active24, "candidate ran: hits > 0", iff(forced24, "reject: forced control",
+    iff(notFour24, cat("reject: batch ", calib24, " fallback"), "reject: latched at start"))), "…"),
+  (c) => c.time >= 2400 && c.state.selftest === "Hook drops saved values" && c.state.calib !== "4" && !c.state.forced,
+  "latched run blamed on the calibrated batch", { mustPassElsewhere: final({ selftest: "Reference backward intact" }, 4800) });
+mutated("concept-path-coverage", "pc-fwd", "text", after(1600, cat("forward hits ", st("steps")), "forward hits …"),
+  (c) => c.time >= 1600 && (c.state.calib !== "4" || c.state.selftest !== "Reference backward intact" || c.state.forced),
+  "hit counts read from the requested path",
+  { mustPassElsewhere: final({ calib: "4", selftest: "Reference backward intact", forced: false }, 4800) });
+mutated("concept-path-coverage", "pc-combined", "text", after(3200, "combined: 5", "combined: …"),
+  from({ combine: "Weight by size" }, 3200), "mean of means reported for the weighted combine",
+  { mustPassElsewhere: final({ combine: "Mean of means (bug)" }, 4800) });
 
 // ------------------------------------------------ runtime contract checks
 for (const scene of scenes) {
