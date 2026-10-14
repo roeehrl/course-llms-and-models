@@ -2,6 +2,7 @@ import {chromium} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import {mkdir} from 'node:fs/promises';
 import path from 'node:path';
+import {writtenAnswers} from './written-answers.mjs';
 
 /** Actual private learner UI. Author keys live only in this test driver. */
 export async function browserAcceptance({origin,bootstrap,request,requireOk,course,candidate,check,state}){
@@ -20,10 +21,42 @@ export async function browserAcceptance({origin,bootstrap,request,requireOk,cour
         await page.getByRole('button',{name:'Open course',exact:true}).click();
         const enrolled=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/enrollments'&&r.request().method()==='POST');
         await page.getByRole('button',{name:'Start course',exact:true}).click();const enrollmentId=(await (await enrolled).json()).id;
+        const pathname=suffix=>r=>new URL(r.url()).pathname.endsWith(suffix)&&r.request().method()==='POST';
+        // Optional placement is offered on the overview before any study. The phone
+        // leaves it untouched, desktop declines it and tablet takes it and accepts.
+        await page.getByRole('heading',{name:'Already know some of this?',exact:true}).waitFor();
+        let placed=0,placement='ignored';
+        if(name==='desktop'){
+          const declined=page.waitForResponse(pathname('/placement/decline'));
+          await page.getByRole('button',{name:'Start from the beginning',exact:true}).click();check((await declined).ok(),'browser_placement_decline_failed');
+          await page.getByRole('heading',{name:'Already know some of this?',exact:true}).waitFor({state:'detached'});placement='declined';
+        }
+        if(name==='tablet'){
+          const items=course.placement.assessmentIds.length;let issued=page.waitForResponse(pathname('/challenges'));
+          await page.getByRole('button',{name:'Find my starting point',exact:true}).click();
+          for(let n=0;n<items;n++){
+            const response=await issued;check(response.ok(),'browser_placement_issue_failed');const c=await response.json();
+            check(!('grading' in c.question)&&course.placement.assessmentIds.includes(c.question.id),'browser_placement_item_wrong');
+            const a=course.assessments.find(x=>x.id===c.question.id);
+            if(a.type==='choice')await page.getByRole('radio',{name:a.options.find(o=>o.id===a.grading.correctOptionId).text,exact:true}).click();
+            else await page.getByRole('textbox',{name:'Your numeric answer',exact:true}).fill(String(a.grading.expected));
+            const saved=page.waitForResponse(pathname('/answers'));if(n<items-1)issued=page.waitForResponse(pathname('/challenges'));
+            await page.getByRole('button',{name:'Save answer',exact:true}).click();check((await saved).ok(),'browser_placement_answer_failed');
+          }
+          const finished=page.waitForResponse(pathname('/placement/finish'));await page.getByRole('button',{name:'See my result',exact:true}).click();check((await finished).ok(),'browser_placement_finish_failed');
+          await page.getByRole('heading',{name:'Your placement result',exact:true}).waitFor();
+          const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();check(axe.violations.length===0,'browser_placement_accessibility');
+          const start=episodes.find(e=>!course.placement.objectiveIds.includes(e.objectiveIds[0]));
+          const accepted=page.waitForResponse(pathname('/placement/accept'));
+          await page.getByRole('button',{name:`Start at “${start.title}”`,exact:true}).click();const result=await (await accepted).json();
+          placed=result.placedEpisodeIds.length;check(placed===items/2&&result.nextEpisodeId===start.id,'browser_placement_accept_wrong');placement='accepted';
+          // The overview refreshes after acceptance; continue only from the refreshed path.
+          await page.getByRole('heading',{name:'Your placement result',exact:true}).waitFor({state:'detached'});
+        }
         await page.getByRole('button',{name:'Continue learning →',exact:true}).click();
         const snapshot=async()=>requireOk(await request(session,'GET',`/api/enrollments/${enrollmentId}`),'browser_snapshot');
-        let completed=0,recovery=false;
-        for(const episode of episodes){
+        let completed=0,recovery=false,written=0;
+        for(const episode of episodes.slice(placed)){
           await page.getByRole('heading',{name:episode.title,exact:true}).waitFor();
           check(await page.getByRole('button',{name:'Complete episode →',exact:true}).isDisabled(),'browser_completion_not_gated');
           for(const block of episode.blocks)if(!['assessment','activity'].includes(block.type))await page.getByRole('button',{name:'Mark this part read',exact:true}).click();
@@ -37,7 +70,13 @@ export async function browserAcceptance({origin,bootstrap,request,requireOk,cour
             await (isFresh?fresh:page.getByRole('button',{name:'Start the next check →',exact:true})).click();
             const response=await issued;check(response.ok(),'browser_issue_failed');const c=await response.json();
             check(!('grading' in c.question),'browser_grading_key_exposed');
-            if(c.question.type==='code'){
+            if(c.question.type==='rubric'){
+              // The written explanation is offered first and goes to a person; the short checks still decide the gate.
+              check(c.question.criteria?.length===course.assessments.find(a=>a.id===c.question.id).grading.rubric.length,'browser_rubric_criteria_missing');
+              await page.getByRole('textbox',{name:'Your explanation',exact:true}).fill(writtenAnswers[c.question.id].text);
+              const submitted=page.waitForResponse(pathname('/answers'));await page.getByRole('button',{name:'Submit for review',exact:true}).click();
+              const r=await (await submitted).json();check(r.result.pendingReview&&!r.result.passed,'browser_written_answer_not_pending');written++;
+            }else if(c.question.type==='code'){
               const failed=wrongFirst&&!isFresh;await page.getByRole('textbox',{name:'Your code',exact:true}).fill(failed?'def solve(data): return None':candidate);
               if(isFresh){
                 check(codeFailures===1,'browser_did_not_use_existing_code_variants');
@@ -65,8 +104,8 @@ export async function browserAcceptance({origin,bootstrap,request,requireOk,cour
           if(completed<episodes.length)await page.getByRole('button',{name:'Continue learning →',exact:true}).click();
         }
         const end=await snapshot();check(recovery&&errors.length===0,'private_browser_recovery_failed');
-        if(full)check(completed===56&&end.complete&&end.nextEpisodeId===null,'browser_full_course_incomplete');
-        reports.push({viewport:name,completedEpisodes:completed,recovery:true,reloadPreservedCode:true,horizontalOverflow:false,codeAccessibility:true,pageErrors:errors.length});
+        if(full)check(completed===56&&end.complete&&end.nextEpisodeId===null&&written===course.assessments.filter(a=>a.type==='rubric').length,'browser_full_course_incomplete');
+        reports.push({viewport:name,placement,placedEpisodes:placed,writtenExplanationsSubmitted:written,completedEpisodes:completed,recovery:true,reloadPreservedCode:true,horizontalOverflow:false,codeAccessibility:true,pageErrors:errors.length});
       }finally{await context.tracing.stop({path:path.join(state,`private-${name}-trace.zip`)});await context.close();}
     }
   }finally{await browser.close();}

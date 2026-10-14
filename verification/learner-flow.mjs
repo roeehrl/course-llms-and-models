@@ -10,6 +10,7 @@ import {createServer} from 'node:net';
 import pg from 'pg';
 import {verifyReleasedRuntime,expectedCoreRelease} from './released-runtime.mjs';
 import {stageWorkedExamples} from '../scripts/stage-worked-examples.mjs';
+import {writtenAnswers} from './written-answers.mjs';
 const exec=promisify(execFile),root=fileURLToPath(new URL('../',import.meta.url));
 class Failure extends Error {constructor(code){super(code);this.code=code;}}
 const check=(condition,code)=>{if(!condition)throw new Failure(code);};
@@ -33,7 +34,7 @@ const port=await new Promise(resolve=>{const s=createServer();s.listen(0,'127.0.
 const origin=`http://127.0.0.1:${port}`,instanceId=randomUUID();
 await mkdir(path.join(root,'.local/learner-flow'),{recursive:true,mode:0o700});const state=await mkdtemp(path.join(root,'.local/learner-flow/run-'));
 await admin.query(`CREATE SCHEMA ${schema}`);url.searchParams.set('options',`-csearch_path=${schema}`);const db=new pg.Pool({connectionString:url.href,max:2});
-const childEnv={PATH:process.env.PATH,DATABASE_URL:url.href,PUBLIC_ORIGIN:origin,API_HOST:'127.0.0.1',PORT:String(port),CORE_INSTANCE_ID:instanceId,LEARNER_WEB_DIR:path.join(runtime,'apps/learner/dist'),CODE_FIXTURE_FILES:JSON.stringify(registryMetadata.registries.map(r=>path.join(root,r.file))),ADAPTATION_ADAPTERS:JSON.stringify(['bounded-numeric-v1','authored-bank-v1','authored-code-bank-v1']),SANDBOX_STORAGE_DIR:path.join(state,'sandbox'),...(verifierFile?{TEACHING_VERIFIER_FILES:JSON.stringify([verifierFile])}:{})};
+const childEnv={PATH:process.env.PATH,DATABASE_URL:url.href,PUBLIC_ORIGIN:origin,API_HOST:'127.0.0.1',PORT:String(port),CORE_INSTANCE_ID:instanceId,LEARNER_WEB_DIR:path.join(runtime,'apps/learner/dist'),CODE_FIXTURE_FILES:JSON.stringify(registryMetadata.registries.map(r=>path.join(root,r.file))),ADAPTATION_ADAPTERS:JSON.stringify(['bounded-numeric-v1','authored-bank-v1','authored-code-bank-v1','authored-teaching-bank-v1']),SANDBOX_STORAGE_DIR:path.join(state,'sandbox'),...(verifierFile?{TEACHING_VERIFIER_FILES:JSON.stringify([verifierFile])}:{})};
 const server=spawn(process.execPath,['--max-old-space-size=512','services/api/dist/main.js'],{cwd:runtime,env:childEnv,stdio:['ignore','pipe','pipe']});let childExit=false,output='';server.once('exit',()=>{childExit=true;});server.once('error',()=>{childExit=true;});for(const pipe of [server.stdout,server.stderr])pipe.on('data',b=>{output=(output+b.toString()).slice(-65536);});
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 async function ready(){for(let n=0;n<120;n++){check(!childExit,'released_api_startup_failed');try{const r=await fetch(origin+'/health',{signal:AbortSignal.timeout(1000)});if(r.ok&&(await r.json()).instanceId===instanceId)return;}catch{}await pause(100);}throw new Failure('released_api_readiness_timeout');}
@@ -57,6 +58,7 @@ try{
   const adapters=requireOk(await request(teacher,'GET','/api/runtime/adaptation-adapters'),'runtime_descriptors').adapters;
   check(configuration.profiles.every(p=>adapters.some(a=>a.id===p.adapterId&&a.implementationDigest===p.adapterDigest)),'installed_creator_digest_mismatch');
   const extensions=requireOk(await request(teacher,'GET','/api/runtime/extensions'),'runtime_extensions').extensions;check(registryMetadata.registries.every(r=>extensions.some(e=>e.id===r.id&&e.codeReady&&e.integrity==='sha256-'+r.sha256)),'code_grader_not_ready');
+  for(const declared of course.extensions.filter(e=>course.assessments.some(a=>a.type==='rubric'&&a.grading.evaluatorId===e.id)))check(extensions.some(e=>e.id===declared.id&&e.integrity===declared.integrity),'rubric_evaluator_not_installed');
   releaseId=requireOk(await request(teacher,'POST',`/api/workspaces/${teacher.workspaceId}/releases`,course),'course_import').id;
   const catalog=requireOk(await request(teacher,'GET','/api/admin/session'),'admin_session').courses[0];check(catalog,'catalog_missing');
   for(const action of ['submit-review','approve','publish']){
@@ -70,7 +72,7 @@ try{
   const answer=async(l,episode,assessment,value)=>{
     const c=await command(l,'challenges',{episodeId:episode.id,assessmentId:assessment.id,mode:'independent'});check(!('grading' in c.question)&&!('familyId' in c.question),'question_key_leak');return command(l,'answers',{challengeId:c.challengeId,answer:value});
   };
-  const authoredAnswer=a=>a.type==='code'?candidate:a.type==='choice'?a.grading.correctOptionId:a.grading.expected;
+  const authoredAnswer=a=>a.type==='code'?candidate:a.type==='rubric'?writtenAnswers[a.id].text:a.type==='choice'?a.grading.correctOptionId:a.grading.expected;
   const fresh=async(l,episode,family)=>{
     const s=await snapshot(l),body={expectedRevision:s.revision,expectedPlanRevision:s.planRevision,idempotencyKey:randomUUID(),episodeId:episode.id,objectiveId:family.objectiveIds[0],familyId:family.familyId,mode:'independent'};
     const r=await request(l,'POST',`/api/enrollments/${l.enrollmentId}/adaptation/fresh-question`,body);
@@ -79,7 +81,7 @@ try{
   if(browserMode){
     const {browserAcceptance}=await import('./learner-browser.mjs');reports.push(await browserAcceptance({origin,bootstrap,request,requireOk,course,candidate,check,state}));
   }else{
-  const first=await enroll('private-full-path');let recovered=0;
+  const first=await enroll('private-full-path');let recovered=0,written=0;
   for(const episode of course.chapters.flatMap(c=>c.episodes)){
     const before=await snapshot(first);check(before.nextEpisodeId===episode.id,'linear_path_wrong');
     const bypass=await request(first,'POST',`/api/enrollments/${first.enrollmentId}/complete`,{expectedRevision:before.revision,idempotencyKey:randomUUID(),episodeId:episode.id});check(bypass.status===409,'unearned_completion_accepted');
@@ -87,6 +89,8 @@ try{
     const gate=course.gates.find(g=>g.id===episode.gateId),families=new Map();for(const a of course.assessments.filter(a=>gate.assessmentIds.includes(a.id))){const values=families.get(a.familyId)??[];values.push(a);families.set(a.familyId,values);}
     for(const values of families.values()){
       const a=values[0];
+      // A written explanation waits for a person; it must never decide or block the gate.
+      if(a.type==='rubric'){const result=await answer(first,episode,a,authoredAnswer(a));check(result.result.pendingReview&&!result.result.passed&&result.result.independent,'written_answer_not_pending');written++;continue;}
       if(a.type!=='code'){const result=await answer(first,episode,a,authoredAnswer(a));check(result.result.passed&&result.result.independent,'baseline_evidence_failed');continue;}
       for(const original of values){const wrong=await answer(first,episode,original,'def solve(data): return None');check(!wrong.result.passed,'bad_code_accepted');}
       const corrected=await answer(first,episode,a,candidate);check(corrected.result.passed&&!corrected.result.independent,'corrected_repeat_credited');
@@ -100,10 +104,10 @@ try{
     const completed=await command(first,'complete',{episodeId:episode.id}),count=completed.lessons.filter(l=>l.status==='completed').length;
     if(count%14===0)console.log(JSON.stringify({checkpoint:'full_course_progress',completedEpisodes:count,recoveredPracticalFamilies:recovered}));
   }
-  const end=await snapshot(first);check(end.nextEpisodeId===null&&end.complete===true&&end.lessons.filter(l=>l.status==='completed').length===56&&recovered===3,'full_course_path_incomplete');
+  const end=await snapshot(first);check(end.nextEpisodeId===null&&end.complete===true&&end.lessons.filter(l=>l.status==='completed').length===56&&recovered===3&&written===course.assessments.filter(a=>a.type==='rubric').length,'full_course_path_incomplete');
   const reservationRows=(await db.query('SELECT snapshot FROM policy_states WHERE enrollment_id=$1',[first.enrollmentId])).rows[0].snapshot.reservations,committed=reservationRows.filter(r=>r.state==='committed');check(committed.length===6,'recovery_cost_receipts_missing');
   check(committed.reduce((n,r)=>n+r.work.additionalMinutes,0)===270&&committed.reduce((n,r)=>n+r.work.additionalEpisodes,0)===6,'recovery_cost_terms_changed');
-  reports.push({flow:'all_56_episodes_with_recovery',episodes:56,practicalFamiliesRecovered:recovered,committedRecoveryAssignments:6,unearnedCompletionRejectedEveryEpisode:true});
+  reports.push({flow:'all_56_episodes_with_recovery',episodes:56,practicalFamiliesRecovered:recovered,committedRecoveryAssignments:6,unearnedCompletionRejectedEveryEpisode:true,writtenExplanationsPendingWithoutBlocking:written});
   // Separate learner proves a finite bank can end without silently granting credit.
   const exhausted=await enroll('private-exhaustion');
   for(const episode of course.chapters.flatMap(c=>c.episodes)){
