@@ -83,6 +83,7 @@ try{
   }else{
   const first=await enroll('private-full-path');let recovered=0,written=0;
   for(const episode of course.chapters.flatMap(c=>c.episodes)){
+    const episodeStarted=performance.now();
     const before=await snapshot(first);check(before.nextEpisodeId===episode.id,'linear_path_wrong');
     const bypass=await request(first,'POST',`/api/enrollments/${first.enrollmentId}/complete`,{expectedRevision:before.revision,idempotencyKey:randomUUID(),episodeId:episode.id});check(bypass.status===409,'unearned_completion_accepted');
     for(const block of episode.blocks)if(!['assessment','activity'].includes(block.type))await command(first,'read',{episodeId:episode.id,blockId:block.id});
@@ -102,6 +103,7 @@ try{
       const state=await snapshot(first),objective=state.lessons.find(l=>l.id===episode.id).gate.objectives[0];check(objective.required===3&&objective.families.includes(a.familyId),'practical_gate_weakened');
     }
     const completed=await command(first,'complete',{episodeId:episode.id}),count=completed.lessons.filter(l=>l.status==='completed').length;
+    console.log(JSON.stringify({episodeTiming:'full_course',episode:count,episodeId:episode.id,ms:Math.round(performance.now()-episodeStarted)}));
     if(count%14===0)console.log(JSON.stringify({checkpoint:'full_course_progress',completedEpisodes:count,recoveredPracticalFamilies:recovered}));
   }
   const end=await snapshot(first);check(end.nextEpisodeId===null&&end.complete===true&&end.lessons.filter(l=>l.status==='completed').length===56&&recovered===3&&written===course.assessments.filter(a=>a.type==='rubric').length,'full_course_path_incomplete');

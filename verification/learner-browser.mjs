@@ -57,6 +57,7 @@ export async function browserAcceptance({origin,bootstrap,request,requireOk,cour
         const snapshot=async()=>requireOk(await request(session,'GET',`/api/enrollments/${enrollmentId}`),'browser_snapshot');
         let completed=0,recovery=false,written=0;
         for(const episode of episodes.slice(placed)){
+          const episodeStarted=performance.now();
           await page.getByRole('heading',{name:episode.title,exact:true}).waitFor();
           check(await page.getByRole('button',{name:'Complete episode →',exact:true}).isDisabled(),'browser_completion_not_gated');
           for(const block of episode.blocks)if(!['assessment','activity'].includes(block.type))await page.getByRole('button',{name:'Mark this part read',exact:true}).click();
@@ -99,6 +100,7 @@ export async function browserAcceptance({origin,bootstrap,request,requireOk,cour
           check((await snapshot()).lessons.find(l=>l.id===episode.id).gate.passed,'browser_gate_not_passed');
           const saved=page.waitForResponse(r=>new URL(r.url()).pathname.endsWith('/complete')&&r.request().method()==='POST');
           await page.getByRole('button',{name:'Complete episode →',exact:true}).click();check((await saved).ok(),'browser_completion_save_failed');completed++;
+          console.log(JSON.stringify({episodeTiming:'private_browser',viewport:name,episode:completed,episodeId:episode.id,ms:Math.round(performance.now()-episodeStarted)}));
           if(completed%14===0)console.log(JSON.stringify({checkpoint:'private_browser_progress',viewport:name,completedEpisodes:completed}));
           if(!full&&recovery)break;
           if(completed<episodes.length)await page.getByRole('button',{name:'Continue learning →',exact:true}).click();
