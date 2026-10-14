@@ -1,3 +1,25 @@
+# Course 0.1.6 staged on SDK 0.4.0; Core performance defect found — 2026-10-14
+
+- STAGED, NOT packaged/published/installed: course 0.1.6 on the released SDK 0.4.0
+  (tarball sha256 f548f0f9… matches the release). Adds optional placement (24
+  existing short checks, chapters 1–3), 4 human-reviewed written explanations,
+  delayed retention checks (intervals 2/7/21 days, 6 objectives, 24 held-out items)
+  and 4 optional reviewed remedial episodes (teaching-bank insert_episode); packaging
+  now carries all 39 illustrations. Registry 158 profiles. Details, rationale and
+  limits: planning/COURSE_0.1.6.md.
+- PASS: npm test 22/22, verify:math (incl. 273 new checks), verify:visuals, build;
+  released Core 0.1.34 HTTP 56-episode acceptance (41 min); new released-surface
+  feature flow (placement decline/accept, retention check, second-staff rubric
+  review with self-review refused, supervisor remedial insertion).
+- FAIL: phone browser acceptance times out near episode 43 (25.9 s answer). Root
+  cause is in Core: every enrollment request re-validates each applied adaptation
+  against the whole course (adaptation-store.ts:583 materializeAdaptation); cost
+  grows with recoveries × bundle size. Desktop and tablet (UI placement accept)
+  pass alone. Not worked around; maintainer decision needed before pilot install.
+- Gaps reported: no HTTP path for remedial insertion without a live Google model;
+  no clock control for retention checks (both handled only by explicit test harness
+  stand-ins). Pilot untouched.
+
 # Core 0.1.34 published, accepted and deployed — 2026-10-14
 
 - PUBLISHED Core 0.1.34 (tag object d232fe7 on 1c204b6, run 38512307504, artifact
