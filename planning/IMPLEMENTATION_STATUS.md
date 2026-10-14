@@ -1,3 +1,22 @@
+# Core 0.1.33 published; pilot rolled back to 0.1.32; code-bank digest fix in progress — 2026-10-14
+
+- PUBLISHED Core 0.1.33 (tag object bf187f2 on fa41b02, run 38506727322, artifact
+  11869246342 digest 401b7a25…, manifest 70c9edac…; 553 source members compared;
+  hosted bytes identical; consumer shasum ok). Fixes the 0.1.32 visuals versioning
+  regression (visuals 0.1.1; earlier server-identical 0.1.0 build accepted; digest
+  guard in CI). Pilot course 0.1.4 renderer declaration accepted again.
+- NEW REGRESSION in 0.1.33 (stated in its notes): a behaviour-neutral edit to
+  qualifiedCodeEvaluator moved the authored-code-bank-v1 adapter digest
+  (05d8ba24… -> c51bc8a5…); approved code-recovery registries no longer resolve.
+  Private 56-episode acceptance failed (installed_creator_digest_mismatch).
+- DEPLOYED: pilot upgraded 0.1.32 -> 0.1.33 (backup + drill 77 tables/164 rows,
+  pilot acceptance passed), then ROLLED BACK to 0.1.32 with the same tool (no
+  migrations between; backup + drill 77/175; health ok; QA enrollment unchanged).
+  Evidence: evidence/core-0.1.33-pilot-upgrade-and-rollback.json.
+- IN PROGRESS: Core 0.1.34 restoring the earlier code-bank digest plus a CI guard
+  over built adapter digests.
+- Concept illustrations: 39/56 episodes, every chapter (b8d2ef8, layout fixes 290c5e4).
+
 # Core 0.1.32 published and deployed; visuals versioning regression found — 2026-10-14
 
 Full approved v0.8 objective ACTIVE and incomplete. States are distinguished below.
