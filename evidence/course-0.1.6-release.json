@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "courseVersion": "0.1.6",
+  "sourceCommit": "628f8f8511cbe16842ec587f9a68d5fad2fc8df7",
+  "contentUnchangedSince": "08c65ed",
+  "courseDigest": "9574ac29c541401ac7cfb1bbf5c65ddcbb4f64f6ddf94605f247ac54cb92b1c2",
+  "privateRelease": "https://github.com/roeehrl/course-llms-and-models/releases/tag/course-v0.1.6",
+  "artifactSha256": "2053e5d7dc475d72be132f7a40eb3bf38f2f010e4d8646e9f25bf71bd3e0f0b1",
+  "hostedBytesIdentical": true,
+  "sdkVersion": "0.4.0",
+  "minimumCoreVersion": "0.1.34",
+  "acceptedOnCore": "0.1.38 (evidence/core-0.1.38-release-and-pilot.json; the same digest served in the accepted browser runs)",
+  "adaptationProfiles": 158,
+  "illustratedEpisodes": 39,
+  "installerCheck": { "harness": "verification/install-flow.mjs", "core": "0.1.38 released runtime, disposable schema", "result": ["wrong_password_refused", "installed_and_selected", "duplicate_refused", "password_never_printed"] },
+  "pilot": {
+    "packageStaged": "course/v0.1.6 (0700/0600, verified)",
+    "configChange": "adaptationAdapters += authored-teaching-bank-v1 (needed by the 4 remedial-episode profiles); previous config kept as state/.config.json.pre-0.1.6",
+    "restarted": true,
+    "health": "ok",
+    "qaEnrollmentAfterRestart": { "id": "6d7439c7-43b0-42d9-a2e2-c0ad5f8367ec", "course": "0.1.4", "status": "active", "revision": 9 },
+    "installedForNewLearners": false,
+    "installBlockedOn": "operator password (set by the operator); then: node scripts/install-pilot-course.mjs --origin http://localhost:4310 --package <Pilot>/course/v0.1.6 --bootstrap <Pilot>/state/bootstrap.json --login <operator username>"
+  },
+  "liveProviderAcceptance": false
+}

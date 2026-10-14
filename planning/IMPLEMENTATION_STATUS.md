@@ -1,3 +1,18 @@
+# Course 0.1.6 released privately; pilot prepared, install waits for the operator password — 2026-10-15
+
+- PUBLISHED (private) course-v0.1.6: package from 628f8f8 (content unchanged since
+  08c65ed), digest 9574ac29…, tgz sha256 2053e5d7…; hosted bytes identical. Accepted
+  on Core 0.1.38 before release (see the 0.1.38 entry).
+- scripts/install-pilot-course.mjs signs in with --login and a password typed without
+  echo (codes are off on Core 0.1.36+). verification/install-flow.mjs passed against a
+  disposable released 0.1.38: wrong password refused, install selected, duplicate
+  refused, password never printed.
+- PILOT: package staged at course/v0.1.6; config adaptationAdapters gained
+  authored-teaching-bank-v1 (needed by the remedial-episode profiles), previous config
+  kept as state/.config.json.pre-0.1.6; restarted, health ok, QA enrollment unchanged
+  (0.1.4, active, rev 9). NOT installed for new learners yet: needs the operator's
+  password. Evidence: evidence/course-0.1.6-release.json.
+
 # Core 0.1.38 published, accepted and deployed; v0.1.36 and v0.1.37 dead tags — 2026-10-14
 
 - PUBLISHED Core 0.1.38 prerelease (tag object 9d72b3c on ded66f2, run
