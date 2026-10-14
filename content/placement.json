@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Optional placement over chapters 1-3. Questions are the existing independent gate items of those episodes; an episode is placed out only when this run answers every one of its gate families independently. Chapter 4 objectives are not placeable, so the walk always stops there at the latest.",
+  "placement": {
+    "enabled": true,
+    "learnerMayDecline": true,
+    "objectiveIds": [
+      "fnd-o01-01",
+      "fnd-o01-02",
+      "fnd-o01-03",
+      "fnd-o01-04",
+      "fnd-o02-01",
+      "fnd-o02-02",
+      "fnd-o02-03",
+      "fnd-o02-04",
+      "fnd-o03-01",
+      "fnd-o03-02",
+      "fnd-o03-03",
+      "fnd-o03-04"
+    ],
+    "assessmentIds": [
+      "fnd-a01-01-trace",
+      "fnd-a01-01-transfer",
+      "fnd-a01-02-trace",
+      "fnd-a01-02-transfer",
+      "fnd-a01-03-trace",
+      "fnd-a01-03-transfer",
+      "fnd-a01-04-trace",
+      "fnd-a01-04-transfer",
+      "fnd-a02-01-trace",
+      "fnd-a02-01-transfer",
+      "fnd-a02-02-trace",
+      "fnd-a02-02-transfer",
+      "fnd-a02-03-trace",
+      "fnd-a02-03-transfer",
+      "fnd-a02-04-trace",
+      "fnd-a02-04-transfer",
+      "fnd-a03-01-trace",
+      "fnd-a03-01-transfer",
+      "fnd-a03-02-trace",
+      "fnd-a03-02-transfer",
+      "fnd-a03-03-trace",
+      "fnd-a03-03-transfer",
+      "fnd-a03-04-trace",
+      "fnd-a03-04-transfer"
+    ],
+    "protectedEpisodeIds": [],
+    "maxItems": 24
+  }
+}

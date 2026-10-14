@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Optional human-reviewed written explanations. Each item joins its episode gate as an extra independent family; the gate keeps requiring two families, so the two deterministic checks still suffice and review latency never blocks progress.",
+  "extension": {
+    "id": "course-core-reviewed-rubric",
+    "version": "1.0.0",
+    "integrity": "sha256-d162a0182dad8fa60245e1eeee433a6efe7f52c9fa17d514de4822f0bf2adea3",
+    "entrypoint": "extensions/course-core-reviewed-rubric.json",
+    "execution": "server",
+    "platforms": [
+      "web"
+    ],
+    "capabilities": [
+      "assessment.evaluate"
+    ],
+    "accessibility": {
+      "keyboard": true,
+      "reducedMotion": true,
+      "textAlternative": "Written explanations reviewed by a person against published criteria."
+    }
+  },
+  "assessments": [
+    {
+      "id": "wri-06-03",
+      "type": "rubric",
+      "objectiveIds": [
+        "ttf-o06-03"
+      ],
+      "familyId": "wri-family-06-03",
+      "prompt": "Written explanation, reviewed by a person. Use the episode's sequence [4,2,7,1]. In a few sentences of your own, explain (1) which inputs and next-token targets teacher forcing builds from it, (2) exactly what leaks if the causal mask is missing even though the targets are shifted correctly, and (3) one test that would detect that leak. The reviewer quotes your own words for each point, so state each one explicitly. This check does not hold up your progress: the two short checks for this episode still decide completion.",
+      "grading": {
+        "evaluatorId": "course-core-reviewed-rubric",
+        "rubric": [
+          {
+            "id": "shift",
+            "required": true,
+            "description": "States that the inputs are [4,2,7] and the targets are [2,7,1], or equivalently that each position's target is the next token of the sequence."
+          },
+          {
+            "id": "leak",
+            "required": true,
+            "description": "Explains that without the causal mask position 0 can attend to input position 1, whose token 2 is exactly position 0's target, so the model can read the answer it is supposed to predict."
+          },
+          {
+            "id": "separate",
+            "required": true,
+            "description": "States that a correct target shift does not repair a missing or wrong mask: the label shift and the attention mask are separate contracts."
+          },
+          {
+            "id": "detect",
+            "required": false,
+            "description": "Proposes a test such as changing only a future token and checking that earlier positions' logits stay unchanged, or running an intentionally unmasked variant to show the test detects leakage."
+          }
+        ]
+      }
+    },
+    {
+      "id": "wri-12-01",
+      "type": "rubric",
+      "objectiveIds": [
+        "eng-o12-01"
+      ],
+      "familyId": "wri-family-12-01",
+      "prompt": "Written explanation, reviewed by a person. The episode's reference output is [1,2,3,4]; a candidate returns [1,3,2,4] on every call. In a few sentences of your own, explain why this candidate passes a finiteness check, a repeatability check and a sum check yet is wrong, and name a check that rejects it. The reviewer quotes your own words for each point, so state each one explicitly. This check does not hold up your progress: the two short checks for this episode still decide completion.",
+      "grading": {
+        "evaluatorId": "course-core-reviewed-rubric",
+        "rubric": [
+          {
+            "id": "finite",
+            "required": true,
+            "description": "States that a finiteness check only shows the values are not NaN or infinity and says nothing about whether the right coordinates or function were computed."
+          },
+          {
+            "id": "repeatable",
+            "required": true,
+            "description": "States that repeating the candidate only shows it returns the same answer every time (the same wrong answer here), not that it matches the reference."
+          },
+          {
+            "id": "oracle",
+            "required": true,
+            "description": "Names an elementwise comparison with an independent reference, such as the maximum absolute coordinate error (1 for this pair), as the check that rejects the candidate."
+          },
+          {
+            "id": "aggregate",
+            "required": false,
+            "description": "Notes that aggregate statistics such as the sum (10 for both) or the norm are identical for the two vectors and therefore hide the swapped coordinates."
+          }
+        ]
+      }
+    },
+    {
+      "id": "wri-12-04",
+      "type": "rubric",
+      "objectiveIds": [
+        "eng-o12-04"
+      ],
+      "familyId": "wri-family-12-04",
+      "prompt": "Written explanation, reviewed by a person. Draft three or four sentences of a disclosure note for this situation from the episode: a saved coordinate probe of the original kernel fails, and the incident narrative also attributes shared-run damage to that defect. Keep what the probe directly supports separate from what is still a hypothesis, say what containment you would propose and who decides it, and name a next test that could discriminate between explanations. The reviewer quotes your own words for each point, so state each one explicitly. This check does not hold up your progress: the two short checks for this episode still decide completion.",
+      "grading": {
+        "evaluatorId": "course-core-reviewed-rubric",
+        "rubric": [
+          {
+            "id": "supported",
+            "required": true,
+            "description": "States as directly supported only the local finding: the saved coordinate probe shows a coordinate (layout) defect in the original computation."
+          },
+          {
+            "id": "hypothesis",
+            "required": true,
+            "description": "States that the broader causal claim, for example that this defect explains the shared-run damage or historical loss jumps, is not established by the probe alone and remains a hypothesis that needs stronger evidence."
+          },
+          {
+            "id": "containment",
+            "required": true,
+            "description": "Describes containment as a proposal for an authorized operator to decide, not as an action the writer performs or has already performed."
+          },
+          {
+            "id": "next-test",
+            "required": false,
+            "description": "Names a next discriminating test or a negative-control outcome that could support or invalidate the preferred explanation."
+          }
+        ]
+      }
+    },
+    {
+      "id": "wri-14-04",
+      "type": "rubric",
+      "objectiveIds": [
+        "eng-o14-04"
+      ],
+      "familyId": "wri-family-14-04",
+      "prompt": "Teach-back, reviewed by a person. Without your worked answers open, use the episode's practice model: prediction w*x with x=2, target 4, half squared error, starting at w=1 with learning rate 0.1. In your own words, explain the two correct updates, what the deliberately bad version does differently to reach 2.04, and why its small final loss on this one example does not show that the training step is correct. The reviewer quotes your own words for each point, so state each one explicitly. This check does not hold up your progress: the two short checks for this episode still decide completion.",
+      "grading": {
+        "evaluatorId": "course-core-reviewed-rubric",
+        "rubric": [
+          {
+            "id": "updates",
+            "required": true,
+            "description": "Gives the two correct weights after the updates, 1.4 and then 1.64, for example by computing the gradient (2w-4)*2 = -4 at w=1."
+          },
+          {
+            "id": "stale",
+            "required": true,
+            "description": "Explains that the bad version keeps (accumulates) the first gradient into the second update instead of resetting it, which is why it reaches 2.04."
+          },
+          {
+            "id": "loss",
+            "required": true,
+            "description": "States that a small or improving final loss on one example does not establish that the state transition is correct; the weights or gradients must be compared with an independent reference."
+          },
+          {
+            "id": "control",
+            "required": false,
+            "description": "Proposes a check that would catch the defect, such as a negative control with stale accumulation or comparing analytic gradients with finite differences."
+          }
+        ]
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "episodeId": "ttf-e06-03",
+      "assessmentId": "wri-06-03"
+    },
+    {
+      "episodeId": "eng-e12-01",
+      "assessmentId": "wri-12-01"
+    },
+    {
+      "episodeId": "eng-e12-04",
+      "assessmentId": "wri-12-04"
+    },
+    {
+      "episodeId": "eng-e14-04",
+      "assessmentId": "wri-14-04"
+    }
+  ]
+}

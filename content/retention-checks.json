@@ -1,0 +1,525 @@
+{
+  "schemaVersion": 1,
+  "intervalsDays": [
+    2,
+    7,
+    21
+  ],
+  "source": "content/adaptation-authoring.json numerical recipes",
+  "objectives": [
+    {
+      "objectiveId": "fnd-o03-03",
+      "episodeId": "fnd-e03-03",
+      "recipeId": "ada-recipe-03-03",
+      "key": "03-03",
+      "variables": [
+        {
+          "d": 5,
+          "g": 5,
+          "w": 4
+        },
+        {
+          "d": 4,
+          "g": 5,
+          "w": 4
+        },
+        {
+          "d": 8,
+          "g": 4,
+          "w": 4
+        },
+        {
+          "d": 5,
+          "g": 4,
+          "w": 4
+        }
+      ]
+    },
+    {
+      "objectiveId": "fnd-o04-03",
+      "episodeId": "fnd-e04-03",
+      "recipeId": "ada-recipe-04-03",
+      "key": "04-03",
+      "variables": [
+        {
+          "a": -2,
+          "g": 4,
+          "k": 3,
+          "n": 8
+        },
+        {
+          "a": -1,
+          "g": 3,
+          "k": 3,
+          "n": 8
+        },
+        {
+          "a": -2,
+          "g": 3,
+          "k": 3,
+          "n": 8
+        },
+        {
+          "a": -1,
+          "g": 2,
+          "k": 3,
+          "n": 8
+        }
+      ]
+    },
+    {
+      "objectiveId": "ttf-o06-04",
+      "episodeId": "ttf-e06-04",
+      "recipeId": "ada-recipe-06-04",
+      "key": "06-04",
+      "variables": [
+        {
+          "b": 1,
+          "d": 5,
+          "h": 2,
+          "l": 4
+        },
+        {
+          "b": 2,
+          "d": 4,
+          "h": 2,
+          "l": 4
+        },
+        {
+          "b": 1,
+          "d": 4,
+          "h": 2,
+          "l": 4
+        },
+        {
+          "b": 2,
+          "d": 3,
+          "h": 2,
+          "l": 4
+        }
+      ]
+    },
+    {
+      "objectiveId": "ttf-o07-01",
+      "episodeId": "ttf-e07-01",
+      "recipeId": "ada-recipe-07-01",
+      "key": "07-01",
+      "variables": [
+        {
+          "d": 6,
+          "q": 5,
+          "v": 4
+        },
+        {
+          "d": 5,
+          "q": 5,
+          "v": 4
+        },
+        {
+          "d": 7,
+          "q": 4,
+          "v": 4
+        },
+        {
+          "d": 6,
+          "q": 4,
+          "v": 4
+        }
+      ]
+    },
+    {
+      "objectiveId": "sys-o10-02",
+      "episodeId": "sys-e10-02",
+      "recipeId": "ada-recipe-10-02",
+      "key": "10-02",
+      "variables": [
+        {
+          "m": 4,
+          "s": 5,
+          "t": 4
+        },
+        {
+          "m": 3,
+          "s": 5,
+          "t": 4
+        },
+        {
+          "m": 6,
+          "s": 4,
+          "t": 4
+        },
+        {
+          "m": 4,
+          "s": 4,
+          "t": 4
+        }
+      ]
+    },
+    {
+      "objectiveId": "eng-o13-04",
+      "episodeId": "eng-e13-04",
+      "recipeId": "ada-recipe-13-04",
+      "key": "13-04",
+      "variables": [
+        {
+          "c": 21,
+          "h": 4,
+          "o": 18
+        },
+        {
+          "c": 22,
+          "h": 3,
+          "o": 18
+        },
+        {
+          "c": 22,
+          "h": 2,
+          "o": 17
+        },
+        {
+          "c": 28,
+          "h": 2,
+          "o": 16
+        }
+      ]
+    }
+  ],
+  "assessments": [
+    {
+      "id": "ret-03-03-1",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o03-03"
+      ],
+      "familyId": "ret-family-03-03",
+      "prompt": "Delayed retention check. A scalar optimizer starts at w=4 with recorded gradient g=5. It applies ordinary descent with learning rate 1/5. A second optimizer call intentionally uses the SAME recorded gradient without a new backward pass. Return w after the second call.",
+      "grading": {
+        "expected": 2,
+        "absoluteTolerance": 1e-9,
+        "explanation": "Computation: (4 − ((2 × 5) ÷ 5)) = 2. This applies the same procedure as Gradient descent and learning rate."
+      }
+    },
+    {
+      "id": "ret-03-03-2",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o03-03"
+      ],
+      "familyId": "ret-family-03-03",
+      "prompt": "Delayed retention check. A scalar optimizer starts at w=4 with recorded gradient g=5. It applies ordinary descent with learning rate 1/4. A second optimizer call intentionally uses the SAME recorded gradient without a new backward pass. Return w after the second call.",
+      "grading": {
+        "expected": 1.5,
+        "absoluteTolerance": 1e-9,
+        "explanation": "Computation: (4 − ((2 × 5) ÷ 4)) = 1.5. This applies the same procedure as Gradient descent and learning rate."
+      }
+    },
+    {
+      "id": "ret-03-03-3",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o03-03"
+      ],
+      "familyId": "ret-family-03-03",
+      "prompt": "Delayed retention check. A scalar optimizer starts at w=4 with recorded gradient g=4. It applies ordinary descent with learning rate 1/8. A second optimizer call intentionally uses the SAME recorded gradient without a new backward pass. Return w after the second call.",
+      "grading": {
+        "expected": 3,
+        "absoluteTolerance": 1e-9,
+        "explanation": "Computation: (4 − ((2 × 4) ÷ 8)) = 3. This applies the same procedure as Gradient descent and learning rate."
+      }
+    },
+    {
+      "id": "ret-03-03-4",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o03-03"
+      ],
+      "familyId": "ret-family-03-03",
+      "prompt": "Delayed retention check. A scalar optimizer starts at w=4 with recorded gradient g=4. It applies ordinary descent with learning rate 1/5. A second optimizer call intentionally uses the SAME recorded gradient without a new backward pass. Return w after the second call.",
+      "grading": {
+        "expected": 2.4,
+        "absoluteTolerance": 1e-9,
+        "explanation": "Computation: (4 − ((2 × 4) ÷ 5)) = 2.4. This applies the same procedure as Gradient descent and learning rate."
+      }
+    },
+    {
+      "id": "ret-04-03-1",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o04-03"
+      ],
+      "familyId": "ret-family-04-03",
+      "prompt": "Delayed retention check. A logical batch has 8 examples with mean gradient 4. One microbatch contains 3 of those examples and has mean gradient -2. What SUM of per-example gradients must the remaining examples contribute? No update occurs between microbatches.",
+      "grading": {
+        "expected": 38,
+        "absoluteTolerance": 0,
+        "explanation": "Computation: ((8 × 4) − (3 × -2)) = 38. This applies the same procedure as Saved activations, recomputation and gradient accumulation."
+      }
+    },
+    {
+      "id": "ret-04-03-2",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o04-03"
+      ],
+      "familyId": "ret-family-04-03",
+      "prompt": "Delayed retention check. A logical batch has 8 examples with mean gradient 3. One microbatch contains 3 of those examples and has mean gradient -1. What SUM of per-example gradients must the remaining examples contribute? No update occurs between microbatches.",
+      "grading": {
+        "expected": 27,
+        "absoluteTolerance": 0,
+        "explanation": "Computation: ((8 × 3) − (3 × -1)) = 27. This applies the same procedure as Saved activations, recomputation and gradient accumulation."
+      }
+    },
+    {
+      "id": "ret-04-03-3",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o04-03"
+      ],
+      "familyId": "ret-family-04-03",
+      "prompt": "Delayed retention check. A logical batch has 8 examples with mean gradient 3. One microbatch contains 3 of those examples and has mean gradient -2. What SUM of per-example gradients must the remaining examples contribute? No update occurs between microbatches.",
+      "grading": {
+        "expected": 30,
+        "absoluteTolerance": 0,
+        "explanation": "Computation: ((8 × 3) − (3 × -2)) = 30. This applies the same procedure as Saved activations, recomputation and gradient accumulation."
+      }
+    },
+    {
+      "id": "ret-04-03-4",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o04-03"
+      ],
+      "familyId": "ret-family-04-03",
+      "prompt": "Delayed retention check. A logical batch has 8 examples with mean gradient 2. One microbatch contains 3 of those examples and has mean gradient -1. What SUM of per-example gradients must the remaining examples contribute? No update occurs between microbatches.",
+      "grading": {
+        "expected": 19,
+        "absoluteTolerance": 0,
+        "explanation": "Computation: ((8 × 2) − (3 × -1)) = 19. This applies the same procedure as Saved activations, recomputation and gradient accumulation."
+      }
+    },
+    {
+      "id": "ret-06-04-1",
+      "type": "numeric",
+      "objectiveIds": [
+        "ttf-o06-04"
+      ],
+      "familyId": "ret-family-06-04",
+      "prompt": "Delayed retention check. An append-only KV cache has 4 layers, batch 1, 2 KV heads, head width 5, and 2 bytes per cached scalar. Both keys and values are cached. Its length grows from 5 to 8 tokens. How many ADDITIONAL payload bytes are needed, excluding allocation slack?",
+      "grading": {
+        "expected": 480,
+        "absoluteTolerance": 0,
+        "explanation": "Computation: ((((((2 × 4) × 1) × 2) × 5) × 2) × 3) = 480. This applies the same procedure as Sampling, context, KV caches and inference costs."
+      }
+    },
+    {
+      "id": "ret-06-04-2",
+      "type": "numeric",
+      "objectiveIds": [
+        "ttf-o06-04"
+      ],
+      "familyId": "ret-family-06-04",
+      "prompt": "Delayed retention check. An append-only KV cache has 4 layers, batch 2, 2 KV heads, head width 4, and 2 bytes per cached scalar. Both keys and values are cached. Its length grows from 5 to 8 tokens. How many ADDITIONAL payload bytes are needed, excluding allocation slack?",
+      "grading": {
+        "expected": 768,
+        "absoluteTolerance": 0,
+        "explanation": "Computation: ((((((2 × 4) × 2) × 2) × 4) × 2) × 3) = 768. This applies the same procedure as Sampling, context, KV caches and inference costs."
+      }
+    },
+    {
+      "id": "ret-06-04-3",
+      "type": "numeric",
+      "objectiveIds": [
+        "ttf-o06-04"
+      ],
+      "familyId": "ret-family-06-04",
+      "prompt": "Delayed retention check. An append-only KV cache has 4 layers, batch 1, 2 KV heads, head width 4, and 2 bytes per cached scalar. Both keys and values are cached. Its length grows from 5 to 8 tokens. How many ADDITIONAL payload bytes are needed, excluding allocation slack?",
+      "grading": {
+        "expected": 384,
+        "absoluteTolerance": 0,
+        "explanation": "Computation: ((((((2 × 4) × 1) × 2) × 4) × 2) × 3) = 384. This applies the same procedure as Sampling, context, KV caches and inference costs."
+      }
+    },
+    {
+      "id": "ret-06-04-4",
+      "type": "numeric",
+      "objectiveIds": [
+        "ttf-o06-04"
+      ],
+      "familyId": "ret-family-06-04",
+      "prompt": "Delayed retention check. An append-only KV cache has 4 layers, batch 2, 2 KV heads, head width 3, and 2 bytes per cached scalar. Both keys and values are cached. Its length grows from 5 to 8 tokens. How many ADDITIONAL payload bytes are needed, excluding allocation slack?",
+      "grading": {
+        "expected": 576,
+        "absoluteTolerance": 0,
+        "explanation": "Computation: ((((((2 × 4) × 2) × 2) × 3) × 2) × 3) = 576. This applies the same procedure as Sampling, context, KV caches and inference costs."
+      }
+    },
+    {
+      "id": "ret-07-01-1",
+      "type": "numeric",
+      "objectiveIds": [
+        "ttf-o07-01"
+      ],
+      "familyId": "ret-family-07-01",
+      "prompt": "Delayed retention check. A bias-free attention module has D=6, Q width 5, K width 5, and V width 4. Its output projection maps width 4 back to D. If you omit ONLY the K projection from a parameter ledger, how many parameters are missing? Count scalar weights, not activations.",
+      "grading": {
+        "expected": 30,
+        "absoluteTolerance": 0,
+        "explanation": "Computation: (6 × 5) = 30. This applies the same procedure as Queries, keys and values as learned projections."
+      }
+    },
+    {
+      "id": "ret-07-01-2",
+      "type": "numeric",
+      "objectiveIds": [
+        "ttf-o07-01"
+      ],
+      "familyId": "ret-family-07-01",
+      "prompt": "Delayed retention check. A bias-free attention module has D=5, Q width 5, K width 5, and V width 4. Its output projection maps width 4 back to D. If you omit ONLY the K projection from a parameter ledger, how many parameters are missing? Count scalar weights, not activations.",
+      "grading": {
+        "expected": 25,
+        "absoluteTolerance": 0,
+        "explanation": "Computation: (5 × 5) = 25. This applies the same procedure as Queries, keys and values as learned projections."
+      }
+    },
+    {
+      "id": "ret-07-01-3",
+      "type": "numeric",
+      "objectiveIds": [
+        "ttf-o07-01"
+      ],
+      "familyId": "ret-family-07-01",
+      "prompt": "Delayed retention check. A bias-free attention module has D=7, Q width 4, K width 4, and V width 4. Its output projection maps width 4 back to D. If you omit ONLY the K projection from a parameter ledger, how many parameters are missing? Count scalar weights, not activations.",
+      "grading": {
+        "expected": 28,
+        "absoluteTolerance": 0,
+        "explanation": "Computation: (7 × 4) = 28. This applies the same procedure as Queries, keys and values as learned projections."
+      }
+    },
+    {
+      "id": "ret-07-01-4",
+      "type": "numeric",
+      "objectiveIds": [
+        "ttf-o07-01"
+      ],
+      "familyId": "ret-family-07-01",
+      "prompt": "Delayed retention check. A bias-free attention module has D=6, Q width 4, K width 4, and V width 4. Its output projection maps width 4 back to D. If you omit ONLY the K projection from a parameter ledger, how many parameters are missing? Count scalar weights, not activations.",
+      "grading": {
+        "expected": 24,
+        "absoluteTolerance": 0,
+        "explanation": "Computation: (6 × 4) = 24. This applies the same procedure as Queries, keys and values as learned projections."
+      }
+    },
+    {
+      "id": "ret-10-02-1",
+      "type": "numeric",
+      "objectiveIds": [
+        "sys-o10-02"
+      ],
+      "familyId": "ret-family-10-02",
+      "prompt": "Delayed retention check. A forward-only pipeline has 5 equal stages, each taking 4 ms per microbatch, no communication overhead and no overlap inside one stage. Sending 4 microbatches together takes fill plus drain time. How many milliseconds are SAVED compared with sending those microbatches strictly one at a time through all stages?",
+      "grading": {
+        "expected": 48,
+        "absoluteTolerance": 0,
+        "explanation": "Computation: (((4 × 5) − ((4 + 5) − 1)) × 4) = 48. This applies the same procedure as Microbatches, bubbles, stale work and backpressure."
+      }
+    },
+    {
+      "id": "ret-10-02-2",
+      "type": "numeric",
+      "objectiveIds": [
+        "sys-o10-02"
+      ],
+      "familyId": "ret-family-10-02",
+      "prompt": "Delayed retention check. A forward-only pipeline has 5 equal stages, each taking 4 ms per microbatch, no communication overhead and no overlap inside one stage. Sending 3 microbatches together takes fill plus drain time. How many milliseconds are SAVED compared with sending those microbatches strictly one at a time through all stages?",
+      "grading": {
+        "expected": 32,
+        "absoluteTolerance": 0,
+        "explanation": "Computation: (((3 × 5) − ((3 + 5) − 1)) × 4) = 32. This applies the same procedure as Microbatches, bubbles, stale work and backpressure."
+      }
+    },
+    {
+      "id": "ret-10-02-3",
+      "type": "numeric",
+      "objectiveIds": [
+        "sys-o10-02"
+      ],
+      "familyId": "ret-family-10-02",
+      "prompt": "Delayed retention check. A forward-only pipeline has 4 equal stages, each taking 4 ms per microbatch, no communication overhead and no overlap inside one stage. Sending 6 microbatches together takes fill plus drain time. How many milliseconds are SAVED compared with sending those microbatches strictly one at a time through all stages?",
+      "grading": {
+        "expected": 60,
+        "absoluteTolerance": 0,
+        "explanation": "Computation: (((6 × 4) − ((6 + 4) − 1)) × 4) = 60. This applies the same procedure as Microbatches, bubbles, stale work and backpressure."
+      }
+    },
+    {
+      "id": "ret-10-02-4",
+      "type": "numeric",
+      "objectiveIds": [
+        "sys-o10-02"
+      ],
+      "familyId": "ret-family-10-02",
+      "prompt": "Delayed retention check. A forward-only pipeline has 4 equal stages, each taking 4 ms per microbatch, no communication overhead and no overlap inside one stage. Sending 4 microbatches together takes fill plus drain time. How many milliseconds are SAVED compared with sending those microbatches strictly one at a time through all stages?",
+      "grading": {
+        "expected": 36,
+        "absoluteTolerance": 0,
+        "explanation": "Computation: (((4 × 4) − ((4 + 4) − 1)) × 4) = 36. This applies the same procedure as Microbatches, bubbles, stale work and backpressure."
+      }
+    },
+    {
+      "id": "ret-13-04-1",
+      "type": "numeric",
+      "objectiveIds": [
+        "eng-o13-04"
+      ],
+      "familyId": "ret-family-13-04",
+      "prompt": "Delayed retention check. A serial reference run spends 21 seconds in the optimized computation and 18 seconds elsewhere. The new computation is twice as fast BUT adds 4 seconds of setup on the measured path. Return full-run speedup old_time/new_time.",
+      "grading": {
+        "expected": 1.2,
+        "absoluteTolerance": 1e-12,
+        "explanation": "Computation: ((21 + 18) ÷ (((21 ÷ 2) + 18) + 4)) = 1.2. This applies the same procedure as Benchmarking, memory gates, fault injection and guarded rollout."
+      }
+    },
+    {
+      "id": "ret-13-04-2",
+      "type": "numeric",
+      "objectiveIds": [
+        "eng-o13-04"
+      ],
+      "familyId": "ret-family-13-04",
+      "prompt": "Delayed retention check. A serial reference run spends 22 seconds in the optimized computation and 18 seconds elsewhere. The new computation is twice as fast BUT adds 3 seconds of setup on the measured path. Return full-run speedup old_time/new_time.",
+      "grading": {
+        "expected": 1.25,
+        "absoluteTolerance": 1e-12,
+        "explanation": "Computation: ((22 + 18) ÷ (((22 ÷ 2) + 18) + 3)) = 1.25. This applies the same procedure as Benchmarking, memory gates, fault injection and guarded rollout."
+      }
+    },
+    {
+      "id": "ret-13-04-3",
+      "type": "numeric",
+      "objectiveIds": [
+        "eng-o13-04"
+      ],
+      "familyId": "ret-family-13-04",
+      "prompt": "Delayed retention check. A serial reference run spends 22 seconds in the optimized computation and 17 seconds elsewhere. The new computation is twice as fast BUT adds 2 seconds of setup on the measured path. Return full-run speedup old_time/new_time.",
+      "grading": {
+        "expected": 1.3,
+        "absoluteTolerance": 1e-12,
+        "explanation": "Computation: ((22 + 17) ÷ (((22 ÷ 2) + 17) + 2)) = 1.3. This applies the same procedure as Benchmarking, memory gates, fault injection and guarded rollout."
+      }
+    },
+    {
+      "id": "ret-13-04-4",
+      "type": "numeric",
+      "objectiveIds": [
+        "eng-o13-04"
+      ],
+      "familyId": "ret-family-13-04",
+      "prompt": "Delayed retention check. A serial reference run spends 28 seconds in the optimized computation and 16 seconds elsewhere. The new computation is twice as fast BUT adds 2 seconds of setup on the measured path. Return full-run speedup old_time/new_time.",
+      "grading": {
+        "expected": 1.375,
+        "absoluteTolerance": 1e-12,
+        "explanation": "Computation: ((28 + 16) ÷ (((28 ÷ 2) + 16) + 2)) = 1.375. This applies the same procedure as Benchmarking, memory gates, fault injection and guarded rollout."
+      }
+    }
+  ]
+}

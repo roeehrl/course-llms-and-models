@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Reviewed remedial episodes for authored-teaching-bank-v1 insert_episode profiles. Each restates its anchor episode's own worked example step by step, adds no grading and is inserted, after learner opt-in and a supervisor decision, immediately after the anchor episode.",
+  "source": {
+    "id": "remedial-episodes-reviewed",
+    "title": "Private remedial episodes restating anchor-episode examples; numbers independently checked",
+    "url": "urn:private-course:remedial-episodes-v1",
+    "reviewedAt": "2026-10-14T00:00:00Z"
+  },
+  "entries": [
+    {
+      "id": "remedial-strides",
+      "anchorEpisodeId": "fnd-e02-02",
+      "objectiveIds": [
+        "fnd-o02-02"
+      ],
+      "title": "Strides, one address at a time",
+      "blocks": [
+        {
+          "id": "address",
+          "markdown": "This short personal episode slows down one idea from *Strides, views, broadcasting and aliasing*. It introduces no new material and is not graded. It was added because a focused second pass helps here more than another question would, and it comes before later episodes that build on this idea.\n\nAn element's storage offset is `o + i*s0 + j*s1`. Start at the base offset `o`, move `s0` elements for each step along the first index and `s1` elements for each step along the second. Use the episode's flat storage `[10,20,30,40,50,60]` with base offset `0`.\n\n| View | Shape | Strides | Index | Offset | Value |\n| --- | --- | --- | --- | --- | --- |\n| original | (2,3) | (3,1) | (1,0) | 1*3 + 0*1 = 3 | 40 |\n| transpose | (3,2) | (1,3) | (0,1) | 0*1 + 1*3 = 3 | 40 |\n| transpose | (3,2) | (1,3) | (2,1) | 2*1 + 1*3 = 5 | 60 |\n\nThe first two rows name the same storage slot through two views. That is aliasing: writing `99` through transposed index `(0,1)` also changes original index `(1,0)`, because no element was copied."
+        },
+        {
+          "id": "wrong-strides",
+          "markdown": "Now repeat the transposed reads with the faulty contiguous strides `(2,1)`. Index `(0,1)` gives offset `0*2 + 1*1 = 1`, which holds `20` instead of `40`. The value is finite and in bounds and the shape is still `(3,2)`, so shape, finiteness and bounds checks all pass.\n\nSome positions agree by coincidence. At `(0,0)` both stride pairs give offset `0`. At `(2,1)` both give offset `5`: `2*1 + 1*3` and `2*2 + 1*1`. A test that reads only the first and last elements misses the bug. Pick an asymmetric position such as `(0,1)` and compare with a reference that applies the intended strides.\n\nTwo habits prevent most stride mistakes:\n\n1. Say the unit before you compute. In this course strides count elements unless they are labeled bytes. Multiply by the element size only when you need a byte offset.\n2. Include the base offset. A view that starts at offset `o` adds `o` to every address it computes."
+        },
+        {
+          "id": "self-check",
+          "markdown": "Before moving on, work these without looking back, then compare.\n\n- In the original `(2,3)` view, index `(0,2)` has offset `0*3 + 2*1 = 2`, value `30`.\n- In the transposed `(3,2)` view, index `(2,0)` has offset `2*1 + 0*3 = 2`, value `30`. Both name the same slot.\n- With the faulty strides `(2,1)`, transposed index `(2,0)` would read offset `4`, value `50`.\n\nIf you can explain why the second and third lines differ while both are finite and in bounds, you have the idea the next episodes rely on."
+        }
+      ],
+      "classification": "optional",
+      "plannedMinutes": 8,
+      "additionalEpisodes": 1
+    },
+    {
+      "id": "remedial-chain-rule",
+      "anchorEpisodeId": "fnd-e03-02",
+      "objectiveIds": [
+        "fnd-o03-02"
+      ],
+      "title": "The chain rule, one link at a time",
+      "blocks": [
+        {
+          "id": "links",
+          "markdown": "This short personal episode slows down one idea from *Derivatives as sensitivity; the chain rule*. It introduces no new material and is not graded. It was added because a focused second pass helps here more than another question would, and it comes before later episodes that build on this idea.\n\nUse the episode's model: `prediction = w*x`, residual `r = prediction - y`, loss `L = r*r/2`, at `x = 2`, `y = 5`, `w = 1`. Forward first: `prediction = 2`, `r = -3`, `L = 4.5`.\n\nThen write one row per link and multiply along the path.\n\n| Link | Local derivative | Value here |\n| --- | --- | --- |\n| loss to residual | dL/dr = r | -3 |\n| residual to prediction | dr/dprediction = 1 | 1 |\n| prediction to weight | dprediction/dw = x | 2 |\n| product | dL/dw = r*x | -6 |\n\nThe product is the gradient: `dL/dw = -6`. A missing row is the most common slip. Dropping the last link returns `-3`, the residual alone."
+        },
+        {
+          "id": "check",
+          "markdown": "Two independent checks catch a missing link.\n\n**Prediction from the derivative.** Raise `w` by `0.01`. The linear estimate changes the loss by `-6*0.01 = -0.06`, predicting `4.44`. The exact new prediction is `2.02`, the residual `-2.98` and the loss `4.4402`. The small gap, `0.0002`, is the curvature the local line leaves out, not an error in the derivative.\n\n**Central difference.** Evaluate the loss slightly above and below `w = 1` and divide by the width of the step. With `h = 1e-5` this agrees with `-6` to many digits, without using any derivative rule.\n\n**Units.** Loss per residual, times residual per prediction, times prediction per weight leaves loss per weight. If your units do not cancel to loss per weight, a link is missing."
+        },
+        {
+          "id": "bias",
+          "markdown": "Add a bias: `prediction = w*x + b`. The same loss now has two partial derivatives, `dL/dw = r*x` and `dL/db = r`. With `w = 1`, `b = 0`, `x = 2`, `y = 5` they are `-6` and `-3`.\n\nNow set `x = 0` with `w = 1`, `b = 0`, `y = 5`. The residual is `-5`, so `dL/db = -5`, but `dL/dw = r*0 = 0`: changing `w` cannot affect `w*0`. A zero gradient for one parameter is not a sign that the loss is flat in every direction."
+        }
+      ],
+      "classification": "optional",
+      "plannedMinutes": 8,
+      "additionalEpisodes": 1
+    },
+    {
+      "id": "remedial-backward-fanout",
+      "anchorEpisodeId": "fnd-e04-02",
+      "objectiveIds": [
+        "fnd-o04-02"
+      ],
+      "title": "Backward: accumulate every path",
+      "blocks": [
+        {
+          "id": "accumulate",
+          "markdown": "This short personal episode slows down one idea from *Backward propagates sensitivities*. It introduces no new material and is not graded. It was added because a focused second pass helps here more than another question would, and it comes before later episodes that build on this idea.\n\nTake the episode's graph: `x = 3`, `s = x*x`, `z = s + x`, with `z` as the scalar objective. Seed `bar(z) = 1` and visit each operation once, in reverse. Add every contribution to the input's running total; never overwrite it.\n\n| Step | Operation | Contribution | Running bar(x) |\n| --- | --- | --- | --- |\n| 1 | z = s + x, slot x | 1 * 1 = 1 | 1 |\n| 1 | z = s + x, slot s | bar(s) = 1 | 1 |\n| 2 | s = x*x, first slot | bar(s) * x = 3 | 4 |\n| 2 | s = x*x, second slot | bar(s) * x = 3 | 7 |\n\nThe total is `bar(x) = 7`, matching the symbolic derivative `2*x + 1 = 7`. A rule that updates only one slot when both parents are the same node stops at `4`. A rule that overwrites instead of adding keeps only the last contribution and returns `3`."
+        },
+        {
+          "id": "read-then-write",
+          "markdown": "Backward computes sensitivities. It does not change parameters.\n\nTrace the episode's loss: `p = w*x + b`, `r = p - y`, `L = r*r/2`, with `w = 2`, `x = 3`, `b = 1`, `y = 8`. Forward gives `p = 7`, `r = -1`, `L = 0.5`. Backward gives `bar(p) = -1`, `bar(w) = bar(p)*x = -3`, `bar(b) = -1` and `bar(x) = bar(p)*w = -2`.\n\nAfter backward, `w` is still `2` and `b` is still `1`. Only the optimizer step writes them. With rate `0.1`, plain descent gives `w = 2 - 0.1*(-3) = 2.3` and `b = 1 - 0.1*(-1) = 1.1`. The new forward pass predicts `2.3*3 + 1.1 = 8`, so the loss is zero on this one example. That is a lucky illustration, not a convergence guarantee.\n\nKeep the order fixed in your head: forward, backward (read values, write gradients), then update (read gradients, write parameters)."
+        }
+      ],
+      "classification": "optional",
+      "plannedMinutes": 8,
+      "additionalEpisodes": 1
+    },
+    {
+      "id": "remedial-attention-mask",
+      "anchorEpisodeId": "ttf-e07-02",
+      "objectiveIds": [
+        "ttf-o07-02"
+      ],
+      "title": "Masked attention, one query by hand",
+      "blocks": [
+        {
+          "id": "forward",
+          "markdown": "This short personal episode slows down one idea from *Attention scores, masking, softmax and weighted values*. It introduces no new material and is not graded. It was added because a focused second pass helps here more than another question would, and it comes before later episodes that build on this idea.\n\nWork the episode's single query with head width one: query `q = 1`, keys `[0, log(3)]`, scalar values `[2, 6]`.\n\n1. Scores: `q*k / sqrt(1)` gives `[0, log(3)]`.\n2. Softmax over the allowed keys: `exp` gives `[1, 3]`, and dividing by their sum `4` gives weights `[0.25, 0.75]`.\n3. Output: `0.25*2 + 0.75*6 = 5`.\n\nSubtracting the largest score first, giving `[-log(3), 0]`, produces the same weights and avoids overflow on large scores."
+        },
+        {
+          "id": "mask",
+          "markdown": "A mask changes which keys take part in the normalization. It is not a filter applied to outputs afterwards.\n\n- Only the first key allowed: its weight is `1`, so the output is `2`.\n- Blocked score wrongly replaced by `0` instead of being excluded: both scores are `0`, the weights become `[0.5, 0.5]` and the output is `4`. The blocked value leaks in.\n\nUse negative infinity for a blocked score, or sum only over allowed indices. Decide in advance what an all-blocked row should return instead of normalizing an empty set."
+        },
+        {
+          "id": "backward",
+          "markdown": "The same row also checks the backward formulas. Use half squared loss with target `1`, so the output sensitivity is `G = 5 - 1 = 4`.\n\n- Values: `dV = P*G = [1, 3]`.\n- Probabilities: `dP = G*V = [8, 24]`. Their P-weighted mean is `0.25*8 + 0.75*24 = 20`.\n- Scores: `dS = P*(dP - 20) = [-3, 3]`.\n- Query and keys (scale `1`): `dQ = -3*0 + 3*log(3) = 3*log(3)` and `dK = dS*q = [-3, 3]`.\n\nEach number can be checked by a central difference on the forward computation alone. Checking that the probabilities sum to one cannot catch these errors: that sum is always one."
+        }
+      ],
+      "classification": "optional",
+      "plannedMinutes": 8,
+      "additionalEpisodes": 1
+    }
+  ]
+}
