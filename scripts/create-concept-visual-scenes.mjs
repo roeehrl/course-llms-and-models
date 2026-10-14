@@ -2301,7 +2301,7 @@ const loopScene = (() => {
       ...text(`lp-ref-${k}`, after(800 * k, cat(`${k}: g `, r3(gRef[k - 1]), " → w ", r3(wRef[k])), `${k}: …`), 16, 90 + 28 * k),
       opacity: rowOpacity(k),
     })),
-    bold("lp-ref-loss", after(2400, cat("loss → ", r3(Lref)), "loss → …"), 16, 206, 18, blue),
+    bold("lp-ref-loss", after(2400, cat("loss → ", r3(Lref)), "loss → …"), 16, add(150, mul(28, sub(K, 1))), 18, blue),
   ]);
   const chosen = card("lp-var", 196, lilac, purple, "CHOSEN LOOP", [
     text("lp-rule", pick(variant, VARIANTS, ["w −= η·g", "w += η·g (bug)", "w −= η·Σg (bug)"]), 16, 62),
@@ -2314,7 +2314,7 @@ const loopScene = (() => {
       ),
       opacity: rowOpacity(k),
     })),
-    bold("lp-var-loss", after(2400, cat("loss ", r3(L0), " → ", r3(Lvar)), "loss …"), 16, 180, 18, purple),
+    bold("lp-var-loss", after(2400, cat("loss ", r3(L0), " → ", r3(Lvar)), "loss …"), 16, add(124, mul(28, sub(K, 1))), 18, purple),
   ]);
   const xOf = (w) => add(24, mul(40, add(op("clamp", w, -2, 4), 2)));
   const dot = (id, w, y, fill, opacity) => ({ ...circle(id, xOf(w), y, 6, fill), opacity });
@@ -2368,7 +2368,13 @@ const loopScene = (() => {
       224,
     ),
   ]);
-  return build({
+  // Both loop cards grow by one 28-unit row per chosen step (218 and 196 at three steps), so
+  // no empty band is left below the last row; compact positions follow the card heights.
+  const refHeight = add(162, mul(28, sub(K, 1))),
+    varHeight = add(140, mul(28, sub(K, 1)));
+  reference.node.children[0].height = refHeight;
+  chosen.node.children[0].height = varHeight;
+  const scene = build({
     id: "concept-loop-states",
     title: "Order the steps. Then judge them.",
     description:
@@ -2398,6 +2404,12 @@ const loopScene = (() => {
     accessible:
       "A one-weight training loop with the lesson's numbers: prediction w·x with input 2, target 4, half squared error and learning rate 0.1, starting at w = 1. The reference loop subtracts the learning rate times the fresh gradient: the first gradient is −4, so w becomes 1.4; at that weight the gradient is −2.4, so w becomes 1.64, and the loss falls from 2 to 0.72 and then 0.2592. Adding instead of subtracting sends w to 0.6 after one step, where the loss is 3.92. Keeping the first gradient in an uncleared buffer adds it to the second: the second step uses −6.4 and sends w from 1.4 to 2.04. Its loss, 0.0032, is lower than the reference's, yet the state transition is wrong: loss improvement does not validate the algorithm. The verdict names the cause. With w0 = 2 every gradient is zero, so all three loops agree and the bug is hidden by the zero gradient; with one step the uncleared buffer has nothing stale in it yet, so it agrees with the reference for that reason. The number line shows each loop's weights from −2 to 4 (values beyond are pinned to the ends), with the target weight 2 marked.",
   });
+  // Compact stacking: reference at 88, then the chosen loop, then the number line.
+  const o = scene.layouts.compact.overrides;
+  o["lp-var"] = { x: 16, y: add(104, refHeight) };
+  o["lp-line"] = { x: 16, y: add(120, refHeight, varHeight) };
+  o["concept-loop-states-canvas"] = { width: 320, height: add(376, refHeight, varHeight) };
+  return scene;
 })();
 
 // ============================================================ 19 queries, keys and values
@@ -2763,11 +2775,13 @@ const mergeScene = (() => {
   const signed = (v) => iff(flipped, -v, v);
   const dA = [0, 1].map((i) => signed(old[i] - A[i])),
     dB = [0, 1].map((i) => signed(old[i] - B[i]));
-  const g = [0, 1].map((i) => div(iff(aOnly, dA[i], div(add(dA[i], dB[i]), 2)), iff(divides, kc, 1)));
+  const mean = [0, 1].map((i) => iff(aOnly, dA[i], div(add(dA[i], dB[i]), 2)));
+  // The source uses the mean itself; the misreading divides it by the batch-count setting.
+  const g = mean.map((v) => div(v, iff(divides, kc, 1)));
   const dir = g.map((v) => mul(add(1, beta), v));
   const nw = [0, 1].map((i) => iff(none, old[i], sub(old[i], mul(lr, dir[i]))));
   const vec = (a, b, lead = "") => cat(lead, "[", r3(a), ", ", r3(b), "]");
-  const local = card("om-local", 190, ice, blue, "LOCAL RESULTS", [
+  const local = card("om-local", 218, ice, blue, "LOCAL RESULTS", [
     text("om-old", "old w [10, 20]", 16, 62),
     text("om-a", after(800, iff(none, "A [9, 18]: invalid", vec(dA[0], dA[1], "A [9, 18]: Δ ")), "A …"), 16, 90),
     text(
@@ -2776,8 +2790,18 @@ const mergeScene = (() => {
       16,
       118,
     ),
-    text("om-g", after(1600, iff(none, "mean g: no valid input", vec(g[0], g[1], "mean g ")), "mean g …"), 16, 146),
-    text("om-sign", cat("Δ = ", iff(flipped, "local − old (bug)", "old − local")), 16, 174, 17, muted),
+    text("om-g", after(1600, iff(none, "mean g: no valid input", vec(mean[0], mean[1], "mean g ")), "mean g …"), 16, 146),
+    text(
+      "om-used",
+      after(
+        1600,
+        iff(none, "used: nothing", iff(divides, cat("bug ÷", kc, ": [", r3(g[0]), ", ", r3(g[1]), "]"), "used: mean g as is")),
+        "used …",
+      ),
+      16,
+      174,
+    ),
+    text("om-sign", cat("Δ = ", iff(flipped, "local − old (bug)", "old − local")), 16, 202, 17, muted),
   ]);
   const L = mul(-1, floor(div(-10, kc))); // ceiling division, as the chunking code does
   const len = [0, 1, 2, 3, 4].map((i) => op("clamp", sub(10, mul(i, L)), 0, L));

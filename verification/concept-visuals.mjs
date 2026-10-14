@@ -598,6 +598,10 @@ mutated("concept-loop-states", "lp-verdict", "text",
   (c) => c.time >= 3200 && c.exact["lp-loss-note"] === "loss fell, still wrong", "loop judged by its loss instead of its transition",
   { mustPassElsewhere: final({ variant: "Correct loop", w0: 1 }, 4000) });
 
+mutated("concept-loop-states", "lp-ref-bg", "height", 218,
+  (c) => c.state.steps < 3, "loop card sized for three steps whatever the step count",
+  { mustPassElsewhere: final({ steps: 3 }, 4000) });
+
 // 19 queries, keys and values
 const fx19 = st("fixture"),
   XS19 = { "Lesson X": [[1, 0], [0, 2]], "Identity X": [[1, 0], [0, 1]], "All-ones X": [[1, 1], [1, 1]] };
@@ -659,7 +663,7 @@ const v22 = st("valid"),
   fl22 = eq(st("sign"), "local − old (flipped)"),
   div22 = iff(eq(st("countUse"), "Also divides g (bug)"), st("chunks"), 1);
 const sgn22 = (v) => iff(fl22, -v, v);
-const g22 = (i) => div(div(add(sgn22([1, 2][i]), iff(eq(v22, "A only"), 0, sgn22([2, -1][i]))), 2), div22);
+const g22 = (i) => div(add(sgn22([1, 2][i]), iff(eq(v22, "A only"), 0, sgn22([2, -1][i]))), 2);
 mutated("concept-outer-merge", "om-g", "text",
   after(1600, iff(eq(v22, "None"), "mean g: no valid input", cat("mean g [", r3(g22(0)), ", ", r3(g22(1)), "]")), "mean g …"),
   from({ valid: "A only" }, 1600), "invalid B averaged in as zero",
@@ -669,6 +673,10 @@ mutated("concept-outer-merge", "om-dir", "text",
   after(2400, iff(eq(v22, "None"), "dir: none", cat("dir [", r3(gOk22(0)), ", ", r3(gOk22(1)), "]")), "dir …"),
   (c) => c.time >= 2400 && c.state.beta > 0 && c.state.valid !== "None", "momentum term omitted from the direction",
   { mustPassElsewhere: final({ beta: 0, valid: "A and B" }, 4800) });
+mutated("concept-outer-merge", "om-g", "text",
+  after(1600, iff(eq(v22, "None"), "mean g: no valid input", cat("mean g [", r3(gOk22(0)), ", ", r3(gOk22(1)), "]")), "mean g …"),
+  (c) => c.time >= 1600 && c.state.countUse === "Also divides g (bug)" && c.state.chunks > 1 && c.state.valid !== "None",
+  "divided value labelled as the mean", { mustPassElsewhere: final({ countUse: "Chunks only (source)", valid: "A and B" }, 4800) });
 mutated("concept-outer-merge", "om-verdict", "text",
   (old) => iff(and(ge(t, 4000), eq(v22, "None")), "no change: zero update", old),
   from({ valid: "None" }, 4000), "empty valid set reported as a zero update",

@@ -126757,7 +126757,27 @@
               "fill": "#E7EFFB",
               "kind": "rect",
               "width": 288,
-              "height": 218,
+              "height": {
+                "op": "add",
+                "args": [
+                  162,
+                  {
+                    "op": "mul",
+                    "args": [
+                      28,
+                      {
+                        "op": "sub",
+                        "args": [
+                          {
+                            "state": "steps"
+                          },
+                          1
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
               "cornerRadius": 12
             },
             {
@@ -127304,7 +127324,27 @@
             {
               "id": "lp-ref-loss",
               "x": 16,
-              "y": 206,
+              "y": {
+                "op": "add",
+                "args": [
+                  150,
+                  {
+                    "op": "mul",
+                    "args": [
+                      28,
+                      {
+                        "op": "sub",
+                        "args": [
+                          {
+                            "state": "steps"
+                          },
+                          1
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
               "fill": "#365CA3",
               "kind": "text",
               "text": {
@@ -127577,7 +127617,27 @@
               "fill": "#F0EAF9",
               "kind": "rect",
               "width": 288,
-              "height": 196,
+              "height": {
+                "op": "add",
+                "args": [
+                  140,
+                  {
+                    "op": "mul",
+                    "args": [
+                      28,
+                      {
+                        "op": "sub",
+                        "args": [
+                          {
+                            "state": "steps"
+                          },
+                          1
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
               "cornerRadius": 12
             },
             {
@@ -128579,7 +128639,27 @@
             {
               "id": "lp-var-loss",
               "x": 16,
-              "y": 180,
+              "y": {
+                "op": "add",
+                "args": [
+                  124,
+                  {
+                    "op": "mul",
+                    "args": [
+                      28,
+                      {
+                        "op": "sub",
+                        "args": [
+                          {
+                            "state": "steps"
+                          },
+                          1
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
               "fill": "#69439D",
               "kind": "text",
               "text": {
@@ -133058,15 +133138,135 @@
             },
             "lp-var": {
               "x": 16,
-              "y": 322
+              "y": {
+                "op": "add",
+                "args": [
+                  104,
+                  {
+                    "op": "add",
+                    "args": [
+                      162,
+                      {
+                        "op": "mul",
+                        "args": [
+                          28,
+                          {
+                            "op": "sub",
+                            "args": [
+                              {
+                                "state": "steps"
+                              },
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             "lp-line": {
               "x": 16,
-              "y": 534
+              "y": {
+                "op": "add",
+                "args": [
+                  120,
+                  {
+                    "op": "add",
+                    "args": [
+                      162,
+                      {
+                        "op": "mul",
+                        "args": [
+                          28,
+                          {
+                            "op": "sub",
+                            "args": [
+                              {
+                                "state": "steps"
+                              },
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "op": "add",
+                    "args": [
+                      140,
+                      {
+                        "op": "mul",
+                        "args": [
+                          28,
+                          {
+                            "op": "sub",
+                            "args": [
+                              {
+                                "state": "steps"
+                              },
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             "concept-loop-states-canvas": {
               "width": 320,
-              "height": 790
+              "height": {
+                "op": "add",
+                "args": [
+                  376,
+                  {
+                    "op": "add",
+                    "args": [
+                      162,
+                      {
+                        "op": "mul",
+                        "args": [
+                          28,
+                          {
+                            "op": "sub",
+                            "args": [
+                              {
+                                "state": "steps"
+                              },
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "op": "add",
+                    "args": [
+                      140,
+                      {
+                        "op": "mul",
+                        "args": [
+                          28,
+                          {
+                            "op": "sub",
+                            "args": [
+                              {
+                                "state": "steps"
+                              },
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
             }
           }
         },
@@ -145309,7 +145509,7 @@
           "fill": "#F8FAF8",
           "kind": "rect",
           "width": 960,
-          "height": 466,
+          "height": 494,
           "cornerRadius": 22
         },
         {
@@ -145344,7 +145544,7 @@
               "fill": "#E7EFFB",
               "kind": "rect",
               "width": 288,
-              "height": 190,
+              "height": 218,
               "cornerRadius": 12
             },
             {
@@ -145637,79 +145837,15 @@
                                     "op": "mul",
                                     "args": [
                                       {
-                                        "op": "div",
+                                        "op": "if",
                                         "args": [
                                           {
-                                            "op": "if",
+                                            "op": "eq",
                                             "args": [
                                               {
-                                                "op": "eq",
-                                                "args": [
-                                                  {
-                                                    "state": "valid"
-                                                  },
-                                                  "A only"
-                                                ]
+                                                "state": "valid"
                                               },
-                                              {
-                                                "op": "if",
-                                                "args": [
-                                                  {
-                                                    "op": "eq",
-                                                    "args": [
-                                                      {
-                                                        "state": "sign"
-                                                      },
-                                                      "local − old (flipped)"
-                                                    ]
-                                                  },
-                                                  -1,
-                                                  1
-                                                ]
-                                              },
-                                              {
-                                                "op": "div",
-                                                "args": [
-                                                  {
-                                                    "op": "add",
-                                                    "args": [
-                                                      {
-                                                        "op": "if",
-                                                        "args": [
-                                                          {
-                                                            "op": "eq",
-                                                            "args": [
-                                                              {
-                                                                "state": "sign"
-                                                              },
-                                                              "local − old (flipped)"
-                                                            ]
-                                                          },
-                                                          -1,
-                                                          1
-                                                        ]
-                                                      },
-                                                      {
-                                                        "op": "if",
-                                                        "args": [
-                                                          {
-                                                            "op": "eq",
-                                                            "args": [
-                                                              {
-                                                                "state": "sign"
-                                                              },
-                                                              "local − old (flipped)"
-                                                            ]
-                                                          },
-                                                          -2,
-                                                          2
-                                                        ]
-                                                      }
-                                                    ]
-                                                  },
-                                                  2
-                                                ]
-                                              }
+                                              "A only"
                                             ]
                                           },
                                           {
@@ -145719,15 +145855,56 @@
                                                 "op": "eq",
                                                 "args": [
                                                   {
-                                                    "state": "countUse"
+                                                    "state": "sign"
                                                   },
-                                                  "Also divides g (bug)"
+                                                  "local − old (flipped)"
                                                 ]
                                               },
-                                              {
-                                                "state": "chunks"
-                                              },
+                                              -1,
                                               1
+                                            ]
+                                          },
+                                          {
+                                            "op": "div",
+                                            "args": [
+                                              {
+                                                "op": "add",
+                                                "args": [
+                                                  {
+                                                    "op": "if",
+                                                    "args": [
+                                                      {
+                                                        "op": "eq",
+                                                        "args": [
+                                                          {
+                                                            "state": "sign"
+                                                          },
+                                                          "local − old (flipped)"
+                                                        ]
+                                                      },
+                                                      -1,
+                                                      1
+                                                    ]
+                                                  },
+                                                  {
+                                                    "op": "if",
+                                                    "args": [
+                                                      {
+                                                        "op": "eq",
+                                                        "args": [
+                                                          {
+                                                            "state": "sign"
+                                                          },
+                                                          "local − old (flipped)"
+                                                        ]
+                                                      },
+                                                      -2,
+                                                      2
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              2
                                             ]
                                           }
                                         ]
@@ -145751,79 +145928,15 @@
                                     "op": "mul",
                                     "args": [
                                       {
-                                        "op": "div",
+                                        "op": "if",
                                         "args": [
                                           {
-                                            "op": "if",
+                                            "op": "eq",
                                             "args": [
                                               {
-                                                "op": "eq",
-                                                "args": [
-                                                  {
-                                                    "state": "valid"
-                                                  },
-                                                  "A only"
-                                                ]
+                                                "state": "valid"
                                               },
-                                              {
-                                                "op": "if",
-                                                "args": [
-                                                  {
-                                                    "op": "eq",
-                                                    "args": [
-                                                      {
-                                                        "state": "sign"
-                                                      },
-                                                      "local − old (flipped)"
-                                                    ]
-                                                  },
-                                                  -2,
-                                                  2
-                                                ]
-                                              },
-                                              {
-                                                "op": "div",
-                                                "args": [
-                                                  {
-                                                    "op": "add",
-                                                    "args": [
-                                                      {
-                                                        "op": "if",
-                                                        "args": [
-                                                          {
-                                                            "op": "eq",
-                                                            "args": [
-                                                              {
-                                                                "state": "sign"
-                                                              },
-                                                              "local − old (flipped)"
-                                                            ]
-                                                          },
-                                                          -2,
-                                                          2
-                                                        ]
-                                                      },
-                                                      {
-                                                        "op": "if",
-                                                        "args": [
-                                                          {
-                                                            "op": "eq",
-                                                            "args": [
-                                                              {
-                                                                "state": "sign"
-                                                              },
-                                                              "local − old (flipped)"
-                                                            ]
-                                                          },
-                                                          1,
-                                                          -1
-                                                        ]
-                                                      }
-                                                    ]
-                                                  },
-                                                  2
-                                                ]
-                                              }
+                                              "A only"
                                             ]
                                           },
                                           {
@@ -145833,15 +145946,56 @@
                                                 "op": "eq",
                                                 "args": [
                                                   {
-                                                    "state": "countUse"
+                                                    "state": "sign"
                                                   },
-                                                  "Also divides g (bug)"
+                                                  "local − old (flipped)"
                                                 ]
                                               },
+                                              -2,
+                                              2
+                                            ]
+                                          },
+                                          {
+                                            "op": "div",
+                                            "args": [
                                               {
-                                                "state": "chunks"
+                                                "op": "add",
+                                                "args": [
+                                                  {
+                                                    "op": "if",
+                                                    "args": [
+                                                      {
+                                                        "op": "eq",
+                                                        "args": [
+                                                          {
+                                                            "state": "sign"
+                                                          },
+                                                          "local − old (flipped)"
+                                                        ]
+                                                      },
+                                                      -2,
+                                                      2
+                                                    ]
+                                                  },
+                                                  {
+                                                    "op": "if",
+                                                    "args": [
+                                                      {
+                                                        "op": "eq",
+                                                        "args": [
+                                                          {
+                                                            "state": "sign"
+                                                          },
+                                                          "local − old (flipped)"
+                                                        ]
+                                                      },
+                                                      1,
+                                                      -1
+                                                    ]
+                                                  }
+                                                ]
                                               },
-                                              1
+                                              2
                                             ]
                                           }
                                         ]
@@ -145865,9 +146019,300 @@
               "fontSize": 17
             },
             {
-              "id": "om-sign",
+              "id": "om-used",
               "x": 16,
               "y": 174,
+              "fill": "#19383E",
+              "kind": "text",
+              "text": {
+                "op": "if",
+                "args": [
+                  {
+                    "op": "gte",
+                    "args": [
+                      {
+                        "time": true
+                      },
+                      1600
+                    ]
+                  },
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "valid"
+                          },
+                          "None"
+                        ]
+                      },
+                      "used: nothing",
+                      {
+                        "op": "if",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "countUse"
+                              },
+                              "Also divides g (bug)"
+                            ]
+                          },
+                          {
+                            "op": "concat",
+                            "args": [
+                              "bug ÷",
+                              {
+                                "state": "chunks"
+                              },
+                              ": [",
+                              {
+                                "op": "div",
+                                "args": [
+                                  {
+                                    "op": "round",
+                                    "args": [
+                                      {
+                                        "op": "mul",
+                                        "args": [
+                                          {
+                                            "op": "div",
+                                            "args": [
+                                              {
+                                                "op": "if",
+                                                "args": [
+                                                  {
+                                                    "op": "eq",
+                                                    "args": [
+                                                      {
+                                                        "state": "valid"
+                                                      },
+                                                      "A only"
+                                                    ]
+                                                  },
+                                                  {
+                                                    "op": "if",
+                                                    "args": [
+                                                      {
+                                                        "op": "eq",
+                                                        "args": [
+                                                          {
+                                                            "state": "sign"
+                                                          },
+                                                          "local − old (flipped)"
+                                                        ]
+                                                      },
+                                                      -1,
+                                                      1
+                                                    ]
+                                                  },
+                                                  {
+                                                    "op": "div",
+                                                    "args": [
+                                                      {
+                                                        "op": "add",
+                                                        "args": [
+                                                          {
+                                                            "op": "if",
+                                                            "args": [
+                                                              {
+                                                                "op": "eq",
+                                                                "args": [
+                                                                  {
+                                                                    "state": "sign"
+                                                                  },
+                                                                  "local − old (flipped)"
+                                                                ]
+                                                              },
+                                                              -1,
+                                                              1
+                                                            ]
+                                                          },
+                                                          {
+                                                            "op": "if",
+                                                            "args": [
+                                                              {
+                                                                "op": "eq",
+                                                                "args": [
+                                                                  {
+                                                                    "state": "sign"
+                                                                  },
+                                                                  "local − old (flipped)"
+                                                                ]
+                                                              },
+                                                              -2,
+                                                              2
+                                                            ]
+                                                          }
+                                                        ]
+                                                      },
+                                                      2
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "op": "if",
+                                                "args": [
+                                                  {
+                                                    "op": "eq",
+                                                    "args": [
+                                                      {
+                                                        "state": "countUse"
+                                                      },
+                                                      "Also divides g (bug)"
+                                                    ]
+                                                  },
+                                                  {
+                                                    "state": "chunks"
+                                                  },
+                                                  1
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          1000
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  1000
+                                ]
+                              },
+                              ", ",
+                              {
+                                "op": "div",
+                                "args": [
+                                  {
+                                    "op": "round",
+                                    "args": [
+                                      {
+                                        "op": "mul",
+                                        "args": [
+                                          {
+                                            "op": "div",
+                                            "args": [
+                                              {
+                                                "op": "if",
+                                                "args": [
+                                                  {
+                                                    "op": "eq",
+                                                    "args": [
+                                                      {
+                                                        "state": "valid"
+                                                      },
+                                                      "A only"
+                                                    ]
+                                                  },
+                                                  {
+                                                    "op": "if",
+                                                    "args": [
+                                                      {
+                                                        "op": "eq",
+                                                        "args": [
+                                                          {
+                                                            "state": "sign"
+                                                          },
+                                                          "local − old (flipped)"
+                                                        ]
+                                                      },
+                                                      -2,
+                                                      2
+                                                    ]
+                                                  },
+                                                  {
+                                                    "op": "div",
+                                                    "args": [
+                                                      {
+                                                        "op": "add",
+                                                        "args": [
+                                                          {
+                                                            "op": "if",
+                                                            "args": [
+                                                              {
+                                                                "op": "eq",
+                                                                "args": [
+                                                                  {
+                                                                    "state": "sign"
+                                                                  },
+                                                                  "local − old (flipped)"
+                                                                ]
+                                                              },
+                                                              -2,
+                                                              2
+                                                            ]
+                                                          },
+                                                          {
+                                                            "op": "if",
+                                                            "args": [
+                                                              {
+                                                                "op": "eq",
+                                                                "args": [
+                                                                  {
+                                                                    "state": "sign"
+                                                                  },
+                                                                  "local − old (flipped)"
+                                                                ]
+                                                              },
+                                                              1,
+                                                              -1
+                                                            ]
+                                                          }
+                                                        ]
+                                                      },
+                                                      2
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "op": "if",
+                                                "args": [
+                                                  {
+                                                    "op": "eq",
+                                                    "args": [
+                                                      {
+                                                        "state": "countUse"
+                                                      },
+                                                      "Also divides g (bug)"
+                                                    ]
+                                                  },
+                                                  {
+                                                    "state": "chunks"
+                                                  },
+                                                  1
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          1000
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  1000
+                                ]
+                              },
+                              "]"
+                            ]
+                          },
+                          "used: mean g as is"
+                        ]
+                      }
+                    ]
+                  },
+                  "used …"
+                ]
+              },
+              "fontSize": 17
+            },
+            {
+              "id": "om-sign",
+              "x": 16,
+              "y": 202,
               "fill": "#4C656D",
               "kind": "text",
               "text": {
@@ -145899,7 +146344,7 @@
         {
           "id": "om-chunks",
           "x": 24,
-          "y": 302,
+          "y": 330,
           "kind": "group",
           "children": [
             {
@@ -149258,7 +149703,7 @@
       "layouts": {
         "compact": {
           "width": 320,
-          "height": 974,
+          "height": 1002,
           "overrides": {
             "concept-outer-merge-kicker": {
               "x": 16
@@ -149272,25 +149717,25 @@
             },
             "om-outer": {
               "x": 16,
-              "y": 294
+              "y": 322
             },
             "om-plane": {
               "x": 16,
-              "y": 566
+              "y": 594
             },
             "om-chunks": {
               "x": 16,
-              "y": 818
+              "y": 846
             },
             "concept-outer-merge-canvas": {
               "width": 320,
-              "height": 974
+              "height": 1002
             }
           }
         },
         "expanded": {
           "width": 960,
-          "height": 466
+          "height": 494
         },
         "breakpoint": 800
       },

@@ -1485,6 +1485,12 @@ for w0 in [0, 0.5, 1, 2, 3]:
                              'lp-rule': LOOP_RULES[variant]}
                     numeric, geometry = {}, {}
                     xs = lambda w: 24 + 40 * (min(4, max(-2, float(w))) + 2)
+                    # Both loop cards are sized to the chosen number of steps: one 28-unit row each.
+                    rows_drawn = sum(1 for k in range(1, 4) if k <= steps)
+                    geometry['lp-ref-bg'] = {'height': 162 + 28 * (rows_drawn - 1)}
+                    geometry['lp-var-bg'] = {'height': 140 + 28 * (rows_drawn - 1)}
+                    geometry['lp-ref-loss'] = {'y': 90 + 28 * rows_drawn + 32}
+                    geometry['lp-var-loss'] = {'y': 62 + 28 * rows_drawn + 34}
                     geometry['lp-ref-dot-0'] = {'x': xs(W0), 'opacity': 1.0}
                     geometry['lp-var-dot-0'] = {'x': xs(W0), 'opacity': 1.0}
                     for k in range(1, 4):
@@ -1702,12 +1708,11 @@ def outer_merge(valid, flipped, beta, lr, count, divides):
     eligible = [pseudo[n] for n in valid]
     if not eligible:
         return pseudo, None  # the merge rejects an empty valid set
-    g = [Fraction(sum(col), len(eligible)) for col in zip(*eligible)]
-    if divides:
-        g = [v / count for v in g]
+    mean = [Fraction(sum(col), len(eligible)) for col in zip(*eligible)]
+    g = [v / count for v in mean] if divides else list(mean)
     momentum = [beta * 0 + v for v in g]  # old buffer is zero
     direction = [gv + beta * mv for gv, mv in zip(g, momentum)]
-    return pseudo, dict(g=g, direction=direction, new=[o - lr * d for o, d in zip(OLD_W, direction)])
+    return pseudo, dict(mean=mean, g=g, direction=direction, new=[o - lr * d for o, d in zip(OLD_W, direction)])
 
 
 def chunk_lengths(n, count):
@@ -1759,8 +1764,20 @@ for valid, names in VALID_SETS.items():
                                 exact['om-b'] = vec3('B [8, 21]: Δ ', *pseudo['B']) if 'B' in names else 'B [8, 21]: invalid'
                             else:
                                 exact['om-a'], exact['om-b'] = 'A …', 'B …'
-                            exact['om-g'] = (('mean g: no valid input' if m is None else vec3('mean g ', *m['g']))
+                            # The mean line always shows the true mean; the bug's divided value has its own label.
+                            if m is not None:
+                                assert m['mean'] == [Fraction(sum(pseudo[n][i] for n in names), len(names)) for i in range(2)]
+                                assert (m['g'] != m['mean']) == (divides and count > 1)
+                            exact['om-g'] = (('mean g: no valid input' if m is None else vec3('mean g ', *m['mean']))
                                              if time >= 1600 else 'mean g …')
+                            if time < 1600:
+                                exact['om-used'] = 'used …'
+                            elif m is None:
+                                exact['om-used'] = 'used: nothing'
+                            elif divides:
+                                exact['om-used'] = f'bug ÷{count}: [{js(r3(m["g"][0]))}, {js(r3(m["g"][1]))}]'
+                            else:
+                                exact['om-used'] = 'used: mean g as is'
                             exact['om-dir'] = (('dir: none' if m is None else vec3('dir ', *m['direction']))
                                                if time >= 2400 else 'dir …')
                             exact['om-new'] = vec3('new ', *new) if time >= 3200 else 'new …'
