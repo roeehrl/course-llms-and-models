@@ -1,3 +1,46 @@
+# Core 0.1.38 published, accepted and deployed; v0.1.36 and v0.1.37 dead tags — 2026-10-14
+
+- PUBLISHED Core 0.1.38 prerelease (tag object 9d72b3c on ded66f2, run
+  38599534149, artifact 11912454761 digest e27d5467…, manifest 9199311b…; 584
+  source members compared; hosted bytes identical). Since 0.1.35: password sign-in
+  (migration 028) with one-time codes OFF by default (AUTH_LOGIN_CODES / pilot
+  loginCodes), sessionHours, optional passkeys (migration 029; need a domain origin,
+  localhost locally), adapted course built once per adaptation state, each visual
+  checked once off the event loop during review/publication (PR #45), placement
+  race (PR #43) and out-of-order refresh (PR #44) fixes, release-input name check in
+  Public CI (PR #42).
+- DEAD TAGS, never published: v0.1.36 (2100d1d; release assembly refused
+  services/api/src/secret-input.ts under the private-name rule) and v0.1.37
+  (6fc6a2a; publish review transitions 15-34 s on the ~2 MB course under load vs the
+  harness's 15 s timeout, HTTP 1/4 and browser 0/3; same 15-17 s measured on 0.1.35).
+- ACCEPTED BEFORE PUBLICATION, one run each, no retries or timeout changes, course
+  0.1.6: HTTP 56 episodes, feature flow, browser phone 56 / desktop 16 / tablet 4,
+  0 page errors. Per episode after the first recovery: HTTP median 16.1 s -> 1.2 s
+  (total 698 s -> 83 s); phone 36.0 s -> 2.2 s (1518 s -> 130 s). The recovery
+  episode itself is ~8 s.
+- HARNESS: all private acceptance drivers sign in with passwords
+  (verification/password-login.mjs; password on stdin to Core's bootstrap and
+  set-password CLIs, never printed). Codes stay at Core's default (off), and the
+  HTTP flow checks /auth/options, a refused /auth/redeem and a 401 wrong password.
+  Feature-flow invitations use temporary passwords and assert 409 before the
+  change. Pilot acceptance sets the QA account's password per run; it never sets
+  the operator's, so without --operator-login (password on stdin) it checks the
+  QA role and operator-unenrolled read-only in the database and the admin sign-in
+  page signed out. Request timeouts in learner-flow now name the route.
+  released-runtime.mjs pins 0.1.38 (0.1.35, 0.1.37 kept).
+- DEPLOYED: pilot 0.1.34 -> 0.1.38 (backup-20261014172920561-d739c7, drill 77
+  tables / 186 rows; migrations 028 and 029 only). config.json: sessionHours=720,
+  publicOrigin=http://localhost:4310 (0600, loginCodes absent); restarted. Health ok,
+  passkeys on. 127.0.0.1:4310 still serves the apps but sign-in answers 403
+  ORIGIN_REJECTED; use http://localhost:4310. QA enrollment 6d7439c7 (0.1.4,
+  active, rev 9, 2 evidence) and the only pin unchanged. Pilot acceptance
+  phone/tablet/desktop passed at localhost. The operator (operator:owner) has no
+  password yet; it is left for the operator to set with set-password-cli.
+  Evidence: evidence/core-0.1.38-release-and-pilot.json.
+- Not verified: live providers, generated prose/reviewer-draft quality, learning
+  efficacy, physical devices, hardware passkeys, native binaries, admin UI signed in
+  on the pilot.
+
 # Course 0.1.6 staged on SDK 0.4.0; Core performance defect found — 2026-10-14
 
 - STAGED, NOT packaged/published/installed: course 0.1.6 on the released SDK 0.4.0

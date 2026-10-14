@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "coreVersion": "0.1.38",
+  "coreTag": "v0.1.38",
+  "coreCommit": "ded66f27124dd4c128f47d92fa05fa85f7790745",
+  "coreTagObject": "9d72b3c1dc23c3d9a8667078aef2e7b33603d088",
+  "coreMainCiRun": 38597953785,
+  "coreReleaseRun": 38599534149,
+  "coreCandidateArtifact": 11912454761,
+  "coreArtifactDigest": "sha256:e27d5467ba6c4e25b5411e43aeaa3096cc03aebfa934189477fe0da34ae637f2",
+  "coreManifestSha256": "9199311b94abe3ce832902c431917200863849db359f2a2fd35d5a4f49894654",
+  "coreRelease": "https://github.com/roeehrl/course-core/releases/tag/v0.1.38",
+  "coreChangesSince": "0.1.35",
+  "coreChange": [
+    "username/password sign-in (migration 028); one-time sign-in codes OFF by default (AUTH_LOGIN_CODES=enabled / pilot loginCodes re-enables); SESSION_HOURS / pilot sessionHours (default 12, max 720)",
+    "optional passkeys (migration 029); RP ID and origin from PUBLIC_ORIGIN, so passkeys need a domain origin (localhost for a local pilot)",
+    "adapted course built once per adaptation state instead of on every request",
+    "each course visual checked once, off the event loop, during review transitions, publication and the admin view (PR #45)",
+    "lesson saves held while a placement or retention request is unconfirmed (PR #43)",
+    "progress refreshes applied in the order they started (PR #44)",
+    "release-input name check in Public CI; secret-input.ts renamed password-input.ts (PR #42)"
+  ],
+  "deadTags": {
+    "v0.1.36": { "commit": "2100d1d65b1f406491a00a79561931c7460dfaa7", "tagObject": "85d57bd7ef87a734c22de98ac78d47fe59e93945", "releaseRun": 38555505450, "published": false, "reason": "candidate assembly refused services/api/src/secret-input.ts under the release private-name rule, which Public CI did not check; main CI 38552393435 attempt 1 also failed on a test-only placement-decline race (learner.spec.ts:906), attempt 2 passed" },
+    "v0.1.37": { "commit": "6fc6a2a4df221b91804c535a6221ce3ea77ae11e", "tagObject": "04a9712eea019c190ad65aa7117f12cef1f16ed5", "releaseRun": 38560622115, "candidateArtifact": 11892359747, "manifestSha256": "c44b0d7ec4fd1889bb638cc6f586e86af088c6ad2781c7a65ef79b04171d9a12", "published": false, "reason": "private acceptance: course publish review transitions took 15-34 s on the ~2 MB course under host load, against the harness's 15 s request timeout (HTTP passed 1 of 4, browser 0 of 3); the same 15-17 s was measured on 0.1.35, so pre-existing, fixed in 0.1.38" }
+  },
+  "consumerChecks": {
+    "sourceMembersComparedToGitTree": 584,
+    "hostedBytesIdentical": true,
+    "sha256sumsAllOk": true,
+    "installedRuntimeCheck": { "checkedMembers": 1392, "uniqueFiles": 797 },
+    "builtAdapterDigestsMatch": true
+  },
+  "privateReleasedConsumerAcceptanceBeforePublication": {
+    "ranAgainst": "candidate artifact bytes, before the GitHub release was published",
+    "runs": "one each; no retries, no timeout changes, no load gating",
+    "hostLoad1": "8-21",
+    "signIn": "password login via Core host CLIs (password on stdin) and POST /auth/login; codes left at Core default (off)",
+    "courseVersion": "0.1.6",
+    "http": { "result": "passed", "episodes": 56, "practicalFamiliesRecovered": 3, "committedRecoveryAssignments": 6, "unearnedCompletionRejectedEveryEpisode": true, "writtenExplanationsPendingWithoutBlocking": 4, "failedFiniteBank": { "replacements": 2, "gateUnchanged": true, "noFurtherCharge": true }, "authOptionsLoginCodes": false, "redeemRefused": "403 LOGIN_CODES_DISABLED", "wrongPassword": "401 LOGIN_FAILED" },
+    "featureFlow": { "result": "passed", "remedialEpisodeApplied": true, "placementDeclined": true, "placementAccepted": { "placedEpisodes": 10 }, "retention": "retained", "writtenExplanationReviewed": "met", "invitedAccounts": "temporary passwords; 409 PASSWORD_CHANGE_REQUIRED before change" },
+    "browser": { "result": "passed", "timeoutsIncreased": false, "signIn": "password form; no one-time code field", "phone": { "completedEpisodes": 56, "writtenExplanationsSubmitted": 4 }, "desktop": { "completedEpisodes": 16, "placement": "declined" }, "tablet": { "completedEpisodes": 4, "placement": "accepted", "placedEpisodes": 12 }, "recovery": true, "reloadPreservedCode": true, "horizontalOverflow": false, "codeAccessibility": true, "pageErrors": 0 },
+    "ownerUnenrolled": true
+  },
+  "perEpisodeTimingsMs": {
+    "source": "episodeTiming lines from verification/learner-flow.mjs and learner-browser.mjs; first practical recovery is episode 16",
+    "before": { "core": "0.1.35", "http": { "medianBeforeFirstRecovery": 829, "medianFromFirstRecovery": 16082, "rangeFromFirstRecovery": [12152, 37376], "totalSeconds": 698 }, "phone": { "medianBeforeFirstRecovery": 1968, "medianFromFirstRecovery": 35990, "rangeFromFirstRecovery": [19548, 50024], "totalSeconds": 1518 }, "desktopFirstRecoveryEpisode": 24179, "tabletFirstRecoveryEpisode": 24332 },
+    "after": {
+      "core": "0.1.38",
+      "http": { "episodes": 56, "medianBeforeFirstRecovery": 856, "medianFromFirstRecovery": 1195, "rangeFromFirstRecovery": [982, 8708], "totalSeconds": 83 },
+      "phone": { "episodes": 56, "medianBeforeFirstRecovery": 1953, "medianFromFirstRecovery": 2249, "rangeFromFirstRecovery": [1653, 8161], "totalSeconds": 130 },
+      "desktop": { "episodes": 16, "medianBeforeFirstRecovery": 1973, "firstRecoveryEpisode": 7718 },
+      "tablet": { "episodes": 4, "medianBeforeFirstRecovery": 1904, "firstRecoveryEpisode": 7713 }
+    },
+    "remainingCost": "the episode that applies a recovery takes about 8 s; others stay near 1.2 s (HTTP) and 2.2 s (phone)"
+  },
+  "nativePilotUpgrade": {
+    "from": "0.1.34",
+    "to": "0.1.38",
+    "runtimeRoot": "~/Library/Application Support/Course Core/Pilot/releases/v0.1.38/course-core",
+    "unusedInstallRemoved": "releases/v0.1.37",
+    "result": { "status": "upgraded", "backup": "backups/backup-20261014172920561-d739c7", "restoreDrill": { "tables": 77, "rows": 186 } },
+    "migrationsApplied": ["028_password_login.sql", "029_passkey_login.sql"],
+    "configChange": { "keysSet": ["sessionHours", "publicOrigin"], "loginCodes": "absent (off)", "mode": "0600", "sessionHours": 720, "publicOrigin": "http://localhost:4310", "restarted": true },
+    "health": "ok",
+    "authOptions": { "loginCodes": false, "passkeys": true },
+    "oldAddress127": "http://127.0.0.1:4310 still serves health and both apps, but sign-in POSTs answer 403 ORIGIN_REJECTED (Origin must equal publicOrigin)",
+    "enrollmentPins": { "before": [{ "id": "6d7439c7-43b0-42d9-a2e2-c0ad5f8367ec", "subject": "qa:pilot-learner", "course": "0.1.4", "digest": "bf54e1289f1fda0c49c4a7d1ac4525376be5c666a0d08e8394021da38af669bb", "status": "active", "revision": 9, "evidence": 2 }], "afterUpgradeAndAcceptance": "identical", "enrollmentCount": 1 },
+    "pilotAcceptance": { "origin": "http://localhost:4310", "phone": "first episode already complete; resumed", "tablet": "resumed fnd-e01-02", "desktop": "resumed fnd-e01-02", "qaSignIn": "password form; QA password set per run by the harness via set-password-cli (stdin)", "qaRoleCheck": "verified_read_only_in_database", "operatorEnrolled": false, "adminSignedIn": false, "adminSignInPageChecked": true, "knownAxeDefectsObserved": [] },
+    "operatorPassword": "not set (operator:owner has no password; left to the operator)",
+    "setPasswordCli": "services/api/dist/set-password-cli.js present; prints usage with no arguments"
+  },
+  "liveProviderAcceptance": false,
+  "notVerified": ["live provider behavior", "generated prose and reviewer-draft quality", "learning efficacy", "physical devices", "real hardware passkey authenticators", "native app binaries", "admin UI signed in on the pilot (operator has no password yet)"],
+  "observedAt": "2026-10-14T17:40:00Z"
+}
