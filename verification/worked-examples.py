@@ -11,6 +11,7 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
+SDK = json.loads((ROOT / 'node_modules/@course-core/sdk/package.json').read_text())['version']
 subprocess.run(['node', str(ROOT / 'scripts/stage-worked-examples.mjs')], cwd=ROOT,
                stdout=subprocess.DEVNULL, check=True, timeout=30)
 definition = json.loads((ROOT / '.local/generated-teaching/verifier.json').read_text())
@@ -55,6 +56,6 @@ for case in definition['qualification']:
     checks += 1
 
 print(json.dumps({'verified': True, 'execution': 'private-cpu-procedural-reference',
-                  'templates': len(covered), 'checks': checks, 'sdkProducer': 'released-0.2.0',
+                  'templates': len(covered), 'checks': checks, 'sdkProducer': 'released-' + SDK,
                   'arbitraryProseVerified': False, 'runtimeBrokerQualified': False,
                   'publishedAuthority': False, 'earnedCredit': False}))

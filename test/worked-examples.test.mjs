@@ -20,6 +20,6 @@ test('independent procedural CPU checks accept legitimate variants and reject wr
   const result=spawnSync('python3',['-B','verification/worked-examples.py'],{cwd:ROOT,encoding:'utf8',timeout:30000});
   assert.equal(result.status,0,result.stderr);
   const report=JSON.parse(result.stdout);assert.equal(report.templates,39);assert.equal(report.checks,1654);
-  assert.equal(report.sdkProducer,'released-0.2.0');assert.equal(report.runtimeBrokerQualified,false);
+  assert.equal(report.sdkProducer,'released-0.4.0');assert.equal(report.runtimeBrokerQualified,false);
   assert.equal(report.arbitraryProseVerified,false);assert.equal(report.publishedAuthority,false);assert.equal(report.earnedCredit,false);
 });
