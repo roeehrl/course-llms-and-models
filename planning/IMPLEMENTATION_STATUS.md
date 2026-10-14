@@ -1,3 +1,23 @@
+# Core 0.1.34 published, accepted and deployed — 2026-10-14
+
+- PUBLISHED Core 0.1.34 (tag object d232fe7 on 1c204b6, run 38512307504, artifact
+  11870787536 digest dac36e45…, manifest 1a5baaee…; 556 source members compared;
+  hosted bytes identical; consumer shasum ok). Restores the approved code-bank
+  adapter digest (05d8ba24…) and guards built adapter digests in CI. Notes state
+  that teaching-bank registries approved before 0.1.31 need re-approval.
+- ACCEPTED BEFORE PUBLICATION on the candidate bytes: private 56-episode
+  released-consumer acceptance (course 0.1.5) passed over HTTP (3 practical
+  recoveries, 6 recovery assignments, unearned completion rejected everywhere)
+  and in the browser (phone 56 episodes, desktop/tablet 16, 0 page errors, no
+  overflow). Process change: this acceptance now gates publication.
+- DEPLOYED: pilot 0.1.32 -> 0.1.34 after confirming its approved registry digests
+  and renderer declaration resolve on the build; backup + drill 77/175; health ok;
+  QA enrollment unchanged; pilot acceptance phone/tablet/desktop passed, no axe
+  defects. verification/released-runtime.mjs pins 0.1.34.
+  Evidence: evidence/core-0.1.34-release-and-pilot.json.
+- Not verified: live providers, generated prose/reviewer-draft quality, learning
+  efficacy, physical devices, native binaries.
+
 # Core 0.1.33 published; pilot rolled back to 0.1.32; code-bank digest fix in progress — 2026-10-14
 
 - PUBLISHED Core 0.1.33 (tag object bf187f2 on fa41b02, run 38506727322, artifact

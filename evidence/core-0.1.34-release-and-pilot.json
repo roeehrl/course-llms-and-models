@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "coreVersion": "0.1.34",
+  "coreTag": "v0.1.34",
+  "coreCommit": "1c204b669c5738cee6891ce624092cc52944bf36",
+  "coreTagObject": "d232fe7145f9426d5ecddfe03a4d83935de7bd52",
+  "coreReleaseRun": 38512307504,
+  "coreCandidateArtifact": 11870787536,
+  "coreArtifactDigest": "sha256:dac36e4599b8810cc891bf07d687cd07e6b080d440fc8e483830db1f0339cb10",
+  "coreManifestSha256": "1a5baaeedd5359417d39e634002bd8dd03b2bf371824b831129b448208587208",
+  "coreRelease": "https://github.com/roeehrl/course-core/releases/tag/v0.1.34",
+  "consumerChecks": {
+    "sourceMembersComparedToGitTree": 556,
+    "hostedBytesIdentical": true,
+    "sha256sumsAllOk": true,
+    "installedRuntimeCheck": { "checkedMembers": 1329, "uniqueFiles": 762 },
+    "builtAdapterDigests": { "authored-code-bank-v1": "05d8ba24", "authored-bank-v1": "5bb608ab" },
+    "pilotCourseRendererDeclarationAccepted": true
+  },
+  "privateReleasedConsumerAcceptanceBeforePublication": {
+    "ranAgainst": "candidate artifact bytes, before the GitHub release was published",
+    "courseVersion": "0.1.5",
+    "http": { "result": "passed", "episodes": 56, "practicalFamiliesRecovered": 3, "committedRecoveryAssignments": 6, "unearnedCompletionRejectedEveryEpisode": true, "failedFiniteBank": { "replacements": 2, "gateUnchanged": true, "noFurtherCharge": true } },
+    "browser": { "result": "passed", "phone": { "completedEpisodes": 56 }, "desktop": { "completedEpisodes": 16 }, "tablet": { "completedEpisodes": 16 }, "recovery": true, "reloadPreservedCode": true, "horizontalOverflow": false, "codeAccessibility": true, "pageErrors": 0 },
+    "ownerUnenrolled": true
+  },
+  "nativePilotUpgrade": {
+    "from": "0.1.32",
+    "to": "0.1.34",
+    "preCheck": "pilot's approved registry digests (code-bank 05d8ba24, bank 5bb608ab, numeric a625ed7b, worked c5330df6) and renderer declaration resolve on the 0.1.34 build",
+    "result": { "status": "upgraded", "backup": "backups/backup-20261014050359615-11874c", "restoreDrill": { "tables": 77, "rows": 175 } },
+    "health": "ok",
+    "preservedEnrollment": { "id": "6d7439c7-43b0-42d9-a2e2-c0ad5f8367ec", "pinnedCourse": "0.1.4", "status": "active", "evidence": 2, "revision": 9, "unchangedByUpgrade": true },
+    "pilotAcceptance": { "phone": "completed fnd-e01-01", "tablet": "resumed fnd-e01-02", "desktop": "resumed fnd-e01-02", "operatorEnrolled": false, "knownAxeDefectsObserved": [] }
+  },
+  "liveProviderAcceptance": false,
+  "notVerified": ["live provider behavior", "generated prose and reviewer-draft quality", "learning efficacy", "physical devices", "native app binaries"],
+  "observedAt": "2026-10-14T05:30:00Z"
+}
