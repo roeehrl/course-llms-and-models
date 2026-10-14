@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "coreVersion": "0.1.35",
+  "coreTag": "v0.1.35",
+  "coreCommit": "846fd467f7388655b4036ed9129b26d81c472f64",
+  "coreTagObject": "5645317772eae07befdfdd5f53811af020e8ca9e",
+  "coreMainCiRun": 38537550001,
+  "coreReleaseRun": 38539008415,
+  "coreCandidateArtifact": 11882500670,
+  "coreArtifactDigest": "sha256:d69a6dbf4bf0fa0f08d8f698458d6f4764710d9342b10224163e3fbb25838466",
+  "coreManifestSha256": "0234d931aedd897b5a29c37764d08dc7a62bc571b18fe7ed464dd85feeecff62",
+  "coreRelease": "https://github.com/roeehrl/course-core/releases/tag/v0.1.35",
+  "coreChange": "retained adaptation validation recorded per process instead of re-run on every enrollment request; prior accepted svg renderer build listed in /api/runtime/extensions",
+  "consumerChecks": {
+    "sourceMembersComparedToGitTree": 558,
+    "hostedBytesIdentical": true,
+    "sha256sumsAllOk": true,
+    "installedRuntimeCheck": { "checkedMembers": 1333, "uniqueFiles": 764 },
+    "builtAdapterDigests": { "authored-code-bank-v1": "05d8ba24", "authored-bank-v1": "5bb608ab", "bounded-numeric-v1": "a625ed7b", "authored-teaching-bank-v1": "5e2550a1" },
+    "adapterDigestsUnchangedFrom": "0.1.34"
+  },
+  "privateReleasedConsumerAcceptanceBeforePublication": {
+    "ranAgainst": "candidate artifact bytes, before the GitHub release was published",
+    "courseVersion": "0.1.6",
+    "http": { "result": "passed", "episodes": 56, "practicalFamiliesRecovered": 3, "committedRecoveryAssignments": 6, "unearnedCompletionRejectedEveryEpisode": true, "writtenExplanationsPendingWithoutBlocking": 4, "failedFiniteBank": { "replacements": 2, "gateUnchanged": true, "noFurtherCharge": true } },
+    "featureFlow": { "result": "passed", "remedialEpisodeApplied": true, "placementDeclined": true, "placementAccepted": { "placedEpisodes": 10 }, "retention": "retained", "writtenExplanationReviewed": "met" },
+    "browser": { "result": "passed", "timeoutsIncreased": false, "phone": { "completedEpisodes": 56, "writtenExplanationsSubmitted": 4 }, "desktop": { "completedEpisodes": 16, "placement": "declined" }, "tablet": { "completedEpisodes": 4, "placement": "accepted", "placedEpisodes": 12 }, "recovery": true, "reloadPreservedCode": true, "horizontalOverflow": false, "codeAccessibility": true, "pageErrors": 0 },
+    "ownerUnenrolled": true
+  },
+  "perEpisodeTimingsMs": {
+    "source": "episodeTiming lines from verification/learner-flow.mjs and learner-browser.mjs; first practical recovery is episode 16",
+    "before": { "core": "0.1.34", "phoneBrowser": "timed out after the 42-episode checkpoint", "reported": "per-episode time grew from 4.7 s to 59 s over 12 recoveries (Core PR #38)", "perEpisodeLogs": false },
+    "after": {
+      "http": { "episodes": 56, "medianBeforeFirstRecovery": 829, "medianFromFirstRecovery": 16082, "rangeFromFirstRecovery": [12152, 37376], "growthWithRecoveries": false, "totalSeconds": 698 },
+      "phone": { "episodes": 56, "medianBeforeFirstRecovery": 1968, "medianFromFirstRecovery": 35990, "rangeFromFirstRecovery": [19548, 50024], "growthWithRecoveries": false, "totalSeconds": 1518 },
+      "desktop": { "episodes": 16, "medianBeforeFirstRecovery": 2085, "firstRecoveryEpisode": 24179 },
+      "tablet": { "episodes": 4, "medianBeforeFirstRecovery": 2121, "firstRecoveryEpisode": 24332 }
+    },
+    "remainingConstantCost": "after the first applied adaptation every enrollment request rebuilds the adapted course (whole-course clone and learner compile); flat, not growing"
+  },
+  "nativePilotUpgrade": null,
+  "liveProviderAcceptance": false,
+  "notVerified": ["native pilot upgrade (release only)", "live provider behavior", "generated prose and reviewer-draft quality", "learning efficacy", "physical devices", "native app binaries"],
+  "observedAt": "2026-10-14T10:00:03Z"
+}
