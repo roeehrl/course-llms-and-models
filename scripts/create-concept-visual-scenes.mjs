@@ -1780,10 +1780,19 @@ const loraScene = (() => {
       "lo-verdict",
       after(
         4000,
+        // The scale is checked first, so s = 0 is never read as an initialization failure.
         iff(
-          and(zero(dA), zero(dB)),
-          "no factor can learn",
-          iff(zero(dA), "only B can learn", iff(zero(dB), "only A can learn", "both factors learn")),
+          eq(sc, 0),
+          "s = 0 scales it all out",
+          iff(
+            eq(init, INITS[2]),
+            "no factor can learn",
+            iff(
+              and(zero(dA), zero(dB)),
+              "A·x = 0: no signal here",
+              iff(zero(dA), "Δy is 0, B still learns", iff(zero(dB), "only A gets a signal", "both factors learn")),
+            ),
+          ),
         ),
         "…",
       ),
@@ -1819,10 +1828,10 @@ const loraScene = (() => {
       { atMs: 1600, text: "Apply the factors in order: first A·x, a single number for rank one." },
       { atMs: 2400, text: "Then Δy = s·B·(A·x), the lesson's [12, −6, 3]. The base output W·x is added separately." },
       { atMs: 3200, text: "Multiplying by the dense ΔW gives the same vector, at the cost of materializing 12 values." },
-      { atMs: 4000, text: "Each factor's gradient depends on the other factor. If both start at zero, neither can learn." },
+      { atMs: 4000, text: "Each factor's gradient depends on the other. B = 0 with A nonzero: Δy starts at 0 but B learns. Both zero: stuck. s = 0: scaled away." },
     ],
     accessible:
-      "Low-rank adaptation with the lesson's numbers. The base matrix W is 3×4 (12 parameters) and stays fixed; LoRA learns B, a 3×1 column [2, −1, 0.5], and A, a 1×4 row [1, 0, −1, 2], seven trainable values at rank 1. In general a rank-r adapter has 7r, so rank 2 needs 14, more than the dense 12. ΔW = s·B·A is drawn as a 3×4 grid of products. For x = [1, 2, 3, 4] and s = 1, A·x = 6 and Δy = s·B·(A·x) = [12, −6, 3], the same as multiplying x by the dense ΔW; the base output W·x is still added. With an invented upstream gradient [1, 0, −1], the factor gradients are ∂B = s·∂y·(A·x) = [6, 0, −6] and ∂A = s·(Bᵀ∂y)·x = [1.5, 3, 4.5, 6]. If B starts at zero, the update and ∂A are zero but ∂B is not, so B learns first and A follows. If both start at zero, both gradients are zero and neither factor can move. The rank control changes only the parameter counts; the drawn factors stay rank one.",
+      "Low-rank adaptation with the lesson's numbers. The base matrix W is 3×4 (12 parameters) and stays fixed; LoRA learns B, a 3×1 column [2, −1, 0.5], and A, a 1×4 row [1, 0, −1, 2], seven trainable values at rank 1. In general a rank-r adapter has 7r, so rank 2 needs 14, more than the dense 12. ΔW = s·B·A is drawn as a 3×4 grid of products. For x = [1, 2, 3, 4] and s = 1, A·x = 6 and Δy = s·B·(A·x) = [12, −6, 3], the same as multiplying x by the dense ΔW; the base output W·x is still added. With an invented upstream gradient [1, 0, −1], the factor gradients are ∂B = s·∂y·(A·x) = [6, 0, −6] and ∂A = s·(Bᵀ∂y)·x = [1.5, 3, 4.5, 6]. If B starts at zero while A is nonzero, the lesson's common design, the update starts at exactly zero but ∂B is not zero, so B learns at once and A follows once B has changed. If both start at zero, both gradients are zero and neither factor can move: that is an initialization trap. A scale of s = 0 is a different cause. It multiplies the update and both factor gradients by zero, so nothing the factors learn can reach the output, whatever their initialization; the verdict names the scale in that case. For an input with A·x = 0 this one example carries no gradient to B, which says nothing about the initialization. The rank control changes only the parameter counts; the drawn factors stay rank one.",
   });
 })();
 

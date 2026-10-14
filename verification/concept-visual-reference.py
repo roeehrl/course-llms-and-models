@@ -1100,8 +1100,23 @@ for scale in [0, 1, 2]:
                 dB, dA = lora_grads(Bcol, Arow, x, scale)
                 count = trainable(3, 4, rank)
                 zero = lambda vals: all(v == 0 for v in vals)
-                verdict = ('no factor can learn' if zero(dA) and zero(dB) else 'only B can learn' if zero(dA)
-                           else 'only A can learn' if zero(dB) else 'both factors learn')
+                # Cause first: a zero scale removes the update and every factor gradient, whatever the init.
+                if scale == 0:
+                    assert zero(delta) and zero(dA) and zero(dB)
+                    verdict = 's = 0 scales it all out'
+                elif not a_on and not b_on:
+                    assert zero(dA) and zero(dB)  # the lesson's trap: each gradient needs the other factor
+                    verdict = 'no factor can learn'
+                elif zero(dA) and zero(dB):
+                    assert inner == 0  # only this example's A·x vanishes
+                    verdict = 'A·x = 0: no signal here'
+                elif zero(dA):
+                    assert not b_on and zero(delta)  # standard init: update starts at exactly zero, B still learns
+                    verdict = 'Δy is 0, B still learns'
+                elif zero(dB):
+                    verdict = 'only A gets a signal'
+                else:
+                    verdict = 'both factors learn'
                 for time in [0, 799, 800, 1600, 2400, 3200, 4000, 4800]:
                     exact = {'lo-x': f'x = [1, 2, 3, {x3}]', 'lo-count': f'rank {rank}: {count} trainable',
                              'lo-dense-count': f'dense W has 12: {"saves" if count < 12 else "costs"} {abs(12 - count)}',

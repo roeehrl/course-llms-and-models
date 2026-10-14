@@ -495,6 +495,14 @@ mutated("concept-lora-update", "lo-dy", "text",
   (c) => c.time >= 2400 && c.state.scale !== 1 && c.state.init === "Lesson A and B" && c.state.x3 !== 1, "scale s ignored",
   { mustPassElsewhere: at({ scale: 1, init: "Lesson A and B" }, 4800) });
 
+mutated("concept-lora-update", "lo-verdict", "text",
+  after(4000, iff(eq(st("init"), "Both start at zero"), "no factor can learn",
+    iff(eq(st("init"), "B starts at zero"), iff(eq(sc14, 0), "no factor can learn", "Δy is 0, B still learns"),
+      iff(eq(sc14, 0), "no factor can learn", iff(eq(x314, 1), "only A gets a signal", "both factors learn")))), "…"),
+  (c) => c.time === 4800 && c.state.scale === 0 && c.state.init !== "Both start at zero",
+  "zero scale reported as a factor that cannot learn",
+  { mustPassElsewhere: at({ scale: 1, init: "B starts at zero", x3: 4 }, 4800) });
+
 // 15 parallel messages
 const w15 = st("w"),
   v15 = st("v");
