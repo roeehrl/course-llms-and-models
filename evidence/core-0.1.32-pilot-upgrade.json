@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "coreVersion": "0.1.32",
+  "coreTag": "v0.1.32",
+  "coreCommit": "859b4db2aa5b6ff601bf8f6ef5366d97d1f75e34",
+  "coreTagObject": "1964d6068da4096333438b0063be75e94b29a632",
+  "coreReleaseRun": 38498335184,
+  "coreCandidateArtifact": 11865321561,
+  "coreArtifactDigest": "sha256:3908fd6ebe30bf3c898b1c36b80018a87025fd3c063b8ca0f74c8775f5cdfaf8",
+  "coreManifestSha256": "ed2f247eb89baa63fce8c0fda68d63b9f7463f394f271eb7656410f05b1887cc",
+  "coreRelease": "https://github.com/roeehrl/course-core/releases/tag/v0.1.32",
+  "skippedTag": "v0.1.31 was tagged but never released: main CI on its commit failed a WebKit placement test that reloaded while a request was in flight",
+  "consumerChecks": {
+    "sourceMembersComparedToGitTree": 547,
+    "hostedBytesIdentical": true,
+    "sha256sumsAllOk": true,
+    "installedRuntimeCheck": { "checkedMembers": 1310, "uniqueFiles": 752 },
+    "publishedWebMembersRestored": 15
+  },
+  "nativePilotUpgrade": {
+    "from": "0.1.25",
+    "to": "0.1.32",
+    "origin": "http://127.0.0.1:4310",
+    "tool": "deploy/local/upgrade.mjs from the 0.1.32 runtime (first real use)",
+    "result": {
+      "status": "upgraded",
+      "steps": ["stopped", "backed_up", "restore_verified", "started_new_runtime"],
+      "backup": "backups/backup-20261014021056633-0db110",
+      "restoreDrill": { "tables": 70, "rows": 146 }
+    },
+    "migrationsApplied": ["021_retention", "022_personal_changes", "023_wakeups", "024_rubric_assist", "025_review_conversation", "026_rubric_assist_retry", "027_rubric_appeals"],
+    "preservedEnrollment": {
+      "id": "6d7439c7-43b0-42d9-a2e2-c0ad5f8367ec",
+      "pinnedCourse": "0.1.4",
+      "status": "active",
+      "evidence": 2,
+      "revision": 9,
+      "unchangedByUpgrade": true
+    }
+  },
+  "pilotAcceptance": {
+    "viewports": [
+      { "name": "phone", "completedEpisode": "fnd-e01-01" },
+      { "name": "tablet", "resumedEpisode": "fnd-e01-02" },
+      { "name": "desktop", "resumedEpisode": "fnd-e01-02" }
+    ],
+    "resumedExistingEnrollment": true,
+    "operatorEnrolled": false,
+    "qaRoleCheck": "verified_via_people_api",
+    "knownAxeDefectsObserved": []
+  },
+  "privateReleasedConsumerAcceptance": {
+    "runner": "verification/learner-flow.mjs --worked-course (released CLI + HTTP, disposable Postgres 17)",
+    "pinnedCore": "0.1.32",
+    "result": "failed",
+    "failure": "review_transition_409_PUBLISH_CAPABILITY_MISSING",
+    "cause": "Core 0.1.32 changed visuals dist/react.js without bumping visuals 0.1.0; the installed renderer integrity (sha256-b330d598…) no longer matches the course's declared 0.1.0 integrity sha256-e16ff7d93b320f12913f1c3bc5a7246c16d1ca09cc4cf8f1ba8a29d2cde2aa24"
+  },
+  "knownIssues": [
+    "Deployed pilot on 0.1.32: interactive visual context for the pinned course 0.1.4 (6 visuals) is refused with INTERACTIVE_RENDERER_UNAVAILABLE because of the same renderer integrity mismatch. Lessons, answers, evidence and progress are unaffected; no live provider is configured on the pilot. A Core fix (visuals 0.1.1 plus explicit acceptance of the earlier server-identical 0.1.0 build) is in progress."
+  ],
+  "liveProviderAcceptance": false,
+  "notVerified": [
+    "live provider behavior",
+    "learning efficacy",
+    "physical devices",
+    "native app binaries",
+    "private 56-episode released-consumer acceptance (fails on 0.1.32; see above)"
+  ],
+  "observedAt": "2026-10-14T02:20:00Z"
+}
