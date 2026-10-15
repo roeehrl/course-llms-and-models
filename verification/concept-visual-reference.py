@@ -1,4 +1,4 @@
-"""Independent CPU oracle for the twenty-four concept scenes (three batches of eight).
+"""Independent CPU oracle for the thirty concept scenes (three batches of eight, then six).
 
 Python standard library only. It never reads scene JSON and never evaluates the
 scene expression AST: every expected readout is recomputed here from the
@@ -1966,5 +1966,566 @@ for calib in ['4', '2', '1']:
                         case('concept-path-coverage', dict(calib=calib, selftest=selftest, forced=forced, steps=steps,
                                                            combine=combine), time, {}, exact)
 CHECKS.append('a startup-then-dispatch event log with per-path hit counters, the first recorded disable reason as the cause, and fsum/fmean microbatch combines against the full logical batch')
+
+
+# =========================================================== fourth batch (25-30)
+# Every verdict's cause is asserted on the computed state before its text is emitted.
+TIMES48 = [0, 799, 800, 1600, 2400, 3200, 4000, 4800]
+
+
+# ----------------------------------------------------------- 25 forward, backward and update as separate states
+class OneWeightRun:
+    """The lesson's explicit loop with a ledger snapshot at every boundary."""
+
+    def __init__(self, w, x=3, y=8):
+        self.w, self.x, self.y = Fraction(w), x, y
+        self.ledger = [('before forward', self.w, {})]
+
+    def forward(self):
+        p = self.w * self.x
+        r = p - self.y
+        self.produced = dict(p=p, r=r, L=r * r / 2)
+        self.ledger.append(('after forward', self.w, dict(self.produced)))
+        return self.produced
+
+    def backward(self):
+        g = (self.produced['p'] - self.y) * self.x
+        self.ledger.append(('after backward', self.w, dict(g=g)))
+        return g
+
+    def update(self, g, eta):
+        self.w = self.w - eta * g
+        self.ledger.append(('after update', self.w, {}))
+
+
+JOURNALS25 = {'forward_done, response_saved': ['request_received', 'forward_done', 'response_saved'],
+              '+ gradient_ready': ['request_received', 'forward_done', 'response_saved', 'gradient_ready'],
+              '+ optimizer_step, w v2': ['request_received', 'forward_done', 'response_saved', 'gradient_ready',
+                                         'optimizer_step', 'weights_version_2']}
+for w in [0, 0.5, 1, 2, 2.5, 3, 4]:
+    for eta in [0, 0.05, 0.1, 0.3]:
+        for stop in ['Update', 'Backward', 'Forward']:
+            run = OneWeightRun(w)
+            out = run.forward()
+            g = run.backward() if stop in ('Update', 'Backward') else None
+            if stop == 'Update':
+                run.update(g, Fraction(str(eta)))
+            assert all(entry[1] == Fraction(w) for entry in run.ledger if entry[0] != 'after update')  # only the update writes w
+            w2 = run.w
+            fresh = None
+            if stop == 'Update':
+                p2 = w2 * 3
+                fresh = (p2, (p2 - 8) ** 2 / 2)
+                if eta == 0:
+                    assert w2 == Fraction(w)
+                    wverdict = 'η = 0: update kept w'
+                else:
+                    assert g != 0 and w2 != Fraction(w)
+                    wverdict = 'only the update moved w'
+            else:
+                assert w2 == Fraction(w)
+                wverdict = 'w unchanged: no step'
+            for trace, events in JOURNALS25.items():
+                grad_seen = 'gradient_ready' in events
+                step_seen = 'optimizer_step' in events and any(e.startswith('weights_version_') for e in events)
+                if step_seen:
+                    jverdict = 'a training step ran'
+                elif grad_seen:
+                    assert 'optimizer_step' not in events
+                    jverdict = 'gradient, but no step'
+                else:
+                    assert not grad_seen and 'forward_done' in events
+                    jverdict = 'inference only'
+                for time in TIMES48:
+                    exact = {'sl-w-before': f'before forward: w {js(w)}',
+                             'sl-j-grad': 'gradient: ' + ('yes' if grad_seen else 'not shown'),
+                             'sl-j-step': 'weight update: ' + ('yes' if step_seen else 'not shown')}
+                    exact['sl-w-fwd'] = f'after forward: w {js(run.ledger[1][1])}' if time >= 800 else 'after forward: …'
+                    exact['sl-p'] = f'ŷ = w·x = {js(r3(out["p"]))}' if time >= 800 else 'ŷ = …'
+                    exact['sl-r'] = f'r = ŷ − y = {js(r3(out["r"]))}' if time >= 1600 else 'r = …'
+                    exact['sl-L'] = f'L = r²/2 = {js(r3(out["L"]))}' if time >= 1600 else 'L = …'
+                    if time < 2400:
+                        exact.update({'sl-w-bwd': 'after backward: …', 'sl-g': 'g = …'})
+                    elif g is None:
+                        exact.update({'sl-w-bwd': 'backward: not run', 'sl-g': 'g: backward not run'})
+                    else:
+                        exact.update({'sl-w-bwd': f'after backward: w {js(run.ledger[2][1])}', 'sl-g': f'g = r·x = {js(r3(g))}'})
+                    if time < 3200:
+                        exact.update({'sl-w-upd': 'after update: …', 'sl-w-verdict': '…'})
+                    else:
+                        exact['sl-w-upd'] = f'after update: w {js(r3(w2))}' if stop == 'Update' else 'update: not run'
+                        exact['sl-w-verdict'] = wverdict
+                    numeric = {}
+                    if time < 4000:
+                        exact.update({'sl-p2': 'fresh ŷ …', 'sl-L2': 'fresh L …', 'sl-j-verdict': '…'})
+                    else:
+                        exact['sl-j-verdict'] = jverdict
+                        if fresh is None:
+                            exact.update({'sl-p2': 'fresh ŷ: no new w', 'sl-L2': 'fresh L: no new w'})
+                        else:
+                            numeric = {'sl-p2': float(fresh[0]), 'sl-L2': float(fresh[1])}
+                    case('concept-state-ledger', dict(w=w, eta=eta, stop=stop, trace=trace), time, numeric, exact)
+CHECKS.append("(fourth batch) the lesson's one-weight loop as a ledger with a snapshot at every boundary, asserting that only the update writes w; journal verdicts from the recorded event set")
+
+
+# ----------------------------------------------------------- 26 values forward, sensitivities back
+class StageA:
+    def __init__(self, w):
+        self.w = Fraction(w)
+
+    def forward(self, x):
+        self.x = x
+        return self.w * x
+
+    def backward(self, upstream):
+        return upstream * self.x  # A's parameter gradient from whatever arrived
+
+
+class StageB:
+    def __init__(self, v):
+        self.v = Fraction(v)
+
+    def forward(self, h):
+        self.h = h
+        self.out = self.v * h
+        return self.out
+
+    def backward(self, r):
+        return dict(dv=r * self.h, dh=r * self.v)
+
+
+def total_loss(w, v, x=2, target=20):
+    return (v * (w * x) - target) ** 2 / 2
+
+
+MESSAGES26 = {'dL/dh (correct)': 'dh', "dL/dv, B's own gradient": 'dv', "B's prediction ŷ": 'prediction'}
+JOURNALS26 = {'backward_done': ['backward_done'], '+ upload_sent': ['backward_done', 'upload_sent'],
+              '+ upload_sent, timeout': ['backward_done', 'upload_sent', 'timeout'],
+              '+ receiver ack': ['backward_done', 'upload_sent', 'receiver_ack']}
+for w in [1, 2, 2.5, 3, 4]:
+    for v in [-2, 0, 1.5, 4, 5]:
+        A, B = StageA(w), StageB(v)
+        h = A.forward(2)
+        yhat = B.forward(h)
+        r = yhat - 20
+        grads = B.backward(r)
+        eps = Fraction(1, 1000)  # exact central differences of a quadratic
+        true_dw = (total_loss(Fraction(w) + eps, Fraction(v)) - total_loss(Fraction(w) - eps, Fraction(v))) / (2 * eps)
+        true_dv = (total_loss(Fraction(w), Fraction(v) + eps) - total_loss(Fraction(w), Fraction(v) - eps)) / (2 * eps)
+        assert grads['dv'] == true_dv and grads['dh'] * 2 == true_dw
+        for message, kind in MESSAGES26.items():
+            sent = {'dh': grads['dh'], 'dv': grads['dv'], 'prediction': yhat}[kind]
+            dw_used = A.backward(sent)
+            if kind == 'dh':
+                assert dw_used == true_dw
+                verdict = 'A got dL/dh'
+            elif sent == grads['dh']:
+                assert dw_used == true_dw  # right number, but the message's meaning is wrong
+                verdict = 'right number, wrong type'
+            else:
+                assert dw_used != true_dw
+                verdict = 'A got the wrong quantity'
+            new_w, new_v = A.w - Fraction(1, 100) * dw_used, B.v - Fraction(1, 100) * grads['dv']
+            for journal, events in JOURNALS26.items():
+                submitted = 'upload_sent' in events
+                if 'receiver_ack' in events:
+                    accepted = 'yes'
+                elif 'timeout' in events:
+                    assert submitted
+                    accepted = 'unknown'
+                else:
+                    accepted = 'no evidence'
+                proven = ('proven: accepted' if accepted == 'yes' else 'timeout: outcome unknown' if accepted == 'unknown'
+                          else 'proven: submitted' if submitted else 'proven: computed')
+                for time in TIMES48:
+                    exact = {'sm-l-sub': 'submitted: ' + ('yes' if submitted else 'no evidence'),
+                             'sm-l-acc': f'accepted: {accepted}', 'sm-l-cred': 'credited: no evidence',
+                             'sm-l-paid': 'paid: no evidence'}
+                    exact['sm-h'] = f'A: h = w·x = {js(r3(h))}' if time >= 800 else 'A: h = …'
+                    exact['sm-send-h'] = f'sends h = {js(r3(h))}' if time >= 800 else 'sends …'
+                    exact['sm-yhat'] = f'B: ŷ = v·h = {js(r3(yhat))}' if time >= 1600 else 'B: ŷ = …'
+                    exact['sm-loss'] = f'L = (ŷ − 20)²/2 = {js(r3(r * r / 2))}' if time >= 1600 else 'L = …'
+                    exact['sm-r'] = f'r = ŷ − 20 = {js(r3(r))}' if time >= 2400 else 'r = …'
+                    exact['sm-dv'] = f'B: dL/dv = r·h = {js(r3(grads["dv"]))}' if time >= 2400 else 'B: dL/dv = …'
+                    exact['sm-dh'] = f'dL/dh = r·v = {js(r3(grads["dh"]))}' if time >= 2400 else 'dL/dh = …'
+                    exact['sm-sent'] = f'sent: {js(r3(sent))}' if time >= 3200 else 'sent: …'
+                    exact['sm-dw'] = f'A: dL/dw = sent·x = {js(r3(dw_used))}' if time >= 3200 else 'A: dL/dw = …'
+                    exact['sm-verdict'] = verdict if time >= 4000 else '…'
+                    exact['sm-new'] = f'w → {js(r3(new_w))}, v → {js(r3(new_v))}' if time >= 4000 else 'w, v after step …'
+                    exact['sm-true'] = f'true dL/dw = {js(r3(true_dw))}' if time >= 4000 else 'true dL/dw …'
+                    exact['sm-l-verdict'] = proven if time >= 4000 else '…'
+                    case('concept-stage-messages', dict(w=w, v=v, message=message, journal=journal), time, {}, exact)
+CHECKS.append('two stage objects whose backward returns both gradients, a message chosen by meaning, parameter gradients cross-checked by exact central differences of the joint loss, and an evidence ledger derived from journal events')
+
+
+# ----------------------------------------------------------- 27 a loss turns a prediction into a penalty
+def penalty(w, x, y, halved):
+    r = w * x - y
+    return (r * r / 2) if halved else r * r
+
+
+def least_squares_w(examples):
+    """Normal equation for ŷ = w·x: Σ x(wx − y) = 0 for either penalty."""
+    return Fraction(sum(x * y for x, y in examples), sum(x * x for x, y in examples))
+
+
+SCALE27 = 168 / 49
+for w in [0, 0.25, 1, 2, 2.5, 3, 4, 5]:
+    for y in [3, 5, 7]:
+        for pen in ['Half squared r²/2', 'Squared r²']:
+            halved = pen == 'Half squared r²/2'
+            W = Fraction(w)
+            L1 = penalty(W, 2, y, halved)
+            eps = Fraction(1, 1000)
+            slope = (penalty(W + eps, 2, y, halved) - penalty(W - eps, 2, y, halved)) / (2 * eps)
+            w_min = least_squares_w([(2, y)])
+            assert penalty(w_min, 2, y, halved) == 0
+            mirror = 2 * w_min - W
+            assert penalty(mirror, 2, y, halved) == L1
+            pair_mean = (L1 + penalty(W, 1, 1, halved)) / 2
+            for second in [False, True]:
+                examples = [(2, y), (1, 1)] if second else [(2, y)]
+                losses = [penalty(W, x, yy, halved) for x, yy in examples]
+                mean = sum(losses) / len(losses)
+                w_star = least_squares_w(examples)
+                residuals = [w_star * x - yy for x, yy in examples]
+                if second:
+                    assert all(rr != 0 for rr in residuals)  # the mean's minimum fits neither example
+                for time in TIMES48:
+                    exact = {'ls-y': f'target y = {y}'}
+                    exact['ls-p'] = f'ŷ = w·x = {js(r3(W * 2))}' if time >= 800 else 'ŷ = …'
+                    exact['ls-r'] = f'signed r = ŷ − y = {js(r3(W * 2 - y))}' if time >= 800 else 'signed r = …'
+                    exact['ls-L'] = ('L = r²/2 = ' if halved else 'L = r² = ') + js(r3(L1)) if time >= 1600 else 'L = …'
+                    exact['ls-slope'] = f'dL/dw = {js(r3(slope))}' if time >= 2400 else 'dL/dw = …'
+                    exact['ls-min'] = f'minimum at w = {js(r3(w_min))}' if time >= 3200 else 'minimum at …'
+                    exact['ls-mirror'] = f'w = {js(r3(mirror))} gives the same L' if time >= 3200 else 'mirror …'
+                    exact['ls-e1'] = f'ex1 L = {js(r3(losses[0]))}' if second else 'ex1 only: switch on ex2'
+                    exact['ls-e2'] = f'ex2 L = {js(r3(losses[1]))}' if second else 'ex2: not in the set'
+                    exact['ls-legend-2'] = 'gold: mean of two' if second else 'teal: minimum'
+                    exact['ls-scale'] = '½ only scales the slope' if halved else 'no ½: slope doubles'
+                    if time >= 4000:
+                        exact['ls-mean'] = f'mean L = {js(r3(mean))}'
+                        exact['ls-wstar'] = (f'mean min at w = {js(r3(w_star))}' if second else f'min at w = {js(r3(w_star))}')
+                        exact['ls-res'] = (f'there r1 {js(r3(residuals[0]))}, r2 {js(r3(residuals[1]))}' if second else 'there r = 0')
+                        exact['ls-verdict'] = 'a mean can hide misfits' if second else 'one point matched'
+                    else:
+                        exact.update({'ls-mean': 'mean L = …', 'ls-wstar': 'min …', 'ls-res': 'there …', 'ls-verdict': '…'})
+                    geometry = {'ls-now': {'x': 16 + 48 * w, 'y': 216 - SCALE27 * min(float(L1), 49)},
+                                # drawn at the two-example mean, hidden while the second example is off
+                                'ls-now-mean': {'x': 16 + 48 * w, 'y': 216 - SCALE27 * min(float(pair_mean), 49),
+                                                'opacity': float(second)},
+                                'ls-minline': {'x': 16 + 48 * float(w_min), 'opacity': float(time >= 3200)}}
+                    case('concept-loss-shape', dict(w=w, y=y, penalty=pen, second=second), time, {}, exact, geometry)
+CHECKS.append('per-example penalties in exact Fractions, slopes by exact central differences, minimizers from the normal equation Σx(wx − y) = 0, a mirror-weight check, and residuals at the mean minimizer asserted nonzero')
+
+
+# ----------------------------------------------------------- 28 a graph with shared identity
+class GNode:
+    def __init__(self, name, value, parents=(), op=None):
+        self.name, self.value, self.parents, self.op = name, value, parents, op
+
+
+def build_graph(x, copies):
+    xa = GNode('x', x)
+    xb = GNode('x′', x) if copies else xa  # a copy-per-use record makes a second leaf for the same input
+    s_node = GNode('s', xa.value * xa.value, (xa, xa), 'mul')
+    z_node = GNode('z', s_node.value + xb.value, (s_node, xb), 'add')
+    return z_node
+
+
+def topo(root):
+    order, seen = [], set()
+
+    def visit(n):
+        if id(n) in seen:
+            return
+        seen.add(id(n))
+        for p in n.parents:
+            visit(p)
+        order.append(n)
+    visit(root)
+    return order
+
+
+def backprop(root):
+    grads = {id(root): 1}
+    for n in reversed(topo(root)):
+        g = grads.get(id(n), 0)
+        if n.op == 'mul':
+            a, b = n.parents
+            grads[id(a)] = grads.get(id(a), 0) + g * b.value  # slot 0
+            grads[id(b)] = grads.get(id(b), 0) + g * a.value  # slot 1 (same node here: both add)
+        elif n.op == 'add':
+            for p in n.parents:
+                grads[id(p)] = grads.get(id(p), 0) + g
+    return grads
+
+
+class SavedMul:
+    def __init__(self, a, b, keep_operands):
+        self.out = a * b
+        self.saved = (a, b) if keep_operands else None
+
+    def backward(self):
+        if self.saved is None:
+            return None
+        a, b = self.saved
+        return b, a
+
+
+for x in [-3, 0, 1, 3]:
+    for build in ['One shared x node', 'x copied per use (bug)']:
+        copies = build != 'One shared x node'
+        z = build_graph(Fraction(x), copies)
+        order = topo(z)
+        assert all(order.index(p) < order.index(n) for n in order for p in n.parents)
+        names = [n.name for n in order]
+        grads = backprop(z)
+        leaves = [n for n in order if not n.parents]
+        true = (Fraction(x) + Fraction(1, 1000)) ** 2 + Fraction(x) + Fraction(1, 1000)
+        true = (true - ((Fraction(x) - Fraction(1, 1000)) ** 2 + Fraction(x) - Fraction(1, 1000))) / Fraction(2, 1000)
+        if copies:
+            assert len(order) == 4 and len(leaves) == 2
+            parts = [grads[id(n)] for n in leaves]
+            assert sum(parts) == true
+            if x != 0:
+                assert all(p != true for p in parts)  # either copy alone loses a contribution
+            split = f'copies hold {js(parts[0])} and {js(parts[1])}'
+        else:
+            assert len(order) == 3 and grads[id(leaves[0])] == true
+            split = 'one x node sums both'
+        for a in [1, 2, 3, 6]:
+            for b in [1, 4, 6]:
+                for save in ['Operands a and b', 'Output p only (bug)']:
+                    for mutate in [False, True]:
+                        node = SavedMul(a, b, save == 'Operands a and b')
+                        live_b = b + 1 if mutate else b  # caller overwrites b after forward
+                        back = node.backward()
+                        if back is None:
+                            # Another factor pair with the same output has different local derivatives.
+                            assert Fraction(2 * a) * Fraction(b, 2) == node.out and Fraction(b, 2) != b
+                            da, db, verdict = 'dp/da: b not kept', 'dp/db: a not kept', 'p alone is ambiguous'
+                        else:
+                            assert back == (b, a)  # the saved operands, whatever the live b is now
+                            da, db = f'dp/da = saved b = {back[0]}', f'dp/db = saved a = {back[1]}'
+                            verdict = 'old forward, saved b' if live_b != b else 'operands describe p'
+                        for time in TIMES48:
+                            exact = {'gi-xv': f'x = {x}', 'gi-count': 'nodes drawn: 4 (x twice)' if copies else 'value nodes: 3',
+                                     'gi-id': 'identity lost' if copies else 'visited once',
+                                     'gi-p': f'p = a·b = {a}·{b} = {node.out}',
+                                     'gi-saved': f'saved: p = {node.out} only' if back is None else f'saved: a = {a}, b = {b}',
+                                     'gi-live': f'live b now {live_b}' if mutate else 'live b unchanged'}
+                            exact['gi-sv'] = f's = x·x = {js(next(n for n in order if n.name == "s").value)}' if time >= 800 else 's = …'
+                            exact['gi-zv'] = f'z = s + x = {js(z.value)}' if time >= 1600 else 'z = …'
+                            if time >= 2400:
+                                exact['gi-topo'] = ('topo: ' if copies else 'topological: ') + ', '.join(names)
+                                exact['gi-rev'] = 'reverse: ' + ', '.join(reversed(names))
+                            else:
+                                exact.update({'gi-topo': 'topological: …', 'gi-rev': 'reverse: …'})
+                            exact['gi-dzdx'] = f'dz/dx = 2x + 1 = {js(true)}' if time >= 3200 else 'dz/dx = …'
+                            exact['gi-split'] = split if time >= 3200 else '…'
+                            exact['gi-da'] = da if time >= 4000 else 'dp/da = …'
+                            exact['gi-db'] = db if time >= 4000 else 'dp/db = …'
+                            exact['gi-verdict'] = verdict if time >= 4000 else '…'
+                            geometry = {'gi-e-xz': {'opacity': float(time >= 1600 and not copies)},
+                                        'gi-e-x2z': {'opacity': float(time >= 1600 and copies)},
+                                        'gi-n-x2-dot': {'opacity': float(copies)}}
+                            case('concept-graph-identity', dict(x=x, build=build, a=a, b=b, save=save, mutate=mutate),
+                                 time, {}, exact, geometry)
+CHECKS.append('graph nodes compared by object identity, a depth-first topological order validated edge by edge, reverse-mode accumulation per node checked against an exact central difference, and a multiply node that keeps its operands or only its output')
+
+
+# ----------------------------------------------------------- 29 a tiny decoder's ledger and shapes
+def decoder_shapes(V, C, d, f, T):
+    """Run the lesson's reference decoder structure with deterministic weights; return shapes and counts."""
+    params = {'embedding': (V, d), 'positions': (C, d), 'Wq': (d, d), 'Wk': (d, d), 'Wv': (d, d), 'Wo': (d, d),
+              'W_up': (d, f), 'W_down': (f, d), 'W_vocab': (d, V)}
+    counter = iter(range(1, 10 ** 6))
+    mats = {k: [[0.1 * math.sin(next(counter)) for _ in range(m)] for _ in range(n)] for k, (n, m) in params.items()}
+    mats['W_vocab'] = [[0.0] * V for _ in range(d)]  # zero vocabulary projection
+
+    def mm(a, b):
+        return [[sum(x * y for x, y in zip(row, col)) for col in zip(*b)] for row in a]
+    ids = [k % V for k in range(T)]
+    pos_rows = mats['positions'][:T]
+    missing = T - len(pos_rows)
+    x = [[e + p for e, p in zip(mats['embedding'][ids[t]], pos_rows[t])] if t < len(pos_rows)
+         else list(mats['embedding'][ids[t]]) for t in range(T)]  # a token past C has no position row
+    q, k, v = (mm(x, mats[n]) for n in ('Wq', 'Wk', 'Wv'))
+    allowed = [(i, j) for i in range(T) for j in range(T) if j <= i]
+    scores = [[sum(a * b for a, b in zip(q[i], k[j])) for j in range(T)] for i in range(T)]
+    hidden = [[math.tanh(z) for z in row] for row in mm(x, mats['W_up'])]
+    logits = mm(mm(hidden, mats['W_down']), mats['W_vocab'])
+    losses = [max(row) + math.log(sum(math.exp(z - max(row)) for z in row)) - row[0] for row in logits]
+    shape = lambda m: (len(m), len(m[0]))
+    return dict(counts={k: n * m for k, (n, m) in params.items()}, ids=(len(ids),), x=shape(x), q=shape(q), v=shape(v),
+                scores=shape(scores), allowed=len(allowed), hidden=shape(hidden), logits=shape(logits),
+                uniform=statistics.fmean(losses), missing=missing)
+
+
+def tup(t):
+    return '(' + ', '.join(str(v) for v in t) + ')'
+
+
+for V in range(2, 7):
+    for C in range(1, 5):
+        for d in [2, 4]:
+            for f in [1, 2, 3]:
+                for T in range(1, 5):
+                    r = decoder_shapes(V, C, d, f, T)
+                    c = r['counts']
+                    total = sum(c.values())
+                    if (V, C, d, f) == (3, 2, 2, 3):
+                        assert total == 44
+                    assert abs(r['uniform'] - math.log(V)) < 1e-12
+                    assert r['x'] == r['q'] == r['v'] == (T, d)
+                    fit = f'residuals {tup((T, d))} ✓' if r['missing'] <= 0 else f'positions missing: {r["missing"]}'
+                    if r['missing'] > 0:
+                        assert T > C
+                    for time in TIMES48:
+                        exact = {'dc-emb': f'embed V·d = {c["embedding"]}', 'dc-pos': f'positions C·d = {c["positions"]}',
+                                 'dc-qkv': f'Q, K, V 3·d² = {c["Wq"] + c["Wk"] + c["Wv"]}', 'dc-wo': f'output W_O d² = {c["Wo"]}',
+                                 'dc-ff': f'feed-fwd 2·d·f = {c["W_up"] + c["W_down"]}', 'dc-vocab': f'vocab d·V = {c["W_vocab"]}',
+                                 'dc-targets': f'targets per window: {T}', 'dc-rows': f'C = {C} position rows'}
+                        exact['dc-total'] = f'total = {total}' if time >= 800 else 'total = …'
+                        exact['dc-ids'] = f'ids ({T},)' if time >= 1600 else 'ids …'
+                        exact['dc-x'] = f'X, Q, K, V {tup(r["x"])}' if time >= 1600 else 'X, Q, K, V …'
+                        exact['dc-scores'] = f'scores {tup(r["scores"])}' if time >= 2400 else 'scores …'
+                        exact['dc-mask'] = f'causal keeps {r["allowed"]} of {T * T}' if time >= 2400 else 'causal keeps …'
+                        exact['dc-hidden'] = f'FF hidden {tup(r["hidden"])}' if time >= 3200 else 'FF hidden …'
+                        exact['dc-logits'] = f'logits {tup(r["logits"])}' if time >= 3200 else 'logits …'
+                        exact['dc-fit'] = fit if time >= 3200 else '…'
+                        exact['dc-fd'] = f'central diff: {2 * total} runs' if time >= 4000 else 'central diff: …'
+                        numeric = {'dc-lnv': r['uniform']} if time >= 4000 else {}
+                        if time < 4000:
+                            exact['dc-lnv'] = 'loss ln V = …'
+                        case('concept-decoder-ledger', dict(V=V, C=C, d=d, f=f, T=T), time, numeric, exact)
+CHECKS.append("parameter counts from a table of matrix shapes, a forward pass of the lesson's decoder structure with deterministic weights read for every intermediate shape, the causal pair count by enumeration, and the zero-projection cross-entropy against math.log(V)")
+
+
+# ----------------------------------------------------------- 30 registration, autograd and the optimizer
+class Param:
+    def __init__(self, value):
+        self.value, self.grad = [Fraction(v) for v in value], None
+
+
+class Module:
+    def __init__(self):
+        object.__setattr__(self, '_params', {})
+        object.__setattr__(self, '_children', {})
+
+    def __setattr__(self, name, value):
+        if isinstance(value, Param):
+            self._params[name] = value
+        elif isinstance(value, Module):
+            self._children[name] = value
+        object.__setattr__(self, name, value)  # a plain list is stored but never registered
+
+    def named_parameters(self, prefix=''):
+        for n, p in self._params.items():
+            yield prefix + n, p
+        for n, m in self._children.items():
+            yield from m.named_parameters(prefix + n + '.')
+
+    def zero_grad(self):
+        for _, p in self.named_parameters():
+            p.grad = None
+
+
+class Linear(Module):
+    def __init__(self):
+        super().__init__()
+        self.weight = Param([2, -1])
+        self.bias = Param([Fraction(1, 2)])
+
+
+class SGD:
+    def __init__(self, params, lr):
+        self.params = list(params)
+        if not self.params:
+            raise ValueError('optimizer got an empty parameter list')
+        self.lr = lr
+
+    def step(self):
+        for p in self.params:
+            if p.grad is not None:
+                p.value = [v - self.lr * g for v, g in zip(p.value, p.grad)]
+
+
+def linear_step(container, detach, calls, zero, lr, x=(3, 4), target=Fraction(3, 2)):
+    model = Module()
+    layer = Linear()
+    if container == 'Registered attribute':
+        model.layer = layer
+    else:
+        model.layers = [layer]
+    names = [n for n, _ in model.named_parameters()]
+    try:
+        opt, error = SGD([p for _, p in model.named_parameters()], lr), None
+    except ValueError as e:
+        opt, error = None, e
+    for _ in range(calls):
+        if zero:
+            model.zero_grad()
+        pred = sum(wv * xv for wv, xv in zip(layer.weight.value, x)) + layer.bias.value[0]
+        upstream = pred - target  # d(½(ŷ − t)²)/dŷ
+        if not detach:
+            g = [upstream * xv for xv in x]
+            layer.weight.grad = g if layer.weight.grad is None else [a + b for a, b in zip(layer.weight.grad, g)]
+        layer.bias.grad = [upstream] if layer.bias.grad is None else [layer.bias.grad[0] + upstream]
+    grads = (layer.weight.grad, layer.bias.grad[0])
+    if opt:
+        opt.step()
+    new_pred = sum(wv * xv for wv, xv in zip(layer.weight.value, x)) + layer.bias.value[0]
+    return names, error, grads, layer.weight.value, layer.bias.value[0], new_pred
+
+
+for container in ['Registered attribute', 'Plain Python list (bug)']:
+    for detach in [False, True]:
+        for calls in [1, 2, 3]:
+            for zero in [True, False]:
+                for lr in [0.01, 0.03, 0.05]:
+                    names, error, (gw, gb), W2, b2, y2 = linear_step(container, detach, calls, zero, Fraction(str(lr)))
+                    contributions = gb  # each call adds dL/dŷ = 1 to b.grad
+                    if error is not None:
+                        assert names == [] and container != 'Registered attribute'
+                        verdict = 'not registered: no step'
+                    elif detach:
+                        assert gw is None and W2 == [2, -1] and b2 != Fraction(1, 2)
+                        verdict = 'W detached: b moved only'
+                    elif contributions > 1:
+                        assert not zero
+                        verdict = f'grad ×{js(contributions)}: not cleared'
+                    else:
+                        verdict = 'one clean step'
+                    if contributions > 1:
+                        acc = 'model.zero_grad missed it' if zero else f'summed over {js(contributions)} calls'
+                        if zero:
+                            assert names == []  # zero_grad walks parameters(), which never saw the layer
+                    else:
+                        acc = 'one contribution'
+                    for time in TIMES48:
+                        exact = {'mr-params': 'parameters(): ' + (', '.join({'layer.weight': 'W', 'layer.bias': 'b'}[n] for n in names) or 'none'),
+                                 'mr-calls': f'{calls} backward()' if calls == 1 else f'{calls} backward() calls',
+                                 'mr-zero': 'model.zero_grad() each' if zero else 'no zero_grad between',
+                                 'mr-detach': 'W.detach(): no route' if detach else 'W tracked by autograd',
+                                 'mr-sgd': 'SGD([]): ValueError' if error else f'SGD(lr {js(lr)}) owns W, b'}
+                        if time >= 1600:
+                            exact['mr-gw'] = 'W.grad: None' if gw is None else f'W.grad = [{js(r3(gw[0]))}, {js(r3(gw[1]))}]'
+                            exact['mr-gb'] = f'b.grad = {js(gb)}'
+                        else:
+                            exact.update({'mr-gw': 'W.grad …', 'mr-gb': 'b.grad …'})
+                        exact['mr-acc'] = acc if time >= 2400 else '…'
+                        if time >= 3200:
+                            exact['mr-W2'] = 'W: no step' if error else f'W → [{js(r3(W2[0]))}, {js(r3(W2[1]))}]'
+                            exact['mr-b2'] = 'b: no step' if error else f'b → {js(r3(b2))}'
+                            exact['mr-y2'] = 'ŷ stays 2.5' if error else f'new ŷ = {js(r3(y2))}'
+                        else:
+                            exact.update({'mr-W2': 'W → …', 'mr-b2': 'b → …', 'mr-y2': 'new ŷ …'})
+                        exact['mr-verdict'] = verdict if time >= 4000 else '…'
+                        case('concept-module-registry', dict(container=container, detach=detach, calls=calls, zero=zero, lr=lr),
+                             time, {}, exact)
+CHECKS.append('a miniature module system that registers only Param and Module attributes, an optimizer that refuses an empty parameter list, gradient buffers that add on every backward unless model.zero_grad() clears them, and an SGD step that skips None gradients')
+
 
 print(json.dumps({'cases': CASES, 'independentChecks': CHECKS}, allow_nan=False, separators=(',', ':')))

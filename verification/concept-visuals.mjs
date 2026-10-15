@@ -1,4 +1,4 @@
-// Read-only verification of the twenty-four concept scenes, except optional private
+// Read-only verification of the thirty concept scenes, except optional private
 // temporary browser screenshots. Default consumption: the released package.
 import assert from "node:assert/strict";
 import { readFile, mkdtemp, writeFile, chmod } from "node:fs/promises";
@@ -31,7 +31,7 @@ const overlay = await read("content/concept-visuals.json");
 const scenes = overlay.visuals.map(fromVisualExperience);
 assert.deepEqual(scenes, data.scenes, "Delivered overlay differs from authored scenes");
 assert.deepEqual(overlay.bindings, data.bindings);
-assert.equal(scenes.length, 24);
+assert.equal(scenes.length, 30);
 
 // ------------------------------------------------ full-curriculum integration
 // Same overlays and order as scripts/assemble.mjs, compiled in memory through
@@ -725,6 +725,121 @@ mutated("concept-path-coverage", "pc-fwd", "text", after(1600, cat("forward hits
 mutated("concept-path-coverage", "pc-combined", "text", after(3200, "combined: 5", "combined: …"),
   from({ combine: "Weight by size" }, 3200), "mean of means reported for the weighted combine",
   { mustPassElsewhere: final({ combine: "Mean of means (bug)" }, 4800) });
+
+// ------------------------------------------------ fourth batch (25-30)
+const or = (...v) => op("or", ...v);
+const pickv = (expr, options, values) =>
+  values.slice(0, -1).reduceRight((rest, value, i) => iff(eq(expr, options[i]), value, rest), values.at(-1));
+
+// 25 state ledger
+const w25 = st("w"),
+  g25 = mul(sub(mul(w25, 3), 8), 3);
+const bwd25 = or(eq(st("stop"), "Backward"), eq(st("stop"), "Update"));
+mutated("concept-state-ledger", "sl-w-bwd", "text",
+  after(2400, iff(bwd25, cat("after backward: w ", g25), "backward: not run"), "after backward: …"),
+  (c) => c.time >= 2400 && c.state.stop !== "Forward" && c.state.w !== 3, "gradient written as the new weight",
+  { mustPassElsewhere: final({ w: 3, stop: "Update" }, 4800) });
+mutated("concept-state-ledger", "sl-w-upd", "text",
+  after(3200, iff(eq(st("stop"), "Update"), cat("after update: w ", r3(add(w25, mul(st("eta"), g25)))), "update: not run"), "after update: …"),
+  (c) => c.time >= 3200 && c.state.stop === "Update" && c.state.eta > 0, "update steps up the gradient",
+  { mustPassElsewhere: final({ eta: 0, stop: "Update" }, 4800) });
+mutated("concept-state-ledger", "sl-j-verdict", "text",
+  after(4000, iff(eq(st("trace"), "forward_done, response_saved"), "inference only", "a training step ran"), "…"),
+  from({ trace: "+ gradient_ready" }, 4000), "gradient_ready judged as a training step",
+  { mustPassElsewhere: final({ trace: "+ optimizer_step, w v2" }, 4800) });
+
+// 26 stage messages
+const h26 = mul(st("w"), 2),
+  r26 = sub(mul(st("v"), h26), 20);
+const differs26 = (c) => {
+  const h = 2 * c.state.w,
+    r = c.state.v * h - 20;
+  return r * h !== r * c.state.v;
+};
+mutated("concept-stage-messages", "sm-sent", "text", after(3200, cat("sent: ", r3(mul(r26, h26))), "sent: …"),
+  (c) => c.time >= 3200 && c.state.message === "dL/dh (correct)" && differs26(c),
+  "B's parameter gradient sent under the dL/dh label", { mustPassElsewhere: final({ w: 2, v: 4, message: "dL/dh (correct)" }, 4800) });
+const J26 = ["backward_done", "+ upload_sent", "+ upload_sent, timeout", "+ receiver ack"];
+mutated("concept-stage-messages", "sm-l-acc", "text",
+  cat("accepted: ", pickv(st("journal"), J26, ["no evidence", "yes", "yes", "yes"])),
+  (c) => c.state.journal === "+ upload_sent" || c.state.journal === "+ upload_sent, timeout", "upload treated as acceptance",
+  { mustPassElsewhere: final({ journal: "+ receiver ack" }, 4800) });
+mutated("concept-stage-messages", "sm-l-verdict", "text",
+  (old) => iff(and(ge(t, 4000), eq(st("journal"), "+ upload_sent, timeout")), "timeout: work rejected", old),
+  from({ journal: "+ upload_sent, timeout" }, 4000), "timeout reported as a rejection",
+  { mustPassElsewhere: final({ journal: "+ upload_sent" }, 4800) });
+
+// 27 loss shape
+const y27 = st("y"),
+  r27 = sub(mul(st("w"), 2), y27);
+mutated("concept-loss-shape", "ls-min", "text", after(3200, cat("minimum at w = ", r3(y27)), "minimum at …"),
+  (c) => c.time >= 3200, "minimum placed at w = y (input ignored)");
+mutated("concept-loss-shape", "ls-slope", "text", after(2400, cat("dL/dw = ", r3(mul(4, r27))), "dL/dw = …"),
+  (c) => c.time >= 2400 && c.state.penalty === "Half squared r²/2" && 2 * c.state.w !== c.state.y,
+  "unhalved slope under the half-squared label", { mustPassElsewhere: final({ penalty: "Half squared r²/2", w: 2.5, y: 5 }, 4800) });
+mutated("concept-loss-shape", "ls-wstar", "text",
+  after(4000, iff(st("second"), cat("mean min at w = ", r3(div(add(div(y27, 2), 1), 2))), cat("min at w = ", r3(div(y27, 2)))), "min …"),
+  from({ second: true }, 4000), "mean minimizer taken as the average of the two minimizers",
+  { mustPassElsewhere: final({ second: false }, 4800) });
+mutated("concept-loss-shape", "ls-verdict", "text",
+  (old) => iff(and(ge(t, 4000), st("second")), "the mean fits both", old),
+  from({ second: true }, 4000), "mean minimum reported as fitting both examples",
+  { mustPassElsewhere: final({ second: false }, 4800) });
+
+// 28 graph identity
+const outOnly28 = eq(st("save"), "Output p only (bug)");
+mutated("concept-graph-identity", "gi-da", "text",
+  after(4000, iff(outOnly28, "dp/da: b not kept", cat("dp/da = saved b = ", iff(st("mutate"), add(st("b"), 1), st("b")))), "dp/da = …"),
+  from({ save: "Operands a and b", mutate: true }, 4000), "live b read after the caller mutated it",
+  { mustPassElsewhere: final({ save: "Operands a and b", mutate: false }, 4800) });
+mutated("concept-graph-identity", "gi-dzdx", "text", after(3200, cat("dz/dx = 2x + 1 = ", mul(2, st("x"))), "dz/dx = …"),
+  (c) => c.time >= 3200, "direct use of x dropped from dz/dx");
+mutated("concept-graph-identity", "gi-count", "text", "value nodes: 3",
+  at({ build: "x copied per use (bug)" }), "copy-per-use record counted as three value nodes",
+  { mustPassElsewhere: final({ build: "One shared x node" }, 4800) });
+mutated("concept-graph-identity", "gi-verdict", "text",
+  (old) => iff(and(ge(t, 4000), outOnly28), "operands describe p", old),
+  from({ save: "Output p only (bug)" }, 4000), "output-only save reported as sufficient",
+  { mustPassElsewhere: final({ save: "Operands a and b", mutate: false }, 4800) });
+
+// 29 decoder ledger
+const V29 = st("V"),
+  C29 = st("C"),
+  d29 = st("d"),
+  T29 = st("T");
+mutated("concept-decoder-ledger", "dc-pos", "text", cat("positions C·d = ", mul(V29, d29)),
+  (c) => c.state.V !== c.state.C, "positions sized by the vocabulary", { mustPassElsewhere: final({ V: 2, C: 2 }, 4800) });
+mutated("concept-decoder-ledger", "dc-total", "text",
+  after(800, cat("total = ", add(mul(V29, d29), mul(C29, d29), mul(3, d29, d29), mul(2, d29, st("f")), mul(d29, V29))), "total = …"),
+  (c) => c.time >= 800, "attention output W_O left out of the total");
+mutated("concept-decoder-ledger", "dc-logits", "text", after(3200, cat("logits (", T29, ", ", d29, ")"), "logits …"),
+  (c) => c.time >= 3200 && c.state.V !== c.state.d, "logits shaped by the model width",
+  { mustPassElsewhere: final({ V: 2, d: 2 }, 4800) });
+mutated("concept-decoder-ledger", "dc-fit", "text",
+  (old) => iff(ge(t, 3200), cat("residuals (", T29, ", ", d29, ") ✓"), old),
+  (c) => c.time >= 3200 && c.state.T > c.state.C, "a window longer than the context reported as fitting",
+  { mustPassElsewhere: final({ T: 2, C: 2 }, 4800) });
+
+// 30 module registry
+const list30 = eq(st("container"), "Plain Python list (bug)");
+const n30 = (c) => (c.state.zero && c.state.container === "Registered attribute" ? 1 : c.state.calls);
+mutated("concept-module-registry", "mr-gw", "text", after(1600, iff(st("detach"), "W.grad: None", "W.grad = [3, 4]"), "W.grad …"),
+  (c) => c.time >= 1600 && !c.state.detach && n30(c) > 1, "accumulated buffer shown as a fresh gradient",
+  { mustPassElsewhere: final({ calls: 1, detach: false }, 4800) });
+const lr30 = st("lr"),
+  k30 = iff(and(st("zero"), not(list30)), 1, st("calls"));
+mutated("concept-module-registry", "mr-W2", "text",
+  after(3200, iff(list30, "W: no step", cat("W → [", r3(sub(2, mul(lr30, 3, k30))), ", ", r3(sub(-1, mul(lr30, 4, k30))), "]")), "W → …"),
+  from({ detach: true, container: "Registered attribute" }, 3200), "detached weight still updated",
+  { mustPassElsewhere: final({ detach: false, container: "Registered attribute" }, 4800) });
+mutated("concept-module-registry", "mr-verdict", "text",
+  (old) => iff(and(ge(t, 4000), list30), "one clean step", old),
+  from({ container: "Plain Python list (bug)" }, 4000), "unregistered layer reported as one clean step",
+  { mustPassElsewhere: final({ container: "Registered attribute", calls: 1 }, 4800) });
+mutated("concept-module-registry", "mr-gb", "text", after(1600, cat("b.grad = ", iff(st("zero"), 1, st("calls"))), "b.grad …"),
+  (c) => c.time >= 1600 && c.state.container === "Plain Python list (bug)" && c.state.zero && c.state.calls > 1,
+  "model.zero_grad() assumed to clear an unregistered layer",
+  { mustPassElsewhere: final({ container: "Registered attribute", zero: true }, 4800) });
 
 // ------------------------------------------------ runtime contract checks
 for (const scene of scenes) {
