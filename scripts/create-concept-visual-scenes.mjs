@@ -1,6 +1,6 @@
-// Private authoring only. Builds twenty-four bounded concept scenes (three batches
-// of eight) with the released @course-core/visuals package and writes exactly two
-// files:
+// Private authoring only. Builds thirty bounded concept scenes (three batches of
+// eight, then a fourth batch of six) with the released @course-core/visuals package
+// and writes exactly two files:
 //   visuals/concept-scenes.json and content/concept-visuals.json
 // A development build may be selected only through an explicit file: URL to a
 // built dist/headless.js (same convention as the systems and learning scenes).
@@ -3152,6 +3152,604 @@ const pathScene = (() => {
   });
 })();
 
+// ============================================================ 25 forward, backward and update are separate states
+// fnd-e01-02: prediction = w·x with x = 3, target 8, L = (prediction − y)²/2; w = 2 gives 6, −2, 2,
+// gradient −6; rate 0.1 gives w = 2.6 and a fresh prediction 7.8 with loss 0.02.
+const ledgerScene = (() => {
+  const w = s("w"),
+    eta = s("eta"),
+    stop = s("stop"),
+    trace = s("trace");
+  const X = 3,
+    Y = 8;
+  const bwd = or(eq(stop, "Backward"), eq(stop, "Update")),
+    upd = eq(stop, "Update");
+  const p = mul(w, X),
+    r = sub(p, Y),
+    L = div(mul(r, r), 2),
+    g = mul(r, X);
+  const w2 = sub(w, mul(eta, g)),
+    p2 = mul(w2, X),
+    r2 = sub(p2, Y),
+    L2 = div(mul(r2, r2), 2);
+  const weights = card("sl-weights", 222, ice, blue, "WEIGHT AT EACH BOUNDARY", [
+    text("sl-w-before", cat("before forward: w ", w), 16, 62),
+    text("sl-w-fwd", after(800, cat("after forward: w ", w), "after forward: …"), 16, 90),
+    text("sl-w-bwd", after(2400, iff(bwd, cat("after backward: w ", w), "backward: not run"), "after backward: …"), 16, 118),
+    text("sl-w-upd", after(3200, iff(upd, cat("after update: w ", r3(w2)), "update: not run"), "after update: …"), 16, 146),
+    bold(
+      "sl-w-verdict",
+      after(
+        3200,
+        // The weight moves only at the update, and only by η·g.
+        iff(upd, iff(eq(eta, 0), "η = 0: update kept w", "only the update moved w"), "w unchanged: no step"),
+        "…",
+      ),
+      16,
+      180,
+      17,
+      blue,
+    ),
+    text("sl-w-rule", "w′ = w − η·g", 16, 208, 17, muted),
+  ]);
+  const values = card("sl-values", 250, lilac, purple, "VALUES JUST PRODUCED", [
+    text("sl-xy", "x = 3, target y = 8", 16, 62),
+    text("sl-p", after(800, cat("ŷ = w·x = ", r3(p)), "ŷ = …"), 16, 90),
+    text("sl-r", after(1600, cat("r = ŷ − y = ", r3(r)), "r = …"), 16, 118),
+    text("sl-L", after(1600, cat("L = r²/2 = ", r3(L)), "L = …"), 16, 146),
+    bold("sl-g", after(2400, iff(bwd, cat("g = r·x = ", r3(g)), "g: backward not run"), "g = …"), 16, 180, 18, purple),
+    text("sl-p2", after(4000, iff(upd, cat("fresh ŷ = ", r3(p2)), "fresh ŷ: no new w"), "fresh ŷ …"), 16, 208),
+    text("sl-L2", after(4000, iff(upd, cat("fresh L = ", r3(L2)), "fresh L: no new w"), "fresh L …"), 16, 236),
+  ]);
+  const T = ["forward_done, response_saved", "+ gradient_ready", "+ optimizer_step, w v2"];
+  const level = iff(eq(trace, T[0]), 0, iff(eq(trace, T[1]), 1, 2));
+  const journal = card("sl-journal", 222, sand, gold, "WHAT A JOURNAL PROVES", [
+    text("sl-j-exec", "forward ran: yes", 16, 62),
+    text("sl-j-grad", cat("gradient: ", iff(ge(level, 1), "yes", "not shown")), 16, 90),
+    text("sl-j-step", cat("weight update: ", iff(ge(level, 2), "yes", "not shown")), 16, 118),
+    bold(
+      "sl-j-verdict",
+      after(4000, iff(eq(level, 0), "inference only", iff(eq(level, 1), "gradient, but no step", "a training step ran")), "…"),
+      16,
+      152,
+      17,
+      gold,
+    ),
+    text("sl-j-log", "a log is app state", 16, 180, 17, muted),
+    text("sl-j-cache", "caches change; w need not", 16, 208, 17, muted),
+  ]);
+  return build({
+    id: "concept-state-ledger",
+    title: "Forward, backward, update: three states.",
+    description:
+      "Run the lesson's one-weight model through forward, backward and a gradient-descent update, stopping after any phase. Read the weight at each boundary and the values each phase produces, then judge what an invented journal proves about training.",
+    state: {
+      w: num("Start weight w", 2, 0, 4, 0.5),
+      eta: num("Learning rate η", 0.1, 0, 0.3, 0.05),
+      stop: choice("Run until", ["Update", "Backward", "Forward"]),
+      trace: choice("Journal to judge", T),
+    },
+    kicker: "25 / GRADIENT IS NOT A STEP",
+    subtitle: "ŷ = w·x, L = (ŷ − y)²/2",
+    grid: [
+      [weights, 0],
+      [values, 1],
+      [journal, 2],
+    ],
+    compactOrder: [weights, values, journal],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "Before forward the ledger holds w = 2, input 3 and target 8. Predict which phase changes w." },
+      { atMs: 800, text: "Forward produces the prediction 6. The weight is still 2." },
+      { atMs: 1600, text: "The residual −2 and the half squared loss 2 are values, not parameters." },
+      { atMs: 2400, text: "Backward produces the gradient −6. It is a direction signal; w is still 2." },
+      { atMs: 3200, text: "Only the update writes w: 2 − 0.1·(−6) = 2.6." },
+      { atMs: 4000, text: "A fresh forward predicts 7.8 with loss 0.02. A journal proves only the events it records." },
+    ],
+    accessible:
+      "Training as separate state transitions, with the lesson's one-weight model prediction = w·x, input x = 3, target y = 8 and half squared loss. Before forward the weight is 2. Forward produces the prediction 6; the residual is −2 and the loss is 2, and the weight is still 2. Backward produces the gradient (prediction − y)·x = −6, and the weight is still 2: a gradient is a proposed direction, not a new weight. Only the update writes the weight: with learning rate 0.1, w becomes 2 − 0.1·(−6) = 2.6, and a fresh forward predicts 7.8 with loss 0.02. Stopping after forward or backward leaves w unchanged; a learning rate of 0 also leaves it unchanged. A journal is judged by what it records: forward_done and response_saved show inference only (a growing log or cache is application or request state, not a changed parameter); adding gradient_ready shows a gradient was computed but not that an optimizer step ran; only a recorded optimizer step with a new weight version shows training.",
+  });
+})();
+
+// ============================================================ 26 forward values and backward sensitivities between stages
+// fnd-e01-04: stage A h = w·x, stage B ŷ = v·h with x = 2, w = 3, v = 4, target 20: h = 6, ŷ = 24, L = 8;
+// B's gradient 24, the message dL/dh = 16, A's gradient 32; rate 0.01 gives w 2.68, v 3.76.
+const stageScene = (() => {
+  const w = s("w"),
+    v = s("v"),
+    msg = s("message"),
+    journal = s("journal");
+  const M = ["dL/dh (correct)", "dL/dv, B's own gradient", "B's prediction ŷ"];
+  const J = ["backward_done", "+ upload_sent", "+ upload_sent, timeout", "+ receiver ack"];
+  const h = mul(w, 2),
+    yhat = mul(v, h),
+    r = sub(yhat, 20),
+    L = div(mul(r, r), 2),
+    dv = mul(r, h),
+    dh = mul(r, v),
+    sent = pick(msg, M, [dh, dv, yhat]),
+    dwUsed = mul(sent, 2),
+    dwTrue = mul(dh, 2);
+  const fwd = card("sm-forward", 222, ice, blue, "FORWARD: A SENDS A VALUE", [
+    text("sm-x", "x = 2, target 20", 16, 62),
+    text("sm-h", after(800, cat("A: h = w·x = ", r3(h)), "A: h = …"), 16, 90),
+    bold("sm-send-h", after(800, cat("sends h = ", r3(h)), "sends …"), 16, 120, 18, blue),
+    text("sm-yhat", after(1600, cat("B: ŷ = v·h = ", r3(yhat)), "B: ŷ = …"), 16, 150),
+    text("sm-loss", after(1600, cat("L = (ŷ − 20)²/2 = ", r3(L)), "L = …"), 16, 178),
+    text("sm-same", "one function, two places", 16, 206, 17, muted),
+  ]);
+  const bwd = card("sm-backward", 278, lilac, purple, "BACKWARD: B SENDS dL/dh", [
+    text("sm-r", after(2400, cat("r = ŷ − 20 = ", r3(r)), "r = …"), 16, 62),
+    text("sm-dv", after(2400, cat("B: dL/dv = r·h = ", r3(dv)), "B: dL/dv = …"), 16, 90),
+    text("sm-dh", after(2400, cat("dL/dh = r·v = ", r3(dh)), "dL/dh = …"), 16, 118),
+    bold("sm-sent", after(3200, cat("sent: ", r3(sent)), "sent: …"), 16, 150, 18, purple),
+    text("sm-dw", after(3200, cat("A: dL/dw = sent·x = ", r3(dwUsed)), "A: dL/dw = …"), 16, 180),
+    bold(
+      "sm-verdict",
+      after(
+        4000,
+        // Name the cause: the wrong quantity, or the right number under the wrong meaning.
+        iff(eq(msg, M[0]), "A got dL/dh", iff(eq(sent, dh), "right number, wrong type", "A got the wrong quantity")),
+        "…",
+      ),
+      16,
+      212,
+      17,
+      purple,
+    ),
+    text(
+      "sm-new",
+      after(4000, cat("w → ", r3(sub(w, mul(0.01, dwUsed))), ", v → ", r3(sub(v, mul(0.01, dv)))), "w, v after step …"),
+      16,
+      242,
+    ),
+    text("sm-true", after(4000, cat("true dL/dw = ", r3(dwTrue)), "true dL/dw …"), 16, 268, 17, muted),
+  ]);
+  const lvl = pick(journal, J, [0, 1, 2, 3]);
+  const ledger = card("sm-ledger", 250, sand, gold, "EVIDENCE LEDGER", [
+    text("sm-l-comp", "computed: yes", 16, 62),
+    text("sm-l-sub", cat("submitted: ", iff(ge(lvl, 1), "yes", "no evidence")), 16, 90),
+    text("sm-l-acc", cat("accepted: ", iff(eq(lvl, 3), "yes", iff(eq(lvl, 2), "unknown", "no evidence"))), 16, 118),
+    text("sm-l-cred", "credited: no evidence", 16, 146),
+    text("sm-l-paid", "paid: no evidence", 16, 174),
+    bold(
+      "sm-l-verdict",
+      after(4000, pick(journal, J, ["proven: computed", "proven: submitted", "timeout: outcome unknown", "proven: accepted"]), "…"),
+      16,
+      208,
+      17,
+      gold,
+    ),
+    text("sm-l-rule", "each state needs its own", 16, 236, 17, muted),
+  ]);
+  return build({
+    id: "concept-stage-messages",
+    title: "Values go forward. Sensitivities come back.",
+    description:
+      "Split the lesson's scalar model across two imaginary stages. Stage A sends an activation forward, stage B returns the sensitivity of the loss to that activation, and each stage computes its own parameter gradient. Send the wrong quantity, then judge what an invented journal proves.",
+    state: {
+      w: num("Stage A weight w", 3, 1, 4, 0.5),
+      v: num("Stage B weight v", 4, -2, 5, 0.5),
+      message: choice("B sends upstream", M),
+      journal: choice("Journal evidence", J),
+    },
+    kicker: "26 / A PAYLOAD HAS A MEANING",
+    subtitle: "imaginary stages A and B",
+    grid: [
+      [fwd, 0],
+      [bwd, 1],
+      [ledger, 2],
+    ],
+    compactOrder: [fwd, bwd, ledger],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "Stage A computes h = w·x; stage B computes ŷ = v·h. One device could run both; distribution changes placement only." },
+      { atMs: 800, text: "Forward sends a value: h = 6." },
+      { atMs: 1600, text: "B predicts 24; the half squared loss against 20 is 8." },
+      { atMs: 2400, text: "Backward starts at r = 4. B keeps its own gradient 24 and computes dL/dh = r·v = 16." },
+      { atMs: 3200, text: "The message upstream is dL/dh. A multiplies it by x: dL/dw = 32." },
+      { atMs: 4000, text: "Computed, submitted, accepted, credited and paid are separate states, each with its own evidence." },
+    ],
+    accessible:
+      "A two-stage scalar model with the lesson's numbers: stage A computes h = w·x and stage B computes the prediction v·h, with x = 2, w = 3, v = 4 and target 20. Forward sends the activation value h = 6; B predicts 24 and the half squared loss is 8. Backward begins with the output sensitivity 24 − 20 = 4. B computes its own parameter gradient 4·h = 24 and sends the activation gradient dL/dh = 4·v = 16 upstream. A computes its parameter gradient 16·x = 32. With plain gradient descent at rate 0.01 both stages update from the same old forward state: w becomes 2.68 and v becomes 3.76. If B sends its own gradient or its prediction instead, A multiplies the wrong quantity and its gradient is wrong; when the number happens to equal dL/dh, the message is still mislabelled. A message needs its meaning, not just a number. Separately, an evidence ledger keeps computed, submitted, accepted, credited and paid apart: backward_done proves only computation, upload_sent adds a submission, a timeout leaves acceptance unknown, and only a receiver acknowledgement shows acceptance. Credit and payment are separate accounting outcomes that none of these events proves. Stages A and B are imaginary.",
+  });
+})();
+
+// ============================================================ 27 a loss turns a prediction into a penalty
+// fnd-e03-01: ŷ = w·x with x = 2, y = 5: w = 1 → ŷ 2, r −3, L 4.5; w = 2 and w = 3 → L 0.5; minimum at 2.5.
+// A second example x = 1, y = 1 at w = 2 also has loss 0.5; the mean is 0.5.
+const lossScene = (() => {
+  const w = s("w"),
+    y = s("y"),
+    full = eq(s("penalty"), "Squared r²"),
+    two = s("second");
+  const c = iff(full, 1, 0.5);
+  const lossAt = (wv, xv, yv) => {
+    const rr = sub(mul(wv, xv), yv);
+    return mul(c, rr, rr);
+  };
+  const p = mul(w, 2),
+    r = sub(p, y),
+    L1 = lossAt(w, 2, y),
+    slope = mul(2, c, r, 2);
+  const L2 = lossAt(w, 1, 1),
+    mean = div(add(L1, L2), 2);
+  const wStar = div(add(mul(2, y), 1), 5); // minimizer of the two-example mean for either penalty
+  const one = card("ls-one", 250, ice, blue, "ONE EXAMPLE: x = 2", [
+    text("ls-y", cat("target y = ", y), 16, 62),
+    text("ls-p", after(800, cat("ŷ = w·x = ", r3(p)), "ŷ = …"), 16, 90),
+    text("ls-r", after(800, cat("signed r = ŷ − y = ", r3(r)), "signed r = …"), 16, 118),
+    bold("ls-L", after(1600, cat(iff(full, "L = r² = ", "L = r²/2 = "), r3(L1)), "L = …"), 16, 150, 18, blue),
+    text("ls-slope", after(2400, cat("dL/dw = ", r3(slope)), "dL/dw = …"), 16, 180),
+    text("ls-min", after(3200, cat("minimum at w = ", r3(div(y, 2))), "minimum at …"), 16, 208),
+    text("ls-mirror", after(3200, cat("w = ", r3(sub(y, w)), " gives the same L"), "mirror …"), 16, 236, 17, muted),
+  ]);
+  const top = 48,
+    plotH = 168,
+    scale = plotH / 49;
+  const X = (wv) => add(16, mul(48, wv)),
+    Yp = (Lv) => sub(top + plotH, mul(scale, op("clamp", Lv, 0, 49)));
+  const curve = (id, fn, stroke) => ({
+    kind: "path",
+    id,
+    commands: Array.from({ length: 21 }, (_, k) => ({ command: k ? "L" : "M", x: 16 + 12 * k, y: Yp(fn(k / 4)) })),
+    stroke,
+    strokeWidth: 3,
+    fill: "none",
+  });
+  const plot = card("ls-plot", 278, mint, teal, "L(w) FOR w IN 0…5", [
+    segment("ls-axis", 16, top + plotH, 240, 0, line, 2),
+    { ...segment("ls-minline", X(div(y, 2)), top, 0, plotH, teal, 2), opacity: after(3200, 1, 0) },
+    curve("ls-curve", (k) => lossAt(k, 2, y), blue),
+    { ...curve("ls-mean-curve", (k) => div(add(lossAt(k, 2, y), lossAt(k, 1, 1)), 2), gold), opacity: iff(two, 1, 0) },
+    circle("ls-now", X(w), Yp(L1), 6, ink),
+    { ...circle("ls-now-mean", X(w), Yp(mean), 5, gold), opacity: iff(two, 1, 0) },
+    text("ls-legend-1", "blue: this example", 16, 244, 17, blue),
+    text("ls-legend-2", iff(two, "gold: mean of two", "teal: minimum"), 16, 268, 17, muted),
+    handle("ls-w-handle", 0, top, CW, plotH, "Drag or use arrows to change w", { x: { state: "w", from: 16, to: 256 } }),
+  ]);
+  const pair = card("ls-pair", 250, sand, gold, "ADD x = 1, y = 1", [
+    text("ls-e1", iff(two, cat("ex1 L = ", r3(L1)), "ex1 only: switch on ex2"), 16, 62),
+    text("ls-e2", iff(two, cat("ex2 L = ", r3(L2)), "ex2: not in the set"), 16, 90),
+    bold("ls-mean", after(4000, iff(two, cat("mean L = ", r3(mean)), cat("mean L = ", r3(L1))), "mean L = …"), 16, 122, 18, gold),
+    text("ls-wstar", after(4000, iff(two, cat("mean min at w = ", r3(wStar)), cat("min at w = ", r3(div(y, 2)))), "min …"), 16, 152),
+    text(
+      "ls-res",
+      after(4000, iff(two, cat("there r1 ", r3(sub(mul(2, wStar), y)), ", r2 ", r3(sub(wStar, 1))), "there r = 0"), "there …"),
+      16,
+      180,
+    ),
+    bold("ls-verdict", after(4000, iff(two, "a mean can hide misfits", "one point matched"), "…"), 16, 212, 17, gold),
+    text("ls-scale", iff(full, "no ½: slope doubles", "½ only scales the slope"), 16, 240, 17, muted),
+  ]);
+  return build({
+    id: "concept-loss-shape",
+    title: "A penalty for every miss.",
+    description:
+      "Move one weight and watch the lesson's prediction, signed residual and half squared loss trace a symmetric curve. Drop the factor one half, then add a second example and see where the mean loss is smallest and how much each example still misses there.",
+    state: {
+      w: num("Weight w", 1, 0, 5, 0.25),
+      y: num("Target y", 5, 3, 7, 1),
+      penalty: choice("Penalty", ["Half squared r²/2", "Squared r²"]),
+      second: flag("Add example x = 1, y = 1"),
+    },
+    kicker: "27 / LOSS: A CHOSEN PENALTY",
+    subtitle: "ŷ = w·x, r = ŷ − y",
+    grid: [
+      [one, 0],
+      [plot, 1],
+      [pair, 2],
+    ],
+    compactOrder: [one, plot, pair],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "One example x = 2, y = 5. The weight is the only thing we can change. Predict the loss at w = 1." },
+      { atMs: 800, text: "The prediction is 2 and the signed residual is −3." },
+      { atMs: 1600, text: "Half squared error discards the sign: 4.5. Over- and under-prediction are both penalized." },
+      { atMs: 2400, text: "The factor one half only scales the slope; it does not move the minimum." },
+      { atMs: 3200, text: "The minimum is at w = 2.5, where the prediction equals the target. w = 2 and w = 3 tie at 0.5." },
+      { atMs: 4000, text: "With a second example the mean is smallest at another w, where neither example is fit exactly." },
+    ],
+    accessible:
+      "A loss function on the lesson's one-weight model: prediction = w·x with x = 2 and target y = 5. At w = 1 the prediction is 2, the signed residual is −3 and the half squared loss is 4.5; at w = 2 and w = 3 the loss is 0.5 either way, because squaring discards the residual's sign. The curve is symmetric around its minimum w = 2.5, where the prediction equals the target, so w and 5 − w have the same loss. The slope is r·x for the half squared loss and twice that without the factor one half: the half is a convention that scales the gradient without moving the minimum. Other targets from 3 to 7 move the minimum to y/2. Adding the lesson's second example x = 1, y = 1 makes the objective the mean of two losses: at w = 2 both losses are 0.5 and their mean is 0.5. The mean is smallest at w = (2y + 1)/5, which is 2.2 for y = 5; there the first example's residual is −0.6 and the second's is 1.2, so the mean can hide that neither example is fit. The plot shows the loss for w from 0 to 5, values above 49 pinned to the top.",
+  });
+})();
+
+// ============================================================ 28 forward records a graph with shared identity
+// fnd-e04-01: x = 3, s = x·x = 9, z = s + x = 12; three value nodes, topological order x, s, z.
+// Multiplication must keep its operands: 2·6 and 3·4 both give 12 with different local derivatives.
+const graphScene = (() => {
+  const x = s("x"),
+    copies = eq(s("build"), "x copied per use (bug)"),
+    a = s("a"),
+    b = s("b"),
+    outOnly = eq(s("save"), "Output p only (bug)"),
+    mutate = s("mutate");
+  const sv = mul(x, x),
+    z = add(sv, x);
+  const nodeAt = (id, cx, cy, fill, label, opacity = 1) => [
+    { ...circle(`${id}-dot`, cx, cy, 18, fill), opacity },
+    { ...centered(bold(`${id}-label`, label, cx, cy + 6, 17, white)), opacity },
+  ];
+  const graph = card("gi-graph", 290, ice, blue, "FORWARD GRAPH", [
+    // Two operand slots, both drawn from the one x node to s.
+    { ...segment("gi-e-xs1", 56, 91, 73, -25, blue, 3), opacity: after(800, 1, 0) },
+    { ...segment("gi-e-xs2", 59, 103, 73, -25, blue, 3), opacity: after(800, 1, 0) },
+    { ...segment("gi-e-sz", 164, 70, 76, 30, purple, 3), opacity: after(1600, 1, 0) },
+    { ...segment("gi-e-xz", 52, 108, 188, 0, teal, 3), opacity: after(1600, iff(copies, 0, 1), 0) },
+    { ...segment("gi-e-x2z", 52, 150, 188, -38, teal, 3), opacity: after(1600, iff(copies, 1, 0), 0) },
+    ...nodeAt("gi-n-x", 40, 100, blue, "x"),
+    ...nodeAt("gi-n-s", 146, 66, purple, "s"),
+    ...nodeAt("gi-n-z", 252, 104, teal, "z"),
+    ...nodeAt("gi-n-x2", 40, 152, red, "x′", iff(copies, 1, 0)),
+    text("gi-xv", cat("x = ", x), 16, 196),
+    text("gi-sv", after(800, cat("s = x·x = ", sv), "s = …"), 16, 222),
+    text("gi-zv", after(1600, cat("z = s + x = ", z), "z = …"), 16, 248),
+    text("gi-count", iff(copies, "nodes drawn: 4 (x twice)", "value nodes: 3"), 16, 274, 17, muted),
+  ]);
+  const order = card("gi-order", 222, lilac, purple, "ORDER AND IDENTITY", [
+    text("gi-topo", after(2400, iff(copies, "topo: x, s, x′, z", "topological: x, s, z"), "topological: …"), 16, 62),
+    text("gi-rev", after(2400, iff(copies, "reverse: z, x′, s, x", "reverse: z, s, x"), "reverse: …"), 16, 90),
+    text("gi-slots", "x·x keeps two slots", 16, 118),
+    bold("gi-dzdx", after(3200, cat("dz/dx = 2x + 1 = ", add(mul(2, x), 1)), "dz/dx = …"), 16, 152, 18, purple),
+    text(
+      "gi-split",
+      after(3200, iff(copies, cat("copies hold ", mul(2, x), " and 1"), "one x node sums both"), "…"),
+      16,
+      180,
+    ),
+    text("gi-id", iff(copies, "identity lost", "visited once"), 16, 208, 17, muted),
+  ]);
+  const bNow = iff(mutate, add(b, 1), b);
+  const save = card("gi-save", 250, sand, gold, "WHAT p = a·b KEEPS", [
+    text("gi-p", cat("p = a·b = ", a, "·", b, " = ", mul(a, b)), 16, 62),
+    text("gi-saved", iff(outOnly, cat("saved: p = ", mul(a, b), " only"), cat("saved: a = ", a, ", b = ", b)), 16, 90),
+    text("gi-live", iff(mutate, cat("live b now ", bNow), "live b unchanged"), 16, 118),
+    bold(
+      "gi-da",
+      after(4000, iff(outOnly, "dp/da: b not kept", cat("dp/da = saved b = ", b)), "dp/da = …"),
+      16,
+      152,
+      18,
+      gold,
+    ),
+    text("gi-db", after(4000, iff(outOnly, "dp/db: a not kept", cat("dp/db = saved a = ", a)), "dp/db = …"), 16, 180),
+    bold(
+      "gi-verdict",
+      after(4000, iff(outOnly, "p alone is ambiguous", iff(mutate, "old forward, saved b", "operands describe p")), "…"),
+      16,
+      212,
+      17,
+      gold,
+    ),
+    text("gi-pairs", "2·6 and 3·4 both give 12", 16, 240, 17, muted),
+  ]);
+  return build({
+    id: "concept-graph-identity",
+    title: "One node per value, two slots per product.",
+    description:
+      "Record the lesson's forward pass x, s = x·x, z = s + x as a graph whose x node is shared, read its topological and reverse orders, then decide what a multiplication must remember for backward: its operands, from the same forward execution.",
+    state: {
+      x: num("Input x", 3, -3, 3, 1),
+      build: choice("Graph record", ["One shared x node", "x copied per use (bug)"]),
+      a: num("Product input a", 2, 1, 6, 1),
+      b: num("Product input b", 6, 1, 6, 1),
+      save: choice("Multiply saves", ["Operands a and b", "Output p only (bug)"]),
+      mutate: flag("b += 1 before backward"),
+    },
+    kicker: "28 / RECORD WHAT RAN",
+    subtitle: "s = x·x, z = s + x",
+    grid: [
+      [graph, 0],
+      [order, 1],
+      [save, 2],
+    ],
+    compactOrder: [graph, order, save],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "Forward evaluates in dependency order and records which operation produced each value." },
+      { atMs: 800, text: "s = x·x: both operand slots point to the same x node." },
+      { atMs: 1600, text: "z = s + x uses x again directly. Three value nodes, not copies of x." },
+      { atMs: 2400, text: "Topological order x, s, z; its reverse z, s, x processes consumers before producers." },
+      { atMs: 3200, text: "Because x is one node, both paths add into it: dz/dx = 2x + 1." },
+      { atMs: 4000, text: "A product's output does not determine its local derivatives; keep the operands from that forward." },
+    ],
+    accessible:
+      "A forward pass recorded as a computation graph, with the lesson's example x = 3, s = x·x = 9 and z = s + x = 12. There are three value nodes. The multiplication has two operand slots that both refer to the same x node, and the addition uses x again directly. A valid topological order is x, s, z; its reverse z, s, x processes every consumer before its producer, and a visited set executes the shared x once. Because x is one node, both uses contribute to its sensitivity: dz/dx = 2x + 1 = 7 at x = 3. Copying x per use draws four nodes and splits that sensitivity into a copy holding 2x = 6 and a copy holding 1, so reading either copy loses a contribution. Separately, a multiplication p = a·b must remember its operands for backward: dp/da is b and dp/db is a. Saving only the output is not enough, because 2·6 and 3·4 both give 12 with different local derivatives. If b is overwritten after forward, for example b += 1, the derivative for that old forward still uses the saved b; mixing a new b with an old output would be wrong. Inputs a and b range from 1 to 6.",
+  });
+})();
+
+// ============================================================ 29 a tiny decoder's parameter and shape ledger
+// ttf-e07-04: V = 3, C = 2, d = 2, one head, f = 3, no biases or trainable gains:
+// 6 + 4 + 12 + 4 + 6 + 6 + 6 = 44 parameters; logits (2, 3); zero vocabulary projection → loss ln 3.
+const decoderScene = (() => {
+  const V = s("V"),
+    C = s("C"),
+    d = s("d"),
+    f = s("f"),
+    T = s("T");
+  const emb = mul(V, d),
+    pos = mul(C, d),
+    qkv = mul(3, d, d),
+    wo = mul(d, d),
+    ff = mul(2, d, f),
+    vocab = mul(d, V),
+    total = add(emb, pos, qkv, wo, ff, vocab);
+  const LN = [2, 3, 4, 5, 6].map((k) => Math.log(k)); // ln V for the uniform-logit loss (oracle uses math.log)
+  const lnV = pick(V, [2, 3, 4, 5, 6], LN);
+  const fits = le(T, C);
+  const shape = (...dims) => cat("(", ...dims.flatMap((dim, i) => (i ? [", ", dim] : [dim])), ")");
+  const ledger = card("dc-ledger", 278, ice, blue, "PARAMETER LEDGER", [
+    text("dc-emb", cat("embed V·d = ", emb), 16, 62),
+    text("dc-pos", cat("positions C·d = ", pos), 16, 90),
+    text("dc-qkv", cat("Q, K, V 3·d² = ", qkv), 16, 118),
+    text("dc-wo", cat("output W_O d² = ", wo), 16, 146),
+    text("dc-ff", cat("feed-fwd 2·d·f = ", ff), 16, 174),
+    text("dc-vocab", cat("vocab d·V = ", vocab), 16, 202),
+    bold("dc-total", after(800, cat("total = ", total), "total = …"), 16, 236, 20, blue),
+    text("dc-nobias", "no biases or gains", 16, 264, 17, muted),
+  ]);
+  const shapes = card("dc-shapes", 278, lilac, purple, "SHAPE PATH, T TOKENS", [
+    text("dc-ids", after(1600, cat("ids (", T, ",)"), "ids …"), 16, 62),
+    text("dc-x", after(1600, cat("X, Q, K, V ", shape(T, d)), "X, Q, K, V …"), 16, 90),
+    text("dc-scores", after(2400, cat("scores ", shape(T, T)), "scores …"), 16, 118),
+    text("dc-mask", after(2400, cat("causal keeps ", div(mul(T, add(T, 1)), 2), " of ", mul(T, T)), "causal keeps …"), 16, 146),
+    text("dc-hidden", after(3200, cat("FF hidden ", shape(T, f)), "FF hidden …"), 16, 174),
+    text("dc-logits", after(3200, cat("logits ", shape(T, V)), "logits …"), 16, 202),
+    bold(
+      "dc-fit",
+      after(3200, iff(fits, cat("residuals ", shape(T, d), " ✓"), cat("positions missing: ", sub(T, C))), "…"),
+      16,
+      236,
+      18,
+      purple,
+    ),
+    text("dc-rows", cat("C = ", C, " position rows"), 16, 264, 17, muted),
+  ]);
+  const checks = card("dc-checks", 222, sand, gold, "CHECKS BEFORE TRAINING", [
+    text("dc-uniform", "zero W_vocab: uniform", 16, 62),
+    bold("dc-lnv", after(4000, cat("loss ln V = ", r3(lnV)), "loss ln V = …"), 16, 94, 18, gold),
+    text("dc-fd", after(4000, cat("central diff: ", mul(2, total), " runs"), "central diff: …"), 16, 124),
+    text("dc-targets", cat("targets per window: ", T), 16, 152),
+    text("dc-fit-note", "a fit pattern is not", 16, 180, 17, muted),
+    text("dc-fit-note-2", "general skill", 16, 206, 17, muted),
+  ]);
+  return build({
+    id: "concept-decoder-ledger",
+    title: "Count every matrix. Follow every shape.",
+    description:
+      "Change the vocabulary, context, model width, feed-forward width and window length of the lesson's tiny one-head decoder. Its parameter ledger, the shape path from token IDs to logits, the causal mask's size and the uniform-logit starting loss follow.",
+    state: {
+      V: num("Vocabulary V", 3, 2, 6, 1),
+      C: num("Context C", 2, 1, 4, 1),
+      d: num("Model width d", 2, 2, 4, 2),
+      f: num("Feed-forward width f", 3, 1, 3, 1),
+      T: num("Tokens in window T", 2, 1, 4, 1),
+    },
+    kicker: "29 / ASSEMBLE A DECODER",
+    subtitle: "one head, no biases",
+    grid: [
+      [ledger, 0],
+      [shapes, 1],
+      [checks, 2],
+    ],
+    compactOrder: [ledger, shapes, checks],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "Capstone B: vocabulary 3, context 2, width 2, one head, feed-forward width 3, no biases." },
+      { atMs: 800, text: "6 + 4 + 12 + 4 + 6 + 6 + 6 = 44 trainable values." },
+      { atMs: 1600, text: "Two token IDs become X of shape (2, 2); Q, K and V keep that shape." },
+      { atMs: 2400, text: "Scores are (T, T): rows are queries, columns keys. The causal mask keeps the lower triangle." },
+      { atMs: 3200, text: "The feed-forward hidden layer is (T, f) and the logits are (T, V). Residual additions need (T, d)." },
+      { atMs: 4000, text: "A zero vocabulary projection gives uniform probabilities and loss ln V. A central difference costs 2 runs per parameter." },
+    ],
+    accessible:
+      "The parameter and shape ledger of the lesson's tiny one-head causal decoder. With vocabulary V = 3, context C = 2, model width d = 2 and feed-forward width f = 3, and no biases or trainable normalization gains, the trainable values are: token embeddings V·d = 6, learned positions C·d = 4, Q, K and V projections 3·d² = 12, attention output d² = 4, feed-forward expansion and contraction 2·d·f = 12, and the vocabulary projection d·V = 6, 44 in total. For a window of T = 2 tokens the IDs have shape (2,), X, Q, K and V are (2, 2), the attention scores are (2, 2) with the causal mask keeping 3 of 4 entries, the feed-forward hidden values are (2, 3) and the logits are (2, 3); both residual additions need (2, 2). Learned absolute positions have only C rows, so a window longer than C has no position for its last tokens. A zero vocabulary projection gives uniform probabilities and loss ln V, 1.0986 for V = 3. A central-difference gradient needs two forward evaluations per parameter, 88 here: fine for a tiny CPU check, not a training method. Each window supplies one target per position. Feed-forward widths are limited to 1 to 3 in this scene.",
+  });
+})();
+
+// ============================================================ 30 registration, autograd and the optimizer are separate contracts
+// ttf-e08-01: Linear(2→1) with weight row [2, −1], bias 0.5, x = [3, 4], target 1.5, half squared loss:
+// ŷ = 2.5, grads [3, 4] and 1; SGD 0.01 → [1.97, −1.04], 0.49 and a new prediction 2.24.
+const moduleScene = (() => {
+  const listBug = eq(s("container"), "Plain Python list (bug)"),
+    detached = s("detach"),
+    k = s("calls"),
+    zero = s("zero"),
+    lr = s("lr");
+  // Backward contributions left in the .grad buffers at the step. model.zero_grad() walks
+  // parameters(), so it cannot clear a layer that was never registered.
+  const n = iff(and(zero, not(listBug)), 1, k);
+  const gw = [mul(3, n), mul(4, n)],
+    gb = n;
+  const stepped = not(listBug);
+  const W2 = [0, 1].map((i) => iff(and(stepped, not(detached)), sub([2, -1][i], mul(lr, gw[i])), [2, -1][i]));
+  const b2 = iff(stepped, sub(0.5, mul(lr, gb)), 0.5);
+  const yNew = add(mul(3, W2[0]), mul(4, W2[1]), b2);
+  const vec = (lead, a, bb) => cat(lead, "[", r3(a), ", ", r3(bb), "]");
+  const fwd = card("mr-forward", 222, ice, blue, "LINEAR(2 → 1), FORWARD", [
+    text("mr-x", "x = [3, 4], target 1.5", 16, 62),
+    text("mr-w", "W row [2, −1], b 0.5", 16, 90),
+    bold("mr-y", after(800, "ŷ = W·x + b = 2.5", "ŷ = …"), 16, 122, 18, blue),
+    text("mr-L", after(800, "L = (ŷ − 1.5)²/2 = 0.5", "L = …"), 16, 152),
+    text("mr-params", iff(listBug, "parameters(): none", "parameters(): W, b"), 16, 180),
+    text("mr-same", "forward works either way", 16, 208, 17, muted),
+  ]);
+  const grads = card("mr-autograd", 222, lilac, purple, "AUTOGRAD BUFFERS", [
+    text("mr-calls", cat(k, iff(eq(k, 1), " backward()", " backward() calls")), 16, 62),
+    text("mr-zero", iff(zero, "model.zero_grad() each", "no zero_grad between"), 16, 90),
+    bold(
+      "mr-gw",
+      after(1600, iff(detached, "W.grad: None", vec("W.grad = ", gw[0], gw[1])), "W.grad …"),
+      16,
+      124,
+      18,
+      purple,
+    ),
+    text("mr-gb", after(1600, cat("b.grad = ", gb), "b.grad …"), 16, 154),
+    text(
+      "mr-acc",
+      after(2400, iff(gt(n, 1), iff(zero, "model.zero_grad missed it", cat("summed over ", n, " calls")), "one contribution"), "…"),
+      16,
+      182,
+    ),
+    text("mr-detach", iff(detached, "W.detach(): no route", "W tracked by autograd"), 16, 208, 17, muted),
+  ]);
+  const optim = card("mr-optim", 250, sand, gold, "OPTIMIZER STEP", [
+    text("mr-sgd", iff(listBug, "SGD([]): ValueError", cat("SGD(lr ", lr, ") owns W, b")), 16, 62),
+    text("mr-W2", after(3200, iff(listBug, "W: no step", vec("W → ", W2[0], W2[1])), "W → …"), 16, 90),
+    text("mr-b2", after(3200, iff(listBug, "b: no step", cat("b → ", r3(b2))), "b → …"), 16, 118),
+    bold("mr-y2", after(3200, iff(listBug, "ŷ stays 2.5", cat("new ŷ = ", r3(yNew))), "new ŷ …"), 16, 152, 18, gold),
+    bold(
+      "mr-verdict",
+      after(
+        4000,
+        // The first broken contract wins: no registration, then a cut route, then stale buffers.
+        iff(listBug, "not registered: no step", iff(detached, "W detached: b moved only", iff(gt(n, 1), cat("grad ×", n, ": not cleared"), "one clean step"))),
+        "…",
+      ),
+      16,
+      184,
+      17,
+      gold,
+    ),
+    text("mr-eval", "eval() ≠ no_grad()", 16, 212, 17, muted),
+    text("mr-own", "register, then build SGD", 16, 238, 17, muted),
+  ]);
+  return build({
+    id: "concept-module-registry",
+    title: "Registered, tracked, cleared, stepped.",
+    description:
+      "Follow the lesson's Linear layer through forward, autograd and one SGD step. Hide the layer in a plain Python list, detach its weight, or call backward several times without clearing gradients, and see which contract each mistake breaks while forward still works.",
+    state: {
+      container: choice("Layer stored in", ["Registered attribute", "Plain Python list (bug)"]),
+      detach: flag("Weight detached in forward"),
+      calls: num("backward() calls before step", 1, 1, 3, 1),
+      zero: flag("model.zero_grad() before each backward", true),
+      lr: num("SGD learning rate", 0.01, 0.01, 0.05, 0.01),
+    },
+    kicker: "30 / FOUR SEPARATE CONTRACTS",
+    subtitle: "plain arithmetic, CPU",
+    grid: [
+      [fwd, 0],
+      [grads, 1],
+      [optim, 2],
+    ],
+    compactOrder: [fwd, grads, optim],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "A Linear layer stores W as (out, in) = (1, 2) and a bias. Registration decides what parameters() returns." },
+      { atMs: 800, text: "Forward: 2·3 − 1·4 + 0.5 = 2.5, loss 0.5 against target 1.5." },
+      { atMs: 1600, text: "Backward fills the .grad buffers: [3, 4] for W and 1 for b." },
+      { atMs: 2400, text: "Autograd adds into .grad on every backward call unless the caller clears it." },
+      { atMs: 3200, text: "SGD with rate 0.01 moves W to [1.97, −1.04] and b to 0.49; the new prediction is 2.24." },
+      { atMs: 4000, text: "Each mistake breaks a different contract while forward still looks right." },
+    ],
+    accessible:
+      "Framework abstractions with the lesson's numbers, computed in plain arithmetic: a Linear layer from two inputs to one output stores its weight as one row [2, −1] with bias 0.5. For input [3, 4] the prediction is 2.5 and the half squared loss against target 1.5 is 0.5. Backward fills the gradient buffers with [3, 4] for the weight and 1 for the bias. SGD with learning rate 0.01 moves the weight to [1.97, −1.04] and the bias to 0.49, and the new prediction is 2.24. Three mistakes break different contracts while forward still produces 2.5. If the layer is kept only in a plain Python list, the module does not register it, parameters() is empty and constructing SGD with an empty list raises a ValueError, so no step happens; model.zero_grad() walks the same parameters() and does not clear that layer either. If the weight is detached in forward, its gradient is None and only the bias moves. If backward runs several times without model.zero_grad() between calls, the buffers hold the sum of the calls (two calls give [6, 8] and 2) and the step is that many times larger. Evaluation mode and no-grad are separate switches. Learning rates from 0.01 to 0.05 are an extension of the lesson.",
+  });
+})();
+
 // ---------------------------------------------------------------- assemble
 const authored = [
   matmulScene,
@@ -3178,6 +3776,12 @@ const authored = [
   mergeScene,
   cacheScene,
   pathScene,
+  ledgerScene,
+  stageScene,
+  lossScene,
+  graphScene,
+  decoderScene,
+  moduleScene,
 ];
 const depthOf = (e) =>
   e && typeof e === "object" && "op" in e ? 1 + Math.max(0, ...e.args.map(depthOf)) : 0;
@@ -3233,6 +3837,12 @@ const bindings = [
   ["concept-outer-merge", "sys-e10-04", "sys-10-04-text-2"],
   ["concept-cache-queue", "sys-e11-03", "sys-11-03-text-2"],
   ["concept-path-coverage", "eng-e12-03", "eng-12-03-lesson"],
+  ["concept-state-ledger", "fnd-e01-02", "fnd-01-02-text-1"],
+  ["concept-stage-messages", "fnd-e01-04", "fnd-01-04-text-1"],
+  ["concept-loss-shape", "fnd-e03-01", "fnd-03-01-text-1"],
+  ["concept-graph-identity", "fnd-e04-01", "fnd-04-01-text-1"],
+  ["concept-decoder-ledger", "ttf-e07-04", "ttf-07-04-text-1"],
+  ["concept-module-registry", "ttf-e08-01", "ttf-08-01-text-1"],
 ].map(([visualId, episodeId, afterBlockId]) => ({ visualId, episodeId, afterBlockId }));
 assert.deepEqual(
   bindings.map((b) => b.visualId),
@@ -3367,7 +3977,7 @@ const extension = {
     keyboard: true,
     reducedMotion: true,
     textAlternative:
-      "All twenty-four concept scenes state their arithmetic, show live readouts, and include complete text equivalents.",
+      "All thirty concept scenes state their arithmetic, show live readouts, and include complete text equivalents.",
   },
 };
 // The assembler accepts an overlay only if its renderer declaration matches the
