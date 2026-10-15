@@ -1,5 +1,5 @@
-// Private authoring only. Builds thirty bounded concept scenes (three batches of
-// eight, then a fourth batch of six) with the released @course-core/visuals package
+// Private authoring only. Builds thirty-six bounded concept scenes (three batches of
+// eight, then twelve of a fourth batch) with the released @course-core/visuals package
 // and writes exactly two files:
 //   visuals/concept-scenes.json and content/concept-visuals.json
 // A development build may be selected only through an explicit file: URL to a
@@ -3389,19 +3389,35 @@ const lossScene = (() => {
     scale = plotH / 49;
   const X = (wv) => add(16, mul(48, wv)),
     Yp = (Lv) => sub(top + plotH, mul(scale, op("clamp", Lv, 0, 49)));
-  const curve = (id, fn, stroke) => ({
+  // A parabola over w in [0, 5] is exactly one quadratic Bézier: its control point is where the
+  // end tangents meet, at w = 2.5 and height L(0) + 2.5·L′(0). Neither curve exceeds 49, so the
+  // unclamped screen map is exact; one segment keeps the scene small.
+  const Yl = (Lv) => sub(top + plotH, mul(scale, Lv));
+  const curve = (id, fn, slope, stroke) => ({
     kind: "path",
     id,
-    commands: Array.from({ length: 21 }, (_, k) => ({ command: k ? "L" : "M", x: 16 + 12 * k, y: Yp(fn(k / 4)) })),
+    commands: [
+      { command: "M", x: 16, y: Yl(fn(0)) },
+      { command: "Q", x1: 136, y1: Yl(add(fn(0), mul(2.5, slope(0)))), x: 256, y: Yl(fn(5)) },
+    ],
     stroke,
     strokeWidth: 3,
     fill: "none",
   });
+  const slopeAt = (wv, xv, yv) => mul(2, c, xv, sub(mul(wv, xv), yv));
   const plot = card("ls-plot", 278, mint, teal, "L(w) FOR w IN 0…5", [
     segment("ls-axis", 16, top + plotH, 240, 0, line, 2),
     { ...segment("ls-minline", X(div(y, 2)), top, 0, plotH, teal, 2), opacity: after(3200, 1, 0) },
-    curve("ls-curve", (k) => lossAt(k, 2, y), blue),
-    { ...curve("ls-mean-curve", (k) => div(add(lossAt(k, 2, y), lossAt(k, 1, 1)), 2), gold), opacity: iff(two, 1, 0) },
+    curve("ls-curve", (k) => lossAt(k, 2, y), (k) => slopeAt(k, 2, y), blue),
+    {
+      ...curve(
+        "ls-mean-curve",
+        (k) => div(add(lossAt(k, 2, y), lossAt(k, 1, 1)), 2),
+        (k) => div(add(slopeAt(k, 2, y), slopeAt(k, 1, 1)), 2),
+        gold,
+      ),
+      opacity: iff(two, 1, 0),
+    },
     circle("ls-now", X(w), Yp(L1), 6, ink),
     { ...circle("ls-now-mean", X(w), Yp(mean), 5, gold), opacity: iff(two, 1, 0) },
     text("ls-legend-1", "blue: this example", 16, 244, 17, blue),
@@ -3750,6 +3766,605 @@ const moduleScene = (() => {
   });
 })();
 
+// ============================================================ 31 fusion saves the intermediate's round trip
+// sys-e09-03: A rows [1, −2], [3, 1]; B rows [2, 0], [1, −1]; C = [[0, 2], [7, −1]], ReLU → [[0, 2], [7, 0]].
+// Fusing removes one write and one reread of the 2×2 FP32 intermediate: 32 logical bytes.
+const fusionScene = (() => {
+  const R = s("rows"),
+    Cc = s("cols"),
+    two = eq(s("bytes"), "2 bytes"),
+    fused = eq(s("schedule"), "Fused GEMM + ReLU"),
+    guessed = eq(s("layout"), "Guessed lane order (bug)");
+  const C = [
+    [0, 2],
+    [7, -1],
+  ];
+  const relu = (v) => Math.max(0, v);
+  // The guessed mapping stores C[i][j] at (j, i): finite values in the wrong cells.
+  const got = (i, j) => iff(guessed, relu(C[j][i]), relu(C[i][j]));
+  const ref = (i, j) => relu(C[i][j]);
+  const cells = [];
+  for (let i = 0; i < 2; i++)
+    for (let j = 0; j < 2; j++) {
+      const x = 160 + 56 * j,
+        y = 128 + 40 * i,
+        wrong = iff(eq(got(i, j), ref(i, j)), 0, 0.35);
+      cells.push(
+        rect(`fu-o-${i}-${j}`, x, y, 52, 34, white, 6),
+        { ...rect(`fu-o-${i}-${j}-hl`, x, y, 52, 34, red, 6), opacity: after(1600, wrong, 0) },
+        centered(bold(`fu-o-${i}-${j}-v`, after(1600, got(i, j), "…"), x + 26, y + 23, 17)),
+      );
+    }
+  const product = card("fu-product", 278, ice, blue, "C = A·B, THEN ReLU", [
+    text("fu-a", "A [1, −2], [3, 1]", 16, 62),
+    text("fu-b", "B [2, 0], [1, −1]", 16, 90),
+    text("fu-c", after(800, "C [0, 2], [7, −1]", "C …"), 16, 118),
+    text("fu-out-label", "stored out:", 16, 148, 17, muted),
+    ...cells,
+    text("fu-ref", "ref [0, 2], [7, 0]", 16, 230),
+    text("fu-store", iff(guessed, "store: guessed (bug)", "store: API contract"), 16, 258, 17, muted),
+  ]);
+  const b = iff(two, 2, 4);
+  const inputs = mul(add(mul(2, R), mul(2, Cc)), b),
+    inter = mul(R, Cc, b),
+    total = add(inputs, iff(fused, inter, mul(3, inter)));
+  const traffic = card("fu-traffic", 250, lilac, purple, "LOGICAL TRAFFIC (BYTES)", [
+    text("fu-shape", cat("intermediate ", R, "×", Cc, " × ", b, " B"), 16, 62),
+    text("fu-in", after(2400, cat("read A, B: ", inputs), "read A, B: …"), 16, 90),
+    text("fu-mid", after(2400, iff(fused, "intermediate: on chip", cat("write + reread: ", mul(2, inter))), "intermediate …"), 16, 118),
+    text("fu-outw", after(2400, cat("write output: ", inter), "write output: …"), 16, 146),
+    bold("fu-total", after(3200, cat("total: ", total), "total: …"), 16, 180, 18, purple),
+    text("fu-saved", after(3200, cat("fusion saves ", mul(2, inter)), "fusion saves …"), 16, 208),
+    text("fu-rest", "inputs, output unchanged", 16, 236, 17, muted),
+  ]);
+  const IJ = [
+    [0, 0],
+    [0, 1],
+    [1, 0],
+    [1, 1],
+  ];
+  const sumGot = add(...IJ.map(([i, j]) => got(i, j))),
+    maxErr = max(...IJ.map(([i, j]) => abs(sub(got(i, j), ref(i, j))))),
+    wrongCells = add(...IJ.map(([i, j]) => iff(eq(got(i, j), ref(i, j)), 0, 1)));
+  const check = card("fu-check", 222, sand, gold, "CHECK THE PLACEMENT", [
+    text("fu-finite", "all values finite", 16, 62),
+    text("fu-sum", after(4000, cat("sum: ", sumGot, " vs ref 9"), "sum: …"), 16, 90),
+    text("fu-max", after(4000, cat("max |error| = ", maxErr), "max |error| …"), 16, 118),
+    bold("fu-verdict", after(4000, iff(gt(wrongCells, 0), cat(wrongCells, " cells misplaced"), "placement matches"), "…"), 16, 152, 18, gold),
+    text("fu-api", "API name ≠ device used", 16, 180, 17, muted),
+    text("fu-speed", "bytes are not a speedup", 16, 206, 17, muted),
+  ]);
+  return build({
+    id: "concept-fusion-traffic",
+    title: "Fuse the pass, keep the placement.",
+    description:
+      "Multiply the lesson's two small matrices and apply ReLU, in two passes or fused. Count the logical bytes each schedule moves for an intermediate of your chosen size, then store the result with a guessed lane order and see finite values land in the wrong cells.",
+    state: {
+      rows: num("Intermediate rows", 2, 1, 4, 1),
+      cols: num("Intermediate columns", 2, 1, 4, 1),
+      bytes: choice("Element size", ["4 bytes (FP32)", "2 bytes"]),
+      schedule: choice("Schedule", ["Two passes", "Fused GEMM + ReLU"]),
+      layout: choice("Store coordinates by", ["API store contract", "Guessed lane order (bug)"]),
+    },
+    kicker: "31 / FUSION AND PLACEMENT",
+    subtitle: "logical bytes, not timings",
+    grid: [
+      [product, 0],
+      [traffic, 1],
+      [check, 2],
+    ],
+    compactOrder: [product, traffic, check],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "A and B are the lesson's 2×2 matrices. Predict C = A·B before it appears." },
+      { atMs: 800, text: "C = [[0, 2], [7, −1]]." },
+      { atMs: 1600, text: "ReLU keeps [[0, 2], [7, 0]]. Each value must land in its logical coordinate." },
+      { atMs: 2400, text: "Two passes write the intermediate and read it back. Fusion keeps it on chip." },
+      { atMs: 3200, text: "For a 2×2 FP32 intermediate fusion saves 2 × 4 × 4 = 32 logical bytes, not all traffic." },
+      { atMs: 4000, text: "A guessed lane order stores finite values in the wrong cells; the sum still matches." },
+    ],
+    accessible:
+      "Fusion and coordinate placement with the lesson's matrices. A has rows [1, −2] and [3, 1]; B has rows [2, 0] and [1, −1]. C = A·B = [[0, 2], [7, −1]] and ReLU gives [[0, 2], [7, 0]]. Run in two passes, the GEMM writes the intermediate C and the ReLU pass reads it back; fused, the intermediate stays on chip. For a 2×2 intermediate of 4-byte values, fusion removes one write and one read of 16 bytes, 32 logical bytes in all; reading A and B (32 bytes) and writing the output (16 bytes) are unchanged, so the logical total falls from 80 to 48 bytes. Other intermediate sizes from 1×1 to 4×4 and 2-byte elements scale the same count: saved bytes = 2 × rows × columns × element size, with A of shape rows×2 and B of shape 2×columns. These are logical byte counts, not timings or a speedup. If results are stored with a guessed lane order instead of the API's store contract, here a transposed mapping, the stored values [[0, 7], [2, 0]] are finite and still sum to 9 but two cells are wrong, with maximum absolute error 5. An operation's name does not show which implementation or device ran it.",
+  });
+})();
+
+// ============================================================ 32 a clamped return score and honest blame
+// sys-e10-03: factor = clamp((reference/cost)^1.5, 0.2, 4.0); costs 20 and 80 s with reference 50 give
+// about 3.952847 and 0.494106, ratio 8. Own-endpoint losses are forgotten, not charged to peers.
+const scoreScene = (() => {
+  const ref = s("ref"),
+    cA = s("costA"),
+    cB = s("costB"),
+    newB = s("newB"),
+    outage = s("outage"),
+    charge = eq(s("blame"), "Charge peer A (bug)"),
+    tries = s("attempts");
+  const EXPIRY = 120;
+  const usedA = iff(and(outage, charge), EXPIRY, cA);
+  const raw = (c) => op("pow", div(ref, c), 1.5);
+  const clampF = (c) => op("clamp", raw(c), 0.2, 4);
+  const fA = clampF(usedA),
+    fB = iff(newB, 1, clampF(cB));
+  const label = (v) => iff(eq(v, 4), " (cap)", iff(eq(v, 0.2), " (floor)", ""));
+  const bar = (id, y, f, fill) => ({ ...rect(id, 16, y, mul(60, f), 16, fill, 3), opacity: after(1600, 1, 0) });
+  const peers = card("rs-peers", 278, ice, blue, "TWO ESTABLISHED PEERS", [
+    text("rs-ref", cat("reference ", ref, " s"), 16, 62),
+    text("rs-rawA", after(800, cat("A raw ", r3(raw(usedA))), "A raw …"), 16, 90),
+    bold("rs-fA", after(1600, cat("A uses ", r3(fA), label(fA)), "A uses …"), 16, 118, 17, blue),
+    bar("rs-barA", 128, fA, blue),
+    text("rs-rawB", after(800, iff(newB, "B new: neutral", cat("B raw ", r3(raw(cB)))), "B raw …"), 16, 170),
+    bold("rs-fB", after(1600, cat("B uses ", r3(fB), label(fB)), "B uses …"), 16, 198, 17, purple),
+    bar("rs-barB", 208, fB, purple),
+    bold("rs-ratio", after(2400, cat("A : B = ", r3(div(fA, fB)), " : 1"), "A : B …"), 16, 256, 18, blue),
+  ]);
+  const blame = card("rs-blame", 222, lilac, purple, "OUR OWN OUTAGE", [
+    text("rs-out", iff(outage, "own endpoint rebuilt", "own endpoint healthy"), 16, 62),
+    text("rs-lost", iff(outage, "2 returns unresolved", "no unresolved returns"), 16, 90),
+    text("rs-rule", iff(charge, "charged to A (bug)", "forgotten (source)"), 16, 118),
+    text("rs-usedA", after(3200, cat("A cost used: ", usedA, " s"), "A cost used: …"), 16, 146),
+    bold(
+      "rs-verdict",
+      after(3200, iff(and(outage, charge), "A blamed for our outage", iff(outage, "learned costs kept", "no outage to attribute")), "…"),
+      16,
+      180,
+      17,
+      purple,
+    ),
+    text("rs-expiry", "expiry cost: 120 s", 16, 208, 17, muted),
+  ]);
+  const retries = card("rs-retries", 194, sand, gold, "RETRIES ARE ATTEMPTS", [
+    text("rs-tries", cat("send attempts: ", tries), 16, 62),
+    text("rs-back", "matching backward: 1", 16, 90),
+    bold("rs-unique", after(4000, "unique returned: 1", "unique returned: …"), 16, 124, 18, gold),
+    text("rs-not", after(4000, iff(gt(tries, 1), cat("not ", tries, " samples"), "one attempt, one item"), "…"), 16, 152),
+    text("rs-id", "reuse the activation ID", 16, 180, 17, muted),
+  ]);
+  return build({
+    id: "concept-return-score",
+    title: "Score returns. Blame the right party.",
+    description:
+      "Apply the lesson's clamped return-cost factor to two invented peers and compare their weights. Mark one peer as new, take your own endpoint down and choose whether its lost returns are forgotten or charged to a peer, and count retries as attempts rather than samples.",
+    state: {
+      ref: num("Reference cost (s)", 50, 10, 100, 10),
+      costA: num("Peer A return cost (s)", 20, 5, 150, 5),
+      costB: num("Peer B return cost (s)", 80, 5, 150, 5),
+      newB: flag("B is new (too few returns)"),
+      outage: flag("Own endpoint rebuilt"),
+      blame: choice("Unresolved returns", ["Forget (source)", "Charge peer A (bug)"]),
+      attempts: num("Send attempts, one activation", 3, 1, 4, 1),
+    },
+    kicker: "32 / RETURN-AWARE ROUTING",
+    subtitle: "invented costs",
+    grid: [
+      [peers, 0],
+      [blame, 1],
+      [retries, 2],
+    ],
+    compactOrder: [peers, blame, retries],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "Each established peer's factor is clamp((reference/cost)^1.5, 0.2, 4.0). Costs are invented." },
+      { atMs: 800, text: "Raw factors: (50/20)^1.5 ≈ 3.953 and (50/80)^1.5 ≈ 0.494." },
+      { atMs: 1600, text: "Clamping keeps every factor between 0.2 and 4.0. A new peer stays neutral at 1." },
+      { atMs: 2400, text: "With otherwise equal base scores the weights are eight to one." },
+      { atMs: 3200, text: "Returns lost while our own endpoint was down must not teach the router that peers are slow." },
+      { atMs: 4000, text: "Three send attempts with one matching backward are one returned activation, not three samples." },
+    ],
+    accessible:
+      "A return-aware routing factor with the lesson's formula and invented inputs. An established peer's factor is clamp((reference cost / peer cost)^1.5, 0.2, 4.0). With reference 50 s and costs 20 s and 80 s, the factors are about 3.952847 and 0.494106, so with equal base scores the faster peer is weighted eight to one. A very slow peer is held at the 0.2 floor, which keeps some sampling, and a very fast one at the 4.0 cap. A new peer without enough observations stays neutral at 1. If our own endpoint is rebuilt and two returns are left unresolved, the source forgets those records while keeping previously learned costs; charging them to peer A as an invented 120 s expiry cost would cut A's factor for our own outage. Separately, retries are attempts: three sends of one logical activation with one matching backward are one returned activation, not three successful samples, and a retry should reuse the activation's identity. The costs, the expiry and the attempt counts are invented, not measured peer speeds.",
+  });
+})();
+
+// ============================================================ 33 lifecycle milestones and a readiness margin
+// sys-e11-01: invented monotonic trace: host launch 0.0, worker launch 1.2, control bound 3.5,
+// welcome 3.8, ready 4.0; launch→bind 2.3 s, bind→welcome 0.3 s, margin 1 s against a 5 s budget.
+const readyScene = (() => {
+  const bind = s("bind"),
+    budget = s("budget"),
+    seen = s("seen"),
+    guiBug = eq(s("gui"), "Process created (bug)"),
+    healthDown = s("health");
+  const SEEN = ["Host ready", "Welcome received", "Control bound", "Process created"];
+  const level = pick(seen, SEEN, [4, 3, 2, 1]);
+  const tBound = add(1.2, bind),
+    tWelcome = add(tBound, 0.3),
+    tReady = add(tWelcome, 0.2);
+  const ev = (id, k, at, name, y) =>
+    text(id, iff(ge(level, k), cat(r3(at), " s ", name), cat(name, ": not seen")), 16, y, 17, ink);
+  const PX = 30;
+  const dot = (id, k, at, fill) => ({ ...circle(id, add(16, mul(PX, at)), 222, 6, fill), opacity: iff(ge(level, k), 1, 0.15) });
+  const trace = card("rd-trace", 278, ice, blue, "MONOTONIC TRACE", [
+    text("rd-host", "0 s host launch", 16, 62),
+    text("rd-worker", "1.2 s worker launch", 16, 90),
+    ev("rd-bound", 2, tBound, "control bound", 118),
+    ev("rd-welcome", 3, tWelcome, "welcome", 146),
+    ev("rd-ready", 4, tReady, "host ready", 174),
+    segment("rd-axis", 16, 222, 240, 0, line, 2),
+    { ...segment("rd-budget", add(16, mul(PX, budget)), 204, 0, 36, red, 3), opacity: after(2400, 1, 0) },
+    circle("rd-d-host", 16, 222, 6, ink),
+    circle("rd-d-worker", 16 + PX * 1.2, 222, 6, ink),
+    dot("rd-d-bound", 2, tBound, blue),
+    dot("rd-d-welcome", 3, tWelcome, purple),
+    dot("rd-d-ready", 4, tReady, teal),
+    text("rd-scale", "axis 0–8 s; red: budget", 16, 262, 17, muted),
+  ]);
+  const margin = sub(budget, tReady);
+  const intervals = card("rd-intervals", 222, lilac, purple, "INTERVALS AND MARGIN", [
+    text("rd-i-bind", after(800, iff(ge(level, 2), cat("launch → bound ", r3(bind), " s"), "launch → bound: ?"), "launch → bound …"), 16, 62),
+    text("rd-i-welcome", after(1600, iff(ge(level, 3), "bound → welcome 0.3 s", "bound → welcome: ?"), "bound → welcome …"), 16, 90),
+    text("rd-i-budget", cat("budget ", budget, " s from launch"), 16, 118),
+    bold(
+      "rd-margin",
+      after(
+        2400,
+        iff(lt(level, 4), "margin: ready not seen", iff(ge(margin, 0), cat("margin ", r3(margin), " s"), cat("late by ", r3(mul(-1, margin)), " s"))),
+        "margin …",
+      ),
+      16,
+      152,
+      18,
+      purple,
+    ),
+    text("rd-invented", "invented, not measured", 16, 180, 17, muted),
+    text("rd-owner", "each event has an owner", 16, 206, 17, muted),
+  ]);
+  const claim = card("rd-claim", 222, sand, gold, "WHAT MAY BE CLAIMED", [
+    text("rd-gui", iff(guiBug, "GUI: ready at 1.2 s", iff(eq(level, 4), cat("GUI: ready at ", r3(tReady), " s"), "GUI: starting")), 16, 62),
+    text("rd-health", iff(healthDown, "health port: bind failed", "health port: up"), 16, 90),
+    bold(
+      "rd-verdict",
+      after(
+        3200,
+        iff(
+          guiBug,
+          iff(eq(level, 4), "ready claimed too early", "spawn sold as ready"),
+          iff(eq(level, 4), "ready: host said so", iff(eq(level, 1), "process exists, no more", "initializing, not ready")),
+        ),
+        "…",
+      ),
+      16,
+      124,
+      17,
+      gold,
+    ),
+    text("rd-hverdict", after(4000, iff(healthDown, "no health ≠ stopped", "health is not admission"), "…"), 16, 152),
+    text("rd-order", "spawn→bind→welcome→ready", 16, 180, 17, muted),
+    text("rd-admit", "admission is separate", 16, 206, 17, muted),
+  ]);
+  return build({
+    id: "concept-readiness",
+    title: "Created is not bound. Bound is not ready.",
+    description:
+      "Place the lesson's invented lifecycle events on one monotonic clock: host launch, worker launch, control binding, welcome and host readiness. Change the binding delay and the readiness budget, stop observing at an earlier event, let the GUI call a spawned process ready, or lose the health port.",
+    state: {
+      bind: num("Worker launch → control bound (s)", 2.3, 0.5, 4, 0.1),
+      budget: num("Readiness budget (s)", 5, 3, 8, 0.5),
+      seen: choice("Last event observed", SEEN),
+      gui: choice("GUI shows ready at", ["Host ready (correct)", "Process created (bug)"]),
+      health: flag("Health port bind failed"),
+    },
+    kicker: "33 / LIFECYCLE MILESTONES",
+    subtitle: "invented monotonic trace",
+    grid: [
+      [trace, 0],
+      [intervals, 1],
+      [claim, 2],
+    ],
+    compactOrder: [trace, intervals, claim],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "Host launch at 0, worker launch at 1.2 s. These times are invented to show attribution." },
+      { atMs: 800, text: "Control binding at 3.5 s: 2.3 s after the worker launched." },
+      { atMs: 1600, text: "The welcome follows binding by 0.3 s; the host reports ready at 4.0 s." },
+      { atMs: 2400, text: "Against a 5 s readiness budget the margin is 1 s." },
+      { atMs: 3200, text: "A created process is not a bound control port, a welcome or readiness. Claim only the last milestone seen." },
+      { atMs: 4000, text: "A missing health endpoint does not prove the worker stopped; readiness does not prove admission." },
+    ],
+    accessible:
+      "Lifecycle milestones on one invented monotonic clock, with the lesson's numbers: host launch at 0 s, worker launch at 1.2 s, control port bound at 3.5 s, welcome received at 3.8 s and host ready at 4.0 s. Worker launch to binding takes 2.3 s and binding to welcome 0.3 s; against a hypothetical 5 s readiness budget the margin is 1 s. Changing the binding delay moves every later milestone, and the margin can turn into lateness. If observation stops at an earlier event, the later intervals and the margin are unknown, not zero. A trace distinguishes process created, control bound, welcome received and host ready; a GUI that says ready as soon as the process exists promotes one milestone to another, and even when readiness later happens it was claimed early. A health port that failed to bind does not show that the worker stopped, and host readiness is not network admission. The times are invented and are not measurements of any machine.",
+  });
+})();
+
+// ============================================================ 34 head, body and tail roles in a split model
+// sys-e11-02: a fictional 12-block model with head end 4 and body 4…8: 4, 4 and 4 blocks.
+// A [4, 800, 32] activation at 2 bytes is 204,800 bytes = 200 KiB; width 128 gives 800 KiB.
+// The tail's logits for batch 2, sequence 3, vocabulary 5 are 30 numbers with 6 labels.
+const splitScene = (() => {
+  const N = s("N"),
+    hEnd = s("headEnd"),
+    bEnd = s("bodyEnd"),
+    width = s("width"),
+    bugLoss = eq(s("loss"), "All B·T·V logits (bug)");
+  const valid = and(lt(0, hEnd), lt(hEnd, bEnd), lt(bEnd, N));
+  // One bar per role, cut into blocks by separators: 21 units per block.
+  const fade = iff(valid, 1, 0.25);
+  const bar = (id, from, to, fill) => ({
+    ...rect(id, add(16, mul(21, from)), 48, max(0, sub(mul(21, sub(to, from)), 3)), 26, fill, 3),
+    opacity: fade,
+  });
+  const cellsRow = [
+    bar("sp-bar-head", 0, hEnd, blue),
+    bar("sp-bar-body", hEnd, bEnd, purple),
+    bar("sp-bar-tail", bEnd, N, teal),
+    ...Array.from({ length: 11 }, (_, i) => ({
+      ...segment(`sp-sep-${i + 1}`, 16 + 21 * (i + 1) - 1.5, 48, 0, 26, white, 3),
+      opacity: iff(lt(i + 1, N), 1, 0),
+    })),
+  ];
+  const range = (a, b) => iff(eq(sub(b, a), 1), cat("block ", a), cat("blocks ", a, "–", sub(b, 1)));
+  const roles = card("sp-roles", 250, ice, blue, "BLOCKS PER ROLE", [
+    ...cellsRow,
+    text("sp-head", iff(valid, cat("head ", hEnd, ": ", range(0, hEnd)), "head: invalid split"), 16, 104),
+    text("sp-body", iff(valid, cat("body ", sub(bEnd, hEnd), ": ", range(hEnd, bEnd)), "body: invalid split"), 16, 132),
+    text("sp-tail", iff(valid, cat("tail ", sub(N, bEnd), ": ", range(bEnd, N)), "tail: invalid split"), 16, 160),
+    bold("sp-check", iff(valid, cat("total ", N, " blocks ✓"), "need 0 < h < e < N"), 16, 194, 18, blue),
+    text("sp-tailjob", "tail adds norm + vocab", 16, 222, 17, muted),
+  ]);
+  const values = mul(4, 800, width),
+    bytes = mul(values, 2);
+  const payload = card("sp-payload", 222, lilac, purple, "HEAD OUTPUT PAYLOAD", [
+    text("sp-shape", cat("[4, 800, ", width, "] at 2 B"), 16, 62),
+    text("sp-values", after(1600, cat("values ", values), "values …"), 16, 90),
+    text("sp-bytes", after(1600, cat("bytes ", bytes), "bytes …"), 16, 118),
+    bold("sp-kib", after(2400, cat("= ", div(bytes, 1024), " KiB"), "= … KiB"), 16, 152, 20, purple),
+    text("sp-width", "width is configuration", 16, 180, 17, muted),
+    text("sp-null", "head: no loss field", 16, 206, 17, muted),
+  ]);
+  const LN5 = Math.log(5); // uniform-logit cross-entropy per position (oracle uses math.log)
+  const tail = card("sp-tail-card", 250, sand, gold, "TAIL: LOGITS VS LABELS", [
+    text("sp-logits", "logits 2·3·5 = 30", 16, 62),
+    text("sp-labels", "labels 2·3 = 6", 16, 90),
+    text("sp-each", "uniform: ln 5 each", 16, 118),
+    text("sp-div", after(3200, cat("divide by ", iff(bugLoss, 30, 6)), "divide by …"), 16, 146),
+    bold("sp-loss", after(3200, cat("loss = ", r3(iff(bugLoss, div(mul(6, LN5), 30), LN5))), "loss = …"), 16, 180, 18, gold),
+    bold("sp-verdict", after(4000, iff(bugLoss, "5× too small: logits", "one target per position"), "…"), 16, 212, 17, gold),
+    text("sp-where", "loss lives outside tail", 16, 240, 17, muted),
+  ]);
+  return build({
+    id: "concept-split-roles",
+    title: "Head, body, tail: count what each owns.",
+    description:
+      "Split a fictional transformer into head, body and tail by two boundaries and read how many blocks each role constructs. Size the head's activation payload for two widths, then normalize the tail's loss by positions or, mistakenly, by every logit.",
+    state: {
+      N: num("Transformer blocks", 12, 8, 12, 1),
+      headEnd: num("Head ends at", 4, 1, 6, 1),
+      bodyEnd: num("Body ends at", 8, 2, 11, 1),
+      width: num("Transferred width", 32, 32, 128, 96),
+      loss: choice("Loss averaged over", ["B·T positions", "All B·T·V logits (bug)"]),
+    },
+    kicker: "34 / ROLES IN A SPLIT MODEL",
+    subtitle: "fictional configuration",
+    grid: [
+      [roles, 0],
+      [payload, 1],
+      [tail, 2],
+    ],
+    compactOrder: [roles, payload, tail],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "Twelve fictional blocks. The head ends at 4 and the body covers 4 up to 8; the tail takes the rest." },
+      { atMs: 800, text: "Head 4 blocks, body 4, tail 4. A split is a collection of operations, not one head or neuron." },
+      { atMs: 1600, text: "An archived head record reports output shape [4, 800, 32]: 102,400 values." },
+      { atMs: 2400, text: "At an assumed 2 bytes per value that is 204,800 bytes, exactly 200 KiB. Width 128 makes it 800 KiB." },
+      { atMs: 3200, text: "The tail returns logits. Batch 2, sequence 3, vocabulary 5: 30 logits but only 6 labels." },
+      { atMs: 4000, text: "Average the loss over the 6 predicted positions. Dividing by 30 logits makes it five times too small." },
+    ],
+    accessible:
+      "Roles in a split model with the lesson's fictional configuration. Twelve transformer blocks are divided by two boundaries: the head builds blocks 0 to 3 (head end 4), the body blocks 4 to 7 (start 4, end 8) and the tail blocks 8 to 11, four each; the tail then applies the final normalization and a bias-free vocabulary projection, and the training path computes the loss outside it. Moving the boundaries changes the counts; a split needs 0 < head end < body end < total. The head's archived output shape [4, 800, 32] holds 102,400 values; at an assumed 2 bytes per value that is 204,800 bytes, exactly 200 KiB, and a width of 128 would make it 800 KiB, so width is a configuration fact that changes traffic and cache needs. The tail produces vocabulary logits instead of the hidden width: with batch 2, sequence 3 and vocabulary 5 there are 30 logits but 6 labels, one per predicted position. With uniform logits each position's cross-entropy is ln 5 ≈ 1.609, which is the mean over the 6 positions; dividing the summed loss by all 30 logits gives 0.322, five times too small. Block totals from 8 to 12 are fictional.",
+  });
+})();
+
+// ============================================================ 35 a typed journal, monotonic intervals and stale events
+// sys-e11-04: registration started 0, registered 4, forward complete 7, backward complete 15, reset 16;
+// admission waiting 4 s, post-admission to backward 11 s; an older progress event (time 12) ingested late.
+const journalScene = (() => {
+  const reg = s("registered"),
+    bk = s("backward"),
+    stale = eq(s("rule"), "Last 'training' line (bug)"),
+    bodyFail = eq(s("heartbeat"), "HTTP 200, body: failure"),
+    reset = s("reset");
+  const trace = card("ej-trace", 250, ice, blue, "MONOTONIC JOURNAL", [
+    text("ej-e0", "0 s registration_started", 16, 62),
+    text("ej-e1", cat(reg, " s registered"), 16, 90),
+    text("ej-e2", "7 s forward_complete", 16, 118),
+    text("ej-e3", cat(bk, " s backward_complete"), 16, 146),
+    text("ej-e4", iff(reset, "16 s reset", "(no reset)"), 16, 174),
+    text("ej-e5", after(2400, "late: progress @ 12 s", "late: …"), 16, 202, 17, red),
+    text("ej-clock", "one process clock", 16, 230, 17, muted),
+  ]);
+  const intervals = card("ej-intervals", 194, lilac, purple, "INTERVALS", [
+    text("ej-wait", after(800, cat("admission wait: ", reg, " s"), "admission wait: …"), 16, 62),
+    bold("ej-to-bwd", after(1600, cat("registered → bwd: ", sub(bk, reg), " s"), "registered → bwd: …"), 16, 94, 18, purple),
+    text("ej-fwd-bwd", after(1600, cat("forward → bwd: ", sub(bk, 7), " s"), "forward → bwd: …"), 16, 124),
+    text("ej-notgpu", "not pure GPU time", 16, 152, 17, muted),
+    text("ej-wall", "wall clocks may jump", 16, 180, 17, muted),
+  ]);
+  const staleWins = and(stale, reset);
+  const state = card("ej-state", 250, sand, gold, "WHAT IS CURRENT?", [
+    text("ej-rule", iff(stale, "rule: last 'training'", "rule: session + order"), 16, 62),
+    bold(
+      "ej-now",
+      after(3200, iff(reset, iff(stale, "state: training (stale)", "state: reset, idle"), "state: training"), "state: …"),
+      16,
+      94,
+      18,
+      gold,
+    ),
+    text("ej-hb", iff(bodyFail, "heartbeat: 200, failure", "heartbeat: 200, ok"), 16, 124),
+    bold(
+      "ej-verdict",
+      after(
+        4000,
+        iff(staleWins, "old session revived", iff(bodyFail, "200 ≠ admission: body", iff(reset, "reset ended session", "session still active"))),
+        "…",
+      ),
+      16,
+      156,
+      17,
+      gold,
+    ),
+    text("ej-absent", "absent here ≠ absent", 16, 184),
+    text("ej-label", "label: source, observed,", 16, 212, 17, muted),
+    text("ej-label-2", "simulated or unknown", 16, 238, 17, muted),
+  ]);
+  return build({
+    id: "concept-event-journal",
+    title: "Order the journal. Then decide what is current.",
+    description:
+      "Read the lesson's invented monotonic journal of registration, forward and backward completion and a reset. Compute the admission wait and the time to the first backward, then let a stale progress event arrive after the reset and judge the current state, and read a heartbeat whose HTTP 200 carries a failure.",
+    state: {
+      registered: num("registered at (s)", 4, 1, 6, 1),
+      backward: num("backward_complete at (s)", 15, 9, 15, 1),
+      rule: choice("Current state from", ["Session + order", "Last 'training' line (bug)"]),
+      heartbeat: choice("Heartbeat reply", ["HTTP 200, body ok", "HTTP 200, body: failure"]),
+      reset: flag("Reset at 16 s", true),
+    },
+    kicker: "35 / EVENTS NEED CONTEXT",
+    subtitle: "invented trace, one clock",
+    grid: [
+      [trace, 0],
+      [intervals, 1],
+      [state, 2],
+    ],
+    compactOrder: [trace, intervals, state],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "An invented journal on one monotonic clock: registration starts at 0 and succeeds at 4 s." },
+      { atMs: 800, text: "Admission waiting took 4 s." },
+      { atMs: 1600, text: "Registered to first backward complete: 11 s. It contains queueing and transfers, not only GPU work." },
+      { atMs: 2400, text: "A reset at 16 s ends the session. Then an older progress event from 12 s is ingested late." },
+      { atMs: 3200, text: "Associate events with their session and order; the last line mentioning training is not the current state." },
+      { atMs: 4000, text: "An HTTP 200 heartbeat can carry a semantic failure; the body decides admission." },
+    ],
+    accessible:
+      "A typed event journal with the lesson's invented monotonic times: registration started at 0 s, registered at 4 s, first forward complete at 7 s, first backward complete at 15 s and a reset at 16 s. Admission waiting took 4 s and the time from registration to that backward was 11 s; neither interval is pure GPU time, because it can include queueing, transfers and other work. Monotonic time is meaningful only within its own clock domain; wall clocks can jump or differ between hosts. After the reset, an older progress event stamped 12 s is ingested late. Interpreting state by session and order keeps the session reset and idle; taking the last line that mentions training revives the old session as if it were still training. A heartbeat response logged with HTTP 200 can carry a semantic failure in its body, so the HTTP status alone does not establish admission. Absence of an event from one stream is not proof that it did not happen elsewhere. Label each inference as source-supported, observed, simulated or unknown. Registration times from 1 to 6 s and backward times from 9 to 15 s are variations of the invented trace.",
+  });
+})();
+
+// ============================================================ 36 finite, repeatable and correct are different claims
+// eng-e12-01: reference [1, 2, 3, 4]; a permuted candidate [1, 3, 2, 4] is finite, repeatable, has the same
+// sum and norm, and still has maximum absolute error 1. Relative L2 = ‖c − r‖ / ‖r‖.
+const claimsScene = (() => {
+  const V = ["Permuted [1, 3, 2, 4]", "Spike: last + δ", "Bias: every + δ", "Returns [] (empty)", "Exact copy"];
+  const variant = s("variant"),
+    dl = s("delta"),
+    tol = s("tol"),
+    zipOnly = eq(s("compare"), "zip() pairs only (bug)");
+  const REF = [1, 2, 3, 4];
+  const empty = eq(variant, V[3]);
+  const cand = REF.map((r, i) => pick(variant, V, [[1, 3, 2, 4][i], i === 3 ? add(4, dl) : r, add(r, dl), 0, r]));
+  const diffs = REF.map((r, i) => sub(cand[i], r));
+  // Aggregates use each candidate family's closed form (δ ≥ 0), which keeps the scene small;
+  // the oracle computes every aggregate from the vectors themselves.
+  const per = (values) => pick(variant, V, values);
+  const sumC = per([10, add(10, dl), add(10, mul(4, dl)), 0, 10]),
+    normC = per([Math.sqrt(30), sqrt(add(14, mul(add(4, dl), add(4, dl)))), sqrt(add(30, mul(20, dl), mul(4, dl, dl))), 0, Math.sqrt(30)]),
+    maxErr = per([1, dl, dl, 0, 0]),
+    rel = div(per([Math.SQRT2, dl, mul(2, dl), 0, 0]), Math.sqrt(30)),
+    meanErr = per([0.5, div(dl, 4), dl, 0, 0]);
+  const cells = [];
+  REF.forEach((r, i) => {
+    const x = 16 + 64 * i;
+    cells.push(
+      rect(`cc-r-${i}`, x, 44, 58, 32, white, 6),
+      centered(bold(`cc-r-${i}-v`, String(r), x + 29, 66, 17, blue)),
+      { ...rect(`cc-c-${i}`, x, 84, 58, 32, white, 6), opacity: iff(empty, 0.3, 1) },
+      { ...rect(`cc-c-${i}-hl`, x, 84, 58, 32, red, 6), opacity: after(800, iff(and(not(empty), gt(abs(diffs[i]), 0)), 0.35, 0), 0) },
+      { ...centered(bold(`cc-c-${i}-v`, r3(cand[i]), x + 29, 106, 17)), opacity: iff(empty, 0, 1) },
+    );
+  });
+  const vectors = card("cc-vectors", 222, ice, blue, "REFERENCE / CANDIDATE", [
+    ...cells,
+    text("cc-shape", iff(empty, "candidate shape (0,)", "both shape (4,)"), 16, 146),
+    text("cc-repeat", "10,000 runs: identical", 16, 174),
+    text("cc-finite", iff(empty, "finite: nothing to test", "finite: every value"), 16, 202),
+  ]);
+  const weak = card("cc-weak", 222, lilac, purple, "WEAK CHECKS", [
+    text("cc-sum", after(1600, iff(empty, "sum: 0 vs 10", cat("sum: ", r3(sumC), " vs 10")), "sum: …"), 16, 62),
+    text("cc-norm", after(1600, iff(empty, "norm: 0 vs 5.477", cat("norm: ", r3(normC), " vs 5.477")), "norm: …"), 16, 90),
+    text("cc-hash", "hash: stable each run", 16, 118),
+    bold(
+      "cc-weak-verdict",
+      after(
+        2400,
+        iff(
+          empty,
+          "aggregates disagree",
+          iff(and(lt(abs(sub(sumC, 10)), 1e-9), lt(abs(sub(normC, Math.sqrt(30))), 1e-9)), "aggregates all agree", "aggregates disagree"),
+        ),
+        "…",
+      ),
+      16,
+      152,
+      17,
+      purple,
+    ),
+    text("cc-weak-note", "agreement is not proof", 16, 180, 17, muted),
+    text("cc-hash-note", "a hash names the bytes", 16, 206, 17, muted),
+  ]);
+  const passes = and(not(empty), le(maxErr, tol));
+  const oracle = card("cc-oracle", 250, sand, gold, "ORACLE COMPARISON", [
+    text("cc-cmp", iff(zipOnly, "zip() pairs only (bug)", "shape first, then values"), 16, 62),
+    text(
+      "cc-max",
+      after(3200, iff(empty, iff(zipOnly, "max |err| over 0 pairs", "shape mismatch"), cat("max |err| = ", r3(maxErr))), "max |err| …"),
+      16,
+      90,
+    ),
+    text("cc-rel", after(3200, iff(empty, "rel L2: undefined", cat("rel L2 = ", r3(rel))), "rel L2 …"), 16, 118),
+    text("cc-tol", cat("tolerance (contract) ", r3(tol)), 16, 146),
+    bold(
+      "cc-verdict",
+      after(
+        4000,
+        iff(
+          empty,
+          iff(zipOnly, "vacuous pass: 0 pairs", "fail: shape (0,)"),
+          iff(passes, iff(eq(maxErr, 0), "pass: exact match", "pass: within tolerance"), "fail: coordinates differ"),
+        ),
+        "…",
+      ),
+      16,
+      180,
+      17,
+      gold,
+    ),
+    text("cc-keep", "keep bad ones as controls", 16, 208, 17, muted),
+    text("cc-mean", after(4000, iff(empty, "mean |err|: none", cat("mean |err| = ", r3(meanErr))), "mean …"), 16, 236),
+  ]);
+  return build({
+    id: "concept-claim-checks",
+    title: "Finite, repeatable, correct: three claims.",
+    description:
+      "Compare candidate outputs with the lesson's reference [1, 2, 3, 4]: a permutation, a single spike, a constant bias, an empty result and an exact copy. Weak checks such as finiteness, repeatability, sums, norms and hashes are compared with an oracle's shape check, maximum absolute error and relative L2 error against a contract tolerance.",
+    state: {
+      variant: choice("Candidate", V),
+      delta: num("δ for spike or bias", 0.5, 0, 2, 0.25),
+      tol: num("Max-error tolerance", 0.1, 0, 1, 0.05),
+      compare: choice("Comparison code", ["Shape, then values", "zip() pairs only (bug)"]),
+    },
+    kicker: "36 / AN EVIDENCE LADDER",
+    subtitle: "original CPU counterexample",
+    grid: [
+      [vectors, 0],
+      [weak, 1],
+      [oracle, 2],
+    ],
+    compactOrder: [vectors, weak, oracle],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "The reference is [1, 2, 3, 4]. The permuted candidate returns [1, 3, 2, 4] on every call." },
+      { atMs: 800, text: "Mark the coordinates that differ." },
+      { atMs: 1600, text: "Sum and norm are identical; so are finiteness, repeatability and the hash of the wrong vector." },
+      { atMs: 2400, text: "Aggregates cannot see a coordinate swap." },
+      { atMs: 3200, text: "Maximum absolute error is 1; relative L2 error is √2/√30 ≈ 0.258." },
+      { atMs: 4000, text: "Judge against a tolerance from the contract. An empty comparison must fail, not pass vacuously." },
+    ],
+    accessible:
+      "Three different claims about a floating-point output, with the lesson's reference [1, 2, 3, 4]. The permuted candidate [1, 3, 2, 4] is finite, identical on every run and has the same sum (10) and norm (√30 ≈ 5.477), and its hash is a stable identifier of the wrong vector; still, its maximum absolute error is 1 and its relative L2 error is √2/√30 ≈ 0.258, so it fails any tolerance below 1. A single spike of δ on the last coordinate has maximum error δ but a mean absolute error of only δ/4, which shows how an average can hide a local error. A constant bias of δ changes every coordinate by δ. An empty candidate must fail on shape: a comparison that only zips pairs checks zero pairs and passes vacuously. An exact copy passes with error 0. The tolerance is a contract value in this scene; in practice it comes from the numerical contract and baseline evidence, not from a wish to pass. Keep known-bad candidates as negative controls. This is an original CPU counterexample, not a recreation of any device's register mapping.",
+  });
+})();
+
 // ---------------------------------------------------------------- assemble
 const authored = [
   matmulScene,
@@ -3781,7 +4396,12 @@ const authored = [
   lossScene,
   graphScene,
   decoderScene,
-  moduleScene,
+  moduleScene,  fusionScene,
+  scoreScene,
+  readyScene,
+  splitScene,
+  journalScene,
+  claimsScene,
 ];
 const depthOf = (e) =>
   e && typeof e === "object" && "op" in e ? 1 + Math.max(0, ...e.args.map(depthOf)) : 0;
@@ -3843,6 +4463,12 @@ const bindings = [
   ["concept-graph-identity", "fnd-e04-01", "fnd-04-01-text-1"],
   ["concept-decoder-ledger", "ttf-e07-04", "ttf-07-04-text-1"],
   ["concept-module-registry", "ttf-e08-01", "ttf-08-01-text-1"],
+  ["concept-fusion-traffic", "sys-e09-03", "sys-09-03-text-1"],
+  ["concept-return-score", "sys-e10-03", "sys-10-03-text-2"],
+  ["concept-readiness", "sys-e11-01", "sys-11-01-text-2"],
+  ["concept-split-roles", "sys-e11-02", "sys-11-02-text-2"],
+  ["concept-event-journal", "sys-e11-04", "sys-11-04-text-2"],
+  ["concept-claim-checks", "eng-e12-01", "eng-12-01-lesson"],
 ].map(([visualId, episodeId, afterBlockId]) => ({ visualId, episodeId, afterBlockId }));
 assert.deepEqual(
   bindings.map((b) => b.visualId),
@@ -3977,7 +4603,7 @@ const extension = {
     keyboard: true,
     reducedMotion: true,
     textAlternative:
-      "All thirty concept scenes state their arithmetic, show live readouts, and include complete text equivalents.",
+      "All thirty-six concept scenes state their arithmetic, show live readouts, and include complete text equivalents.",
   },
 };
 // The assembler accepts an overlay only if its renderer declaration matches the

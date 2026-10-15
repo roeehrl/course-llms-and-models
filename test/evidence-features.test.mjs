@@ -65,7 +65,7 @@ test('remedial episodes bind as optional metered teaching-bank insertions only i
 test('packaging includes every verified illustration overlay and the same learner evidence as the assembled course',async()=>{
   assert.deepEqual(VISUAL_OVERLAYS,['visuals','systems-visuals','learning-visuals','concept-visuals']);
   const staged=await stageWorkedExamples(),visuals=(await Promise.all(VISUAL_OVERLAYS.map(n=>read(`content/${n}.json`)))).flatMap(o=>o.visuals);
-  assert.equal(staged.compiled.server.visuals.length,visuals.length);assert.equal(visuals.length,45);
+  assert.equal(staged.compiled.server.visuals.length,visuals.length);assert.equal(visuals.length,51);
   const illustrated=new Set(staged.compiled.server.chapters.flatMap(c=>c.episodes).filter(e=>e.blocks.some(b=>b.type==='visual')).map(e=>e.id));
   assert.equal(illustrated.size,new Set((await Promise.all(VISUAL_OVERLAYS.map(n=>read(`content/${n}.json`)))).flatMap(o=>o.bindings.map(b=>b.episodeId))).size);
   for(const field of ['gates','assessments','placement','retention','chapters','visuals'])assert.deepEqual(staged.compiled.server[field],full.server[field],field);
