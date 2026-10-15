@@ -1,4 +1,4 @@
-// Read-only verification of the thirty concept scenes, except optional private
+// Read-only verification of the thirty-six concept scenes, except optional private
 // temporary browser screenshots. Default consumption: the released package.
 import assert from "node:assert/strict";
 import { readFile, mkdtemp, writeFile, chmod } from "node:fs/promises";
@@ -31,7 +31,7 @@ const overlay = await read("content/concept-visuals.json");
 const scenes = overlay.visuals.map(fromVisualExperience);
 assert.deepEqual(scenes, data.scenes, "Delivered overlay differs from authored scenes");
 assert.deepEqual(overlay.bindings, data.bindings);
-assert.equal(scenes.length, 30);
+assert.equal(scenes.length, 36);
 
 // ------------------------------------------------ full-curriculum integration
 // Same overlays and order as scripts/assemble.mjs, compiled in memory through
@@ -840,6 +840,134 @@ mutated("concept-module-registry", "mr-gb", "text", after(1600, cat("b.grad = ",
   (c) => c.time >= 1600 && c.state.container === "Plain Python list (bug)" && c.state.zero && c.state.calls > 1,
   "model.zero_grad() assumed to clear an unregistered layer",
   { mustPassElsewhere: final({ container: "Registered attribute", zero: true }, 4800) });
+
+// 31 fusion traffic
+const R31 = st("rows"),
+  C31 = st("cols"),
+  b31 = iff(eq(st("bytes"), "2 bytes"), 2, 4);
+const in31 = mul(add(mul(2, R31), mul(2, C31)), b31),
+  mid31 = mul(R31, C31, b31);
+mutated("concept-fusion-traffic", "fu-total", "text",
+  after(3200, cat("total: ", add(in31, iff(eq(st("schedule"), "Fused GEMM + ReLU"), mid31, mul(2, mid31)))), "total: …"),
+  from({ schedule: "Two passes" }, 3200), "intermediate round trip counted once",
+  { mustPassElsewhere: final({ schedule: "Fused GEMM + ReLU" }, 4800) });
+mutated("concept-fusion-traffic", "fu-saved", "text", after(3200, cat("fusion saves ", add(in31, mul(3, mid31))), "fusion saves …"),
+  (c) => c.time >= 3200, "fusion credited with all input and output traffic");
+const guessed31 = eq(st("layout"), "Guessed lane order (bug)");
+mutated("concept-fusion-traffic", "fu-verdict", "text",
+  (old) => iff(and(ge(t, 4000), guessed31), "placement matches", old),
+  from({ layout: "Guessed lane order (bug)" }, 4000), "misplaced values judged by their sum",
+  { mustPassElsewhere: final({ layout: "API store contract" }, 4800) });
+mutated("concept-fusion-traffic", "fu-o-0-1-hl", "opacity", 0,
+  from({ layout: "Guessed lane order (bug)" }, 1600), "a misplaced cell left unmarked",
+  { mustPassElsewhere: final({ layout: "API store contract" }, 4800) });
+
+// 32 return score
+const ref32 = st("ref"),
+  usedA32 = iff(and(st("outage"), eq(st("blame"), "Charge peer A (bug)")), 120, st("costA"));
+const used32 = (c) => (c.state.outage && c.state.blame === "Charge peer A (bug)" ? 120 : c.state.costA);
+mutated("concept-return-score", "rs-fA", "text",
+  after(1600, cat("A uses ", r3(pow(div(ref32, usedA32), 1.5))), "A uses …"),
+  (c) => c.time >= 1600 && ((c.state.ref / used32(c)) ** 1.5 > 4 || (c.state.ref / used32(c)) ** 1.5 < 0.2), "clamp dropped",
+  { mustPassElsewhere: final({ ref: 50, costA: 20, outage: false }, 4800) });
+mutated("concept-return-score", "rs-fB", "text",
+  after(1600, cat("B uses ", r3(op("clamp", pow(div(ref32, st("costB")), 1.5), 0.2, 4))), "B uses …"),
+  from({ newB: true }, 1600), "new peer scored from its few returns",
+  { mustPassElsewhere: final({ newB: false, ref: 50, costB: 80 }, 4800) });
+mutated("concept-return-score", "rs-verdict", "text",
+  (old) => iff(and(ge(t, 3200), st("outage")), "A blamed for our outage", old),
+  from({ outage: true, blame: "Forget (source)" }, 3200), "own outage blamed on a peer",
+  { mustPassElsewhere: final({ outage: false }, 4800) });
+mutated("concept-return-score", "rs-unique", "text", after(4000, cat("unique returned: ", st("attempts")), "unique returned: …"),
+  (c) => c.time >= 4000 && c.state.attempts > 1, "send attempts counted as returned samples",
+  { mustPassElsewhere: final({ attempts: 1 }, 4800) });
+
+// 33 readiness
+const ready33 = add(1.2, st("bind"), 0.3, 0.2),
+  hostSeen33 = eq(st("seen"), "Host ready");
+mutated("concept-readiness", "rd-margin", "text",
+  (old) => iff(and(ge(t, 2400), hostSeen33), cat("margin ", r3(sub(add(st("budget"), 1.2), ready33)), " s"), old),
+  from({ seen: "Host ready" }, 2400), "margin measured from worker launch");
+mutated("concept-readiness", "rd-margin", "text",
+  (old) => iff(and(ge(t, 2400), not(hostSeen33)), "margin 0 s", old),
+  (c) => c.time >= 2400 && c.state.seen !== "Host ready", "unobserved readiness reported as zero margin",
+  { mustPassElsewhere: final({ seen: "Host ready" }, 4800) });
+mutated("concept-readiness", "rd-verdict", "text",
+  (old) => iff(and(ge(t, 3200), eq(st("seen"), "Process created"), eq(st("gui"), "Host ready (correct)")), "ready: host said so", old),
+  from({ seen: "Process created", gui: "Host ready (correct)" }, 3200), "a created process accepted as ready",
+  { mustPassElsewhere: final({ seen: "Host ready", gui: "Host ready (correct)" }, 4800) });
+mutated("concept-readiness", "rd-ready", "text", iff(hostSeen33, "4 s host ready", "host ready: not seen"),
+  (c) => c.state.seen === "Host ready" && c.state.bind !== 2.3, "binding delay not carried to later events",
+  { mustPassElsewhere: final({ seen: "Host ready", bind: 2.3 }, 4800) });
+
+// 34 split roles
+const h34 = st("headEnd"),
+  e34 = st("bodyEnd"),
+  valid34 = (c) => c.state.headEnd < c.state.bodyEnd && c.state.bodyEnd < c.state.N;
+const rng34 = (a, b) => iff(eq(sub(b, a), 1), cat("block ", a), cat("blocks ", a, "–", sub(b, 1)));
+mutated("concept-split-roles", "sp-body", "text",
+  iff(and(lt(h34, e34), lt(e34, st("N"))), cat("body ", sub(sub(e34, h34), 1), ": ", rng34(h34, sub(e34, 1))), "body: invalid split"),
+  (c) => valid34(c), "body's final block forgotten");
+mutated("concept-split-roles", "sp-kib", "text", after(2400, cat("= ", div(mul(4, 800, st("width"), 2), 1000), " KiB"), "= … KiB"),
+  (c) => c.time >= 2400, "payload divided by 1000 under a KiB label");
+const bugLoss34 = eq(st("loss"), "All B·T·V logits (bug)");
+mutated("concept-split-roles", "sp-verdict", "text",
+  (old) => iff(and(ge(t, 4000), bugLoss34), "one target per position", old),
+  from({ loss: "All B·T·V logits (bug)" }, 4000), "loss over every logit judged correct",
+  { mustPassElsewhere: final({ loss: "B·T positions" }, 4800) });
+mutated("concept-split-roles", "sp-loss", "text", after(3200, cat("loss = ", r3(div(mul(6, Math.log(5)), 30))), "loss = …"),
+  from({ loss: "B·T positions" }, 3200), "summed loss divided by the logit count",
+  { mustPassElsewhere: final({ loss: "All B·T·V logits (bug)" }, 4800) });
+
+// 35 event journal
+mutated("concept-event-journal", "ej-to-bwd", "text", after(1600, cat("registered → bwd: ", st("backward"), " s"), "registered → bwd: …"),
+  (c) => c.time >= 1600, "interval measured from registration_started");
+const fail35 = eq(st("heartbeat"), "HTTP 200, body: failure");
+mutated("concept-event-journal", "ej-verdict", "text",
+  (old) => iff(and(ge(t, 4000), fail35), iff(st("reset"), "reset ended session", "session still active"), old),
+  (c) => c.time >= 4000 && c.state.heartbeat === "HTTP 200, body: failure" && !(c.state.reset && c.state.rule !== "Session + order"),
+  "HTTP 200 read as admission", { mustPassElsewhere: final({ heartbeat: "HTTP 200, body ok" }, 4800) });
+mutated("concept-event-journal", "ej-now", "text",
+  (old) => iff(and(ge(t, 3200), st("reset")), "state: training (stale)", old),
+  from({ reset: true, rule: "Session + order" }, 3200), "late progress revives a reset session",
+  { mustPassElsewhere: final({ reset: false }, 4800) });
+
+// 36 claim checks
+const V36 = ["Permuted [1, 3, 2, 4]", "Spike: last + δ", "Bias: every + δ", "Returns [] (empty)", "Exact copy"];
+const cand36 = (c) => {
+  const d = c.state.delta;
+  return { [V36[0]]: [1, 3, 2, 4], [V36[1]]: [1, 2, 3, 4 + d], [V36[2]]: [1 + d, 2 + d, 3 + d, 4 + d], [V36[3]]: [], [V36[4]]: [1, 2, 3, 4] }[c.state.variant];
+};
+const ex36 = (i) =>
+  pickv(st("variant"), V36, [[1, 3, 2, 4][i], i === 3 ? add(4, st("delta")) : i + 1, add(i + 1, st("delta")), 0, i + 1]);
+const diff36 = [0, 1, 2, 3].map((i) => sub(ex36(i), i + 1));
+const empty36 = eq(st("variant"), V36[3]);
+mutated("concept-claim-checks", "cc-verdict", "text",
+  (old) => iff(and(ge(t, 4000), empty36), "vacuous pass: 0 pairs", old),
+  from({ variant: V36[3], compare: "Shape, then values" }, 4000), "empty result passed by the shape-checked comparison",
+  { mustPassElsewhere: final({ variant: V36[3], compare: "zip() pairs only (bug)" }, 4800) });
+mutated("concept-claim-checks", "cc-rel", "text",
+  after(3200, iff(empty36, "rel L2: undefined",
+    cat("rel L2 = ", r3(div(sqrt(add(...diff36.map((d) => mul(d, d)))), sqrt(add(...[0, 1, 2, 3].map((i) => mul(ex36(i), ex36(i))))))))), "rel L2 …"),
+  (c) => {
+    const v = cand36(c);
+    return c.time >= 3200 && v.length === 4 && Math.abs(Math.hypot(...v) - Math.sqrt(30)) > 1e-3 && v.some((x, i) => x !== i + 1);
+  },
+  "relative L2 divided by the candidate's norm", { mustPassElsewhere: final({ variant: V36[0] }, 4800) });
+mutated("concept-claim-checks", "cc-verdict", "text",
+  (old) => iff(and(ge(t, 4000), eq(st("variant"), V36[0])), "pass: within tolerance", old),
+  (c) => c.time >= 4000 && c.state.variant === V36[0] && c.state.tol < 1, "agreeing aggregates taken as correctness",
+  { mustPassElsewhere: final({ variant: V36[0], tol: 1 }, 4800) });
+mutated("concept-claim-checks", "cc-max", "text",
+  after(3200, iff(empty36, iff(eq(st("compare"), "zip() pairs only (bug)"), "max |err| over 0 pairs", "shape mismatch"),
+    cat("max |err| = ", r3(div(add(...diff36.map((d) => abs(d))), 4)))), "max |err| …"),
+  (c) => {
+    const v = cand36(c);
+    if (c.time < 3200 || v.length !== 4) return false;
+    const e = v.map((x, i) => Math.abs(x - i - 1));
+    return Math.max(...e) !== e.reduce((a, b) => a + b) / 4;
+  },
+  "mean error reported as the maximum", { mustPassElsewhere: final({ variant: V36[2] }, 4800) });
 
 // ------------------------------------------------ runtime contract checks
 for (const scene of scenes) {

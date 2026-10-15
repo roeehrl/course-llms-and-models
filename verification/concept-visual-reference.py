@@ -1,4 +1,4 @@
-"""Independent CPU oracle for the thirty concept scenes (three batches of eight, then six).
+"""Independent CPU oracle for the thirty-six concept scenes (three batches of eight, then twelve).
 
 Python standard library only. It never reads scene JSON and never evaluates the
 scene expression AST: every expected readout is recomputed here from the
@@ -12,6 +12,7 @@ cause on the computed state. Cases go to stdout;
 concept-visuals.mjs consumes them. No GPU, no network.
 """
 import cmath
+import datetime
 import json
 import math
 import statistics
@@ -1968,7 +1969,7 @@ for calib in ['4', '2', '1']:
 CHECKS.append('a startup-then-dispatch event log with per-path hit counters, the first recorded disable reason as the cause, and fsum/fmean microbatch combines against the full logical batch')
 
 
-# =========================================================== fourth batch (25-30)
+# =========================================================== fourth batch (25-41)
 # Every verdict's cause is asserted on the computed state before its text is emitted.
 TIMES48 = [0, 799, 800, 1600, 2400, 3200, 4000, 4800]
 
@@ -2526,6 +2527,433 @@ for container in ['Registered attribute', 'Plain Python list (bug)']:
                         case('concept-module-registry', dict(container=container, detach=detach, calls=calls, zero=zero, lr=lr),
                              time, {}, exact)
 CHECKS.append('a miniature module system that registers only Param and Module attributes, an optimizer that refuses an empty parameter list, gradient buffers that add on every backward unless model.zero_grad() clears them, and an SGD step that skips None gradients')
+
+
+
+# ----------------------------------------------------------- 31 fusion saves the intermediate's round trip
+A31, B31 = [[1, -2], [3, 1]], [[2, 0], [1, -1]]
+C31 = [[sum(A31[i][k] * B31[k][j] for k in range(2)) for j in range(2)] for i in range(2)]
+assert C31 == [[0, 2], [7, -1]]
+
+
+def lanes_of(matrix):
+    """Elements as a cooperative layout distributes them: lane k holds column-major element k."""
+    return [(matrix[k % 2][k // 2], (k % 2, k // 2)) for k in range(4)]
+
+
+def store(lanes, guessed):
+    out = [[None, None], [None, None]]
+    for k, (value, coord) in enumerate(lanes):
+        i, j = (k // 2, k % 2) if guessed else coord  # a guessed row-major lane order ignores the contract
+        out[i][j] = max(0, value)  # ReLU applied as the value is stored
+    return out
+
+
+def traffic(rows, cols, size, fused):
+    ops = [('read', rows * 2), ('read', 2 * cols)]  # A is rows×2 and B is 2×cols
+    if not fused:
+        ops += [('write', rows * cols), ('read', rows * cols)]  # the intermediate's round trip
+    ops.append(('write', rows * cols))
+    return sum(n for _, n in ops) * size, ops
+
+
+REF31 = [[max(0, v) for v in row] for row in C31]
+for rows in range(1, 5):
+    for cols in range(1, 5):
+        for size_label, size in [('4 bytes (FP32)', 4), ('2 bytes', 2)]:
+            unfused, _ = traffic(rows, cols, size, False)
+            fused_total, _ = traffic(rows, cols, size, True)
+            for schedule in ['Two passes', 'Fused GEMM + ReLU']:
+                total = fused_total if schedule == 'Fused GEMM + ReLU' else unfused
+                for layout in ['API store contract', 'Guessed lane order (bug)']:
+                    stored = store(lanes_of(C31), layout != 'API store contract')
+                    flat, ref_flat = [v for row in stored for v in row], [v for row in REF31 for v in row]
+                    wrong = sum(a != b for a, b in zip(flat, ref_flat))
+                    err = max(abs(a - b) for a, b in zip(flat, ref_flat))
+                    if wrong:
+                        assert all(math.isfinite(v) for v in flat) and sum(flat) == sum(ref_flat)  # finite, same sum, wrong cells
+                        verdict = f'{wrong} cells misplaced'
+                    else:
+                        verdict = 'placement matches'
+                    for time in TIMES48:
+                        exact = {'fu-shape': f'intermediate {rows}×{cols} × {size} B',
+                                 'fu-store': 'store: guessed (bug)' if layout != 'API store contract' else 'store: API contract'}
+                        exact['fu-c'] = 'C [0, 2], [7, −1]' if time >= 800 else 'C …'
+                        for i in range(2):
+                            for j in range(2):
+                                exact[f'fu-o-{i}-{j}-v'] = str(stored[i][j]) if time >= 1600 else '…'
+                        if time >= 2400:
+                            exact['fu-in'] = f'read A, B: {(2 * rows + 2 * cols) * size}'
+                            exact['fu-mid'] = ('intermediate: on chip' if schedule == 'Fused GEMM + ReLU'
+                                               else f'write + reread: {2 * rows * cols * size}')
+                            exact['fu-outw'] = f'write output: {rows * cols * size}'
+                        else:
+                            exact.update({'fu-in': 'read A, B: …', 'fu-mid': 'intermediate …', 'fu-outw': 'write output: …'})
+                        exact['fu-total'] = f'total: {total}' if time >= 3200 else 'total: …'
+                        exact['fu-saved'] = f'fusion saves {unfused - fused_total}' if time >= 3200 else 'fusion saves …'
+                        exact['fu-sum'] = f'sum: {sum(flat)} vs ref 9' if time >= 4000 else 'sum: …'
+                        exact['fu-max'] = f'max |error| = {err}' if time >= 4000 else 'max |error| …'
+                        exact['fu-verdict'] = verdict if time >= 4000 else '…'
+                        geometry = {f'fu-o-{i}-{j}-hl': {'opacity': 0.35 if (time >= 1600 and stored[i][j] != REF31[i][j]) else 0}
+                                    for i in range(2) for j in range(2)}
+                        case('concept-fusion-traffic', dict(rows=rows, cols=cols, bytes=size_label, schedule=schedule, layout=layout),
+                             time, {}, exact, geometry)
+CHECKS.append('the 2×2 product by loops, results distributed to lanes in column-major order and stored either by their recorded coordinates or by a guessed row-major lane order, and logical traffic as an explicit list of reads and writes')
+
+
+# ----------------------------------------------------------- 32 a clamped return score and honest blame
+def return_factor(reference, cost):
+    return min(4.0, max(0.2, (reference / cost) ** 1.5))  # the lesson's pinned component
+
+
+class ReturnRouter:
+    """Keeps each established peer's latest return cost (a simplification for the illustration)."""
+    EXPIRY = 120
+
+    def __init__(self, costs):
+        self.cost = dict(costs)
+        self.unresolved = []
+
+    def own_outage(self, lost_for, charge):
+        self.unresolved = [lost_for, lost_for]
+        if charge:
+            for peer in self.unresolved:
+                self.cost[peer] = self.EXPIRY  # wrongly teaches the router that the peer is slow
+        self.unresolved = []  # the source forgets unresolved records, keeping learned costs
+
+
+for ref in [10, 50, 100]:
+    for costA in [5, 20, 150]:
+        for costB in [5, 80, 150]:
+            for newB in [False, True]:
+                for outage in [False, True]:
+                    for blame in ['Forget (source)', 'Charge peer A (bug)']:
+                        router = ReturnRouter({'A': costA, 'B': costB})
+                        if outage:
+                            router.own_outage('A', blame == 'Charge peer A (bug)')
+                        usedA = router.cost['A']
+                        rawA, rawB = (ref / usedA) ** 1.5, (ref / costB) ** 1.5
+                        fA = return_factor(ref, usedA)
+                        fB = 1.0 if newB else return_factor(ref, costB)
+                        if (ref, costA, costB, newB, outage) == (50, 20, 80, False, False):
+                            assert abs(fA - 3.952847) < 1e-6 and abs(fB - 0.494106) < 1e-6 and abs(fA / fB - 8) < 1e-12
+                        if outage and blame == 'Charge peer A (bug)':
+                            assert usedA == ReturnRouter.EXPIRY
+                            bverdict = 'A blamed for our outage'
+                        elif outage:
+                            assert usedA == costA
+                            bverdict = 'learned costs kept'
+                        else:
+                            bverdict = 'no outage to attribute'
+                        tag = lambda f: ' (cap)' if f == 4.0 else ' (floor)' if f == 0.2 else ''
+                        for attempts in [1, 3]:
+                            sends = [('activation-7', k) for k in range(attempts)]
+                            returns = [('activation-7', 'backward')]
+                            unique = len({a for a, _ in sends} & {a for a, _ in returns})
+                            assert unique == 1
+                            for time in TIMES48:
+                                exact = {'rs-ref': f'reference {ref} s',
+                                         'rs-out': 'own endpoint rebuilt' if outage else 'own endpoint healthy',
+                                         'rs-lost': '2 returns unresolved' if outage else 'no unresolved returns',
+                                         'rs-rule': 'charged to A (bug)' if blame == 'Charge peer A (bug)' else 'forgotten (source)',
+                                         'rs-tries': f'send attempts: {attempts}'}
+                                numeric = {}
+                                if time >= 800:
+                                    numeric['rs-rawA'] = rawA
+                                    if newB:
+                                        exact['rs-rawB'] = 'B new: neutral'
+                                    else:
+                                        numeric['rs-rawB'] = rawB
+                                else:
+                                    exact.update({'rs-rawA': 'A raw …', 'rs-rawB': 'B raw …'})
+                                if time >= 1600:
+                                    exact['rs-fA'] = f'A uses {js(r3(fA))}{tag(fA)}'
+                                    exact['rs-fB'] = f'B uses {js(r3(fB))}{tag(fB) if not newB else ""}'
+                                else:
+                                    exact.update({'rs-fA': 'A uses …', 'rs-fB': 'B uses …'})
+                                if time >= 2400:
+                                    exact['rs-ratio'] = f'A : B = {js(r3(fA / fB))} : 1'
+                                else:
+                                    exact['rs-ratio'] = 'A : B …'
+                                exact['rs-usedA'] = f'A cost used: {usedA} s' if time >= 3200 else 'A cost used: …'
+                                exact['rs-verdict'] = bverdict if time >= 3200 else '…'
+                                exact['rs-unique'] = 'unique returned: 1' if time >= 4000 else 'unique returned: …'
+                                exact['rs-not'] = ((f'not {attempts} samples' if attempts > 1 else 'one attempt, one item')
+                                                   if time >= 4000 else '…')
+                                geometry = {'rs-barA': {'width': 60 * fA, 'opacity': float(time >= 1600)},
+                                            'rs-barB': {'width': 60 * fB, 'opacity': float(time >= 1600)}}
+                                case('concept-return-score', dict(ref=ref, costA=costA, costB=costB, newB=newB, outage=outage,
+                                                                  blame=blame, attempts=attempts), time, numeric, exact, geometry)
+CHECKS.append("the lesson's clamped factor with the published reference values, a router that keeps each peer's latest cost and either forgets or charges returns lost in its own outage, and unique work from a set intersection of activation identities")
+
+
+# ----------------------------------------------------------- 33 lifecycle milestones and a readiness margin
+SEEN33 = ['Host ready', 'Welcome received', 'Control bound', 'Process created']
+for bind in [0.5, 2.3, 4]:
+    events = [('host launch', Fraction(0)), ('process created', Fraction(6, 5))]
+    events.append(('control bound', events[-1][1] + Fraction(str(bind))))
+    events.append(('welcome', events[-1][1] + Fraction(3, 10)))
+    events.append(('host ready', events[-1][1] + Fraction(1, 5)))
+    t = dict(events)
+    assert [e[1] for e in events] == sorted(e[1] for e in events)  # one monotonic clock
+    if bind == 2.3:
+        assert (t['control bound'], t['welcome'], t['host ready']) == (Fraction(7, 2), Fraction(19, 5), 4)
+    for budget in [3, 5, 8]:
+        for seen in SEEN33:
+            last = {'Host ready': 'host ready', 'Welcome received': 'welcome', 'Control bound': 'control bound',
+                    'Process created': 'process created'}[seen]
+            observed = [name for name, _ in events[:[n for n, _ in events].index(last) + 1]]
+            ready_seen = 'host ready' in observed
+            for gui in ['Host ready (correct)', 'Process created (bug)']:
+                gui_ready_at = t['process created'] if gui == 'Process created (bug)' else (t['host ready'] if ready_seen else None)
+                if gui == 'Process created (bug)':
+                    if ready_seen:
+                        assert gui_ready_at < t['host ready']
+                        verdict = 'ready claimed too early'
+                    else:
+                        verdict = 'spawn sold as ready'
+                elif ready_seen:
+                    verdict = 'ready: host said so'
+                elif observed[-1] == 'process created':
+                    verdict = 'process exists, no more'
+                else:
+                    verdict = 'initializing, not ready'
+                for health in [False, True]:
+                    for time in TIMES48:
+                        def row(name, label):
+                            return f'{js(r3(t[name]))} s {label}' if name in observed else f'{label}: not seen'
+                        exact = {'rd-bound': row('control bound', 'control bound'), 'rd-welcome': row('welcome', 'welcome'),
+                                 'rd-ready': row('host ready', 'host ready'), 'rd-i-budget': f'budget {js(budget)} s from launch',
+                                 'rd-gui': ('GUI: ready at 1.2 s' if gui == 'Process created (bug)' else
+                                            f'GUI: ready at {js(r3(gui_ready_at))} s' if ready_seen else 'GUI: starting'),
+                                 'rd-health': 'health port: bind failed' if health else 'health port: up'}
+                        exact['rd-i-bind'] = ((f'launch → bound {js(r3(t["control bound"] - t["process created"]))} s'
+                                               if 'control bound' in observed else 'launch → bound: ?') if time >= 800 else 'launch → bound …')
+                        exact['rd-i-welcome'] = (('bound → welcome 0.3 s' if 'welcome' in observed else 'bound → welcome: ?')
+                                                 if time >= 1600 else 'bound → welcome …')
+                        if time < 2400:
+                            exact['rd-margin'] = 'margin …'
+                        elif not ready_seen:
+                            exact['rd-margin'] = 'margin: ready not seen'
+                        else:
+                            m = budget - t['host ready']
+                            exact['rd-margin'] = f'margin {js(r3(m))} s' if m >= 0 else f'late by {js(r3(-m))} s'
+                        exact['rd-verdict'] = verdict if time >= 3200 else '…'
+                        exact['rd-hverdict'] = ('no health ≠ stopped' if health else 'health is not admission') if time >= 4000 else '…'
+                        geometry = {'rd-budget': {'x': 16 + 30 * budget, 'opacity': float(time >= 2400)}}
+                        for node, name in [('rd-d-bound', 'control bound'), ('rd-d-welcome', 'welcome'), ('rd-d-ready', 'host ready')]:
+                            geometry[node] = {'x': 16 + 30 * float(t[name]), 'opacity': 1 if name in observed else 0.15}
+                        case('concept-readiness', dict(bind=bind, budget=budget, seen=seen, gui=gui, health=health), time, {}, exact, geometry)
+CHECKS.append('an ordered milestone log on one exact monotonic clock, observation cut at the last event seen, the margin only from an observed readiness event, and GUI claims compared with the event they were based on')
+
+
+# ----------------------------------------------------------- 34 head, body and tail roles
+def build_split(n_blocks, head_end, body_end):
+    head = [k for k in range(head_end)]
+    body = [k for k in range(head_end, body_end - 1)] + [body_end - 1]  # ordinary blocks, then the final one
+    tail = list(range(body_end, n_blocks))
+    return head, body, tail
+
+
+def span(blocks):
+    return f'block {blocks[0]}' if len(blocks) == 1 else f'blocks {blocks[0]}–{blocks[-1]}'
+
+
+for N in range(8, 13):
+    for head_end in [1, 4, 6]:
+        for body_end in [2, 5, 8, 11]:
+            valid = 0 < head_end < body_end < N
+            if valid:
+                head, body, tail = build_split(N, head_end, body_end)
+                assert head + body + tail == list(range(N))
+                if (N, head_end, body_end) == (12, 4, 8):
+                    assert (len(head), len(body), len(tail)) == (4, 4, 4)
+            for width in [32, 128]:
+                values = math.prod([4, 800, width])
+                payload = values * 2
+                kib = Fraction(payload, 1024)
+                if width == 32:
+                    assert payload == 204800 and kib == 200
+                for loss in ['B·T positions', 'All B·T·V logits (bug)']:
+                    logits = [[0.0] * 5 for _ in range(2 * 3)]  # uniform logits, one row per predicted position
+                    labels = [k % 5 for k in range(2 * 3)]
+                    per_position = [math.log(sum(math.exp(z) for z in row)) - row[y] for row, y in zip(logits, labels)]
+                    divisor = len(labels) if loss == 'B·T positions' else 2 * 3 * 5
+                    value = math.fsum(per_position) / divisor
+                    verdict = 'one target per position' if divisor == len(labels) else '5× too small: logits'
+                    for time in TIMES48:
+                        exact = {'sp-shape': f'[4, 800, {width}] at 2 B'}
+                        if valid:
+                            exact.update({'sp-head': f'head {len(head)}: {span(head)}', 'sp-body': f'body {len(body)}: {span(body)}',
+                                          'sp-tail': f'tail {len(tail)}: {span(tail)}', 'sp-check': f'total {N} blocks ✓'})
+                        else:
+                            exact.update({'sp-head': 'head: invalid split', 'sp-body': 'body: invalid split',
+                                          'sp-tail': 'tail: invalid split', 'sp-check': 'need 0 < h < e < N'})
+                        exact['sp-values'] = f'values {values}' if time >= 1600 else 'values …'
+                        exact['sp-bytes'] = f'bytes {payload}' if time >= 1600 else 'bytes …'
+                        exact['sp-kib'] = f'= {js(kib)} KiB' if time >= 2400 else '= … KiB'
+                        exact['sp-div'] = f'divide by {divisor}' if time >= 3200 else 'divide by …'
+                        numeric = {'sp-loss': value} if time >= 3200 else {}
+                        if time < 3200:
+                            exact['sp-loss'] = 'loss = …'
+                        exact['sp-verdict'] = verdict if time >= 4000 else '…'
+                        fade = 1 if valid else 0.25
+                        geometry = {'sp-bar-head': {'x': 16, 'width': max(0, 21 * head_end - 3), 'opacity': fade},
+                                    'sp-bar-body': {'x': 16 + 21 * head_end, 'width': max(0, 21 * (body_end - head_end) - 3), 'opacity': fade},
+                                    'sp-bar-tail': {'x': 16 + 21 * body_end, 'width': max(0, 21 * (N - body_end) - 3), 'opacity': fade}}
+                        for k in range(1, 12):
+                            geometry[f'sp-sep-{k}'] = {'opacity': float(k < N)}
+                        case('concept-split-roles', dict(N=N, headEnd=head_end, bodyEnd=body_end, width=width, loss=loss),
+                             time, numeric, exact, geometry)
+CHECKS.append('head, body and tail block lists built from the constructor pattern and checked to partition the model, payload bytes from the shape product, and the tail cross-entropy from uniform logits by log-sum-exp with the divisor set by the label count')
+
+
+# ----------------------------------------------------------- 35 a typed journal and stale events
+def replay(registered, backward, reset, heartbeat_failure):
+    ingest = [dict(name='registration_started', t=0, session=1), dict(name='registered', t=registered, session=1),
+              dict(name='forward_complete', t=7, session=1), dict(name='backward_complete', t=backward, session=1)]
+    if reset:
+        ingest.append(dict(name='reset', t=16, session=1))
+    ingest.append(dict(name='training_progress', t=12, session=1))  # an older record ingested late
+    ingest.append(dict(name='heartbeat_response', t=17, session=1, http=200, ok=not heartbeat_failure))
+    return ingest
+
+
+def state_by_session(ingest):
+    closed = set()
+    state = 'idle'
+    for e in sorted((e for e in ingest if e['name'] != 'heartbeat_response'), key=lambda e: e['t']):
+        if e['name'] == 'reset':
+            closed.add(e['session'])
+            state = 'reset'
+        elif e['session'] not in closed and e['name'] in ('registered', 'forward_complete', 'backward_complete', 'training_progress'):
+            state = 'training'
+    return state
+
+
+def state_by_last_training_line(ingest):
+    lines = [e for e in ingest if 'training' in e['name']]
+    return 'training' if lines else 'idle'
+
+
+for registered in [1, 4, 6]:
+    for backward in [9, 12, 15]:
+        for reset in [True, False]:
+            for heartbeat in ['HTTP 200, body ok', 'HTTP 200, body: failure']:
+                ingest = replay(registered, backward, reset, heartbeat == 'HTTP 200, body: failure')
+                times = {e['name']: e['t'] for e in ingest}
+                assert times['registered'] - times['registration_started'] == registered
+                hb = [e for e in ingest if e['name'] == 'heartbeat_response'][0]
+                admitted = hb['ok']  # the body, not the HTTP status, decides
+                assert hb['http'] == 200
+                for rule in ['Session + order', "Last 'training' line (bug)"]:
+                    correct = state_by_session(ingest)
+                    if rule == 'Session + order':
+                        state = correct
+                        shown = 'state: reset, idle' if state == 'reset' else 'state: training'
+                    else:
+                        state = state_by_last_training_line(ingest)
+                        shown = 'state: training (stale)' if (state == 'training' and correct == 'reset') else 'state: training'
+                    if rule != 'Session + order' and correct == 'reset':
+                        assert state == 'training'  # the stale record revived a session that had ended
+                        verdict = 'old session revived'
+                    elif not admitted:
+                        verdict = '200 ≠ admission: body'
+                    elif correct == 'reset':
+                        verdict = 'reset ended session'
+                    else:
+                        verdict = 'session still active'
+                    for time in TIMES48:
+                        exact = {'ej-e1': f'{registered} s registered', 'ej-e3': f'{backward} s backward_complete',
+                                 'ej-e4': '16 s reset' if reset else '(no reset)',
+                                 'ej-rule': 'rule: last \'training\'' if rule != 'Session + order' else 'rule: session + order',
+                                 'ej-hb': 'heartbeat: 200, ok' if admitted else 'heartbeat: 200, failure'}
+                        exact['ej-e5'] = 'late: progress @ 12 s' if time >= 2400 else 'late: …'
+                        exact['ej-wait'] = f'admission wait: {registered} s' if time >= 800 else 'admission wait: …'
+                        exact['ej-to-bwd'] = f'registered → bwd: {backward - registered} s' if time >= 1600 else 'registered → bwd: …'
+                        exact['ej-fwd-bwd'] = f'forward → bwd: {backward - 7} s' if time >= 1600 else 'forward → bwd: …'
+                        exact['ej-now'] = shown if time >= 3200 else 'state: …'
+                        exact['ej-verdict'] = verdict if time >= 4000 else '…'
+                        case('concept-event-journal', dict(registered=registered, backward=backward, rule=rule,
+                                                           heartbeat=heartbeat, reset=reset), time, {}, exact)
+CHECKS.append('an ingest-ordered journal with sessions, state derived by monotonic order with closed sessions ignored versus the last line mentioning training, and admission read from the heartbeat body rather than its HTTP status')
+
+
+# ----------------------------------------------------------- 36 finite, repeatable and correct
+REF36 = [1.0, 2.0, 3.0, 4.0]
+
+
+def candidate36(variant, delta):
+    if variant == 'Permuted [1, 3, 2, 4]':
+        return [REF36[i] for i in (0, 2, 1, 3)]
+    if variant == 'Spike: last + δ':
+        return REF36[:3] + [REF36[3] + delta]
+    if variant == 'Bias: every + δ':
+        return [r + delta for r in REF36]
+    if variant == 'Returns [] (empty)':
+        return []
+    return list(REF36)
+
+
+def zip_check(candidate, reference, tol):
+    return all(abs(c - r) <= tol for c, r in zip(candidate, reference))  # vacuously true for no pairs
+
+
+for variant in ['Permuted [1, 3, 2, 4]', 'Spike: last + δ', 'Bias: every + δ', 'Returns [] (empty)', 'Exact copy']:
+    for delta in [0, 0.25, 0.5, 2]:
+        cand = candidate36(variant, delta)
+        assert candidate36(variant, delta) == cand and all(math.isfinite(v) for v in cand)  # repeatable and finite
+        empty = not cand
+        for tol in [0, 0.1, 0.25, 0.5, 1]:
+            for compare in ['Shape, then values', 'zip() pairs only (bug)']:
+                if empty:
+                    assert len(cand) != len(REF36)
+                    if compare == 'zip() pairs only (bug)':
+                        assert zip_check(cand, REF36, tol)
+                        verdict = 'vacuous pass: 0 pairs'
+                    else:
+                        verdict = 'fail: shape (0,)'
+                else:
+                    diffs = [c - r for c, r in zip(cand, REF36)]
+                    max_err = max(abs(d) for d in diffs)
+                    rel = math.hypot(*diffs) / math.hypot(*REF36)
+                    mean_err = statistics.fmean(abs(d) for d in diffs)
+                    agree = abs(math.fsum(cand) - 10) < 1e-9 and abs(math.hypot(*cand) - math.sqrt(30)) < 1e-9
+                    if max_err <= tol:
+                        verdict = 'pass: exact match' if max_err == 0 else 'pass: within tolerance'
+                    else:
+                        verdict = 'fail: coordinates differ'
+                for time in TIMES48:
+                    exact = {'cc-shape': 'candidate shape (0,)' if empty else 'both shape (4,)',
+                             'cc-finite': 'finite: nothing to test' if empty else 'finite: every value',
+                             'cc-cmp': 'zip() pairs only (bug)' if compare != 'Shape, then values' else 'shape first, then values',
+                             'cc-tol': f'tolerance (contract) {js(tol)}'}
+                    if not empty:
+                        for i in range(4):
+                            exact[f'cc-c-{i}-v'] = js(r3(cand[i]))
+                    if time >= 1600:
+                        exact['cc-sum'] = 'sum: 0 vs 10' if empty else f'sum: {js(r3(math.fsum(cand)))} vs 10'
+                        exact['cc-norm'] = 'norm: 0 vs 5.477' if empty else f'norm: {js(r3(math.hypot(*cand)))} vs 5.477'
+                    else:
+                        exact.update({'cc-sum': 'sum: …', 'cc-norm': 'norm: …'})
+                    exact['cc-weak-verdict'] = ('aggregates all agree' if (not empty and agree) else 'aggregates disagree') if time >= 2400 else '…'
+                    if time >= 3200:
+                        if empty:
+                            exact['cc-max'] = 'max |err| over 0 pairs' if compare != 'Shape, then values' else 'shape mismatch'
+                            exact['cc-rel'] = 'rel L2: undefined'
+                        else:
+                            exact['cc-max'] = f'max |err| = {js(r3(max_err))}'
+                            exact['cc-rel'] = f'rel L2 = {js(r3(rel))}'
+                    else:
+                        exact.update({'cc-max': 'max |err| …', 'cc-rel': 'rel L2 …'})
+                    exact['cc-verdict'] = verdict if time >= 4000 else '…'
+                    exact['cc-mean'] = (('mean |err|: none' if empty else f'mean |err| = {js(r3(mean_err))}') if time >= 4000 else 'mean …')
+                    geometry = {}
+                    if not empty:
+                        for i in range(4):
+                            geometry[f'cc-c-{i}-hl'] = {'opacity': 0.35 if (time >= 800 and cand[i] != REF36[i]) else 0}
+                    case('concept-claim-checks', dict(variant=variant, delta=delta, tol=tol, compare=compare), time, {}, exact, geometry)
+CHECKS.append('candidate vectors built by index permutation and offsets, finiteness and repeat calls checked, fsum/hypot aggregates, maximum and mean absolute error, relative L2 by hypot, and a zip-only comparison shown to pass vacuously on an empty result')
 
 
 print(json.dumps({'cases': CASES, 'independentChecks': CHECKS}, allow_nan=False, separators=(',', ':')))
