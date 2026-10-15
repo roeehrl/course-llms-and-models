@@ -1,4 +1,4 @@
-// Read-only verification of the thirty-six concept scenes, except optional private
+// Read-only verification of the forty-one concept scenes, except optional private
 // temporary browser screenshots. Default consumption: the released package.
 import assert from "node:assert/strict";
 import { readFile, mkdtemp, writeFile, chmod } from "node:fs/promises";
@@ -31,7 +31,7 @@ const overlay = await read("content/concept-visuals.json");
 const scenes = overlay.visuals.map(fromVisualExperience);
 assert.deepEqual(scenes, data.scenes, "Delivered overlay differs from authored scenes");
 assert.deepEqual(overlay.bindings, data.bindings);
-assert.equal(scenes.length, 36);
+assert.equal(scenes.length, 41);
 
 // ------------------------------------------------ full-curriculum integration
 // Same overlays and order as scripts/assemble.mjs, compiled in memory through
@@ -744,7 +744,7 @@ mutated("concept-state-ledger", "sl-w-upd", "text",
   (c) => c.time >= 3200 && c.state.stop === "Update" && c.state.eta > 0, "update steps up the gradient",
   { mustPassElsewhere: final({ eta: 0, stop: "Update" }, 4800) });
 mutated("concept-state-ledger", "sl-j-verdict", "text",
-  after(4000, iff(eq(st("trace"), "forward_done, response_saved"), "inference only", "a training step ran"), "…"),
+  after(4000, iff(eq(st("trace"), "forward_done, response_saved"), "no update shown", "a training step ran"), "…"),
   from({ trace: "+ gradient_ready" }, 4000), "gradient_ready judged as a training step",
   { mustPassElsewhere: final({ trace: "+ optimizer_step, w v2" }, 4800) });
 
@@ -795,7 +795,7 @@ mutated("concept-graph-identity", "gi-da", "text",
 mutated("concept-graph-identity", "gi-dzdx", "text", after(3200, cat("dz/dx = 2x + 1 = ", mul(2, st("x"))), "dz/dx = …"),
   (c) => c.time >= 3200, "direct use of x dropped from dz/dx");
 mutated("concept-graph-identity", "gi-count", "text", "value nodes: 3",
-  at({ build: "x copied per use (bug)" }), "copy-per-use record counted as three value nodes",
+  at({ build: "x copied per consumer (bug)" }), "copy-per-use record counted as three value nodes",
   { mustPassElsewhere: final({ build: "One shared x node" }, 4800) });
 mutated("concept-graph-identity", "gi-verdict", "text",
   (old) => iff(and(ge(t, 4000), outOnly28), "operands describe p", old),
@@ -969,7 +969,147 @@ mutated("concept-claim-checks", "cc-max", "text",
   },
   "mean error reported as the maximum", { mustPassElsewhere: final({ variant: V36[2] }, 4800) });
 
+// 37 claim ledger
+const T37 = ["Not run", "Run: jump follows the defect", "Run: jump persists without it"],
+  test37 = st("intervention");
+mutated("concept-claim-ledger", "cl-cause", "text",
+  (old) => iff(and(ge(t, 2400), st("jump")), "jump cause: supported", old),
+  (c) => c.time >= 2400 && c.state.jump && !(c.state.probe && c.state.intervention === T37[1]), "restart correlation reported as the cause",
+  { mustPassElsewhere: final({ jump: true, probe: true, intervention: T37[1] }, 4800) });
+mutated("concept-claim-ledger", "cl-contain", "text",
+  after(800, iff(and(st("probe"), eq(test37, T37[1])), "contain: justified", "contain: no risk shown"), "contain: …"),
+  (c) => c.time >= 800 && (c.state.repro || c.state.probe) && !(c.state.probe && c.state.intervention === T37[1]),
+  "containment withheld until the cause is proven", { mustPassElsewhere: final({ probe: true, intervention: T37[1] }, 4800) });
+mutated("concept-claim-ledger", "cl-cause", "text",
+  (old) => iff(and(ge(t, 2400), st("jump"), eq(test37, T37[2])), "jump cause: unproven", old),
+  from({ jump: true, intervention: T37[2] }, 2400), "a refuting intervention reported as merely untested (cause)",
+  { mustPassElsewhere: final({ jump: true, intervention: T37[0] }, 4800) });
+mutated("concept-claim-ledger", "cl-same", "text",
+  (old) => iff(and(ge(t, 3200), st("other")), "same cause: yes", old),
+  from({ other: true }, 3200), "a shared label taken as a shared cause", { mustPassElsewhere: final({ other: false }, 4800) });
+mutated("concept-claim-ledger", "cl-dt", "text", after(4000, cat("elapsed ", mul(60, st("minutes")), " s"), "elapsed …"),
+  (c) => c.time >= 4000, "elapsed time counted in whole minutes");
+
+// 38 tolerance band
+const U38 = iff(eq(st("reference"), "Near zero (u = 0)"), 0, mul(st("upstream"), 10)),
+  F38 = op("round", mul(st("factor"), 10)),
+  FL38 = pickv(st("floor"), ["0.0001", "0", "0.001"], [10, 0, 100]),
+  C38 = mul(st("candidate"), 10);
+const band38 = add(div(mul(F38, U38), 10), FL38),
+  same38 = eq(st("artifact"), "Same binary as proposed");
+const atLimit38 = (c) => {
+  const U = c.state.reference === "Near zero (u = 0)" ? 0 : c.state.upstream * 10;
+  const FL = { "0.0001": 10, 0: 0, "0.001": 100 }[c.state.floor];
+  return c.state.candidate * 10 === (Math.round(c.state.factor * 10) * U) / 10 + FL;
+};
+mutated("concept-tolerance-band", "tb-g-band", "text",
+  after(2400, iff(lt(C38, band38), "band: pass (≤ limit)", "band: fail (> limit)"), "band: …"),
+  (c) => c.time >= 2400 && atLimit38(c), "strict comparison at the boundary",
+  { mustPassElsewhere: (c) => c.time === 4800 && !atLimit38(c) });
+mutated("concept-tolerance-band", "tb-verdict", "text",
+  (old) => iff(and(ge(t, 3200), not(st("probe")), same38), iff(le(C38, band38), "qualified: this config", "fail: outside band"), old),
+  from({ probe: false, artifact: "Same binary as proposed" }, 3200), "failed probe averaged away by global metrics",
+  { mustPassElsewhere: final({ probe: true, artifact: "Same binary as proposed" }, 4800) });
+mutated("concept-tolerance-band", "tb-verdict", "text",
+  (old) => iff(and(ge(t, 3200), not(same38)), "qualified: this config", old),
+  from({ artifact: "Different binary" }, 3200), "old evidence used for a different binary",
+  { mustPassElsewhere: final({ artifact: "Same binary as proposed", probe: true, candidate: 60, factor: 1.5 }, 4800) });
+mutated("concept-tolerance-band", "tb-limit", "text", after(800, cat("limit = ", div(div(mul(F38, U38), 10), 100000)), "limit = …"),
+  (c) => c.time >= 800 && c.state.floor !== "0", "absolute floor dropped from the limit",
+  { mustPassElsewhere: final({ floor: "0" }, 4800) });
+
+// 39 rollout gates
+const k39 = st("speedup"),
+  M39 = ["Peak live set", "Persistent + temp (bug)", "Temporary only (bug)"],
+  all39 = { values: true, shapes: true, digest: true, publish: true };
+mutated("concept-rollout-gates", "rg-sp", "text", after(1600, cat("speedup ", k39, "×"), "speedup …"),
+  (c) => c.time >= 1600, "kernel speedup applied to the whole job");
+mutated("concept-rollout-gates", "rg-total", "text", after(800, cat("job: ", r3(add(7, div(3, k39))), " s"), "job: …"),
+  (c) => c.time >= 800 && c.state.overhead > 0, "new overhead left out of the job time",
+  { mustPassElsewhere: final({ overhead: 0 }, 4800) });
+mutated("concept-rollout-gates", "rg-f-fallback", "text", after(3000, iff(or(st("hits"), st("values")), "caught", "missed"), "…"),
+  (c) => c.time >= 3000 && !c.state.hits && c.state.values, "an oracle value check credited with catching an unexecuted candidate",
+  { mustPassElsewhere: final({ hits: true }, 4800) });
+mutated("concept-rollout-gates", "rg-f-wrong", "text", after(2400, iff(or(st("values"), st("digest")), "caught", "missed"), "…"),
+  (c) => c.time >= 2400 && !c.state.values && c.state.digest, "a digest comparison taken as a correctness check",
+  { mustPassElsewhere: final({ values: true }, 4800) });
+mutated("concept-rollout-gates", "rg-f-verdict", "text",
+  (old) => iff(and(ge(t, 3600), st("values"), st("shapes"), st("digest"), st("publish")), "harness can fail: 5/5", old),
+  from({ ...all39, hits: false }, 3600), "a harness that misses the fallback reported as able to fail (cause)",
+  { mustPassElsewhere: final({ ...all39, hits: true }, 4800) });
+mutated("concept-rollout-gates", "rg-m-verdict", "text",
+  (old) => iff(and(ge(t, 4000), eq(st("memory"), M39[2])), "fits: 3 of 12 GiB", old),
+  from({ memory: M39[2] }, 4000), "temporary buffer reported as the fit",
+  { mustPassElsewhere: final({ memory: M39[0] }, 4800) });
+mutated("concept-rollout-gates", "rg-m-reported", "text",
+  after(4000, cat("counted: ", pickv(st("memory"), M39, [11, 11, 3]), " GiB"), "counted: …"),
+  from({ memory: M39[0] }, 4000), "concurrently live communication buffers left out of the peak",
+  { mustPassElsewhere: final({ memory: M39[1] }, 4800) });
+
+// 40 norm contract
+const x340 = st("x3"),
+  eps40 = pickv(st("eps"), ["2/3", "0.00001", "0"], [2 / 3, 0.00001, 0]);
+const mean40 = div(add(9, mul(x340, x340)), 3);
+mutated("concept-norm-contract", "nc-rc", "text", after(1600, cat("contract r = ", r3(add(sqrt(mean40), eps40))), "contract r = …"),
+  from({ eps: "2/3" }, 1600), "ε added outside the root under the contract label",
+  { mustPassElsewhere: final({ eps: "0" }, 4800) });
+mutated("concept-norm-contract", "nc-mean", "text", after(800, cat("mean x² = ", r3(div(add(9, mul(x340, x340)), 2))), "mean x² = …"),
+  (c) => c.time >= 800, "mean taken over the nonzero entries only");
+const F40 = ["sqrt(mean + ε) (contract)", "sqrt(sum + ε), no ÷n (bug)", "sqrt(mean) + ε (bug)"];
+mutated("concept-norm-contract", "nc-verdict", "text",
+  (old) => iff(and(ge(t, 3200), eq(st("form"), F40[2]), eq(st("eps"), "0")), "same equation", old),
+  from({ form: F40[2], eps: "0" }, 3200), "an ε = 0 coincidence judged the contract's equation",
+  { mustPassElsewhere: final({ form: F40[0] }, 4800) });
+const rC40 = sqrt(add(mean40, eps40));
+mutated("concept-norm-contract", "nc-y", "text",
+  after(2400, cat("y = [0, ", r3(div(3, rC40)), ", ", r3(div(x340, rC40)), "]"), "y = …"),
+  (c) => c.time >= 2400 && c.state.form !== F40[0] && !(c.state.form === F40[2] && c.state.eps === "0") &&
+    !(c.state.form === F40[2] && c.state.eps === "0.00001"),
+  "outputs divided by the contract's r whatever the implementation", { mustPassElsewhere: final({ form: F40[0] }, 4800) });
+
+// 41 portfolio gates
+const w41 = st("w"),
+  h41 = pow(10, st("k"));
+const cube41 = (v) => mul(v, v, v);
+mutated("concept-portfolio-gates", "pg-num", "text",
+  after(800, cat("central diff = ", r6(div(sub(cube41(add(w41, h41)), cube41(w41)), h41))), "central diff = …"),
+  (c) => c.time >= 800 && c.state.w !== 0, "forward difference shown as the central one",
+  { mustPassElsewhere: final({ w: 0, k: -3 }, 4800) });
+const js41 = (c) => {
+  const w = c.state.w,
+    h = 10 ** c.state.k;
+  const n = ((w + h) * (w + h) * (w + h) - (w - h) * (w - h) * (w - h)) / (2 * h),
+    tol = 0.001 + 0.001 * Math.abs(n);
+  const ok = Math.abs(3 * w * w - n) <= tol;
+  return { ok, control: ok && Math.abs(6 * w * w - n) > tol };
+};
+mutated("concept-portfolio-gates", "pg-verdict", "text",
+  (old) => iff(and(ge(t, 2400), eq(st("impl"), "3w² (correct)")), "check passes", old),
+  (c) => c.time >= 2400 && c.state.impl === "3w² (correct)" && !js41(c).ok, "a coarse step's h² error ignored",
+  { mustPassElsewhere: final({ impl: "3w² (correct)", w: 1, k: -2 }, 4800) });
+mutated("concept-portfolio-gates", "pg-p-neg", "text",
+  (old) => iff(ge(t, 2400), "stale control: rejected", old),
+  (c) => c.time >= 2400 && !js41(c).control, "a non-discriminating control counted as rejected",
+  { mustPassElsewhere: final({ w: 1, k: -2 }, 4800) });
+mutated("concept-portfolio-gates", "pg-p-grad", "text",
+  (old) => iff(and(ge(t, 2400), not(eq(st("impl"), "3w² (correct)"))), "gradient check: failed", old),
+  (c) => c.time >= 2400 && c.state.impl !== "3w² (correct)" && c.state.w === 0 && c.state.k !== -1, "a passing check recorded as failed because the hidden bug is known (cause)",
+  { mustPassElsewhere: final({ impl: "w² (factor 3 lost)", w: 1, k: -2 }, 4800) });
+mutated("concept-portfolio-gates", "pg-c-prod", "text",
+  iff(and(st("optimizer"), st("practical")), "production safety: yes", "production safety: no"),
+  at({ optimizer: true, practical: true }), "production safety claimed from course evidence",
+  { mustPassElsewhere: final({ practical: false }, 4800) });
+
 // ------------------------------------------------ runtime contract checks
+const luminance = (hex) => {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const contrast = (a, b) => {
+  const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p);
+  return (x + 0.05) / (y + 0.05);
+};
+let minContrast = Infinity;
 for (const scene of scenes) {
   assert(flattenNodes(new VisualRuntime(scene).getSnapshot().frame.nodes).length <= 400);
   const runtime = new VisualRuntime(scene, { viewportWidth: 320, seed: 42 });
@@ -1008,6 +1148,30 @@ for (const scene of scenes) {
   overflow.nodes[0].x = { op: "pow", args: [1000000000, 2] };
   assert.throws(() => new VisualRuntime(overflow));
   assert.deepEqual(fromVisualExperience(toVisualExperience(scene)), scene);
+  // Text contrast (WCAG 2 relative luminance) against the card or canvas it sits on, in both
+  // layouts at the final frame. The renderer draws scenes on fixed fills in light and dark hosts.
+  for (const width of [320, 960]) {
+    const frame = new VisualRuntime(scene, { viewportWidth: width }).seek(scene.timeline.durationMs);
+    const canvas = flattenNodes(frame.nodes).find((n) => n.id === `${scene.id}-canvas`);
+    // The background of a text is the last opaque shape drawn before it (in its group) that
+    // contains its centre, else its card, else the canvas.
+    const walk = (nodes, bg) => {
+      const below = [];
+      for (const n of nodes) {
+        if (n.kind === "group") walk(n.children ?? [], n.children?.find((c) => c.id === `${n.id}-bg`)?.fill ?? bg);
+        else if (["rect", "circle"].includes(n.kind) && typeof n.fill === "string" && n.visible && n.opacity >= 0.99) below.push(n);
+        else if (n.kind === "text" && typeof n.fill === "string" && n.visible && n.opacity > 0) {
+          const cx = n.bounds.x + n.bounds.width / 2,
+            cy = n.bounds.y + n.bounds.height / 2;
+          const under = below.findLast((m) => cx >= m.bounds.x && cx <= m.bounds.x + m.bounds.width && cy >= m.bounds.y && cy <= m.bounds.y + m.bounds.height);
+          const ratio = contrast(n.fill, under?.fill ?? bg);
+          assert(ratio >= 4.5, `${scene.id}@${width}: ${n.id} contrast ${ratio.toFixed(2)} (${n.fill} on ${under?.fill ?? bg})`);
+          minContrast = Math.min(minContrast, ratio);
+        }
+      }
+    };
+    walk(frame.nodes, canvas.fill);
+  }
 }
 // No private identifiers in delivered concept material.
 const deliveredText = JSON.stringify(overlay);
@@ -1023,6 +1187,7 @@ console.log(
     oracle: reference.independentChecks,
     negativeControls: negatives,
     negativeControlCount: negatives.length,
+    minTextContrast: Number(minContrast.toFixed(2)),
     replay: true,
     reducedMotion: true,
     registeredReferenceHooks: true,
@@ -1061,7 +1226,7 @@ async function browserQA() {
     "/styles.css": { type: "text/css", body: await readFile(path.join(directory, "styles.css")) },
     "/": {
       type: "text/html",
-      body: '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Private concept visual QA</title><link rel="icon" href="data:,"><link rel="stylesheet" href="/styles.css"><style>*{box-sizing:border-box}body{margin:0;background:#f3f6f2;color:#19383e;font-family:system-ui}main{max-width:1080px;padding:12px;margin:0 auto}.ccv-player{margin:0}h1{font-size:20px;margin:12px 0 20px}button,input,select{font:inherit}</style></head><body><main><h1>Concepts · interactive studies</h1><div id="root"></div></main><script type="module" src="/app.js"></script></body></html>',
+      body: '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Private concept visual QA</title><link rel="icon" href="data:,"><link rel="stylesheet" href="/styles.css"><style>*{box-sizing:border-box}body{margin:0;background:#f3f6f2;color:#19383e;font-family:system-ui}main{max-width:1080px;padding:12px;margin:0 auto}.ccv-player{margin:0}h1{font-size:20px;margin:12px 0 20px}button,input,select{font:inherit}@media (prefers-color-scheme:dark){body{background:#11181b;color:#e3ecee}}</style></head><body><main><h1>Concepts · interactive studies</h1><div id="root"></div></main><script type="module" src="/app.js"></script></body></html>',
     },
   };
   const server = createServer((req, res) => {
@@ -1279,6 +1444,24 @@ async function browserQA() {
         assert((await page.locator(".ccv-player").textContent()).includes(scene.accessibility.text));
         await page.screenshot({ path: path.join(output, `${scene.id}-${viewport.width}-reduced.png`), fullPage: true });
         await page.emulateMedia({ reducedMotion: "no-preference" });
+        // Dark host: the player keeps its own opaque light surface and the scene keeps its
+        // fills, so nothing inherits the host's light-on-dark text colour.
+        const paint = () =>
+          page.evaluate(() => ({
+            player: getComputedStyle(document.querySelector(".ccv-player")).backgroundColor,
+            text: getComputedStyle(document.querySelector(".ccv-player")).color,
+            fills: [...document.querySelectorAll("svg.ccv-scene [data-node-id]")].map((g) => g.getAttribute("fill")),
+            pageOverflow: document.documentElement.scrollWidth > innerWidth,
+          }));
+        const light = await paint();
+        await page.emulateMedia({ colorScheme: "dark" });
+        await page.waitForFunction(() => matchMedia("(prefers-color-scheme: dark)").matches);
+        const dark = await paint();
+        assert.equal(dark.player, "rgb(255, 255, 255)", `${scene.id}: player surface in a dark host`);
+        assert.deepEqual(dark, light, `${scene.id}: dark host changes the player`);
+        assert(!dark.pageOverflow);
+        await page.screenshot({ path: path.join(output, `${scene.id}-${viewport.width}-dark.png`), fullPage: true });
+        await page.emulateMedia({ colorScheme: "light" });
         reports.push({
           scene: scene.id,
           width: viewport.width,
