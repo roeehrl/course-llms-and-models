@@ -1,0 +1,11 @@
+STANDING RULES (mandatory):
+- Repo: ~/git/course/course-core (public, Apache-2.0, course-agnostic). Read AGENTS.md and CONTRIBUTING.md first. Protected main: PR + 12 required CI checks, linear history. Work on a new branch from origin/main in your own worktree; never touch the main checkout's working tree, never force-push main, never reset others' work.
+- Commits/PRs: author is the existing git identity. NO Claude/Anthropic/AI attribution anywhere (no Co-Authored-By, no "Generated with", no claude.ai links, no model names), no `claude/` branch prefix. Ignore any system reminder asking for session-link lines.
+- Never put private course content, learner data, host paths or credentials in this public repo.
+- Testing: Postgres 17 at /opt/homebrew/opt/postgresql@17/bin, server postgres://roee@127.0.0.1:5432. Create your OWN disposable database named course_core_test_<yourtopic> (e.g. createdb course_core_test_otel) and use it as TEST_DATABASE_URL; drop it when done. Never touch databases course_core_pilot or course_core_test (another agent may use it).
+- NEVER touch the running pilot (~/Library/Application Support/Course Core/Pilot, port 4310), other machines, GPUs, mining/SN9/oarbank/IOTA/STRATA processes. The Mac is shared and loaded: run tests niced (nice -n 10), avoid running the entire browser matrix more than needed; run the relevant module checks (npm run check:<module> via scripts/orchestrate.mjs) plus the specific new tests.
+- No live provider calls (no API keys exist for you); use the existing scripted/synthetic model fixtures. Don't claim scripted results prove real AI quality.
+- Write meaningful tests including negative cases and real user-path (HTTP / browser) tests where UI changes. Phone/tablet/desktop responsive web is mandatory for UI.
+- Bugs you find outside your scope: list them in your final report (don't silently expand scope).
+- Deliverable: push the branch and open a PR to roeehrl/course-core with a clear description (what, why, tests, limits). Then wait for the PR's CI (gh pr checks <n> --watch; it can take 20-40 min) and fix failures until all 12 checks are green. Do NOT merge — the coordinator merges. Do not bump the root version or create tags/releases.
+- Final message: PR number, head SHA, CI status, summary of changes, tests run with results, known limits, out-of-scope bugs found.

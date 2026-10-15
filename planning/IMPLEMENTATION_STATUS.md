@@ -1,3 +1,19 @@
+# v0.8 audit and parallel implementation wave; SDK 0.5.0 released — 2026-10-15
+
+- AUDIT: ~220 requirements checked against code (planning/audit/): ~25 done, ~150
+  partial, ~45 missing; prioritized gap list with parallel groups.
+- RELEASED: SDK 0.5.0 (gates/decisions, assessment rules, activities, admin sections,
+  research fields, hypotheses/probes, agent strategies, CLI pack/verify; 0.4.0 bundles
+  verify and recompile identically).
+- MERGED to Core main (not released): #47 hermetic CI, #48 OpenTelemetry, #50 speed,
+  #51 audit P0 fixes, #52 media jobs, #53 placement replies.
+- OPEN/WIP: #55 pricing, #49 view-as-learner, #54 teaching hypotheses; branches
+  gates-and-assessment, anthropic-provider, learner-model-privacy, placement-followups;
+  private visuals/final-batch (12 verified illustrations + WIP). See
+  planning/HANDOFF_2026-10-15.md.
+- PILOT: operator password set; Google text-role setup in progress by the user; no
+  live provider call verified yet.
+
 # Course 0.1.6 released privately; pilot prepared, install waits for the operator password — 2026-10-15
 
 - PUBLISHED (private) course-v0.1.6: package from 628f8f8 (content unchanged since
