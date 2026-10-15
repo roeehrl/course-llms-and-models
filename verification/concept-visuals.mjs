@@ -1,4 +1,4 @@
-// Read-only verification of the thirty-six concept scenes, except optional private
+// Read-only verification of the forty-one concept scenes, except optional private
 // temporary browser screenshots. Default consumption: the released package.
 import assert from "node:assert/strict";
 import { readFile, mkdtemp, writeFile, chmod } from "node:fs/promises";
@@ -31,7 +31,7 @@ const overlay = await read("content/concept-visuals.json");
 const scenes = overlay.visuals.map(fromVisualExperience);
 assert.deepEqual(scenes, data.scenes, "Delivered overlay differs from authored scenes");
 assert.deepEqual(overlay.bindings, data.bindings);
-assert.equal(scenes.length, 36);
+assert.equal(scenes.length, 41);
 
 // ------------------------------------------------ full-curriculum integration
 // Same overlays and order as scripts/assemble.mjs, compiled in memory through
@@ -968,6 +968,122 @@ mutated("concept-claim-checks", "cc-max", "text",
     return Math.max(...e) !== e.reduce((a, b) => a + b) / 4;
   },
   "mean error reported as the maximum", { mustPassElsewhere: final({ variant: V36[2] }, 4800) });
+
+// 37 claim ledger
+const probe37 = st("probe"),
+  int37 = st("intervention");
+mutated("concept-claim-ledger", "cl-cause", "text",
+  (old) => iff(and(ge(t, 2400), st("jump")), "explains jump: tested", old),
+  (c) => c.time >= 2400 && c.state.jump && !(c.state.probe && c.state.intervention), "restart correlation reported as the cause",
+  { mustPassElsewhere: final({ jump: true, probe: true, intervention: true }, 4800) });
+mutated("concept-claim-ledger", "cl-contain", "text",
+  after(800, iff(and(probe37, int37), "contain: justified", "contain: no risk shown"), "contain: …"),
+  (c) => c.time >= 800 && (c.state.repro || c.state.probe) && !(c.state.probe && c.state.intervention),
+  "containment withheld until the cause is proven", { mustPassElsewhere: final({ probe: true, intervention: true }, 4800) });
+mutated("concept-claim-ledger", "cl-same", "text",
+  (old) => iff(and(ge(t, 3200), st("other")), "same cause: yes", old),
+  from({ other: true }, 3200), "a shared label taken as a shared cause", { mustPassElsewhere: final({ other: false }, 4800) });
+mutated("concept-claim-ledger", "cl-dt", "text", after(4000, cat("elapsed ", mul(60, st("minutes")), " s"), "elapsed …"),
+  (c) => c.time >= 4000, "elapsed time counted in whole minutes");
+
+// 38 tolerance band
+const U38 = iff(eq(st("reference"), "Near zero (u = 0)"), 0, mul(st("upstream"), 10)),
+  F38 = op("round", mul(st("factor"), 10)),
+  FL38 = pickv(st("floor"), ["0.0001", "0", "0.001"], [10, 0, 100]),
+  C38 = mul(st("candidate"), 10);
+const band38 = add(div(mul(F38, U38), 10), FL38),
+  same38 = eq(st("artifact"), "Same binary as proposed");
+const atLimit38 = (c) => {
+  const U = c.state.reference === "Near zero (u = 0)" ? 0 : c.state.upstream * 10;
+  const FL = { "0.0001": 10, 0: 0, "0.001": 100 }[c.state.floor];
+  return c.state.candidate * 10 === (Math.round(c.state.factor * 10) * U) / 10 + FL;
+};
+mutated("concept-tolerance-band", "tb-g-band", "text",
+  after(2400, iff(lt(C38, band38), "band: pass (≤ limit)", "band: fail (> limit)"), "band: …"),
+  (c) => c.time >= 2400 && atLimit38(c), "strict comparison at the boundary",
+  { mustPassElsewhere: (c) => c.time === 4800 && !atLimit38(c) });
+mutated("concept-tolerance-band", "tb-verdict", "text",
+  (old) => iff(and(ge(t, 3200), not(st("probe")), same38), iff(le(C38, band38), "qualified: this config", "fail: outside band"), old),
+  from({ probe: false, artifact: "Same binary as proposed" }, 3200), "failed probe averaged away by global metrics",
+  { mustPassElsewhere: final({ probe: true, artifact: "Same binary as proposed" }, 4800) });
+mutated("concept-tolerance-band", "tb-verdict", "text",
+  (old) => iff(and(ge(t, 3200), not(same38)), "qualified: this config", old),
+  from({ artifact: "Different binary" }, 3200), "old evidence used for a different binary",
+  { mustPassElsewhere: final({ artifact: "Same binary as proposed", probe: true, candidate: 60, factor: 1.5 }, 4800) });
+mutated("concept-tolerance-band", "tb-limit", "text", after(800, cat("limit = ", div(div(mul(F38, U38), 10), 100000)), "limit = …"),
+  (c) => c.time >= 800 && c.state.floor !== "0", "absolute floor dropped from the limit",
+  { mustPassElsewhere: final({ floor: "0" }, 4800) });
+
+// 39 rollout gates
+const k39 = st("speedup"),
+  bug39 = eq(st("harness"), "Run reference, label it candidate (bug)");
+mutated("concept-rollout-gates", "rg-sp", "text", after(1600, cat("speedup ", k39, "×"), "speedup …"),
+  (c) => c.time >= 1600, "kernel speedup applied to the whole job");
+mutated("concept-rollout-gates", "rg-f-exc", "text",
+  (old) => iff(and(ge(t, 3200), bug39), "exception: caught", old),
+  from({ harness: "Run reference, label it candidate (bug)", hits: false }, 3200), "relabelled reference counted as the candidate",
+  { mustPassElsewhere: final({ harness: "Run reference, label it candidate (bug)", hits: true }, 4800) });
+mutated("concept-rollout-gates", "rg-f-verdict", "text",
+  (old) => iff(and(ge(t, 3600), bug39, not(st("hits"))), "a fault slips through", old),
+  from({ harness: "Run reference, label it candidate (bug)", hits: false }, 3600), "hidden fallback blamed on a generic slip",
+  { mustPassElsewhere: final({ harness: "Fail the gate", hits: false }, 4800) });
+mutated("concept-rollout-gates", "rg-total", "text", after(800, cat("job: ", r3(add(7, div(3, k39))), " s"), "job: …"),
+  (c) => c.time >= 800 && c.state.overhead > 0, "new overhead left out of the job time",
+  { mustPassElsewhere: final({ overhead: 0 }, 4800) });
+mutated("concept-rollout-gates", "rg-m-verdict", "text",
+  (old) => iff(and(ge(t, 4000), eq(st("memory"), "Temporary only (bug)")), "fits: 3 of 12 GiB", old),
+  from({ memory: "Temporary only (bug)" }, 4000), "temporary buffer reported as the fit",
+  { mustPassElsewhere: final({ memory: "Peak live set" }, 4800) });
+
+// 40 norm contract
+const x340 = st("x3"),
+  eps40 = pickv(st("eps"), ["2/3", "0.00001", "0"], [2 / 3, 0.00001, 0]);
+const mean40 = div(add(9, mul(x340, x340)), 3);
+mutated("concept-norm-contract", "nc-rc", "text", after(1600, cat("contract r = ", r3(add(sqrt(mean40), eps40))), "contract r = …"),
+  from({ eps: "2/3" }, 1600), "ε added outside the root under the contract label",
+  { mustPassElsewhere: final({ eps: "0" }, 4800) });
+mutated("concept-norm-contract", "nc-mean", "text", after(800, cat("mean x² = ", r3(div(add(9, mul(x340, x340)), 2))), "mean x² = …"),
+  (c) => c.time >= 800, "mean taken over the nonzero entries only");
+const F40 = ["sqrt(mean + ε) (contract)", "sqrt(sum + ε), no ÷n (bug)", "sqrt(mean) + ε (bug)"];
+mutated("concept-norm-contract", "nc-verdict", "text",
+  (old) => iff(and(ge(t, 3200), eq(st("form"), F40[2]), eq(st("eps"), "0")), "same equation", old),
+  from({ form: F40[2], eps: "0" }, 3200), "an ε = 0 coincidence judged the contract's equation",
+  { mustPassElsewhere: final({ form: F40[0] }, 4800) });
+const rC40 = sqrt(add(mean40, eps40));
+mutated("concept-norm-contract", "nc-y", "text",
+  after(2400, cat("y = [0, ", r3(div(3, rC40)), ", ", r3(div(x340, rC40)), "]"), "y = …"),
+  (c) => c.time >= 2400 && c.state.form !== F40[0] && !(c.state.form === F40[2] && c.state.eps === "0") &&
+    !(c.state.form === F40[2] && c.state.eps === "0.00001"),
+  "outputs divided by the contract's r whatever the implementation", { mustPassElsewhere: final({ form: F40[0] }, 4800) });
+
+// 41 portfolio gates
+const w41 = st("w"),
+  h41 = pow(10, st("k"));
+const cube41 = (v) => mul(v, v, v);
+mutated("concept-portfolio-gates", "pg-num", "text",
+  after(800, cat("central diff = ", r6(div(sub(cube41(add(w41, h41)), cube41(w41)), h41))), "central diff = …"),
+  (c) => c.time >= 800 && c.state.w !== 0, "forward difference shown as the central one",
+  { mustPassElsewhere: final({ w: 0, k: -3 }, 4800) });
+const js41 = (c) => {
+  const w = c.state.w,
+    h = 10 ** c.state.k;
+  const n = ((w + h) * (w + h) * (w + h) - (w - h) * (w - h) * (w - h)) / (2 * h),
+    tol = 0.001 + 0.001 * Math.abs(n);
+  const ok = Math.abs(3 * w * w - n) <= tol;
+  return { ok, control: ok && Math.abs(w * w - n) > tol };
+};
+mutated("concept-portfolio-gates", "pg-verdict", "text",
+  (old) => iff(and(ge(t, 2400), eq(st("impl"), "3w² (correct)")), "check passes", old),
+  (c) => c.time >= 2400 && c.state.impl === "3w² (correct)" && !js41(c).ok, "a coarse step's h² error ignored",
+  { mustPassElsewhere: final({ impl: "3w² (correct)", w: 1, k: -2 }, 4800) });
+mutated("concept-portfolio-gates", "pg-p-neg", "text",
+  (old) => iff(ge(t, 2400), "neg. control: rejected", old),
+  (c) => c.time >= 2400 && !js41(c).control, "a non-discriminating control counted as rejected",
+  { mustPassElsewhere: final({ w: 1, k: -2 }, 4800) });
+mutated("concept-portfolio-gates", "pg-c-prod", "text",
+  iff(and(st("optimizer"), st("practical")), "production safety: yes", "production safety: no"),
+  at({ optimizer: true, practical: true }), "production safety claimed from course evidence",
+  { mustPassElsewhere: final({ optimizer: false }, 4800) });
 
 // ------------------------------------------------ runtime contract checks
 for (const scene of scenes) {

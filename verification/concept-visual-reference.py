@@ -1,4 +1,4 @@
-"""Independent CPU oracle for the thirty-six concept scenes (three batches of eight, then twelve).
+"""Independent CPU oracle for the forty-one concept scenes (three batches of eight, then seventeen).
 
 Python standard library only. It never reads scene JSON and never evaluates the
 scene expression AST: every expected readout is recomputed here from the
@@ -2954,6 +2954,322 @@ for variant in ['Permuted [1, 3, 2, 4]', 'Spike: last + δ', 'Bias: every + δ',
                             geometry[f'cc-c-{i}-hl'] = {'opacity': 0.35 if (time >= 800 and cand[i] != REF36[i]) else 0}
                     case('concept-claim-checks', dict(variant=variant, delta=delta, tol=tol, compare=compare), time, {}, exact, geometry)
 CHECKS.append('candidate vectors built by index permutation and offsets, finiteness and repeat calls checked, fsum/hypot aggregates, maximum and mean absolute error, relative L2 by hypot, and a zip-only comparison shown to pass vacuously on an empty result')
+
+
+
+# ----------------------------------------------------------- 37 containment and causal-claim thresholds
+def claim_ledger(evidence):
+    """Each claim is supported only by the evidence type it needs (the lesson's two thresholds)."""
+    risk = evidence['repro'] or evidence['probe']  # a credible risk to shared computed work
+    claims = {'contain': 'contain: justified' if risk else 'contain: no risk shown',
+              'local': 'local defect: supported' if evidence['probe'] else 'local defect: no probe'}
+    if not evidence['jump']:
+        claims['cause'] = 'explains jump: no claim'
+    elif evidence['probe'] and evidence['intervention']:
+        claims['cause'] = 'explains jump: tested'
+    else:
+        claims['cause'] = 'explains jump: unproven'  # a restart correlation alone
+    claims['same'] = 'same cause: needs a test' if evidence['other'] else 'same cause: n/a'
+    if not risk:
+        verdict = 'no finding to report yet'
+    elif claims['cause'] == 'explains jump: unproven':
+        verdict = 'say: correlation only'
+    elif evidence['other']:
+        verdict = 'report as two findings'
+    else:
+        verdict = 'report what was tested'
+    return claims, verdict
+
+
+T0_37 = datetime.datetime(2030, 2, 1, 14, 20, 10)
+for repro, probe, intervention, jump, other in product([True, False], repeat=5):
+    ev = dict(repro=repro, probe=probe, intervention=intervention, jump=jump, other=other)
+    claims, verdict = claim_ledger(ev)
+    for minutes in [1, 5, 15]:
+        t1 = T0_37 + datetime.timedelta(minutes=minutes, seconds=35)
+        elapsed = int((t1 - T0_37).total_seconds())
+        for time in TIMES48:
+            exact = {'cl-e-repro': f'mismatch saved: {"yes" if repro else "no"}',
+                     'cl-e-probe': f'coordinate probe: {"fails" if probe else "passes"}',
+                     'cl-e-int': f'discriminating test: {"yes" if intervention else "no"}',
+                     'cl-e-jump': 'loss jump after restart' if jump else 'no loss jump seen',
+                     'cl-e-other': 'other config: gate fails' if other else 'no other finding',
+                     'cl-t1': f'{t1:%H:%M:%S} isolation done'}
+            exact['cl-contain'] = claims['contain'] if time >= 800 else 'contain: …'
+            exact['cl-local'] = claims['local'] if time >= 1600 else 'local defect: …'
+            exact['cl-cause'] = claims['cause'] if time >= 2400 else 'explains jump: …'
+            exact['cl-same'] = claims['same'] if time >= 3200 else 'same cause: …'
+            exact['cl-verdict'] = verdict if time >= 4000 else '…'
+            exact['cl-dt'] = f'elapsed {elapsed} s' if time >= 4000 else 'elapsed …'
+            exact['cl-dt-m'] = f'= {minutes} min 35 s' if time >= 4000 else '= …'
+            case('concept-claim-ledger', dict(repro=repro, probe=probe, intervention=intervention, jump=jump, other=other,
+                                              minutes=minutes), time, {}, exact)
+CHECKS.append('a claim ledger that grants containment on credible risk and causal claims only with a discriminating test, and a datetime timeline for the synthetic interval')
+
+
+# ----------------------------------------------------------- 38 a prespecified band and mandatory gates
+def within_band(candidate_error, upstream_error, factor, floor):
+    return candidate_error <= factor * upstream_error + floor  # the lesson's rule, inclusive
+
+
+assert not within_band(Fraction('0.0062'), Fraction('0.004'), Fraction('1.5'), Fraction('0.0001'))
+assert within_band(Fraction('0.0060'), Fraction('0.004'), Fraction('1.5'), Fraction('0.0001'))
+for up in [35, 40, 80]:  # controls in units of 0.0001
+    for cand in [40, 60, 61, 62, 120]:
+        for factor in [1.5, 2]:
+            for floor_label in ['0.0001', '0', '0.001']:
+                for reference in ['Typical (u as set)', 'Near zero (u = 0)']:
+                    U = Fraction(0) if reference == 'Near zero (u = 0)' else Fraction(up, 10000)
+                    C, F, FL = Fraction(cand, 10000), Fraction(str(factor)), Fraction(floor_label)
+                    limit = F * U + FL
+                    ok = within_band(C, U, F, FL)
+                    for probe in [True, False]:
+                        for artifact in ['Same binary as proposed', 'Different binary']:
+                            same = artifact == 'Same binary as proposed'
+                            if not same:
+                                verdict = 'wrong binary tested'
+                            elif not probe:
+                                verdict = 'fail: probe overrides'  # passing global metrics cannot average it away
+                            else:
+                                verdict = 'qualified: this config' if ok else 'fail: outside band'
+                            for time in TIMES48:
+                                exact = {'tb-u': f'upstream u = {js(U)}', 'tb-rule': f'band = {js(F)}·u + {js(FL)}',
+                                         'tb-c-val': f'candidate c = {js(C)}',
+                                         'tb-g-art': 'tested = proposed binary' if same else 'tested ≠ proposed binary',
+                                         'tb-floor': 'u = 0: floor alone' if U == 0 else 'floor guards tiny u'}
+                                exact['tb-limit'] = f'limit = {js(limit)}' if time >= 800 else 'limit = …'
+                                if time >= 1600:
+                                    exact['tb-ratio'] = 'ratio c/u: undefined' if U == 0 else f'ratio c/u = {js(r3(C / U))}'
+                                else:
+                                    exact['tb-ratio'] = 'ratio …'
+                                if time >= 2400:
+                                    exact['tb-g-band'] = 'band: pass (≤ limit)' if ok else 'band: fail (> limit)'
+                                    exact['tb-g-probe'] = 'local probe: pass' if probe else 'local probe: fail'
+                                else:
+                                    exact.update({'tb-g-band': 'band: …', 'tb-g-probe': 'local probe: …'})
+                                exact['tb-verdict'] = verdict if time >= 3200 else '…'
+                                if time >= 4000:
+                                    exact.update({'tb-r-c': f'candidate error {js(C)}', 'tb-r-u': f'upstream error {js(U)}',
+                                                  'tb-r-margin': f'limit − c = {js(limit - C)}'})
+                                else:
+                                    exact.update({'tb-r-c': 'candidate error …', 'tb-r-u': 'upstream error …', 'tb-r-margin': 'limit − c …'})
+                                geometry = {'tb-c': {'x': 16 + 0.2 * min(float(C * 100000), 1200)},
+                                            'tb-ok': {'width': 0.2 * min(float(limit * 100000), 1200)}}
+                                case('concept-tolerance-band', dict(upstream=up, candidate=cand, factor=factor, floor=floor_label,
+                                                                    reference=reference, probe=probe, artifact=artifact),
+                                     time, {}, exact, geometry)
+CHECKS.append("the lesson's within_band rule in exact Fractions, including its own pass and fail examples, gates combined by conjunction with artifact identity first")
+
+
+# ----------------------------------------------------------- 39 end-to-end speedup, fault injection and a memory peak
+def run_harness(fault, exception_policy, assert_hits, compare_digest):
+    """Returns True when the harness fails the gate (the fault is caught)."""
+    reference = [1.0, 2.0, 3.0]
+    proposed_digest, digest, hits = 'sha-proposed', 'sha-proposed', 1
+    try:
+        if fault == 'exception':
+            raise RuntimeError('candidate failed')
+        if fault == 'forced fallback':
+            output, hits = list(reference), 0
+        elif fault == 'wrong value':
+            output = [1.0, 2.0, 3.5]
+        elif fault == 'bad shape':
+            output = [1.0, 2.0]
+        else:
+            output = list(reference)
+            if fault == 'stale digest':
+                digest = 'sha-stale'
+    except RuntimeError:
+        if exception_policy == 'Fail the gate':
+            return True
+        output, hits = list(reference), 0  # the reference result, labelled as the candidate's
+    if len(output) != len(reference) or any(a != b for a, b in zip(output, reference)):
+        return True
+    if assert_hits and hits == 0:
+        return True
+    if compare_digest and digest != proposed_digest:
+        return True
+    return False
+
+
+FAULTS39 = [('rg-f-wrong', 'wrong value'), ('rg-f-shape', 'bad shape'), ('rg-f-digest', 'stale digest'),
+            ('rg-f-fallback', 'forced fallback'), ('rg-f-exc', 'exception')]
+assert not run_harness(None, 'Fail the gate', True, True)  # an intact candidate passes
+LIVE39 = {'initialize': {'persistent': 8}, 'forward': {'persistent': 8, 'temporary': 3},
+          'backward': {'persistent': 8, 'temporary': 3, 'communication': 2}, 'cleanup': {'persistent': 8}}
+PEAK39 = max(sum(p.values()) for p in LIVE39.values())
+assert PEAK39 == 13
+for speedup in [2, 4, 6, 8]:
+    for overhead in [0, 0.2, 1]:
+        total = 7 + Fraction(3, speedup) + Fraction(str(overhead))
+        if (speedup, overhead) == (4, 0):
+            assert total == Fraction(31, 4) and abs(10 / total - 1.2903) < 1e-4
+        for harness in ['Fail the gate', 'Run reference, label it candidate (bug)']:
+            for hits in [True, False]:
+                for digest in [True, False]:
+                    caught = {fid: run_harness(name, harness, hits, digest) for fid, name in FAULTS39}
+                    n_caught = sum(caught.values())
+                    if n_caught == 5:
+                        fverdict = 'harness can fail'
+                    elif harness != 'Fail the gate' and not hits:
+                        assert not caught['rg-f-exc'] and not caught['rg-f-fallback']
+                        fverdict = 'fallback relabelled'
+                    else:
+                        fverdict = 'a fault slips through'
+                    for memory in ['Peak live set', 'Temporary only (bug)']:
+                        reported = PEAK39 if memory == 'Peak live set' else LIVE39['forward']['temporary']
+                        mverdict = 'peak 13 > 12: fail' if reported > 12 else 'passes on a wrong count'
+                        for time in [0, 799, 800, 1600, 2399, 2400, 2600, 3200, 3599, 3600, 4000, 4800]:
+                            exact = {'rg-k': f'kernel {speedup}× faster, +{js(overhead)} s', 'rg-not': f'not {speedup}×: 7 s unchanged'}
+                            exact['rg-total'] = f'job: {js(r3(total))} s' if time >= 800 else 'job: …'
+                            exact['rg-sp'] = f'speedup {js(r3(10 / total))}×' if time >= 1600 else 'speedup …'
+                            for i, (fid, name) in enumerate(FAULTS39):
+                                exact[fid] = f'{name}: {"caught" if caught[fid] else "missed"}' if time >= 2400 + 200 * i else f'{name}: …'
+                            exact['rg-caught'] = f'caught {n_caught} of 5' if time >= 3600 else 'caught …'
+                            exact['rg-f-verdict'] = fverdict if time >= 3600 else '…'
+                            exact['rg-m-reported'] = f'reported: {reported} GiB' if time >= 4000 else 'reported: …'
+                            exact['rg-m-verdict'] = mverdict if time >= 4000 else '…'
+                            geometry = {'rg-c-k': {'width': 24 * 3 / speedup, 'opacity': float(time >= 800)},
+                                        'rg-c-x': {'x': 16 + 24 * (7 + 3 / speedup), 'width': 24 * overhead}}
+                            case('concept-rollout-gates', dict(speedup=speedup, overhead=overhead, harness=harness, hits=hits,
+                                                               digest=digest, memory=memory), time, {}, exact, geometry)
+CHECKS.append('end-to-end time in exact Fractions, a harness function run against five injected faults (exception policy, hit counter and digest comparison switchable), and the memory peak as the maximum live set over phases')
+
+
+# ----------------------------------------------------------- 40 a written contract becomes one equation
+EPS40 = {'2/3': Fraction(2, 3), '0.00001': Fraction(1, 100000), '0': Fraction(0)}
+FORMS40 = ['sqrt(mean + ε) (contract)', 'sqrt(sum + ε), no ÷n (bug)', 'sqrt(mean) + ε (bug)']
+
+
+def contract_r(x, eps):
+    return math.sqrt(math.fsum(v * v for v in x) / len(x) + eps)
+
+
+x_lesson, e_lesson = [Fraction(0), Fraction(3), Fraction(4)], Fraction(2, 3)
+assert sum(v * v for v in x_lesson) / 3 + e_lesson == 9 and x_lesson[-1] / 3 == Fraction(4, 3)
+for x3 in range(-4, 7):
+    x = [0.0, 3.0, float(x3)]
+    for eps_label, E in EPS40.items():
+        eps = float(E)
+        rc = contract_r(x, eps)
+        squares = math.fsum(v * v for v in x)
+        for form in FORMS40:
+            r = {FORMS40[0]: rc, FORMS40[1]: math.sqrt(squares + eps), FORMS40[2]: math.sqrt(squares / 3) + eps}[form]
+            y = [v / r for v in x]
+            twin = math.sqrt((squares + 3 * eps) / 3)
+            hidden = form == FORMS40[2] and E == 0
+            verdict = {FORMS40[0]: 'same equation', FORMS40[1]: 'different: no ÷n',
+                       FORMS40[2]: 'ε = 0 hides the bug' if hidden else 'different: ε outside'}[form]
+            judge = 'reorder ≈, not wrong' if form == FORMS40[0] else 'same only while ε = 0' if hidden else 'a wrong function'
+            if hidden:
+                assert r == rc  # with ε = 0 the misplaced ε cannot change anything
+            elif form != FORMS40[0]:
+                assert r != rc
+            for time in TIMES48:
+                exact = {'nc-x': f'x = [0, 3, {x3}], n = 3', 'nc-eps': f'ε = {eps_label}',
+                         'nc-form': {FORMS40[0]: 'sqrt(mean + ε)', FORMS40[1]: 'sqrt(sum + ε) (bug)', FORMS40[2]: 'sqrt(mean) + ε (bug)'}[form]}
+                numeric, lists, precise = {}, {}, {}
+                if time >= 800:
+                    exact['nc-sum'] = f'Σx² = {js(squares)}'
+                    numeric['nc-mean'] = squares / 3
+                else:
+                    exact.update({'nc-sum': 'Σx² = …', 'nc-mean': 'mean x² = …'})
+                if time >= 1600:
+                    numeric.update({'nc-rad': squares / 3 + eps, 'nc-rc': rc})
+                else:
+                    exact.update({'nc-rad': 'radicand = …', 'nc-rc': 'contract r = …'})
+                if time >= 2400:
+                    numeric.update({'nc-r': r, 'nc-last': y[2]})
+                    lists['nc-y'] = [0, y[1], y[2]]
+                else:
+                    exact.update({'nc-r': 'r = …', 'nc-y': 'y = …', 'nc-last': 'last y = …'})
+                if time >= 3200:
+                    numeric['nc-rms'] = math.sqrt(statistics.fmean(v * v for v in y))
+                    exact['nc-verdict'] = verdict
+                else:
+                    exact.update({'nc-rms': 'rms(y) = …', 'nc-verdict': '…'})
+                if time >= 4000:
+                    numeric.update({'nc-twin-r': twin, 'nc-impl-gap': abs(r - rc)})
+                    precise['nc-twin-gap'] = abs(twin - rc)
+                    exact['nc-judge'] = judge
+                else:
+                    exact.update({'nc-twin-r': 'twin r = …', 'nc-twin-gap': '|twin − contract| …',
+                                  'nc-impl-gap': '|impl − contract| …', 'nc-judge': '…'})
+                case('concept-norm-contract', dict(x3=x3, eps=eps_label, form=form), time, numeric, exact, precise=precise, lists=lists)
+CHECKS.append("the contract's r with math.fsum and math.sqrt, the lesson's r = 3 and 4/3 in exact Fractions, both defective forms and the algebraic rearrangement computed separately, and rms(y) by statistics.fmean")
+
+
+# ----------------------------------------------------------- 41 a held-out gradient check and portfolio claims
+def central(f, w, h):
+    return (f(w + h) - f(w - h)) / (2 * h)
+
+
+def within(analytic, numeric):
+    return abs(analytic - numeric) <= 0.001 + 0.001 * abs(numeric)
+
+
+IMPLS41 = {'3w² (correct)': lambda w: 3 * w * w, 'w² (factor 3 lost)': lambda w: w * w, '6w² (stale buffer)': lambda w: 6 * w * w}
+for w in [-2, -0.5, 0, 0.5, 1, 2]:
+    for k in [-3, -2, -1]:
+        h = 10 ** k
+        numeric = central(lambda v: v * v * v, w, h)
+        exact_diff = 3 * Fraction(w) ** 2 + Fraction(1, 10 ** -k) ** 2
+        assert abs(numeric - float(exact_diff)) < 1e-9
+        tol = 0.001 + 0.001 * abs(numeric)
+        correct_passes = within(IMPLS41['3w² (correct)'](w), numeric)
+        control_rejected = correct_passes and not within(IMPLS41['w² (factor 3 lost)'](w), numeric)
+        for impl, fn in IMPLS41.items():
+            analytic = fn(w)
+            passes = within(analytic, numeric)
+            if not correct_passes:
+                verdict = 'h too coarse: h² error'
+            elif impl == '3w² (correct)':
+                verdict = 'check passes'
+            elif passes:
+                assert w == 0  # every version is 0 here
+                verdict = f'bug hidden at w = {js(w)}'
+            else:
+                verdict = 'check catches the bug'
+            grad_ok = impl == '3w² (correct)' and passes
+            for optimizer in [False, True]:
+                for practical in [False, True]:
+                    strong = grad_ok and control_rejected and optimizer and practical
+                    missing = [name for name, ok in [('first: grad check', grad_ok), ('first: a biting control', control_rejected),
+                                                     ('first: optimizer state', optimizer), ('first: practical review', practical)] if not ok]
+                    gap_text = missing[0] if missing else 'next: exact-config gate'
+                    for time in TIMES48:
+                        # Course evidence never establishes production safety, whatever else passed.
+                        production = False
+                        exact = {'pg-w': f'w = {js(w)}, h = {js(h)}', 'pg-c-concept': 'concepts: supported',
+                                 'pg-c-prod': 'production safety: ' + ('yes' if production else 'no'),
+                                 'pg-p-opt': 'optimizer state: passed' if optimizer else 'optimizer state: failed',
+                                 'pg-p-prac': 'practical: reviewed' if practical else 'practical: not reviewed'}
+                        precise = {}
+                        if time >= 800:
+                            precise['pg-num'] = numeric
+                        else:
+                            exact['pg-num'] = 'central diff = …'
+                        if time >= 1600:
+                            precise.update({'pg-ana': analytic, 'pg-gap': abs(analytic - numeric), 'pg-tol': tol})
+                        else:
+                            exact.update({'pg-ana': 'analytic = …', 'pg-gap': '|gap| = …', 'pg-tol': 'tol = …'})
+                        if time >= 2400:
+                            exact['pg-verdict'] = verdict
+                            exact['pg-p-grad'] = 'gradient check: passed' if grad_ok else 'gradient check: failed'
+                            exact['pg-p-neg'] = 'neg. control: rejected' if control_rejected else 'neg. control: not caught'
+                        else:
+                            exact.update({'pg-verdict': '…', 'pg-p-grad': 'gradient check: …', 'pg-p-neg': 'neg. control: …'})
+                        exact['pg-c-impl'] = (('tested config: supported' if strong else 'tested config: not yet')
+                                              if time >= 3200 else 'tested config: …')
+                        geometry = {'pg-c-gap': {'opacity': float(time < 4000)}}
+                        for node, label in [('pg-c-gap-grad', 'first: grad check'), ('pg-c-gap-ctrl', 'first: a biting control'),
+                                            ('pg-c-gap-opt', 'first: optimizer state'), ('pg-c-gap-prac', 'first: practical review'),
+                                            ('pg-c-gap-next', 'next: exact-config gate')]:
+                            exact[node] = label
+                            geometry[node] = {'opacity': float(time >= 4000 and gap_text == label)}
+                        case('concept-portfolio-gates', dict(w=w, k=k, impl=impl, optimizer=optimizer, practical=practical),
+                             time, {}, exact, geometry, precise=precise)
+CHECKS.append('central differences of w³ checked against the exact 3w² + h², a stated tolerance applied to correct and defective gradients, a negative control that counts only when the check discriminates, and portfolio claims from the evidence present')
 
 
 print(json.dumps({'cases': CASES, 'independentChecks': CHECKS}, allow_nan=False, separators=(',', ':')))

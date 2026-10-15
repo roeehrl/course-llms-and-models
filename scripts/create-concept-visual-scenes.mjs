@@ -1,5 +1,5 @@
-// Private authoring only. Builds thirty-six bounded concept scenes (three batches of
-// eight, then twelve of a fourth batch) with the released @course-core/visuals package
+// Private authoring only. Builds forty-one bounded concept scenes (three batches of
+// eight, then seventeen in a fourth batch) with the released @course-core/visuals package
 // and writes exactly two files:
 //   visuals/concept-scenes.json and content/concept-visuals.json
 // A development build may be selected only through an explicit file: URL to a
@@ -4365,6 +4365,507 @@ const claimsScene = (() => {
   });
 })();
 
+// ============================================================ 37 two thresholds: containment and causal claims
+// eng-e12-04: a credible risk to shared computed work can justify containment before the cause is known;
+// a causal claim needs a discriminating test. Correlation with a restart assigns no share of harm.
+const ledgerClaimScene = (() => {
+  const repro = s("repro"),
+    probe = s("probe"),
+    interv = s("intervention"),
+    jump = s("jump"),
+    other = s("other"),
+    mins = s("minutes");
+  const risk = or(repro, probe);
+  const evidence = card("cl-evidence", 222, ice, blue, "EVIDENCE ON FILE", [
+    text("cl-e-repro", cat("mismatch saved: ", iff(repro, "yes", "no")), 16, 62),
+    text("cl-e-probe", cat("coordinate probe: ", iff(probe, "fails", "passes")), 16, 90),
+    text("cl-e-int", cat("discriminating test: ", iff(interv, "yes", "no")), 16, 118),
+    text("cl-e-jump", iff(jump, "loss jump after restart", "no loss jump seen"), 16, 146),
+    text("cl-e-other", iff(other, "other config: gate fails", "no other finding"), 16, 174),
+    text("cl-e-kind", "observation ≠ hypothesis", 16, 202, 17, muted),
+  ]);
+  const claims = card("cl-claims", 278, lilac, purple, "TWO THRESHOLDS", [
+    bold("cl-contain", after(800, iff(risk, "contain: justified", "contain: no risk shown"), "contain: …"), 16, 62, 17, purple),
+    text("cl-local", after(1600, iff(probe, "local defect: supported", "local defect: no probe"), "local defect: …"), 16, 92),
+    text(
+      "cl-cause",
+      after(2400, iff(not(jump), "explains jump: no claim", iff(and(probe, interv), "explains jump: tested", "explains jump: unproven")), "explains jump: …"),
+      16,
+      120,
+    ),
+    text("cl-same", after(3200, iff(other, "same cause: needs a test", "same cause: n/a"), "same cause: …"), 16, 148),
+    bold(
+      "cl-verdict",
+      after(
+        4000,
+        // The weakest unsupported step names what the report must not assert yet.
+        iff(
+          not(risk),
+          "no finding to report yet",
+          iff(and(jump, not(and(probe, interv))), "say: correlation only", iff(other, "report as two findings", "report what was tested")),
+        ),
+        "…",
+      ),
+      16,
+      182,
+      17,
+      purple,
+    ),
+    text("cl-share", "no share of harm from", 16, 210, 17, muted),
+    text("cl-share-2", "a loss curve alone", 16, 236, 17, muted),
+    text("cl-auth", "containment: a proposal", 16, 262, 17, muted),
+  ]);
+  const elapsed = add(mul(60, mins), 35);
+  const clock = (sec) => {
+    const total = add(14 * 3600 + 20 * 60 + 10, sec),
+      hh = floor(div(total, 3600)),
+      mm = floor(div(mod(total, 3600), 60)),
+      ss = mod(total, 60);
+    const two = (v) => iff(lt(v, 10), cat("0", v), v);
+    return cat(two(hh), ":", two(mm), ":", two(ss));
+  };
+  const timeline = card("cl-timeline", 222, sand, gold, "SYNTHETIC TIMELINE (UTC)", [
+    text("cl-t0", "14:20:10 mismatch saved", 16, 62),
+    text("cl-t1", cat(clock(elapsed), " isolation done"), 16, 90),
+    bold("cl-dt", after(4000, cat("elapsed ", elapsed, " s"), "elapsed …"), 16, 124, 18, gold),
+    text("cl-dt-m", after(4000, cat("= ", mins, " min 35 s"), "= …"), 16, 152),
+    text("cl-next", "next: a test that could", 16, 180, 17, muted),
+    text("cl-next-2", "prove you wrong", 16, 206, 17, muted),
+  ]);
+  return build({
+    id: "concept-claim-ledger",
+    title: "Contain on risk. Claim causes on tests.",
+    description:
+      "Toggle the evidence on file for an anonymized incident: a saved reproducible mismatch, a failing coordinate probe, a discriminating intervention, a loss jump after a restart and a different configuration's failed gate. See which claims each threshold supports and compute a synthetic containment interval.",
+    state: {
+      repro: flag("Reproducible mismatch saved", true),
+      probe: flag("Coordinate probe fails", true),
+      intervention: flag("Discriminating intervention done"),
+      jump: flag("Loss jump after a restart", true),
+      other: flag("Another config fails a different gate"),
+      minutes: num("Minutes to confirmed isolation", 5, 1, 15, 1),
+    },
+    kicker: "37 / TWO DECISION THRESHOLDS",
+    subtitle: "anonymized, synthetic times",
+    grid: [
+      [evidence, 0],
+      [claims, 1],
+      [timeline, 2],
+    ],
+    compactOrder: [evidence, claims, timeline],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "List the evidence first: observations, not explanations." },
+      { atMs: 800, text: "A credible risk to shared computed work can justify proposing containment before the cause is known." },
+      { atMs: 1600, text: "A failing coordinate probe directly supports a local layout defect in the saved probe." },
+      { atMs: 2400, text: "That the defect explains a loss jump after a restart needs a discriminating test; correlation is not enough." },
+      { atMs: 3200, text: "A different configuration failing a different gate is a separate finding until a test links them." },
+      { atMs: 4000, text: "Put each claim at its own evidence level. The synthetic interval is minutes × 60 + 35 seconds." },
+    ],
+    accessible:
+      "Claim discipline for an anonymized incident, following the lesson's two decision thresholds. Containment needs a credible risk to shared computed work: a saved reproducible mismatch or a failing coordinate probe justifies proposing isolation to an authorized operator before the low-level cause is known. A causal claim needs stronger evidence. A failing coordinate probe directly supports a local layout defect in the saved probe. The claim that this defect explains a loss jump after a restart stays unproven, a correlation only, until a controlled, discriminating intervention tests it; a loss curve aggregates many influences and cannot assign a share of harm by itself. A different configuration that fails a different gate is reported as a separate finding: a shared label is not a shared cause. With no reproducible mismatch and a passing probe there is nothing to report yet. The synthetic timeline starts with a mismatch saved at 14:20:10 UTC; isolation is confirmed a chosen number of minutes and 35 seconds later, so 5 minutes gives 335 seconds at 14:25:45. The times are invented, and containment here is a written proposal, not an operational action.",
+  });
+})();
+
+// ============================================================ 38 a prespecified comparison band and mandatory gates
+// eng-e13-03: within_band(c, u, factor, floor) = c ≤ factor·u + floor; with u = 0.004, factor 1.5 and
+// floor 0.0001, c = 0.0062 fails and c = 0.0060 passes. Global metrics cannot overrule a failed probe.
+const bandScene = (() => {
+  const u = s("upstream"),
+    c = s("candidate"),
+    f = s("factor"),
+    flr = s("floor"),
+    zeroRef = eq(s("reference"), "Near zero (u = 0)"),
+    probeOk = s("probe"),
+    sameBin = eq(s("artifact"), "Same binary as proposed");
+  // Exact integer arithmetic in units of 1e-5 so the inclusive boundary is decided exactly.
+  // Errors are set in units of 0.0001 so the native controls show whole numbers.
+  const U = iff(zeroRef, 0, mul(u, 10)),
+    Cn = mul(c, 10),
+    F10 = op("round", mul(f, 10)),
+    FL = pick(flr, ["0.0001", "0", "0.001"], [10, 0, 100]);
+  const band = add(div(mul(F10, U), 10), FL);
+  const inBand = le(Cn, band);
+  const e5 = (v) => div(v, 100000);
+  const dot = (id, v, fill) => circle(id, add(16, mul(0.2, op("clamp", v, 0, 1200))), 112, 7, fill);
+  const bandCard = card("tb-band", 250, ice, blue, "THE BAND, FIXED FIRST", [
+    text("tb-u", cat("upstream u = ", e5(U)), 16, 62),
+    text("tb-rule", cat("band = ", div(F10, 10), "·u + ", e5(FL)), 16, 90),
+    segment("tb-axis", 16, 112, 240, 0, line, 3),
+    { ...rect("tb-ok", 16, 104, mul(0.2, op("clamp", band, 0, 1200)), 16, teal, 3), opacity: 0.35 },
+    dot("tb-c", Cn, ink),
+    text("tb-scale", "axis 0 … 0.012", 16, 146, 17, muted),
+    bold("tb-limit", after(800, cat("limit = ", e5(band)), "limit = …"), 16, 178, 18, blue),
+    text("tb-c-val", cat("candidate c = ", e5(Cn)), 16, 206),
+    text("tb-ratio", after(1600, iff(eq(U, 0), "ratio c/u: undefined", cat("ratio c/u = ", r3(div(Cn, U)))), "ratio …"), 16, 234),
+  ]);
+  const gates = card("tb-gates", 250, lilac, purple, "EVERY MANDATORY GATE", [
+    bold("tb-g-band", after(2400, iff(inBand, "band: pass (≤ limit)", "band: fail (> limit)"), "band: …"), 16, 62, 17, purple),
+    text("tb-g-probe", after(2400, iff(probeOk, "local probe: pass", "local probe: fail"), "local probe: …"), 16, 90),
+    text("tb-g-global", "global metrics: pass", 16, 118),
+    text("tb-g-art", iff(sameBin, "tested = proposed binary", "tested ≠ proposed binary"), 16, 146),
+    bold(
+      "tb-verdict",
+      after(
+        3200,
+        iff(not(sameBin), "wrong binary tested", iff(not(probeOk), "fail: probe overrides", iff(inBand, "qualified: this config", "fail: outside band"))),
+        "…",
+      ),
+      16,
+      180,
+      17,
+      purple,
+    ),
+    text("tb-no-avg", "gates combine by AND", 16, 208, 17, muted),
+    text("tb-no-widen", "never widen after looking", 16, 234, 17, muted),
+  ]);
+  const report = card("tb-report", 222, sand, gold, "REPORT THE NUMBERS", [
+    text("tb-r-c", after(4000, cat("candidate error ", e5(Cn)), "candidate error …"), 16, 62),
+    text("tb-r-u", after(4000, cat("upstream error ", e5(U)), "upstream error …"), 16, 90),
+    text("tb-r-margin", after(4000, cat("limit − c = ", e5(sub(band, Cn))), "limit − c …"), 16, 118),
+    text("tb-floor", iff(eq(U, 0), "u = 0: floor alone", "floor guards tiny u"), 16, 146),
+    text("tb-not-ratio", "not only the ratio", 16, 174, 17, muted),
+    text("tb-scope", "one config, one artifact", 16, 202, 17, muted),
+  ]);
+  return build({
+    id: "concept-tolerance-band",
+    title: "A band fixed in advance, and every gate.",
+    description:
+      "Apply the lesson's prespecified comparison rule, candidate error ≤ factor × upstream error + floor, with exact boundaries. Move the errors, the factor and the floor, let the reference error fall to zero, fail the mandatory local probe, or test a different binary from the one proposed.",
+    state: {
+      upstream: num("Upstream error u (×0.0001)", 40, 35, 80, 5),
+      candidate: num("Candidate error c (×0.0001)", 62, 40, 120, 1),
+      factor: num("Factor", 1.5, 1, 2, 0.1),
+      floor: choice("Absolute floor", ["0.0001", "0", "0.001"]),
+      reference: choice("Reference case", ["Typical (u as set)", "Near zero (u = 0)"]),
+      probe: flag("Mandatory local probe passes", true),
+      artifact: choice("Tested artifact", ["Same binary as proposed", "Different binary"]),
+    },
+    kicker: "38 / QUALIFY ONE CONFIG",
+    subtitle: "c ≤ factor·u + floor",
+    grid: [
+      [bandCard, 0],
+      [gates, 1],
+      [report, 2],
+    ],
+    compactOrder: [bandCard, gates, report],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "The rule is written before any candidate result: c ≤ 1.5·u + 0.0001." },
+      { atMs: 800, text: "With upstream error 0.004 the limit is 0.0061." },
+      { atMs: 1600, text: "A ratio alone hides the absolute size and breaks when the reference error is near zero." },
+      { atMs: 2400, text: "0.0062 is outside the band; 0.0060 would be inside. The boundary itself passes." },
+      { atMs: 3200, text: "A failed mandatory probe or a different binary fails qualification whatever the global metrics say." },
+      { atMs: 4000, text: "Report both errors and the margin, not only their ratio." },
+    ],
+    accessible:
+      "A prespecified comparison band with the lesson's rule: a candidate error c passes when c ≤ factor × u + floor, where u is the upstream implementation's error. With u = 0.004, factor 1.5 and floor 0.0001 the limit is 0.0061, so c = 0.0062 fails and c = 0.0060 passes; the comparison is inclusive; the controls set both errors in units of 0.0001, and the scene decides the comparison in exact integer units. The ratio c/u alone hides the absolute size and is undefined when the reference error is zero, where only the floor remains. Qualification also needs every mandatory gate: a failing local probe cannot be averaged away by passing global metrics, and evidence from a different binary than the one proposed does not qualify the proposed artifact. Report the candidate and upstream errors and the margin, and never widen the band after seeing the candidate. Factors from 1 to 2, floors of 0, 0.0001 and 0.001, and the error ranges are settings for exploration, not a recommended universal tolerance.",
+  });
+})();
+
+// ============================================================ 39 end-to-end speedup, a memory peak and fault injection
+// eng-e13-04: 3 s in the target kernel and 7 s elsewhere; a 4× kernel gives 7.75 s, about 1.2903×.
+// Memory: 8 GiB persistent + 3 GiB temporary + 2 GiB communication buffers = 13 GiB peak.
+const rolloutScene = (() => {
+  const k = s("speedup"),
+    o = s("overhead"),
+    tempOnly = eq(s("memory"), "Temporary only (bug)"),
+    masks = eq(s("harness"), "Run reference, label it candidate (bug)"),
+    hits = s("hits"),
+    digest = s("digest");
+  const total = add(7, div(3, k), o);
+  const PX = 24;
+  const speed = card("rg-speed", 250, ice, blue, "END TO END, ONE JOB", [
+    text("rg-base", "kernel 3 s + other 7 s", 16, 62),
+    rect("rg-b-k", 16, 76, 3 * PX, 14, gold, 3),
+    rect("rg-b-o", 16 + 3 * PX, 76, 7 * PX, 14, teal, 3),
+    { ...rect("rg-c-k", 16, 98, mul(PX, div(3, k)), 14, gold, 3), opacity: after(800, 1, 0) },
+    { ...rect("rg-c-o", add(16, mul(PX, div(3, k))), 98, 7 * PX, 14, teal, 3), opacity: after(800, 1, 0) },
+    { ...rect("rg-c-x", add(16, mul(PX, add(7, div(3, k)))), 98, mul(PX, o), 14, red, 3), opacity: after(800, 1, 0) },
+    text("rg-k", cat("kernel ", k, "× faster, +", r3(o), " s"), 16, 142),
+    bold("rg-total", after(800, cat("job: ", r3(total), " s"), "job: …"), 16, 172, 18, blue),
+    bold("rg-sp", after(1600, cat("speedup ", r3(div(10, total)), "×"), "speedup …"), 16, 202, 18, blue),
+    text("rg-not", cat("not ", k, "×: 7 s unchanged"), 16, 230, 17, muted),
+  ]);
+  // Five injected faults; each row is caught or missed by the harness as configured.
+  const exceptionCaught = or(not(masks), hits);
+  const rows = [
+    ["rg-f-wrong", "wrong value", true],
+    ["rg-f-shape", "bad shape", true],
+    ["rg-f-digest", "stale digest", digest],
+    ["rg-f-fallback", "forced fallback", hits],
+    ["rg-f-exc", "exception", exceptionCaught],
+  ];
+  const caught = add(...rows.map(([, , ok]) => iff(ok, 1, 0)));
+  const faults = card("rg-faults", 278, lilac, purple, "INJECTED FAULTS", [
+    ...rows.map(([id, name, ok], i) =>
+      text(id, after(2400 + 200 * i, cat(name, iff(ok, ": caught", ": missed")), cat(name, ": …")), 16, 62 + 28 * i),
+    ),
+    bold("rg-caught", after(3600, cat("caught ", caught, " of 5"), "caught …"), 16, 212, 18, purple),
+    bold(
+      "rg-f-verdict",
+      after(3600, iff(eq(caught, 5), "harness can fail", iff(and(masks, not(hits)), "fallback relabelled", "a fault slips through")), "…"),
+      16,
+      242,
+      17,
+      purple,
+    ),
+    text("rg-f-note", "known-bad must fail", 16, 268, 17, muted),
+  ]);
+  const peak = 13;
+  const memory = card("rg-memory", 222, sand, gold, "MEMORY GATE: 12 GiB", [
+    text("rg-m-parts", "8 persistent + 3 temp", 16, 62),
+    text("rg-m-comm", "+ 2 comm buffers live", 16, 90),
+    text("rg-m-reported", after(4000, cat("reported: ", iff(tempOnly, 3, peak), " GiB"), "reported: …"), 16, 118),
+    bold("rg-m-verdict", after(4000, iff(tempOnly, "passes on a wrong count", "peak 13 > 12: fail"), "…"), 16, 152, 17, gold),
+    text("rg-m-phases", "count every phase", 16, 180, 17, muted),
+    text("rg-m-synth", "synthetic numbers", 16, 206, 17, muted),
+  ]);
+  return build({
+    id: "concept-rollout-gates",
+    title: "A faster kernel is a hypothesis.",
+    description:
+      "Speed up the lesson's target kernel and add new overhead to see what the whole job gains. Then configure a qualification harness, inject five faults and count which ones it catches, and check a memory gate against the true peak rather than one temporary buffer.",
+    state: {
+      speedup: num("Kernel speedup ×", 4, 2, 8, 2),
+      overhead: num("New overhead (s)", 0, 0, 1, 0.2),
+      harness: choice("On candidate exception", ["Fail the gate", "Run reference, label it candidate (bug)"]),
+      hits: flag("Assert candidate hit counts", true),
+      digest: flag("Compare artifact digest", true),
+      memory: choice("Memory gate counts", ["Peak live set", "Temporary only (bug)"]),
+    },
+    kicker: "39 / GATES BEFORE ROLLOUT",
+    subtitle: "synthetic job and harness",
+    grid: [
+      [speed, 0],
+      [faults, 1],
+      [memory, 2],
+    ],
+    compactOrder: [speed, faults, memory],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "The job spends 3 s in the target kernel and 7 s elsewhere. Predict the gain from a 4× kernel." },
+      { atMs: 800, text: "7 + 3/4 = 7.75 s, before any new overhead." },
+      { atMs: 1600, text: "10/7.75 ≈ 1.29×: a fourfold kernel is not a fourfold job." },
+      { atMs: 2400, text: "Inject five faults. Each must fail the gate that is meant to catch it." },
+      { atMs: 3600, text: "Catching only exceptions misses finite wrong answers; a reference relabelled as the candidate hides a fallback." },
+      { atMs: 4000, text: "A memory gate needs the peak live set: 8 + 3 + 2 = 13 GiB, not the 3 GiB temporary." },
+    ],
+    accessible:
+      "Three gates before a guarded rollout, with the lesson's synthetic numbers. A job spends 3 s in a target kernel and 7 s elsewhere. Making the kernel four times faster gives 7 + 0.75 = 7.75 s, a speedup of about 1.2903, not 4; even an infinitely fast kernel leaves the 7 s, and new overhead (an extension here) eats into the gain. A qualification harness is judged by injected faults: a finite wrong value and a malformed shape are caught by an oracle comparison with shape checks; a stale artifact digest is caught only if digests are compared; a forced fallback is caught only by asserting candidate hit counts; and a candidate exception is caught if the harness fails the gate, but a harness that runs the reference and labels its output as the candidate hides it unless hit counts are asserted. A memory gate must count the peak live set in that interval: 8 GiB persistent state, a 3 GiB temporary and 2 GiB of live communication buffers make 13 GiB, which fails an invented 12 GiB limit, while reporting only the temporary would wrongly pass. Kernel speedups of 2 to 8 and overheads up to 1 s are explorations, not measurements.",
+  });
+})();
+
+// ============================================================ 40 a written contract becomes one equation
+// eng-e14-01: r = sqrt(sum(x_i²)/n + ε) with x = [0, 3, 4] and ε = 2/3: mean square 25/3, radicand 9,
+// r = 3, last output 4/3. Omitting ÷n computes a different equation.
+const contractScene = (() => {
+  const x3 = s("x3"),
+    E = ["2/3", "0.00001", "0"],
+    eps = pick(s("eps"), E, [2 / 3, 0.00001, 0]),
+    F = ["sqrt(mean + ε) (contract)", "sqrt(sum + ε), no ÷n (bug)", "sqrt(mean) + ε (bug)"],
+    form = s("form");
+  const xs = [0, 3, x3];
+  const sum = add(9, mul(x3, x3)),
+    mean = div(sum, 3);
+  const rC = sqrt(add(mean, eps));
+  const r = pick(form, F, [rC, sqrt(add(sum, eps)), add(sqrt(mean), eps)]);
+  const twin = sqrt(div(add(sum, mul(3, eps)), 3)); // algebraically the contract, evaluated another way
+  const y = xs.map((v) => div(v, r));
+  const worksheet = card("nc-sheet", 250, ice, blue, "CONTRACT WORKSHEET", [
+    text("nc-x", cat("x = [0, 3, ", x3, "], n = 3"), 16, 62),
+    text("nc-eps", cat("ε = ", s("eps")), 16, 90),
+    text("nc-sum", after(800, cat("Σx² = ", sum), "Σx² = …"), 16, 118),
+    text("nc-mean", after(800, cat("mean x² = ", r3(mean)), "mean x² = …"), 16, 146),
+    text("nc-rad", after(1600, cat("radicand = ", r3(add(mean, eps))), "radicand = …"), 16, 174),
+    bold("nc-rc", after(1600, cat("contract r = ", r3(rC)), "contract r = …"), 16, 208, 18, blue),
+    text("nc-place", "ε inside the root", 16, 236, 17, muted),
+  ]);
+  const impl = card("nc-impl", 250, lilac, purple, "THE IMPLEMENTATION", [
+    text("nc-form", pick(form, F, ["sqrt(mean + ε)", "sqrt(sum + ε) (bug)", "sqrt(mean) + ε (bug)"]), 16, 62),
+    bold("nc-r", after(2400, cat("r = ", r3(r)), "r = …"), 16, 94, 18, purple),
+    text("nc-y", after(2400, cat("y = [0, ", r3(y[1]), ", ", r3(y[2]), "]"), "y = …"), 16, 124),
+    text("nc-last", after(2400, cat("last y = ", r3(y[2])), "last y = …"), 16, 152),
+    text(
+      "nc-rms",
+      // mean(y²) = mean(x²)/r², so rms(y) = sqrt(mean x²)/r; the oracle averages the y values themselves.
+      after(3200, cat("rms(y) = ", r3(div(sqrt(mean), r))), "rms(y) = …"),
+      16,
+      180,
+    ),
+    bold(
+      "nc-verdict",
+      after(
+        3200,
+        iff(eq(form, F[0]), "same equation", iff(eq(form, F[1]), "different: no ÷n", iff(eq(s("eps"), "0"), "ε = 0 hides the bug", "different: ε outside"))),
+        "…",
+      ),
+      16,
+      212,
+      17,
+      purple,
+    ),
+    text("nc-names", "same name, other math", 16, 238, 17, muted),
+  ]);
+  const twinCard = card("nc-twin", 222, sand, gold, "EQUIVALENT VS WRONG", [
+    text("nc-twin-form", "sqrt((Σx² + nε)/n)", 16, 62),
+    text("nc-twin-r", after(4000, cat("twin r = ", r3(twin)), "twin r = …"), 16, 90),
+    text("nc-twin-gap", after(4000, cat("|twin − contract| = ", r6(abs(sub(twin, rC)))), "|twin − contract| …"), 16, 118),
+    text("nc-impl-gap", after(4000, cat("|impl − contract| = ", r3(abs(sub(r, rC)))), "|impl − contract| …"), 16, 146),
+    bold(
+      "nc-judge",
+      after(4000, iff(eq(form, F[0]), "reorder ≈, not wrong", iff(and(eq(form, F[2]), eq(s("eps"), "0")), "same only while ε = 0", "a wrong function")), "…"),
+      16,
+      180,
+      17,
+      gold,
+    ),
+    text("nc-invented", "invented contract", 16, 206, 17, muted),
+  ]);
+  return build({
+    id: "concept-norm-contract",
+    title: "Write the contract, then the equation.",
+    description:
+      "Turn the lesson's invented RMS-style contract into numbers: mean of squares, ε inside the root, and the normalized outputs. Compare an implementation that omits the division by n or adds ε outside the root, and an algebraically equivalent rearrangement.",
+    state: {
+      x3: num("Last input x₃", 4, -4, 6, 1),
+      eps: choice("ε", E),
+      form: choice("Implementation", F),
+    },
+    kicker: "40 / CONTRACT TO EQUATION",
+    subtitle: "r = sqrt(mean(x²) + ε)",
+    grid: [
+      [worksheet, 0],
+      [impl, 1],
+      [twinCard, 2],
+    ],
+    compactOrder: [worksheet, impl, twinCard],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "An invented contract: r = sqrt(sum of x_i² / n + ε), then y_i = x_i / r." },
+      { atMs: 800, text: "For x = [0, 3, 4]: Σx² = 25 and the mean square is 25/3." },
+      { atMs: 1600, text: "Adding ε = 2/3 gives a radicand of 9, so r = 3." },
+      { atMs: 2400, text: "The normalized outputs are [0, 1, 4/3]." },
+      { atMs: 3200, text: "Omitting ÷n, or adding ε outside the root, computes a different equation with a similar name." },
+      { atMs: 4000, text: "A rearrangement that is algebraically equal may differ in the last bits; a wrong formula differs in value." },
+    ],
+    accessible:
+      "Turning the lesson's invented RMS-style contract into an equation. The contract defines r = sqrt(sum of x_i² / n + ε) and y_i = x_i / r. For x = [0, 3, 4] and ε = 2/3 the sum of squares is 25, the mean square is 25/3, the radicand is 9 and r = 3, so the outputs are [0, 1, 4/3]; the root mean square of the outputs is about 0.962 rather than 1 because ε is added. An implementation that omits the division by n computes sqrt(25 + 2/3) ≈ 5.066, and one that adds ε outside the root computes sqrt(25/3) + 2/3 ≈ 3.553: different equations, however similar the function names. The rearrangement sqrt((Σx² + nε)/n) is algebraically the contract and agrees to the displayed precision, while a wrong reduction differs in value. The last input can range from −4 to 6 and ε can be 2/3, 0.00001 or 0. The constants are an original exercise, not a result from any paper.",
+  });
+})();
+
+// ============================================================ 41 a held-out gradient check and the claims it supports
+// eng-e14-04: compare analytic gradients with independent central differences and keep a negative control.
+// f(w) = w³ is a new function: its central difference is exactly 3w² + h².
+const portfolioScene = (() => {
+  const w = s("w"),
+    h = op("pow", 10, s("k")),
+    I = ["3w² (correct)", "w² (factor 3 lost)", "6w² (stale buffer)"],
+    impl = s("impl"),
+    optOk = s("optimizer"),
+    reviewed = s("practical");
+  const cube = (v) => mul(v, v, v);
+  const numeric = div(sub(cube(add(w, h)), cube(sub(w, h))), mul(2, h));
+  const analytic = pick(impl, I, [mul(3, w, w), mul(w, w), mul(6, w, w)]);
+  const tol = add(0.001, mul(0.001, abs(numeric)));
+  const gap = abs(sub(analytic, numeric));
+  // Decisions use the difference's exact value 3w² + h² (cheap to inline); the readouts above
+  // show the computed difference, and the oracle decides from its own float differences.
+  const exactDiff = add(mul(3, w, w), mul(h, h)),
+    tolE = add(0.001, mul(0.001, exactDiff));
+  const passes = le(abs(sub(analytic, exactDiff)), tolE);
+  const correctPasses = le(mul(h, h), tolE);
+  // The negative control bites only if this check accepts the correct gradient and rejects
+  // the known factor-lost bug at this w and h.
+  const controlRejected = and(correctPasses, gt(add(mul(2, w, w), mul(h, h)), tolE));
+  const check = card("pg-check", 278, ice, blue, "HELD-OUT CHECK: f = w³", [
+    text("pg-w", cat("w = ", w, ", h = ", h), 16, 62),
+    text("pg-num", after(800, cat("central diff = ", r6(numeric)), "central diff = …"), 16, 90),
+    text("pg-ana", after(1600, cat("analytic = ", r6(analytic)), "analytic = …"), 16, 118),
+    text("pg-gap", after(1600, cat("|gap| = ", r6(gap)), "|gap| = …"), 16, 146),
+    text("pg-tol", after(1600, cat("tol = ", r6(tol)), "tol = …"), 16, 174),
+    bold(
+      "pg-verdict",
+      after(
+        2400,
+        // A coarse step fails even the correct gradient; only then is a failure the bug's.
+        iff(
+          not(correctPasses),
+          "h too coarse: h² error",
+          iff(eq(impl, I[0]), "check passes", iff(passes, cat("bug hidden at w = ", w), "check catches the bug")),
+        ),
+        "…",
+      ),
+      16,
+      208,
+      17,
+      blue,
+    ),
+    text("pg-exact", "diff = 3w² + h² exactly", 16, 236, 17, muted),
+    text("pg-tolrule", "tol 0.001 + 0.001·|diff|", 16, 262, 17, muted),
+  ]);
+  const gradOk = and(eq(impl, I[0]), passes);
+  const portfolio = card("pg-portfolio", 250, lilac, purple, "PORTFOLIO EVIDENCE", [
+    text("pg-p-short", "short items: passed", 16, 62),
+    text("pg-p-grad", after(2400, iff(gradOk, "gradient check: passed", "gradient check: failed"), "gradient check: …"), 16, 90),
+    text("pg-p-neg", after(2400, iff(controlRejected, "neg. control: rejected", "neg. control: not caught"), "neg. control: …"), 16, 118),
+    text("pg-p-opt", iff(optOk, "optimizer state: passed", "optimizer state: failed"), 16, 146),
+    text("pg-p-prac", iff(reviewed, "practical: reviewed", "practical: not reviewed"), 16, 174),
+    text("pg-p-keep", "keep failures on file", 16, 202, 17, muted),
+    text("pg-p-hints", "record hints given", 16, 228, 17, muted),
+  ]);
+  const strong = and(gradOk, controlRejected, optOk, reviewed);
+  const claims = card("pg-claims", 222, sand, gold, "WHAT IT SUPPORTS", [
+    text("pg-c-concept", "concepts: supported", 16, 62),
+    text("pg-c-impl", after(3200, iff(strong, "tested config: supported", "tested config: not yet"), "tested config: …"), 16, 90),
+    text("pg-c-prod", "production safety: no", 16, 118),
+    // The first missing piece of evidence, in the order a reviewer asks for it. One line per
+    // outcome, exactly one visible, keeps each condition within the expression-depth limit.
+    { ...bold("pg-c-gap", "…", 16, 152, 17, gold), opacity: after(4000, 0, 1) },
+    ...[
+      ["pg-c-gap-grad", "first: grad check", not(gradOk)],
+      ["pg-c-gap-ctrl", "first: a biting control", and(gradOk, not(controlRejected))],
+      ["pg-c-gap-opt", "first: optimizer state", and(gradOk, controlRejected, not(optOk))],
+      ["pg-c-gap-prac", "first: practical review", and(gradOk, controlRejected, optOk, not(reviewed))],
+      ["pg-c-gap-next", "next: exact-config gate", strong],
+    ].map(([id, label, when]) => ({ ...bold(id, label, 16, 152, 17, gold), opacity: after(4000, iff(when, 1, 0), 0) })),
+    text("pg-c-cert", "a course is not a", 16, 180, 17, muted),
+    text("pg-c-cert-2", "certificate", 16, 206, 17, muted),
+  ]);
+  return build({
+    id: "concept-portfolio-gates",
+    title: "Check a new gradient. Claim only what it shows.",
+    description:
+      "Check an analytic gradient of a new function, w cubed, against an independent central difference with a stated tolerance, and keep a negative control that the check must reject. Then add the remaining portfolio evidence and see which claims it supports.",
+    state: {
+      w: num("Point w", 1, -2, 2, 0.5),
+      k: num("Difference step h = 10^k, k", -2, -3, -1, 1),
+      impl: choice("Analytic gradient", I),
+      optimizer: flag("Optimizer-state comparison passes"),
+      practical: flag("Practical work reviewed"),
+    },
+    kicker: "41 / A DEFENSIBLE PORTFOLIO",
+    subtitle: "a held-out function, f = w³",
+    grid: [
+      [check, 0],
+      [portfolio, 1],
+      [claims, 2],
+    ],
+    compactOrder: [check, portfolio, claims],
+    durationMs: 4800,
+    cues: [
+      { atMs: 0, text: "A held-out function, f(w) = w³, not the rehearsed training trace. Predict its derivative first." },
+      { atMs: 800, text: "The central difference of a cubic is exactly 3w² + h²." },
+      { atMs: 1600, text: "Compare it with the analytic gradient under a tolerance stated in advance." },
+      { atMs: 2400, text: "A negative control must fail the same check; at w = 0 a lost factor of 3 is invisible." },
+      { atMs: 3200, text: "Implementation claims need every comparison, including optimizer state, and reviewed practical work." },
+      { atMs: 4000, text: "Name the first missing piece of evidence. No course result is a production certificate." },
+    ],
+    accessible:
+      "A held-out gradient check and the claims a portfolio supports. The function is f(w) = w³, new relative to the rehearsed linear-model trace. Its central difference (f(w + h) − f(w − h)) / 2h equals 3w² + h² exactly, so the difference itself carries an h² error. Steps of 0.001, 0.01 and 0.1 are offered. The check passes when the gap between the analytic gradient and the central difference is at most 0.001 + 0.001 times the central difference's size. At w = 1 with h = 0.01 the correct gradient 3 passes (gap 0.0001); with h = 0.1 the h² error (0.01) makes even the correct gradient fail, so the step must suit the tolerance. A gradient that loses the factor 3 (w²) or doubles it like a stale, uncleared buffer (6w²) fails, except at w = 0 where every version is 0: a negative control must actually be rejected by the check to count. Short items support conceptual understanding. A claim about the tested configuration also needs a passing gradient check, a negative control that is rejected, a passing optimizer-state comparison and reviewed practical work. No result here supports a production-safety claim or a professional certificate.",
+  });
+})();
+
 // ---------------------------------------------------------------- assemble
 const authored = [
   matmulScene,
@@ -4401,7 +4902,11 @@ const authored = [
   readyScene,
   splitScene,
   journalScene,
-  claimsScene,
+  claimsScene,  ledgerClaimScene,
+  bandScene,
+  rolloutScene,
+  contractScene,
+  portfolioScene,
 ];
 const depthOf = (e) =>
   e && typeof e === "object" && "op" in e ? 1 + Math.max(0, ...e.args.map(depthOf)) : 0;
@@ -4469,6 +4974,11 @@ const bindings = [
   ["concept-split-roles", "sys-e11-02", "sys-11-02-text-2"],
   ["concept-event-journal", "sys-e11-04", "sys-11-04-text-2"],
   ["concept-claim-checks", "eng-e12-01", "eng-12-01-lesson"],
+  ["concept-claim-ledger", "eng-e12-04", "eng-12-04-lesson"],
+  ["concept-tolerance-band", "eng-e13-03", "eng-13-03-lesson"],
+  ["concept-rollout-gates", "eng-e13-04", "eng-13-04-lesson"],
+  ["concept-norm-contract", "eng-e14-01", "eng-14-01-lesson"],
+  ["concept-portfolio-gates", "eng-e14-04", "eng-14-04-lesson"],
 ].map(([visualId, episodeId, afterBlockId]) => ({ visualId, episodeId, afterBlockId }));
 assert.deepEqual(
   bindings.map((b) => b.visualId),
@@ -4603,7 +5113,7 @@ const extension = {
     keyboard: true,
     reducedMotion: true,
     textAlternative:
-      "All thirty-six concept scenes state their arithmetic, show live readouts, and include complete text equivalents.",
+      "All forty-one concept scenes state their arithmetic, show live readouts, and include complete text equivalents.",
   },
 };
 // The assembler accepts an overlay only if its renderer declaration matches the
