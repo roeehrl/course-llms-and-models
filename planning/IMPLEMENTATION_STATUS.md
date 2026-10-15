@@ -1,3 +1,43 @@
+# Core 0.1.39 published, accepted and deployed to the pilot — 2026-10-15
+
+- MERGED: PR #81 (version 0.1.39) on top of #47-#80; main CI 38788376533 12/12 on
+  56b3cda.
+- PUBLISHED Core 0.1.39 prerelease (tag object 68b3b33 on 56b3cda, run 38790654821
+  attempt 1, artifact 12000747209 digest 021a9848…, manifest 4bc32171…; 701 source
+  members byte-compared to the Git tree; every asset member matches the manifest;
+  module locks match Git; built adapter digests unchanged (code-bank 05d8ba24…);
+  visuals 0.1.1 dist files match the released record (the tgz differs from 0.1.38's
+  only because package.json now pins SDK 0.5.0); hosted bytes identical, 7 assets).
+  Notes state the operator-facing changes: model prices required (paid work refused
+  without them) incl. per-web-search price; Anthropic text provider (no live call);
+  gates/assessment + review/exception; view as learner; learner-model privacy for
+  staff (companion, learner model, gate-review and appeal reasons withheld); erasure
+  finishes paid-work reservations and redacts media text; visuals identity change
+  (fingerprints unchanged); budget form fix; hypotheses (opt-in); placement fixes;
+  optional OpenTelemetry (off). Migrations 030, 031, 035-039, 041, 042.
+- ACCEPTED BEFORE PUBLICATION on the candidate bytes, course 0.1.6, scripted models,
+  no timeout changes: HTTP 56 episodes (87 s; 3 recoveries, 6 assignments) passed
+  first run; browser phone 56 / desktop 16 / tablet 4, 0 page errors, passed first
+  run. Feature flow FAILED its first run with model_operation_not_started: 0.1.39's
+  default pricing rule refused the harness's unpriced scripted model (documented
+  behaviour, not a Core defect). verification/feature-flow.mjs now checks the
+  default refusal and enters a synthetic operator price; it passed on the next run
+  against the same bytes. released-runtime.mjs pins 0.1.39 (0.1.38 kept as
+  expectedCoreRelease38).
+- Migration rehearsal: a read-only dump of the pilot DB restored into a disposable
+  DB took all 9 migrations with the candidate's migrate-cli; QA pin unchanged.
+- DEPLOYED: pilot 0.1.38 -> 0.1.39 with the release's deploy/local/upgrade.mjs
+  (backup-20261015193849878-91a3d3, drill 81 tables / 194 rows). config.json bytes
+  unchanged (telemetry off; credentials, prices, allowances untouched). Health ok at
+  http://localhost:4310; QA enrollment 6d7439c7 (0.1.4, active, rev 9, 2 evidence)
+  unchanged; operator unenrolled; pilot acceptance phone/tablet/desktop passed.
+- LIVE-VERIFIED: nothing provider-related. No prices are entered on the pilot
+  (provider_model_prices empty), so paid work is refused until the operator enters
+  prices (incl. per-search price for a research model) and allowances.
+- Host incident: the data volume was full (ENOSPC) for a while; it ended before any
+  local verification, install or acceptance step ran, so no result was affected.
+  Evidence: evidence/core-0.1.39-release-and-pilot.json.
+
 # v0.8 audit and parallel implementation wave; SDK 0.5.0 released — 2026-10-15
 
 - AUDIT: ~220 requirements checked against code (planning/audit/): ~25 done, ~150

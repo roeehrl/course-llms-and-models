@@ -1,0 +1,322 @@
+{
+ "schemaVersion": 1,
+ "coreVersion": "0.1.39",
+ "coreTag": "v0.1.39",
+ "coreCommit": "56b3cda473c7ffe26b4c88547df07853cbe25760",
+ "coreTagObject": "68b3b331965015a9745b46f6846eb967ead64dda",
+ "versionBumpPr": 81,
+ "coreMainCiRun": 38788376533,
+ "coreMainCiRunBeforeBump": {
+  "commit": "faed6b44f1a95a98390d79939c6ae0db36351cef",
+  "run": 38784977850,
+  "result": "success"
+ },
+ "coreReleaseRun": 38790654821,
+ "coreReleaseRunAttempt": 1,
+ "coreCandidateArtifact": 12000747209,
+ "coreArtifactDigest": "sha256:021a9848841e305fcd56ff51999f931bf1eb07d7ea14049856ec38345e90892d",
+ "coreManifestSha256": "4bc32171d915aae85d794aaea0d3b3926efb8a8e87fddee3fd583d1cad4150ff",
+ "sha256sumsFileSha256": "c1ae47c8189a4e1c9a6450365e497b816d5e72dbdab7249002ffd41652ac27a1",
+ "coreRelease": "https://github.com/roeehrl/course-core/releases/tag/v0.1.39",
+ "prerelease": true,
+ "coreChangesSince": "0.1.38",
+ "mergedPrs": [
+  47,
+  48,
+  49,
+  50,
+  51,
+  52,
+  53,
+  54,
+  55,
+  56,
+  57,
+  58,
+  59,
+  60,
+  61,
+  62,
+  63,
+  64,
+  65,
+  66,
+  67,
+  68,
+  69,
+  70,
+  71,
+  72,
+  73,
+  74,
+  75,
+  76,
+  77,
+  78,
+  79,
+  80
+ ],
+ "migrations": [
+  "030_staff_learner_views.sql",
+  "031_wakeup_scan.sql",
+  "035_media_jobs.sql",
+  "036_gate_decisions.sql",
+  "037_teaching_hypotheses.sql",
+  "038_staff_export_audit.sql",
+  "039_provider_cost_receipts.sql",
+  "041_anthropic_provider.sql",
+  "042_provider_dispatch_sent.sql"
+ ],
+ "coreChange": [
+  "operator model prices required: paid provider work refused (PROVIDER_PRICING_REQUIRED / capabilities configuration_missing) until each bound model has a price in force; per-web-search price (migration 041); priced receipts reconciled reserved vs actual (migration 039)",
+  "definite provider refusals release reservations; media ledger/reservation fixes; replay of recorded gateway outcomes; spend telemetry after commit",
+  "Anthropic Messages API provider for text roles (no live call verified)",
+  "server-side gate decisions (SDK 0.5.0, migration 036), assessment rules, gate review and exception (API only, no admin UI)",
+  "audited read-only view as learner (migration 030)",
+  "learner-model privacy: staff exports, learner-model staff API and view-as-learner withhold companion, learner model, drafts, gate-review and written-answer appeal reasons; staff exports audited and listed to the learner (migration 038)",
+  "erasure finalizes open paid-work reservations and redacts generated-media text and clips",
+  "visuals package identity by dist files + manifest minus reviewed type-only dependency pin; visuals stays 0.1.1 on SDK 0.5.0; released fingerprints unchanged",
+  "admin budget form keeps edited drafts on ledger refresh",
+  "teaching hypotheses, probes, trigger table (migration 037), gated on learner opt-in",
+  "placement fixes (replies, appeals, per-run allowance, server-chosen items, WebKit unload errors)",
+  "optional OpenTelemetry (off by default)",
+  "generated media jobs (migration 035), wake-up scan coverage (migration 031)"
+ ],
+ "consumerChecks": {
+  "artifactZipSha256MatchesUploadDigest": true,
+  "sha256sumsAllOk": true,
+  "manifestIdentity": {
+   "tree": "779fdf054548b83605211ef934dc721aef8f35c7",
+   "workflowRef": "roeehrl/course-core/.github/workflows/release.yml@refs/tags/v0.1.39",
+   "ciJobs": 12,
+   "allSuccess": true
+  },
+  "sourceMembersComparedToGitTree": 701,
+  "assetMembersMatchManifest": {
+   "source": 701,
+   "runtime": 942,
+   "learner": 7,
+   "admin": 10,
+   "visuals": 24
+  },
+  "unsafeMembers": 0,
+  "sourceMaps": 0,
+  "licensesPresentInEveryAsset": true,
+  "moduleLocksMatchGit": 11,
+  "builtAdapterDigestsMatch": true,
+  "adapterDigestsUnchangedSince0138": true,
+  "visuals": {
+   "version": "0.1.1",
+   "distFilesMatchReleasedRecord": 21,
+   "tgzSha256": "1f36f86e37dda83fbb1a48fde818afd2e846a20afdd192860f683a91d3117e22",
+   "differsFrom0138HostedTgz": "cedd6785\u2026 (package.json now pins SDK 0.5.0; dist identical)"
+  },
+  "installedRuntimeCheck": {
+   "checkedMembers": 1660,
+   "uniqueFiles": 946
+  },
+  "installNote": "runtime root = source + runtime archives, installed with its own orchestrator (install api, install supervisor) under a temporary git index (removed after); published learner/admin exports re-overlaid after install"
+ },
+ "migrationRehearsal": {
+  "what": "pg_dump of the live pilot DB (read-only) restored into a disposable DB; candidate migrate-cli applied the 9 new migrations; QA pin unchanged; DB and dump deleted",
+  "result": "passed"
+ },
+ "privateReleasedConsumerAcceptanceBeforePublication": {
+  "ranAgainst": "candidate artifact bytes, before the GitHub release was published",
+  "courseVersion": "0.1.6",
+  "models": "scripted only",
+  "timeoutsIncreased": false,
+  "http": {
+   "result": "passed",
+   "runs": 1,
+   "episodes": 56,
+   "practicalFamiliesRecovered": 3,
+   "committedRecoveryAssignments": 6,
+   "unearnedCompletionRejectedEveryEpisode": true,
+   "writtenExplanationsPendingWithoutBlocking": 4,
+   "failedFiniteBank": {
+    "replacements": 2,
+    "gateUnchanged": true,
+    "noFurtherCharge": true
+   },
+   "timings": {
+    "medianBeforeFirstRecoveryMs": 1228,
+    "medianFromEpisode16Ms": 1412,
+    "rangeFromEpisode16Ms": [
+     961,
+     6207
+    ],
+    "totalSeconds": 87
+   }
+  },
+  "featureFlow": {
+   "result": "passed on the second run, after a harness change",
+   "firstRun": {
+    "result": "failed",
+    "code": "model_operation_not_started",
+    "cause": "0.1.39 refuses paid work for unpriced models by default (PROVIDER_PRICING_REQUIRED, documented release behaviour); the harness configured a scripted model and budgets but no operator price",
+    "coreDefect": false
+   },
+   "harnessChange": "verification/feature-flow.mjs now asserts requirePricing defaults to true and the model is unpriced, enters a synthetic operator price via /provider-pricing, asserts the supervisor role is priced",
+   "secondRun": {
+    "remedialEpisodeApplied": true,
+    "placementDeclined": true,
+    "placementAccepted": {
+     "placedEpisodes": 10
+    },
+    "retention": "retained",
+    "writtenExplanationReviewed": "met",
+    "operatorModelPrice": {
+     "refusedWithoutPriceByDefault": true
+    }
+   }
+  },
+  "browser": {
+   "result": "passed",
+   "runs": 1,
+   "phone": {
+    "completedEpisodes": 56,
+    "writtenExplanationsSubmitted": 4,
+    "totalSeconds": 129,
+    "medianFromEpisode16Ms": 2268
+   },
+   "desktop": {
+    "completedEpisodes": 16,
+    "placement": "declined"
+   },
+   "tablet": {
+    "completedEpisodes": 4,
+    "placement": "accepted",
+    "placedEpisodes": 12
+   },
+   "recovery": true,
+   "reloadPreservedCode": true,
+   "horizontalOverflow": false,
+   "codeAccessibility": true,
+   "pageErrors": 0
+  },
+  "ownerUnenrolled": true
+ },
+ "hostedAssets": {
+  "count": 7,
+  "byteIdenticalToCandidate": true
+ },
+ "hostIncident": {
+  "what": "host data volume full (ENOSPC) for a while on 2026-10-15, reported by the coordinator",
+  "impact": "none on release steps: it ended before any local verification, install or acceptance ran (only reads, GitHub-side git/PR operations and an empty test-DB creation before it); free space checked before and after each local step (39-45 GiB)"
+ },
+ "nativePilotUpgrade": {
+  "from": "0.1.38",
+  "to": "0.1.39",
+  "origin": "http://localhost:4310",
+  "runtimeRoot": "~/Library/Application Support/Course Core/Pilot/releases/v0.1.39/course-core",
+  "installedFrom": "hosted release assets (byte-identical to the candidate); Temporal CLI copied from the v0.1.38 root (same sha256)",
+  "preCheck": {
+   "health": "ok",
+   "runningRelease": "0.1.38",
+   "configKeys": [
+    "adaptationAdapters",
+    "codeFixtureFiles",
+    "databaseUrl",
+    "publicOrigin",
+    "schemaVersion",
+    "serviceToken",
+    "sessionHours",
+    "teachingVerifierFiles",
+    "temporalPort",
+    "temporalTaskQueue",
+    "temporalUiPort",
+    "workspaceIds"
+   ],
+   "telemetryKey": "absent"
+  },
+  "tool": "deploy/local/upgrade.mjs of 0.1.39 (owned graceful stop, backup, restore drill, start, health)",
+  "result": {
+   "status": "upgraded",
+   "backup": "backups/backup-20261015193849878-91a3d3",
+   "restoreDrill": {
+    "tables": 81,
+    "rows": 194
+   },
+   "steps": [
+    "stopped",
+    "backed_up",
+    "restore_verified",
+    "started_new_runtime"
+   ]
+  },
+  "migrationsApplied": [
+   "030",
+   "031",
+   "035",
+   "036",
+   "037",
+   "038",
+   "039",
+   "041",
+   "042"
+  ],
+  "configChange": "none (config.json bytes unchanged; telemetry off; provider credentials, prices and allowances untouched)",
+  "health": "ok",
+  "authOptions": {
+   "loginCodes": false,
+   "passkeys": true
+  },
+  "pricingState": {
+   "provider_model_prices": 0,
+   "workspace_cost_settings": 0,
+   "meaning": "default rule requires prices; paid work is refused until the operator enters prices"
+  },
+  "enrollmentPins": {
+   "before": [
+    {
+     "id": "6d7439c7-43b0-42d9-a2e2-c0ad5f8367ec",
+     "subject": "qa:pilot-learner",
+     "course": "0.1.4",
+     "digest": "bf54e1289f1fda0c49c4a7d1ac4525376be5c666a0d08e8394021da38af669bb",
+     "status": "active",
+     "revision": 9,
+     "currentEpisode": "fnd-e01-01",
+     "evidence": 2
+    }
+   ],
+   "afterUpgradeAndAcceptance": "identical",
+   "enrollmentCount": 1,
+   "operatorEnrolled": false,
+   "publishedCourseReleases": [
+    "0.1.4",
+    "0.1.5"
+   ],
+   "course016InstalledForNewLearners": false
+  },
+  "pilotAcceptance": {
+   "result": "passed",
+   "phone": "first episode already complete; resumed",
+   "tablet": "resumed fnd-e01-02",
+   "desktop": "resumed fnd-e01-02",
+   "qaSignIn": "password form; QA password set per run by the harness via set-password-cli (stdin)",
+   "qaRoleCheck": "verified_read_only_in_database",
+   "operatorEnrolled": false,
+   "adminSignedIn": false,
+   "knownAxeDefectsObserved": []
+  }
+ },
+ "liveProviderAcceptance": false,
+ "notVerified": [
+  "live provider behaviour (Google or Anthropic)",
+  "real costs and price reconciliation against a provider invoice",
+  "generated prose and reviewer-draft quality",
+  "learning efficacy",
+  "physical devices",
+  "real hardware passkey authenticators",
+  "native app binaries",
+  "admin UI signed in on the pilot",
+  "gate review queue UI (none exists)"
+ ],
+ "userActions": [
+  "enter model prices (Providers > Model prices) for every role-bound model, incl. 'Price per web search' for a research model, or paid work stays refused",
+  "set paid-work allowances (workspace and QA enrollment)",
+  "install course 0.1.6 for new learners with scripts/install-pilot-course.mjs if not done"
+ ],
+ "observedAt": "2026-10-15T19:45:00Z"
+}

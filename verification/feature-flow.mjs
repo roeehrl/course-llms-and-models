@@ -100,6 +100,13 @@ try{
     configuration:{registry:{revision:'synthetic-acceptance',models:[{id:'synthetic-planner',providerId:'synthetic-google',remoteModel:'synthetic-planner',providerConfig:{apiVersion:'v1beta',transport:'generate_content',maxResponseBytes:1000000},enabled:true,capabilities:['structured_assessment'],limits:{maxInputCharacters:40000,maxOutputTokens:2000}}]},
       adapters:[{id:'synthetic-google',kind:'google',credentialEnv:'GOOGLE_API_KEY'}],roles:{supervisor:{modelId:'synthetic-planner',maxInputCharacters:30000,maxOutputTokens:1000,maxToolRounds:4}}},
     jobPolicy:{allowance:{microUsd:100000,tokens:1200000},durationMs:300000,timeoutMs:60000,maxAttempts:3},credentials:{GOOGLE_API_KEY:'synthetic-acceptance-only'}}),'provider_setup');
+  // Core 0.1.39+: paid work is refused until the operator prices each bound model (no
+  // built-in price list). Check the default refusal rule, then enter a synthetic price.
+  const pricingRoute=`/api/admin/workspaces/${workspaceId}/provider-pricing`,unpriced=requireOk(await request(owner,'GET',pricingRoute),'pricing_view');
+  check(unpriced.requirePricing===true&&unpriced.builtInPrices===false&&!unpriced.models.find(m=>m.modelId==='synthetic-planner')?.coverage?.some(c=>c.priced),'pricing_not_required_by_default');
+  requireOk(await request(owner,'POST',pricingRoute,{idempotencyKey:randomUUID(),modelId:'synthetic-planner',expectedVersion:0,status:'active',currency:'USD',inputMicroUsdPerMillionTokens:1000000,outputMicroUsdPerMillionTokens:2000000,cachedInputMicroUsdPerMillionTokens:null,microUsdPerRequest:null,microUsdPerOutputSecond:null,effectiveFrom:new Date(Date.now()-60000).toISOString(),sourceNote:'synthetic acceptance price'}),'pricing_entry');
+  check(requireOk(await request(owner,'GET',pricingRoute),'pricing_view').models.find(m=>m.modelId==='synthetic-planner')?.coverage?.some(c=>c.role==='supervisor'&&c.priced),'pricing_not_in_force');
+  reports.operatorModelPrice={refusedWithoutPriceByDefault:true,pricedModel:'synthetic-planner'};
   // Publish the staged course through the ordinary review lifecycle and approve its registry.
   const releaseId=requireOk(await request(owner,'POST',`/api/workspaces/${workspaceId}/releases`,course),'course_import').id;
   const catalog=requireOk(await request(owner,'GET','/api/admin/session'),'admin_session').courses[0];check(catalog,'catalog_missing');
