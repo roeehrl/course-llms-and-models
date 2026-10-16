@@ -321,15 +321,16 @@ def practice_input(starter):
 def candidate_source():
     """Algorithm-only authored candidate: never fixture generation or expected data."""
     tree=ast.parse((ROOT/'runtime/code-reference.py').read_text())
-    functions={'value','exp','log','tanh','variables','graph_values','graph_vjp','shared_loss','shared_training',
+    functions={'_decimal_exp','det_exp','det_log','det_tanh','ordered_sum',
+               'value','exp','log','tanh','variables','graph_values','graph_vjp','shared_loss','shared_training',
                'dot','matrix_product','add_rows','rms','softmax','attention','flatten','reshape','attention_vjp',
                'flatten_weights','rebuild_weights','decoder_forward','decoder_step','numerical_audit','evidence_audit','solve'}
     selected=[]
     for node in tree.body:
         if isinstance(node,ast.ClassDef) and node.name=='Dual':selected.append(node)
         elif isinstance(node,ast.FunctionDef) and node.name in functions:selected.append(node)
-        elif isinstance(node,ast.Assign) and any(isinstance(t,ast.Name) and t.id in ['WEIGHT_KEYS','SOLVERS'] for t in node.targets):selected.append(node)
-    source='import math\nfrom statistics import median\n'+ast.unparse(ast.Module(body=selected,type_ignores=[]))+'\n'
+        elif isinstance(node,ast.Assign) and any(isinstance(t,ast.Name) and t.id in ['_PRECISION','WEIGHT_KEYS','SOLVERS'] for t in node.targets):selected.append(node)
+    source='from decimal import Decimal, localcontext\nimport math\nfrom statistics import median\n'+ast.unparse(ast.Module(body=selected,type_ignores=[]))+'\n'
     assert 'build_registry' not in source and 'GENERATORS' not in source and 'expected' not in source
     assert len(source.encode())<64000
     return source

@@ -2,9 +2,16 @@
 
 All calculations use the standard library. The trusted registry contains results;
 this file only generates/verifies them offline. Importing it has no side effects.
+
+Generation must be byte-identical on every platform and Python version, because the
+committed registry is compared exactly. The platform C library's exp/log/tanh differ
+in the last bit between macOS and Linux, and Python 3.12 changed float sum() to
+compensated summation, so the reference uses its own exp/log/tanh (computed in decimal
+arithmetic and rounded once to binary64) and an explicit left-to-right sum.
 """
 import argparse
 import copy
+from decimal import Decimal, localcontext
 import json
 import math
 from pathlib import Path
@@ -21,6 +28,57 @@ FIXTURES = (
     ('llm-qualification-numerics-v1', 'numerical_audit'),
     ('llm-qualification-evidence-v1', 'evidence_audit'),
 )
+
+
+_PRECISION = 60
+
+
+def _decimal_exp(x):
+    with localcontext() as ctx:
+        ctx.prec = _PRECISION
+        return Decimal(x).exp()
+
+
+def det_exp(x):
+    """exp(x) rounded to binary64 identically on every platform."""
+    x = float(x)
+    if not math.isfinite(x):
+        return math.exp(x)
+    result = float(_decimal_exp(x))
+    if math.isinf(result):
+        raise OverflowError('math range error')
+    return result
+
+
+def det_log(x):
+    """Natural log rounded to binary64 identically on every platform."""
+    x = float(x)
+    if not x > 0 or math.isinf(x):
+        return math.log(x)
+    with localcontext() as ctx:
+        ctx.prec = _PRECISION
+        return float(Decimal(x).ln())
+
+
+def det_tanh(x):
+    """tanh(x) rounded to binary64 identically on every platform."""
+    x = float(x)
+    if x == 0 or not math.isfinite(x):
+        return math.tanh(x)
+    if abs(x) >= 40:
+        return math.copysign(1.0, x)
+    with localcontext() as ctx:
+        ctx.prec = _PRECISION
+        e = _decimal_exp(2 * Decimal(x))
+        return float((e - 1) / (e + 1))
+
+
+def ordered_sum(values):
+    """Left-to-right sum with the pre-3.12 float semantics on every Python version."""
+    total = 0
+    for item in values:
+        total = total + item
+    return total
 
 
 class Dual:
@@ -62,14 +120,14 @@ class Dual:
         return self * self.pair(other) ** -1
 
     def exp(self):
-        value = math.exp(self.value)
+        value = det_exp(self.value)
         return Dual(value, [value * a for a in self.derivative])
 
     def log(self):
-        return Dual(math.log(self.value), [a / self.value for a in self.derivative])
+        return Dual(det_log(self.value), [a / self.value for a in self.derivative])
 
     def tanh(self):
-        value = math.tanh(self.value)
+        value = det_tanh(self.value)
         return Dual(value, [(1 - value * value) * a for a in self.derivative])
 
 
@@ -78,15 +136,15 @@ def value(x):
 
 
 def exp(x):
-    return x.exp() if isinstance(x, Dual) else math.exp(x)
+    return x.exp() if isinstance(x, Dual) else det_exp(x)
 
 
 def log(x):
-    return x.log() if isinstance(x, Dual) else math.log(x)
+    return x.log() if isinstance(x, Dual) else det_log(x)
 
 
 def tanh(x):
-    return x.tanh() if isinstance(x, Dual) else math.tanh(x)
+    return x.tanh() if isinstance(x, Dual) else det_tanh(x)
 
 
 def variables(values):
@@ -119,7 +177,7 @@ def graph_vjp(data):
     outputs = graph_values(data, variables([0.0] * len(data['nodes'])))
     queries = []
     for query in data['queries']:
-        scalar = sum(outputs[root] * seed for root, seed in zip(query['roots'], query['seeds']))
+        scalar = ordered_sum(outputs[root] * seed for root, seed in zip(query['roots'], query['seeds']))
         node_grads = scalar.derivative
         input_grads = [0.0] * len(data['inputs'])
         for node, grad in zip(data['nodes'], node_grads):
@@ -137,7 +195,7 @@ def shared_loss(parameters, data):
             prediction = hidden * hidden + c * hidden
             total += 0.5 * (prediction - target) ** 2
             count += 1
-    return total / count + 0.5 * data['l2'] * sum(p * p for p in parameters)
+    return total / count + 0.5 * data['l2'] * ordered_sum(p * p for p in parameters)
 
 
 def shared_training(data):
@@ -152,7 +210,7 @@ def shared_training(data):
 
 
 def dot(a, b):
-    return sum(x * y for x, y in zip(a, b))
+    return ordered_sum(x * y for x, y in zip(a, b))
 
 
 def matrix_product(a, b):
@@ -170,7 +228,7 @@ def rms(rows, epsilon):
 def softmax(scores):
     largest = max(value(x) for x in scores)
     weights = [exp(x - largest) for x in scores]
-    denominator = sum(weights)
+    denominator = ordered_sum(weights)
     return [x / denominator for x in weights]
 
 
@@ -180,7 +238,7 @@ def attention(q, k, v, allowed):
     for i, query in enumerate(q):
         positions = [j for j, yes in enumerate(allowed[i]) if yes]
         weights = softmax([dot(query, k[j]) / scale for j in positions])
-        outputs.append([sum(p * v[j][d] for p, j in zip(weights, positions))
+        outputs.append([ordered_sum(p * v[j][d] for p, j in zip(weights, positions))
                         for d in range(len(v[0]))])
     return outputs
 
@@ -201,7 +259,7 @@ def attention_vjp(data):
         n, d = len(a), len(a[0]); size = n * d
         differentiable.append(reshape(coordinates[cursor:cursor + size], n, d)); cursor += size
     output = attention(*differentiable, data['allowed'])
-    objective = sum(x * g for x, g in zip(flatten(output), flatten(data['upstream'])))
+    objective = ordered_sum(x * g for x, g in zip(flatten(output), flatten(data['upstream'])))
     result = {'output': [[x.value for x in row] for row in output]}
     cursor = 0
     for key, a in zip(('dQ', 'dK', 'dV'), arrays):
@@ -236,8 +294,8 @@ def decoder_forward(weights, data):
     for row, target, valid in zip(logits, data['targets'], data['valid']):
         if valid:
             largest = max(value(x) for x in row)
-            loss += largest + log(sum(exp(x - largest) for x in row)) - row[target]
-    return logits, loss / sum(data['valid'])
+            loss += largest + log(ordered_sum(exp(x - largest) for x in row)) - row[target]
+    return logits, loss / ordered_sum(data['valid'])
 
 
 def decoder_step(data):
