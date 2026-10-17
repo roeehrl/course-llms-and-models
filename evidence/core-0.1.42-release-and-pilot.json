@@ -275,9 +275,7 @@
     "real hardware passkey authenticators",
     "native app binaries",
     "admin UI signed in on the pilot",
-    "external agent tools over HTTP/MCP with a real agent",
-    "hosted asset comparison (release not yet published)",
-    "native pilot upgrade (coordinator)"
+    "external agent tools over HTTP/MCP with a real agent"
   ],
   "userActions": [
     "placement is OFF by default from Core 0.1.40 (migration 048): after upgrading, turn it on per course in Admin > Placement (staff switch); otherwise learners are not offered placement",
