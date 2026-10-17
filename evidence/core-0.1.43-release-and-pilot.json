@@ -1,0 +1,294 @@
+{
+  "schemaVersion": 1,
+  "coreVersion": "0.1.43",
+  "coreTag": "v0.1.43",
+  "coreCommit": "7d2318eb86b628b3de21d5b6f172a1faf34048ab",
+  "coreTagObject": "38cd27866b7b4704d7eb42d80a4016f599382906",
+  "coreTree": "028cc31fe757bf7e97f0a835e7d253234bcff737",
+  "versionBumpPr": 147,
+  "coreMainCi": "12/12 success on 7d2318eb (reported by the coordinator)",
+  "coreReleaseRun": 39029388782,
+  "coreReleaseRunAttempt": 1,
+  "coreCandidateArtifact": 12100626995,
+  "coreCandidateArtifactName": "course-core-v0.1.43-7d2318eb86b628b3de21d5b6f172a1faf34048ab-39029388782-1",
+  "coreArtifactDigest": "sha256:93fc4fd90662cf602e8276fa52f04bb73c2850c3112572b21edc2a392c99855c",
+  "coreManifestSha256": "c602acb275385b8e8bd224ea322686c4590ac32aa9bd01b9a7187eb458f6e32b",
+  "sha256sumsFileSha256": "348d8a54dfbad8c883967ba374be5765d0c02465aa607d10e66b908f6c59426b",
+  "assetSha256": {
+    "course-core-source-0.1.43.tar.gz": "139ee0ae5dee37be257b2dc650eb4f4e8b116abcc2e433add944e48255d34111",
+    "course-core-runtime-0.1.43.tar.gz": "ebd2161849927ef986f4b2da0aedf181a1c6e6ac5db775fcd5e3b5b5d9361a7d",
+    "course-core-learner-web-0.1.43.tar.gz": "ee2d63d05d6457d04e55c8051995a6fdd7be5465ca737dd12ebd6aaec40873fa",
+    "course-core-admin-web-0.1.43.tar.gz": "a7d7a7ff2218ce83dd1fe53730c44f7ec4b61d385cf95386b1534efc8aefe122",
+    "course-core-visuals-0.1.1.tgz": "1f36f86e37dda83fbb1a48fde818afd2e846a20afdd192860f683a91d3117e22"
+  },
+  "coreRelease": "https://github.com/roeehrl/course-core/releases/tag/v0.1.43",
+  "prerelease": true,
+  "published": true,
+  "coreChangesSince": "0.1.42",
+  "skippedVersions": [],
+  "mergedPrs": [
+    121,
+    124,
+    129,
+    131,
+    132,
+    133,
+    134,
+    137,
+    141,
+    143,
+    145,
+    146,
+    147
+  ],
+  "mergedPrsNote": "PRs whose merge commit is in v0.1.43 and not in v0.1.42",
+  "migrations": [
+    "058_conversational_gate_runtime.sql",
+    "062_artifact_store_and_search.sql",
+    "065_erased_request_digests.sql",
+    "066_rubric_assist_rejection.sql",
+    "068_erased_appeal_reasons.sql",
+    "069_receipt_redaction.sql",
+    "070_transfer_check_amendments.sql"
+  ],
+  "consumerChecks": {
+    "artifactZipSha256MatchesUploadDigest": true,
+    "sha256sumsAllOk": true,
+    "sha256sumsCovers": 5,
+    "manifestIdentity": {
+      "tree": "028cc31fe757bf7e97f0a835e7d253234bcff737",
+      "treeMatchesGit": true,
+      "tagObjectMatchesLocalAndRemote": true,
+      "workflowRef": "roeehrl/course-core/.github/workflows/release.yml@refs/tags/v0.1.43",
+      "ciRunId": 39029388782,
+      "ciAttempt": 1,
+      "ciJobs": 12,
+      "allSuccess": true,
+      "state": "verified_candidate"
+    },
+    "sourceMembersComparedToGitTree": 889,
+    "assetMembersMatchManifest": {
+      "source": 889,
+      "runtime": 1165,
+      "learner": 7,
+      "admin": 10,
+      "visuals": 24
+    },
+    "unsafeMembers": 0,
+    "sourceMaps": 0,
+    "licensesPresentInEveryAsset": true,
+    "moduleLocksMatchGit": 11,
+    "builtAdapterDigestsMatch": true,
+    "adapterDigestsUnchangedSince0139": true,
+    "codeBankAdapterDigest": "05d8ba2439c6b2e26a06a1dfd4d366700f08a3b964eb1f1d24ea3fd73e9f7cc2",
+    "visuals": {
+      "version": "0.1.1",
+      "distFilesMatchReleasedRecord": 21,
+      "tgzSha256": "1f36f86e37dda83fbb1a48fde818afd2e846a20afdd192860f683a91d3117e22",
+      "identicalTo0142Tgz": true,
+      "releasedDigestsJsonUnchangedSince0142": true
+    },
+    "installedRuntimeCheck": {
+      "checkedMembers": 2071,
+      "uniqueFiles": 1169
+    },
+    "installNote": "runtime root = source + runtime archives, installed with its own orchestrator (install api, install supervisor; public audit 890 files, 10 locks) under a temporary git index (removed after); published learner/admin exports re-overlaid after install"
+  },
+  "migrationRehearsal": {
+    "what": "fresh pg_dump -Fc of the live pilot DB (now on 0.1.42; read-only session) restored into disposable course_core_rc0143_rehearsal; candidate migrate-cli applied the 7 new migrations; a second run applied none; QA pin, memberships and course releases unchanged; DB dropped and dump deleted; pilot DB still at 071 (57 rows)",
+    "pilotSchemaBefore": {
+      "lastMigration": "071_supervisor_event_requeues.sql",
+      "count": 57
+    },
+    "newMigrations": [
+      "058_conversational_gate_runtime.sql",
+      "062_artifact_store_and_search.sql",
+      "065_erased_request_digests.sql",
+      "066_rubric_assist_rejection.sql",
+      "068_erased_appeal_reasons.sql",
+      "069_receipt_redaction.sql",
+      "070_transfer_check_amendments.sql"
+    ],
+    "note": "all 7 new migrations are numbered below the pilot's latest (071); the runner applies unapplied names in order regardless, and the rehearsal confirms they apply cleanly on top of 071",
+    "rehearsalSchemaAfter": {
+      "count": 64,
+      "publicTables": 124
+    },
+    "qaPin": {
+      "enrollment": "6d7439c7-43b0-42d9-a2e2-c0ad5f8367ec",
+      "course": "0.1.4",
+      "status": "active",
+      "revision": 9,
+      "currentEpisode": "fnd-e01-01",
+      "evidence": 2,
+      "unchanged": true
+    },
+    "result": "passed"
+  },
+  "privateReleasedConsumerAcceptanceBeforePublication": {
+    "ranAgainst": "candidate artifact bytes, before the GitHub release was published",
+    "courseVersion": "0.1.6",
+    "courseRepo": "course main 2125a5f (includes harness PR #3) + local pin commit 57aa7fa (branch rc-0143-acceptance, not pushed)",
+    "models": "scripted only",
+    "timeoutsIncreased": false,
+    "attemptsPerAcceptance": 1,
+    "environmentSetupBeforeAttempts": "runtime installed and verified, npm ci, npm test 26/26, .local dirs created, Playwright browsers in a private path, installed Chrome 155 launch-checked, disposable DB created",
+    "harnessRehearsal": "not needed: harness unchanged since it passed against 0.1.41 and 0.1.42",
+    "http": {
+      "result": "passed",
+      "runs": 1,
+      "episodes": 56,
+      "practicalFamiliesRecovered": 3,
+      "committedRecoveryAssignments": 6,
+      "unearnedCompletionRejectedEveryEpisode": true,
+      "writtenExplanationsPendingWithoutBlocking": 4,
+      "failedFiniteBank": {
+        "replacements": 2,
+        "gateUnchanged": true,
+        "noFurtherCharge": true
+      },
+      "placementSettings": {
+        "offByDefault": true,
+        "enabledByStaff": true
+      },
+      "timings": {
+        "medianBeforeFirstRecoveryMs": 1139,
+        "medianFromEpisode16Ms": 1612,
+        "rangeFromEpisode16Ms": [
+          1465,
+          6477
+        ],
+        "totalSeconds": 96,
+        "wallSeconds": 127
+      }
+    },
+    "featureFlow": {
+      "result": "passed",
+      "runs": 1,
+      "wallSeconds": 59,
+      "operatorModelPrice": {
+        "refusedWithoutPriceByDefault": true
+      },
+      "placementSettings": {
+        "offByDefault": true,
+        "enabledByStaff": true
+      },
+      "remedialEpisodeApplied": true,
+      "placementDeclined": true,
+      "placementAccepted": {
+        "placedEpisodes": 10
+      },
+      "retention": "retained",
+      "writtenExplanationReviewed": "met",
+      "visualsPublished": 56
+    },
+    "browser": {
+      "result": "passed",
+      "runs": 1,
+      "wallSeconds": 256,
+      "phone": {
+        "completedEpisodes": 56,
+        "writtenExplanationsSubmitted": 4,
+        "totalSeconds": 143,
+        "medianFromEpisode16Ms": 2465
+      },
+      "desktop": {
+        "completedEpisodes": 16,
+        "placement": "declined"
+      },
+      "tablet": {
+        "completedEpisodes": 4,
+        "placement": "accepted",
+        "placedEpisodes": 12
+      },
+      "recovery": true,
+      "reloadPreservedCode": true,
+      "horizontalOverflow": false,
+      "codeAccessibility": true,
+      "pageErrors": 0
+    },
+    "ownerUnenrolled": true
+  },
+  "liveProviderAcceptance": false,
+  "notVerified": [
+    "live provider behaviour (Google or Anthropic)",
+    "real costs",
+    "generated prose and reviewer-draft quality",
+    "learning efficacy",
+    "physical devices",
+    "real hardware passkey authenticators",
+    "native app binaries",
+    "admin UI signed in on the pilot",
+    "external agent tools over HTTP/MCP with a real agent",
+    "optional S3-compatible artifact store (not configured)",
+    "conversational gates with a real model"
+  ],
+  "userActions": [
+    "placement is OFF by default from Core 0.1.40 (migration 048): after upgrading, turn it on per course in Admin > Placement (staff switch); otherwise learners are not offered placement",
+    "enter model prices (Providers > Model prices) for every role-bound model, incl. 'Price per web search' for a research model, or paid work stays refused",
+    "set paid-work allowances (workspace and QA enrollment)",
+    "install course 0.1.6 for new learners with scripts/install-pilot-course.mjs if not done"
+  ],
+  "observedAt": "2026-10-17T12:25:00Z",
+  "hostedAssetsByteIdenticalToCandidate": true,
+  "nativePilotUpgrade": {
+    "from": "0.1.42",
+    "to": "0.1.43",
+    "origin": "http://localhost:4310",
+    "runtimeRoot": "~/Library/Application Support/Course Core/Pilot/releases/v0.1.43/course-core",
+    "installedFrom": "hosted release assets (byte-identical to the candidate); Temporal CLI copied from the v0.1.42 root (same sha256 33c298d4\u2026)",
+    "installedRuntimeCheck": {
+      "checkedMembers": 2071,
+      "uniqueFiles": 1169,
+      "adapterDigestsMatch": true
+    },
+    "tool": "deploy/local/upgrade.mjs of 0.1.43",
+    "result": {
+      "status": "upgraded",
+      "backup": "backups/backup-20261017122348327-5a4508",
+      "restoreDrill": {
+        "tables": 122,
+        "rows": 229
+      },
+      "steps": [
+        "stopped",
+        "backed_up",
+        "restore_verified",
+        "started_new_runtime"
+      ],
+      "providerAcceptance": "not_verified"
+    },
+    "migrationsAfter": {
+      "count": 64,
+      "new": [
+        "058",
+        "062",
+        "065",
+        "066",
+        "068",
+        "069",
+        "070"
+      ]
+    },
+    "health": "ok",
+    "runningFrom": "releases/v0.1.43",
+    "enrollmentPins": {
+      "qaEnrollment": "6d7439c7-43b0-42d9-a2e2-c0ad5f8367ec",
+      "status": "active",
+      "revision": 9,
+      "enrollmentCount": 1,
+      "unchanged": true
+    },
+    "pilotAcceptance": {
+      "result": "passed",
+      "course": "0.1.4",
+      "phone": "completed fnd-e01-01",
+      "tablet": "resumed fnd-e01-02",
+      "desktop": "resumed fnd-e01-02",
+      "operatorEnrolled": false,
+      "adminSignedIn": false,
+      "qaRoleCheck": "verified_read_only_in_database",
+      "liveProviderAcceptance": false
+    }
+  }
+}

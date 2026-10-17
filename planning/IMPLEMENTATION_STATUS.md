@@ -1,3 +1,25 @@
+# Core 0.1.43 published, accepted and deployed to the pilot — 2026-10-17
+
+- Published: Core 0.1.43 prerelease.
+  - Tag object 38cd278 on 7d2318e. Main CI 12/12. Release run 39029388782, attempt 1.
+  - Artifact 12100626995, digest 93fc4fd9…. Manifest c602acb2….
+  - 889 source members match Git. Hosted assets are byte-identical to the candidate.
+  - Merged PRs since 0.1.42: #121, #124, #129, #131–#134, #137, #141, #143, #145–#147.
+- Qualification, each acceptance run once against the candidate bytes before publication (scripted models only, no timeout increases):
+  - Migration rehearsal on a fresh copy of the 0.1.42 pilot applied 7 migrations (058, 062, 065, 066, 068, 069, 070). The QA pin was unchanged.
+  - HTTP: 56/56 episodes.
+  - Feature flow: passed.
+  - Browser: passed on phone (56 episodes), desktop and tablet.
+- Deployed to the pilot on this Mac, 0.1.42 → 0.1.43.
+  - Backup backup-20261017122348327-5a4508. Restore drill: 122 tables, 229 rows.
+  - Health ok. 64 migrations.
+  - The QA enrollment is unchanged.
+  - Pilot acceptance passed: phone completed fnd-e01-01, tablet and desktop resumed. The operator is unenrolled.
+- On main after 0.1.43, not yet released: the activity runtime (#122). It went through four security-review rounds and closes audit #14.
+- Not live-verified: no real provider call has been made.
+- User actions: unchanged from 0.1.42 (placement on per course, model prices, allowances, course 0.1.6).
+- Evidence: evidence/core-0.1.43-release-and-pilot.json.
+
 # Core 0.1.42 published, accepted and deployed to the pilot — 2026-10-17
 
 - Not released: 0.1.40 and 0.1.41. Both are tagged, and neither tag was retried.
