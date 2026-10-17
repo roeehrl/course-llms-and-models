@@ -11,6 +11,7 @@ import pg from 'pg';
 import {verifyReleasedRuntime,expectedCoreRelease} from './released-runtime.mjs';
 import {stageWorkedExamples} from '../scripts/stage-worked-examples.mjs';
 import {writtenAnswers} from './written-answers.mjs';
+import {enablePlacement} from './placement-settings.mjs';
 import {harnessPassword,runWithPassword} from './password-login.mjs';
 const exec=promisify(execFile),root=fileURLToPath(new URL('../',import.meta.url));
 class Failure extends Error {constructor(code){super(code);this.code=code;}}
@@ -20,8 +21,8 @@ const runtime=path.resolve(args[1]),manifest=JSON.parse(await readFile(path.join
 const releaseReceipt=await verifyReleasedRuntime(runtime,path.resolve(args[3]));
 check(process.env.TEST_DATABASE_URL&&!process.env.DATABASE_URL,'disposable_database_required');
 const url=new URL(process.env.TEST_DATABASE_URL);check(['postgres:','postgresql:'].includes(url.protocol)&&['localhost','127.0.0.1','[::1]'].includes(url.hostname)&&/^\/course_core_(?:ci|test(?:_[a-z0-9_]+)?)$/.test(url.pathname)&&!url.search&&!url.hash,'disposable_database_required');
-const worked=workedCourse?await stageWorkedExamples():null,compiled=worked?.compiled??JSON.parse(await readFile(path.join(root,'dist/course.compiled.json'),'utf8')),course=compiled.server,configuration=worked?.proposedRegistry??JSON.parse(await readFile(path.join(root,'runtime/recovery-registry.json'),'utf8'));
-let verifierFile;if(worked){verifierFile=path.join(root,'.local/generated-teaching/verifier.json');await writeFile(verifierFile,worked.bytes,{mode:0o600});}
+const worked=workedCourse?await stageWorkedExamples():null,compiled=worked?.compiled??JSON.parse(await readFile(path.join(root,'dist/course.compiled.json'),'utf8').catch(e=>{throw new Failure(e?.code==='ENOENT'?'course_build_missing_run_npm_run_build_first':'course_build_unreadable');})),course=compiled.server,configuration=worked?.proposedRegistry??JSON.parse(await readFile(path.join(root,'runtime/recovery-registry.json'),'utf8'));
+let verifierFile;if(worked){verifierFile=path.join(root,'.local/generated-teaching/verifier.json');await mkdir(path.dirname(verifierFile),{recursive:true,mode:0o700});await writeFile(verifierFile,worked.bytes,{mode:0o600});}
 const candidate=(await exec('python3',['-B','-c',"import importlib.util;s=importlib.util.spec_from_file_location('r','runtime/recovery-code-reference.py');r=importlib.util.module_from_spec(s);s.loader.exec_module(r);print(r.candidate_source())"],{cwd:root,maxBuffer:64000})).stdout;
 const registryMetadata=JSON.parse(await readFile(path.join(root,'runtime/practical-registries.json'),'utf8'));
 check(registryMetadata.schemaVersion===1&&registryMetadata.registries.length===3,'qualified_registries_required');
@@ -76,6 +77,7 @@ try{
     requireOk(await request(teacher,'POST',`/api/admin/courses/${catalog.id}/releases/${releaseId}/transitions`,{action},{'if-match':view.revision,'idempotency-key':randomUUID()}),'review_transition');
   }
   requireOk(await request(teacher,'POST',`/api/admin/releases/${releaseId}/adaptation-registry`,{expectedRegistryRevision:0,configuration}),'approve_recovery');
+  reports.push({flow:'placement_settings',...await enablePlacement({request,requireOk,check,staff:teacher,catalogId:catalog.id})});
   const snapshot=async l=>requireOk(await request(l,'GET',`/api/enrollments/${l.enrollmentId}`),'snapshot');
   const command=async(l,action,body)=>{const s=await snapshot(l);return requireOk(await request(l,'POST',`/api/enrollments/${l.enrollmentId}/${action}`,{expectedRevision:s.revision,idempotencyKey:randomUUID(),...body}),action);};
   const enroll=async subject=>{const l=await bootstrap(subject,'learner');l.enrollmentId=requireOk(await request(l,'POST','/api/enrollments',{releaseId}),'enrollment').id;return l;};

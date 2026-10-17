@@ -7,10 +7,11 @@ import {createServer as reserveServer} from 'node:net';
 import {chromium} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import {stageWorkedExamples,ROOT} from '../scripts/stage-worked-examples.mjs';
-import {verifyReleasedRuntime} from './released-runtime.mjs';
+import {verifyReleasedRuntime,expectedCoreRelease17,releasedDirectories} from './released-runtime.mjs';
 
-const runtime=fileURLToPath(new URL('.local/released-core-v0.1.17/course-core/',ROOT)),releaseDir=fileURLToPath(new URL('.local/released-core-artifacts/v0.1.17/',ROOT));
-const delivery=await verifyReleasedRuntime(runtime,releaseDir);
+const {runtime,release:releaseDir}=await releasedDirectories(process.argv.slice(2),{runtime:fileURLToPath(new URL('.local/released-core-v0.1.17/course-core/',ROOT)),release:fileURLToPath(new URL('.local/released-core-artifacts/v0.1.17/',ROOT))});
+// This flow imports v0.1.17 internals directly, so it verifies against that release, not the current pin.
+const delivery=await verifyReleasedRuntime(runtime,releaseDir,expectedCoreRelease17);
 assert(process.env.TEST_DATABASE_URL&&!process.env.DATABASE_URL,'Explicit disposable test database required');
 const url=new URL(process.env.TEST_DATABASE_URL);assert(['127.0.0.1','localhost','[::1]'].includes(url.hostname)&&/^\/course_core_(?:ci|test(?:_[a-z0-9_]+)?)$/.test(url.pathname)&&!url.search&&!url.hash);
 const api=async name=>import(pathToFileURL(path.join(runtime,'services/api/dist/'+name+'.js')).href);

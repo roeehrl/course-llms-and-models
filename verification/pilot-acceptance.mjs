@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {chromium} from '@playwright/test';
+import {expectResponse} from './browser-responses.mjs';
 import AxeBuilder from '@axe-core/playwright';
 import pg from 'pg';
 import {verifyWorkedPackage} from '../scripts/package-worked-course.mjs';
@@ -73,7 +74,7 @@ async function context(name,width,height){
   page.on('pageerror',e=>errors.push(e.message));return {ctx,page,errors};
 }
 async function signIn(page){
-  const loggedIn=page.waitForResponse(r=>new URL(r.url()).pathname==='/auth/login'&&r.request().method()==='POST');
+  const loggedIn=expectResponse(page,r=>new URL(r.url()).pathname==='/auth/login'&&r.request().method()==='POST');
   await page.goto(origin+'/');await page.getByLabel('Username',{exact:true}).waitFor();
   assert.equal(await page.getByLabel('One-time sign-in code',{exact:true}).count(),0,'One-time code field shown while codes are off');
   await page.getByLabel('Username',{exact:true}).fill(qa.loginName);await page.getByLabel('Password',{exact:true}).fill(qaPassword);
@@ -101,7 +102,7 @@ try{
       for(let step=0;step<2;step++)await page.getByRole('button',{name:'Continue learning →',exact:true}).first().click();
     }else{
       await page.getByRole('button',{name:'Open course',exact:true}).click();
-      const enrolled=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/enrollments'&&r.request().method()==='POST');
+      const enrolled=expectResponse(page,r=>new URL(r.url()).pathname==='/api/enrollments'&&r.request().method()==='POST');
       await page.getByRole('button',{name:'Start course',exact:true}).click();
       enrollmentId=(await (await enrolled).json()).id;report.resumedExistingEnrollment=false;
       await page.getByRole('button',{name:'Continue learning →',exact:true}).click();
@@ -113,13 +114,19 @@ try{
       await page.getByRole('heading',{name:first.title,exact:true}).waitFor();
       await quality(page,'phone','first-episode');
       assert(await page.getByRole('button',{name:'Complete episode →',exact:true}).isDisabled(),'Completion was available before evidence');
-      for(const block of first.blocks){
-        if(['assessment','activity'].includes(block.type)||saved.completedBlockIds.includes(block.id))continue;
-        await page.getByRole('button',{name:'Mark this part read',exact:true}).click();
+      // Mark each unread part inside its own numbered card and wait for the save: the card
+      // advances only after refreshed progress arrives, so an unscoped quick second click can
+      // land on the part just read and be ignored (seen in the Core 0.1.41 rehearsal).
+      const reading=first.blocks.filter(b=>!['assessment','activity'].includes(b.type));
+      for(const [index,block] of reading.entries()){
+        if(saved.completedBlockIds.includes(block.id))continue;
+        const read=expectResponse(page,r=>new URL(r.url()).pathname.endsWith('/read')&&r.request().method()==='POST');
+        await page.getByRole('article',{name:`Reading part ${index+1}`,exact:true}).getByRole('button',{name:'Mark this part read',exact:true}).click();
+        assert((await read).ok(),'Reading part was not saved');
       }
       for(let step=0;step<10;step++){
         if((await snapshot()).lessons.find(l=>l.id===first.id).gate.passed)break;
-        const issued=page.waitForResponse(r=>new URL(r.url()).pathname.endsWith('/challenges')&&r.request().method()==='POST');
+        const issued=expectResponse(page,r=>new URL(r.url()).pathname.endsWith('/challenges')&&r.request().method()==='POST');
         await page.getByRole('button',{name:'Start the next check →',exact:true}).click();
         const c=await (await issued).json();assert(!('grading' in c.question),'Grading key exposed to learner');
         const a=course.assessments.find(x=>x.id===c.question.id);assert(a&&a.type!=='code','Unexpected first-episode assessment');
