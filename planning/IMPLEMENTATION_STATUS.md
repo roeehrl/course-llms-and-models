@@ -1,3 +1,30 @@
+# Core 0.1.42 published, accepted and deployed to the pilot — 2026-10-17
+
+- Not released: 0.1.40 and 0.1.41. Both are tagged, and neither tag was retried.
+  - 0.1.40: release run 38960925130 failed on the adapter-digests 5 s test timeout (fixed by #138).
+  - 0.1.41: its single acceptance attempt failed in the harness before Core ran (missing `.local` directory). The user chose to cut 0.1.42 strictly. The 0.1.41 bytes were then used only to rehearse the fixed harness (course PR #3).
+- Published: Core 0.1.42 prerelease.
+  - Tag object 0c6f2bf on 49eaa5c. Main CI 12/12. Release run 39001467044, attempt 1.
+  - Artifact 12089118918, digest cfe1dc9c…. Manifest cf80c803….
+  - 864 source members byte-compared to the Git tree. Hosted assets are byte-identical to the candidate.
+- Qualification, each acceptance run once against the candidate bytes before publication (scripted models only, no timeout increases):
+  - Migration rehearsal on a pilot copy applied 19 new migrations, through 071. The QA pin was unchanged.
+  - HTTP: 56/56 episodes.
+  - Feature flow: passed.
+  - Browser: passed on phone (56 episodes), desktop and tablet.
+- Deployed to the pilot on this Mac (http://localhost:4310), 0.1.39 → 0.1.42, with the release's upgrade.mjs.
+  - Backup backup-20261017110018397-14b47f. Restore drill: 100 tables, 207 rows.
+  - Health ok. Running from releases/v0.1.42. 57 migrations, through 071.
+  - The QA enrollment 6d7439c7 is unchanged and remains the only enrollment.
+  - Pilot acceptance passed: phone completed fnd-e01-01, tablet and desktop resumed fnd-e01-02. The operator is unenrolled.
+- Not live-verified: no real provider call has been made.
+- User actions:
+  - Turn placement on per course (Admin → Placement). It is OFF by default since 0.1.40.
+  - Enter model prices.
+  - Set paid-work allowances.
+  - Install course 0.1.6 for new learners.
+- Evidence: evidence/core-0.1.42-release-and-pilot.json.
+
 # Core 0.1.39 published, accepted and deployed to the pilot — 2026-10-15
 
 - MERGED: PR #81 (version 0.1.39) on top of #47-#80; main CI 38788376533 12/12 on
