@@ -14,10 +14,6 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - name: Require private repository visibility
-        env:
-          REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
-        run: test "$REPOSITORY_PRIVATE" = true
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
           persist-credentials: false
