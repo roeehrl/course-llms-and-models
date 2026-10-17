@@ -16,6 +16,7 @@ import pg from 'pg';
 import {verifyReleasedRuntime,expectedCoreRelease} from './released-runtime.mjs';
 import {stageWorkedExamples} from '../scripts/stage-worked-examples.mjs';
 import {writtenAnswers} from './written-answers.mjs';
+import {enablePlacement} from './placement-settings.mjs';
 import {instantiateNumericalRecipe} from '@course-core/sdk';
 import {startSyntheticModel} from './synthetic-model.mjs';
 import {harnessPassword,runWithPassword} from './password-login.mjs';
@@ -115,6 +116,7 @@ try{
     requireOk(await request(owner,'POST',`/api/admin/courses/${catalog.id}/releases/${releaseId}/transitions`,{action},{'if-match':view.revision,'idempotency-key':randomUUID()}),'review_transition');
   }
   requireOk(await request(owner,'POST',`/api/admin/releases/${releaseId}/adaptation-registry`,{expectedRegistryRevision:0,configuration}),'approve_registry');
+  reports.placementSettings=await enablePlacement({request,requireOk,check,staff:owner,catalogId:catalog.id});
   // Accounts are created over the People API: a reviewer, an instructor and learners.
   // Invitations carry a login name and a server-generated temporary password that must be changed at first sign-in.
   const invite=async(role,displayName)=>{

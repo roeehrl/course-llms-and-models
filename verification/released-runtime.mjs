@@ -11,6 +11,16 @@ export const expectedCoreRelease35={version:'0.1.35',tag:'v0.1.35',commit:'846fd
 export const expectedCoreRelease37={version:'0.1.37',tag:'v0.1.37',commit:'6fc6a2a4df221b91804c535a6221ce3ea77ae11e',tagObject:'04a9712eea019c190ad65aa7117f12cef1f16ed5',runId:38560622115,manifestSha256:'c44b0d7ec4fd1889bb638cc6f586e86af088c6ad2781c7a65ef79b04171d9a12'};
 export const expectedCoreRelease38={version:'0.1.38',tag:'v0.1.38',commit:'ded66f27124dd4c128f47d92fa05fa85f7790745',tagObject:'9d72b3c1dc23c3d9a8667078aef2e7b33603d088',runId:38599534149,manifestSha256:'9199311b94abe3ce832902c431917200863849db359f2a2fd35d5a4f49894654'};
 export const expectedCoreRelease={version:'0.1.39',tag:'v0.1.39',commit:'56b3cda473c7ffe26b4c88547df07853cbe25760',tagObject:'68b3b331965015a9745b46f6846eb967ead64dda',runId:38790654821,manifestSha256:'4bc32171d915aae85d794aaea0d3b3926efb8a8e87fddee3fd583d1cad4150ff'};
+/** A fresh checkout has no gitignored .local/ tree, so a harness that reads a released
+ * runtime or its assets from a default location says where they come from instead of
+ * failing on a bare ENOENT. --runtime-dir and --release-dir override the defaults. */
+export async function releasedDirectories(argv,defaults){
+ const value=flag=>{const i=argv.indexOf(flag);return i<0?undefined:argv[i+1];};
+ const dirs={runtime:path.resolve(value('--runtime-dir')??defaults.runtime),release:path.resolve(value('--release-dir')??defaults.release)};
+ for(const [name,dir] of Object.entries(dirs)){let ok=false;try{ok=(await lstat(dir)).isDirectory();}catch{}
+  if(!ok)throw Error(`released_${name}_directory_missing: ${dir} does not exist. Download and verify the release assets and install the runtime there (see RELEASES.md), or pass --runtime-dir and --release-dir.`);}
+ return dirs;
+}
 export const releaseCiNames=['Public source and orchestration','Module / policy','Module / providers','Module / adaptation','Module / research','Module / example-courses','Module / supervisor','Sandbox / real Docker Linux','API and connected learner / Postgres 17','Browser / visuals','Browser / learner','Browser / admin'];
 const check=(v,code)=>{if(!v)throw Error(code);},sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 /** Verify published delivery data and installed files independently of Core
