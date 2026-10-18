@@ -1,6 +1,6 @@
-# Private course engineering rules
+# Course engineering rules
 
-- Keep this repository private. The approved design and case-study evidence contain private operational context.
+- This repository is public (since 2026-10-16, so CI can run). Never commit secrets, credentials, learner data or private operational context such as host names, addresses or account details.
 - Consume published SDK/core interfaces. Do not introduce course-specific branches into public core.
 - Author original lessons and exercises with dated source references and independently checked calculations.
 - Preserve uncertainty in incident explanations. Distinguish computed, submitted, accepted, credited and paid work.
