@@ -1,3 +1,28 @@
+# Core 0.1.44 published, accepted and deployed to the pilot, with tailnet access — 2026-10-18
+
+- Published: Core 0.1.44 prerelease.
+  - Tag object bc1348f on ab90eda. Main CI 12/12. Release run 39118265920, attempt 1.
+  - Artifact 12134122421, digest d2ead307…. Manifest 4cfc4324….
+  - 907 source members match Git. Hosted assets are byte-identical to the candidate.
+  - Merged PRs since 0.1.43: #122 (activity runtime, audit #14), #148 (tailnet origins), #149 (placement limit, draft bundle from file), #150 (version).
+- Qualification, each acceptance run once against the candidate bytes before publication (scripted models only, no timeout increases):
+  - Migration rehearsal on a fresh copy of the 0.1.43 pilot applied 2 migrations (059, 076). A rerun applied none. 573 rows unchanged.
+  - HTTP: 56/56 episodes.
+  - Feature flow: passed.
+  - Browser: passed on phone (56 episodes), desktop and tablet.
+- Deployed to the pilot on this Mac, 0.1.43 → 0.1.44.
+  - Backup backup-20261018110606780-333702. Restore drill: 124 tables, 637 rows.
+  - Health ok. 66 migrations.
+  - The QA enrollment is unchanged.
+  - Pilot acceptance passed: phone completed fnd-e01-01, tablet and desktop resumed. The operator is unenrolled.
+- Tailnet access: the pilot trusts its Tailscale IP origin (plain http) and is forwarded with `tailscale serve --tcp=4310` (tailnet only; the API still listens on loopback).
+  - `--http` forwarding answers only the MagicDNS name, so the IP got 404. A Core README correction is in a follow-up PR.
+  - Checked from the pilot host through its tailnet address: admin page loads on phone and desktop sizes, the tailnet origin is accepted, other origins are refused with 403, and no passkeys are offered.
+  - Not checked from a second physical device yet.
+- Not live-verified: no real provider call has been made. Course 0.1.6 declares no activities, so the activity runtime is covered only by Core CI.
+- User actions: placement on per course, model prices, allowances, course 0.1.6.
+- Evidence: evidence/core-0.1.44-release-and-pilot.json.
+
 # Core 0.1.43 published, accepted and deployed to the pilot — 2026-10-17
 
 - Published: Core 0.1.43 prerelease.
