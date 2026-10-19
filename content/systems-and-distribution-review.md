@@ -96,7 +96,7 @@ The traces implement deliberately specified teaching policies. They are not prot
   "records": [
     {
       "id": "sys-src-up-splits",
-      "gitRepository": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/source",
+      "gitRepository": "<mining-repo>/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/source",
       "gitCommit": "22d702acd07453dabb187abedfad185826091341",
       "gitPath": "shared/subnet/src/subnet/model/llama3/splits.py",
       "sha256": "8fc9aa978300f2df81d9ecb81c877bfe76e9e0f27968ab28dbd6724505a014fe",
@@ -107,7 +107,7 @@ The traces implement deliberately specified teaching policies. They are not prot
     },
     {
       "id": "sys-src-up-queue",
-      "gitRepository": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/source",
+      "gitRepository": "<mining-repo>/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/source",
       "gitCommit": "22d702acd07453dabb187abedfad185826091341",
       "gitPath": "src/miner/src/miner/training/activation_queue.py",
       "sha256": "cf61083bbe7eb6f00f0e18605d2fd597bb660afdd399ed97320b9327313b6b0f",
@@ -118,7 +118,7 @@ The traces implement deliberately specified teaching policies. They are not prot
     },
     {
       "id": "sys-src-patched-training",
-      "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/training/training.py",
+      "path": "<mining-repo>/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/training/training.py",
       "sha256": "7ddce6af76a6815ccafee56ce0b44fadfded9ec9fd0b0e31372cd71e70009e7d",
       "bytes": 60259,
       "scope": "historical patched package file; not a live installation observation",
@@ -131,7 +131,7 @@ The traces implement deliberately specified teaching policies. They are not prot
     },
     {
       "id": "sys-src-patched-router",
-      "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/training/transport_health.py",
+      "path": "<mining-repo>/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/training/transport_health.py",
       "sha256": "4020b92fac9a79d7ae71b4b56a427d6d39ab45fa2e4277e98140824647e6f398",
       "bytes": 16382,
       "scope": "historical patched package file; not a live installation observation",
@@ -144,7 +144,7 @@ The traces implement deliberately specified teaching policies. They are not prot
     },
     {
       "id": "sys-src-patched-mesh",
-      "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/sync_v2/elastic_device_mesh.py",
+      "path": "<mining-repo>/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/sync_v2/elastic_device_mesh.py",
       "sha256": "2a55a5a9788c9da573333f74219005bb5475a551af6c5586a8de1f4cbb83ecb4",
       "bytes": 26522,
       "scope": "historical patched package file; not a live installation observation",
@@ -157,7 +157,7 @@ The traces implement deliberately specified teaching policies. They are not prot
     },
     {
       "id": "sys-src-patched-phase",
-      "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/phase_worker.py",
+      "path": "<mining-repo>/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/phase_worker.py",
       "sha256": "f1c3e4ac1a90fbd611eb39b98e497c563d9ba41028025bb7cc64f16e53bc601d",
       "bytes": 33251,
       "scope": "historical patched package file; not a live installation observation",
@@ -170,7 +170,7 @@ The traces implement deliberately specified teaching policies. They are not prot
     },
     {
       "id": "sys-src-patched-merge",
-      "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/utils/partition_merging.py",
+      "path": "<mining-repo>/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/utils/partition_merging.py",
       "sha256": "0fc817650c60ce606490bf21f16f519a6767e94ad863b1e3d959961896b47ec6",
       "bytes": 29547,
       "scope": "historical patched package file; not a live installation observation",
@@ -183,7 +183,7 @@ The traces implement deliberately specified teaching policies. They are not prot
     },
     {
       "id": "sys-src-patched-model",
-      "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/shared/subnet/src/subnet/model/model_mixin.py",
+      "path": "<mining-repo>/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/shared/subnet/src/subnet/model/model_mixin.py",
       "sha256": "888e1fb7787e00e4a776a52a3a1cb4f550c4c84fff7e4b75dafe8ce2fd38d177",
       "bytes": 41274,
       "scope": "historical patched package file; not a live installation observation",
@@ -196,7 +196,7 @@ The traces implement deliberately specified teaching policies. They are not prot
     },
     {
       "id": "sys-src-patched-queue",
-      "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/training/activation_queue.py",
+      "path": "<mining-repo>/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/training/activation_queue.py",
       "sha256": "b25a5d30065898b4b430a83e9aa1a5e2b8da1ac576b484d2b2899a2510d0e517",
       "bytes": 60771,
       "scope": "historical patched package file; not a live installation observation",
@@ -209,7 +209,7 @@ The traces implement deliberately specified teaching policies. They are not prot
     },
     {
       "id": "sys-src-patched-cache",
-      "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/training/activation_cache.py",
+      "path": "<mining-repo>/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/src/miner/src/miner/training/activation_cache.py",
       "sha256": "f0c8186794a94f32fc6ef9aef4184b5c7b11e9b2ec48ea284576f8aa8eeff2a6",
       "bytes": 9517,
       "scope": "historical patched package file; not a live installation observation",
@@ -222,7 +222,7 @@ The traces implement deliberately specified teaching policies. They are not prot
     },
     {
       "id": "sys-src-journal-source",
-      "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/shared/common/src/common/utils/strata_event_journal.py",
+      "path": "<mining-repo>/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/runtime/shared/common/src/common/utils/strata_event_journal.py",
       "sha256": "872e4cf10ecac7560e7f9ef147bd03d0da074eff7f2ba3d54e1512f9130f7a4d",
       "bytes": 3196,
       "scope": "historical patched package file; not a live installation observation",
@@ -235,7 +235,7 @@ The traces implement deliberately specified teaching policies. They are not prot
     },
     {
       "id": "sys-src-entrypoint",
-      "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/mounted_worker_entrypoint.py",
+      "path": "<mining-repo>/macos/StrataMiner/Research/iota-v4.12.10-local-worker/mounted_worker_entrypoint.py",
       "sha256": "fa5a82aa4948865b36053c4f22a13a844e6456ec540db8b4a2b4eaf69acdf41e",
       "bytes": 13354,
       "scope": "local control source snapshot; hash is authoritative, not deployment status",
@@ -248,9 +248,12 @@ The traces implement deliberately specified teaching policies. They are not prot
     },
     {
       "id": "sys-src-local-readme",
-      "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/README.md",
-      "sha256": "1be8e8c9e970ac5ad2522421b6ae4e73fce6b731c3358a4cd6b9036b66e700de",
-      "bytes": 44635,
+      "path": "<mining-repo>/macos/StrataMiner/Research/iota-v4.12.10-local-worker/README.md",
+      "sha256": "a50a878a3b3f9b20a9798110fc581bc796272e6fafd8625ab583e84461b2c0f7",
+      "bytes": 44623,
+      "redaction": "local absolute paths replaced with <mining-repo> placeholders; sha256/bytes describe the redacted snapshot",
+      "originalSha256": "1be8e8c9e970ac5ad2522421b6ae4e73fce6b731c3358a4cd6b9036b66e700de",
+      "originalBytes": 44635,
       "scope": "dated explanatory history; source statements are not fresh fleet observations",
       "lineRanges": "1-115,291-315",
       "readAt": "2026-10-12T16:10:35Z",
@@ -261,7 +264,7 @@ The traces implement deliberately specified teaching policies. They are not prot
     },
     {
       "id": "sys-src-fixset",
-      "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-fixset/README.md",
+      "path": "<mining-repo>/macos/StrataMiner/Research/iota-v4.12.10-fixset/README.md",
       "sha256": "a6765866993c3edc13d1406f714d3d764dd673f582a7868a638332d71550ef50",
       "bytes": 103940,
       "scope": "patch history read as versioned documentation",
@@ -274,7 +277,7 @@ The traces implement deliberately specified teaching policies. They are not prot
     },
     {
       "id": "sys-src-journal-patch",
-      "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-fixset/iota-v4.12.10-structured-event-journal.patch",
+      "path": "<mining-repo>/macos/StrataMiner/Research/iota-v4.12.10-fixset/iota-v4.12.10-structured-event-journal.patch",
       "sha256": "fc67837c33d4f8b6154aac1d81825d39a05c562ff496e02e17e5cf0e0a4fff13",
       "bytes": 12863,
       "scope": "historical patch, not evidence of live execution",
@@ -287,7 +290,7 @@ The traces implement deliberately specified teaching policies. They are not prot
     },
     {
       "id": "sys-src-head-record",
-      "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/evidence/sn9-mps-studio-2026-09-02/head-b4-s800-10.jsonl",
+      "path": "<mining-repo>/macos/StrataMiner/Research/iota-v4.12.10-local-worker/evidence/sn9-mps-studio-2026-09-02/head-b4-s800-10.jsonl",
       "sha256": "ef23f38a86ab4156a5a2d98571adf97f5af5460ef98c2d12fa75e70951ea9a2f",
       "bytes": 55797,
       "scope": "archived local benchmark, not network training/journal acceptance",
@@ -300,7 +303,7 @@ The traces implement deliberately specified teaching policies. They are not prot
     },
     {
       "id": "sys-src-rules",
-      "path": "/Users/tnt/git/mine/CLAUDE.md",
+      "path": "<mining-repo>/CLAUDE.md",
       "sha256": "60da4971318cd8c3e8c2735255d4e526e48e12427c20555488c7c5a9b35f1743",
       "bytes": 3733,
       "scope": "repository computed-work equivalence and operational constraints",
@@ -313,7 +316,7 @@ The traces implement deliberately specified teaching policies. They are not prot
     },
     {
       "id": "sys-src-package-manifest",
-      "path": "/Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/manifest.json",
+      "path": "<mining-repo>/macos/StrataMiner/Research/iota-v4.12.10-local-worker/.build/test-install/releases/v4.12.10-e667fcdcccb0523afbdd7d18/manifest.json",
       "sha256": "cf502aafa3304cb4bf291ade7360b62f7a737ba7dd87b90d13efcf07352f14cd",
       "bytes": 31565,
       "scope": "historical artifact metadata; no deployment assertion",
@@ -330,7 +333,7 @@ The traces implement deliberately specified teaching policies. They are not prot
 
 ## Executable CPU verification
 
-This program reads the authored fragment and exact pinned source bytes, parses source text, and executes only the lesson's standalone CPU examples and the reference simulations below. It uses no network, SSH, wallet, device query or worker import. If a pinned source has changed, it intentionally fails rather than silently reinterpreting historical evidence.
+This program reads the authored fragment and the pinned evidence snapshots in `evidence/snapshots/`, parses source text, and executes only the lesson's standalone CPU examples and the reference simulations below. It uses no network, SSH, wallet, device query or worker import. If a pinned source has changed, it intentionally fails rather than silently reinterpreting historical evidence.
 
 ```python
 import ast, hashlib, json, math, re, subprocess
@@ -338,7 +341,7 @@ from pathlib import Path
 from fractions import Fraction as F
 from collections import deque
 
-ROOT=Path('~/git/course-llms-and-models')
+ROOT=Path.cwd()  # run from the course repo root
 fragment=json.loads((ROOT/'content/systems-and-distribution.json').read_text())
 review=(ROOT/'content/systems-and-distribution-review.md').read_text()
 pins=json.loads(re.search(r'^```json\n(.*?)^```$',review,re.S|re.M).group(1))
@@ -358,9 +361,7 @@ def rejects(fn):
 # Source verification is byte comparison and AST parsing only; no worker imports.
 source_text={}
 for record in pins['records']:
-    if 'gitPath' in record:
-        data=subprocess.check_output(['git','-C',record['gitRepository'],'show',record['gitCommit']+':'+record['gitPath']])
-    else:data=Path(record['path']).read_bytes()
+    data=(ROOT/'evidence/snapshots'/(record['id']+'.txt')).read_bytes()
     assert hashlib.sha256(data).hexdigest()==record['sha256'],record['id']
     source_text[record['id']]=data.decode()
     if record.get('path',record.get('gitPath','')).endswith('.py'):ast.parse(data.decode())
@@ -636,13 +637,13 @@ assert len(bugs)==len(set(bugs))
 print(json.dumps(dict(arithmetic_assertions=checks,reduction_cases=reduction_cases,matrix_tile_cases=matrix_cases,pipeline_schedule_cases=pipeline_cases,numeric_keys=len(expected),python_fences=snippets,source_hashes_verified=len(pins['records']),bug_variants_rejected=bugs),indent=2))
 ```
 
-Run the embedded check without creating another file:
+From the course repo root, run the embedded check without creating another file:
 
 ```sh
 python3 - <<'PYVERIFY'
 from pathlib import Path
 import re
-p=Path('~/git/course-llms-and-models/content/systems-and-distribution-review.md')
+p=Path('content/systems-and-distribution-review.md')
 code=re.search(r'^```python\n(.*?)^```$',p.read_text(),re.S|re.M).group(1)
 exec(compile(code,str(p),'exec'))
 PYVERIFY
@@ -651,7 +652,6 @@ PYVERIFY
 Run released-SDK and parent assembly validation in memory, from the private course root:
 
 ```sh
-cd ~/git/course-llms-and-models
 node --input-type=module - <<'JSVERIFY'
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
