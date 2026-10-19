@@ -73,7 +73,7 @@ import json, math, re, struct
 from fractions import Fraction as F
 from pathlib import Path
 
-root = Path('/Users/tnt/git/course-llms-and-models')
+root = Path('~/git/course-llms-and-models')
 f = json.loads((root/'content/foundations.json').read_text())
 items = {a['id']: a for a in f['assessments']}
 episodes = [e for c in f['chapters'] for e in c['episodes']]
@@ -289,7 +289,7 @@ Run the embedded CPU script without creating another file:
 python3 - <<'PYVERIFY'
 from pathlib import Path
 import re
-p = Path('/Users/tnt/git/course-llms-and-models/content/foundations-review.md')
+p = Path('~/git/course-llms-and-models/content/foundations-review.md')
 code = re.search(r'^```python\n(.*?)^```$', p.read_text(), re.S | re.M).group(1)
 exec(compile(code, str(p), 'exec'))
 PYVERIFY
@@ -301,9 +301,9 @@ Reproduce SDK validation and learner projection checks without writing a manifes
 node --input-type=module - <<'JSVERIFY'
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
-import {validateCourse} from '/Users/tnt/git/course-sdk/dist/validate.js';
-import {compileCourse,verifyCompiledCourse} from '/Users/tnt/git/course-sdk/dist/compiler.js';
-const fragment = JSON.parse(fs.readFileSync('/Users/tnt/git/course-llms-and-models/content/foundations.json','utf8'));
+import {validateCourse} from '~/git/course-sdk/dist/validate.js';
+import {compileCourse,verifyCompiledCourse} from '~/git/course-sdk/dist/compiler.js';
+const fragment = JSON.parse(fs.readFileSync('~/git/course-llms-and-models/content/foundations.json','utf8'));
 const envelope = {
   schemaVersion:1, id:'foundations-validation', version:'0.1.0',
   title:'Validation only', summary:'Not an enrollment policy', locale:'en', platforms:['web'],

@@ -550,8 +550,8 @@ full requested breakthrough platform or reduce the remaining scope.
 
 Fullv0.8goalACTIVE/incomplete. Published/consumer-qualified Core0.1.17 is NOW
 ACTUALLY INSTALLED and running all4native services at http://127.0.0.1:4310.
-Pin /Users/tnt/Library/Application Support/Course Core/Pilot/releases/v0.1.17/course-core;
-state /Users/tnt/git/course-core/.local/pilot. Exact1105members/640files verified;
+Pin ~/Library/Application Support/Course Core/Pilot/releases/v0.1.17/course-core;
+state ~/git/course-core/.local/pilot. Exact1105members/640files verified;
 128dependency links all resolve inside pin; prior qualified Temporalbinary copied
 and hashed. Provenanceactivated:true. Never use the development checkout as root.
 
@@ -1128,8 +1128,8 @@ state equality, key custody and actual authenticated native HTTP/browser checks.
   practical recovery/reload code drafts/accessibility/overflow/zero pageerrors.
   HTTP41007 was already completed. No duplicate acceptance process remains.
 - Core0.1.10 ACTIVE at
-  /Users/tnt/Library/Application Support/Course Core/Pilot/releases/v0.1.10/course-core
-  State /Users/tnt/git/course-core/.local/pilot. Explicit pinned root/state required.
+  ~/Library/Application Support/Course Core/Pilot/releases/v0.1.10/course-core
+  State ~/git/course-core/.local/pilot. Explicit pinned root/state required.
   Latest observed installation47943c39-71be-40f6-bba6-e5958ca8dbbe, label
   com.coursecore.pilot.45b782c8c65c71d4.47943c3971be40f6bba6e5958ca8dbbe,
   instance5bf22738-5824-4921-b91b-005e57a55d85. Revalidate before control; PIDs stale.
@@ -1186,7 +1186,7 @@ Private .local/private-v10-http-acceptance.log. Browser acceptance RUNNINGexec95
 private .local/private-v10-browser-acceptance.log. Pollsamehandle;no timeout restart.
 
 Pinned native0.1.10runtime STAGED,NOTactive:
-/Users/tnt/Library/Application Support/Course Core/Pilot/releases/v0.1.10/course-core
+~/Library/Application Support/Course Core/Pilot/releases/v0.1.10/course-core
 All1082members/627files verified;59dependencylinks resolveinside pinnedroot;
 already-qualifiedTemporalbinary copied and hashed. Provenanceactivated:false.
 Activepilot remains0.1.8, explicitoldroot/state detailedbelow. Existing course0.1.3
@@ -1260,8 +1260,8 @@ called and no paid allowance was enabled.
   browser checks passed. Saved completed counts16,1,0; provider credentials0 and
   paid limits0. Pinned runtime archive bytes1074members/622files verified.
 - Active native root:
-  /Users/tnt/Library/Application Support/Course Core/Pilot/releases/v0.1.8/course-core
-  State remains /Users/tnt/git/course-core/.local/pilot. Always pass explicit root
+  ~/Library/Application Support/Course Core/Pilot/releases/v0.1.8/course-core
+  State remains ~/git/course-core/.local/pilot. Always pass explicit root
   and state to the pinned controller. Latest observed instance
   8d0563a6-ac8a-4661-889b-48399fd5268e; installation
   d7f3c99c-0071-41da-b3f8-6f0c4f1b494e. Revalidate handles/PIDs before any control.
@@ -1357,8 +1357,8 @@ paid call occurred. Core0.1.6 is still the latest actual published runtime.
   after verified released artifacts/consumer/staging may the old authenticated
   controller be stopped, then a consistent backup made and restore-qualified.
 - Keep old root explicit in manager calls while active:
-  /Users/tnt/Library/Application Support/Course Core/Pilot/releases/v0.1.5/course-core
-  and state /Users/tnt/git/course-core/.local/pilot. Never touch other agents or
+  ~/Library/Application Support/Course Core/Pilot/releases/v0.1.5/course-core
+  and state ~/git/course-core/.local/pilot. Never touch other agents or
   assume stale PIDs. Newruntime must be pinned outside checkout and all dependency
   links kept within it. Preserve queue, config, learner state and grader pins.
 
@@ -1635,7 +1635,7 @@ READtopplanning/PRACTICAL_COVERAGE_HOLD.md for exactphaseevidence/currentruntime
 
 - Coremain52208cf...,v0.1.5actuallyPUBLICprerelease. Release38344151592 SUCCESSattempt2 afterisolatedTemporalsetup timeoutattempt1(0of9 ran); unchangedtests passedonfresh runner,exactinitialcauseunproven. Immutableartifact11788398106 verifiedZIP9758257.../3409092bytes;all7archives/manifest/member/lock/installed/hostedbytechecksPASS, tag3d38...unchanged. RuntimeSHA319918e8acc63da467963b35f4a95cc53fa4ff8fcd28c7d1dbde839b2432dfcf. SDK0.2andvisual0.1.0unchangedreleaseddependencies.
 - PrivateCoreconsumer.local/released-core-v0.1.5/course-core installedthroughreleasedCLI;49deliverymembersunchanged. Correctedcandidate5d4169... passed actual56episodeHTTP+PG+isolatedPython with3practicalrecoveries,bothvariants,replay,wrongoriginal/correctedrepeat,all56prematurecompletiondenials,EXACT270min/6episodeassignmentdebits,exhaustionwithunchangedpolicy. ThreeactualbrowservportsPASS:phone56episodes,desktop/tablet16eachthroughprivatefull-suite recovery;reloadcode/accessibility/overflow/0errors. Nativebinaries/physicaldevices/effectivenessNOTclaimed. Exec80889/19152 areCOMPLETEDsuccess;donotrestartthesetestssolelybecausesummaryexists.
-- PinnedruntimeSTAGED/ACTIVATEDoutofcheckout: /Users/tnt/Library/Application Support/Course Core/Pilot/releases/v0.1.5/course-core,577archive members verified. Copiedfsdependencylinksinitiallyescapedtotheprivateconsumer;113linksrewrittenrelativeinsidepinnedroot/realpathverifiedbeforeactivation. Officialalready-qualifiedTemporalbinarycopied,digestrecorded. Nativequeuecourse-core-pilot unchanged. Source/.local cachesnot productiondependencies. Allfuture serviceCLI calls MUSTusepinned--root andexplicit--state /Users/tnt/git/course-core/.local/pilot; defaultoldrepoROOT failsownershipcheck. Pinneddeploymentavoidsdevelopmentbuilds changingrestartcode.
+- PinnedruntimeSTAGED/ACTIVATEDoutofcheckout: ~/Library/Application Support/Course Core/Pilot/releases/v0.1.5/course-core,577archive members verified. Copiedfsdependencylinksinitiallyescapedtotheprivateconsumer;113linksrewrittenrelativeinsidepinnedroot/realpathverifiedbeforeactivation. Officialalready-qualifiedTemporalbinarycopied,digestrecorded. Nativequeuecourse-core-pilot unchanged. Source/.local cachesnot productiondependencies. Allfuture serviceCLI calls MUSTusepinned--root andexplicit--state ~/git/course-core/.local/pilot; defaultoldrepoROOT failsownershipcheck. Pinneddeploymentavoidsdevelopmentbuilds changingrestartcode.
 - Oldownservice authenticatedstopped,not_runningconfirmed,thenuninstalledstoppedlabelONLY(config/data preserved);newserviceinstalledusingpinnedsource. Newlabelcom.coursecore.pilot.e18e7b228df17065.748223c975984240a14b2448cf42d5ed/installation748223c9-7598-4240-a14b-2448cf42d5ed. Currentinstance13ad219c-1baa-42d2-8a52-c0f2e653d412;controller23333/temporal23339/api23377/worker23463/dispatcher23464 atlastcheck(REVALIDATE). Existing2QAenrollments match before/afterrev/plan/course/status/lesson/gates. Owner0enrollments/clockunstarted. Legacyllm-practical-code retained;3newqualifiedgraders installedready withcapturedhashfilenames.
 - Private0.1.3 PUBLISHED live afteractualowneradmin review/publish/registryroutes. Release706d45dd-dea5-49c7-9ae4-be0b3553c8a1/digest5d4169ff837abf5835daeb917ab1ab897b6d82dfe97b8158666f93c5ab47704b, catalogb219561f...;registryrev1/115profilesactive. ActualnativeQA(notowner)completed16lessons,wrongcanon→freshfull-suite→realPythonindependentpass. ReceiptCore/.local/pilot/native-course-0.1.3-acceptance.json0600; publicationreceiptcourse-0.1.3-publication.json0600. NativeQAaddsathirdenrollmenttotheexistingQAaccount; old2pins remain. DoNOTcreateownerprogress.
 - ProtectedoperationalreceiptsCore/.local/pilot: v5-migration-before/after.json,config-before-v5-pinned.json(CONTAINSgeneratedcredential;DONOTPRINT),qualified-registry-staging.json,course-0.1.3-publication.json,native-course-0.1.3-acceptance.json. Pinnedreleaseparentinstallation-provenance.jsoncontainsartifact/binary/linkmetadataonly. Superseded469fprototypegraderremainsstaged/NOTconfigured; configincludesoldlegacy+3qualifiedhashfiles. No wallets/HF/payout/password/sudo/Discord/miner/GPU/remoteMac/newwatcher/externalmessage actions.
@@ -1896,9 +1896,9 @@ The approved Course Core v0.8 goal remains ACTIVE and incomplete. Native mobile 
 
 ## Repositories and release evidence
 
-- Public SDK: /Users/tnt/git/course-sdk, https://github.com/roeehrl/course-sdk.
-- Public core: /Users/tnt/git/course-core, https://github.com/roeehrl/course-core. Source is still local and uncommitted/unpushed.
-- Private course: /Users/tnt/git/course-llms-and-models. Visibility reverified PRIVATE. First source commit 9cff06d2c474e2d463405c157e160dd811148557 is pushed. Later chapters, frozen evidence, practical and visual work remain uncommitted.
+- Public SDK: ~/git/course-sdk, https://github.com/roeehrl/course-sdk.
+- Public core: ~/git/course-core, https://github.com/roeehrl/course-core. Source is still local and uncommitted/unpushed.
+- Private course: ~/git/course-llms-and-models. Visibility reverified PRIVATE. First source commit 9cff06d2c474e2d463405c157e160dd811148557 is pushed. Later chapters, frozen evidence, practical and visual work remain uncommitted.
 - SDK v0.1.0 is RELEASED from exact CI artifact run38271115306, commit c04d78b04216ccc5e7187f3ecb493cdc8c8f048b. Both Node24/26 CI jobs passed. Package SHA256 09915cce7f8ea64e17ba09f22869b187770966bb74c67f5796f4fe715ccf58bc. Distribution is GitHub release, not npm. Main protection requires both checks and PRs, forbids force-push/delete.
 - SDK is now on branch codex/adaptive-teaching-contracts, owned by Sagan for upcoming0.2 work. Do not alter or release it until his report is reviewed.
 - Private CI run38274708308 did not start any steps. GitHub annotation says recent account payments failed or spending limit needs increase. User was alerted; do not change billing or expose private course data through public CI. This is not a code-test failure.
