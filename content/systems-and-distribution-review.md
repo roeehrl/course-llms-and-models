@@ -338,7 +338,7 @@ from pathlib import Path
 from fractions import Fraction as F
 from collections import deque
 
-ROOT=Path('/Users/tnt/git/course-llms-and-models')
+ROOT=Path('~/git/course-llms-and-models')
 fragment=json.loads((ROOT/'content/systems-and-distribution.json').read_text())
 review=(ROOT/'content/systems-and-distribution-review.md').read_text()
 pins=json.loads(re.search(r'^```json\n(.*?)^```$',review,re.S|re.M).group(1))
@@ -642,7 +642,7 @@ Run the embedded check without creating another file:
 python3 - <<'PYVERIFY'
 from pathlib import Path
 import re
-p=Path('/Users/tnt/git/course-llms-and-models/content/systems-and-distribution-review.md')
+p=Path('~/git/course-llms-and-models/content/systems-and-distribution-review.md')
 code=re.search(r'^```python\n(.*?)^```$',p.read_text(),re.S|re.M).group(1)
 exec(compile(code,str(p),'exec'))
 PYVERIFY
@@ -651,7 +651,7 @@ PYVERIFY
 Run released-SDK and parent assembly validation in memory, from the private course root:
 
 ```sh
-cd /Users/tnt/git/course-llms-and-models
+cd ~/git/course-llms-and-models
 node --input-type=module - <<'JSVERIFY'
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
