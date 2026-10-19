@@ -264,7 +264,7 @@ credit, entitlement, and payment still require separate live evidence.
 ## Build and offline test
 
 ```bash
-cd /Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker
+cd <mining-repo>/macos/StrataMiner/Research/iota-v4.12.10-local-worker
 make build
 # Or: clean build + all regressions + isolated install/CLI smoke checks.
 make test
@@ -686,7 +686,7 @@ the cutover cannot silently use a newer mutable source-tree controller. Its
 phases are intentionally separate:
 
 ```bash
-cd /Users/tnt/git/mine/macos/StrataMiner/Research/iota-v4.12.10-local-worker
+cd <mining-repo>/macos/StrataMiner/Research/iota-v4.12.10-local-worker
 
 candidate="$PWD/.build/package"
 

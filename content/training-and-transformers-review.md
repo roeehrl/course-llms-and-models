@@ -94,7 +94,7 @@ import ast, copy, importlib.util, json, math, re
 from pathlib import Path
 from types import SimpleNamespace
 
-ROOT=Path('~/git/course-llms-and-models')
+ROOT=Path.cwd()  # run from the course repo root
 fragment=json.loads((ROOT/'content/training-and-transformers.json').read_text())
 items={a['id']:a for a in fragment['assessments']}
 episodes=[e for c in fragment['chapters'] for e in c['episodes']]
@@ -424,7 +424,7 @@ Extract and run the verification block without creating another file:
 python3 - <<'PYVERIFY'
 from pathlib import Path
 import re
-p=Path('~/git/course-llms-and-models/content/training-and-transformers-review.md')
+p=Path('content/training-and-transformers-review.md')
 code=re.search(r'^```python\n(.*?)^```$',p.read_text(),re.S|re.M).group(1)
 exec(compile(code,str(p),'exec'))
 PYVERIFY
@@ -436,10 +436,10 @@ Reproduce standalone structural validation, combined semantic validation and pro
 node --input-type=module - <<'JSVERIFY'
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
-import validateShape from '~/git/course-sdk/dist/generated/course-validator.js';
-import {validateCourse} from '~/git/course-sdk/dist/validate.js';
-import {compileCourse,verifyCompiledCourse} from '~/git/course-sdk/dist/compiler.js';
-const root='~/git/course-llms-and-models/content/';
+import validateShape from '<course-sdk>/dist/generated/course-validator.js';
+import {validateCourse} from '<course-sdk>/dist/validate.js';
+import {compileCourse,verifyCompiledCourse} from '<course-sdk>/dist/compiler.js';
+const root='content/';
 const read=n=>JSON.parse(fs.readFileSync(root+n+'.json','utf8'));
 const f=read('foundations'),t=read('training-and-transformers');
 const envelope={schemaVersion:1,id:'ttf-validation',version:'0.1.0',title:'Validation only',summary:'No enrollment policy assigned',locale:'en',platforms:['web'],policy:{mode:'bounded',work:{additionalEpisodes:0},existingMaterialAccess:'read_only'}};

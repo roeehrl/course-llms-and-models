@@ -14,8 +14,8 @@
   "relative_floor": 1e-07,
   "passed": false,
   "inputs": {
-    "candidate": "/Users/roee/sn9-equivalence-suite-tmp/work/results/drift-raw-v2-20261011/embedding-exp-avg-sq.pt",
-    "reference": "/Users/roee/sn9-equivalence-suite-tmp/work/results/drift-raw-upstream-20261011/embedding-exp-avg-sq.pt",
-    "oracle": "/Users/roee/sn9-equivalence-suite-tmp/work/results/drift-raw-fp32-20261011/embedding-exp-avg-sq.pt"
+    "candidate": "~/sn9-equivalence-suite-tmp/work/results/drift-raw-v2-20261011/embedding-exp-avg-sq.pt",
+    "reference": "~/sn9-equivalence-suite-tmp/work/results/drift-raw-upstream-20261011/embedding-exp-avg-sq.pt",
+    "oracle": "~/sn9-equivalence-suite-tmp/work/results/drift-raw-fp32-20261011/embedding-exp-avg-sq.pt"
   }
 }

@@ -31,12 +31,12 @@ Chapter 12 reconstructs a numerical incident through coordinate and gradient evi
 
 ## Pinned evidence
 
-The SHA-256 URNs resolve conceptually to the exact local files below. Paths are relative to the recorded source root. These files were read only: no research or worker module, Metal compiler or GPU experiment was executed. Historical dates come from document/directory labels, not invented embedded timestamps. `CLAUDE.md` is the rule snapshot observed on 2026-10-12. If mutable files later change, verification must fail instead of silently citing their new contents. The parent must provide authorized archival storage/URN resolution; hashes alone do not guarantee future availability.
+The SHA-256 URNs resolve conceptually to the exact local files below. Paths are relative to the recorded source root (`<mining-repo>`, a local checkout that is not published). The verification below reads the frozen copies in `evidence/snapshots/`; where a snapshot had local absolute paths replaced with placeholders, its entry records the redacted digest and the original digest separately. These files were read only: no research or worker module, Metal compiler or GPU experiment was executed. Historical dates come from document/directory labels, not invented embedded timestamps. `CLAUDE.md` is the rule snapshot observed on 2026-10-12. If mutable files later change, verification must fail instead of silently citing their new contents. The parent must provide authorized archival storage/URN resolution; hashes alone do not guarantee future availability.
 
 <!-- BEGIN PINNED SOURCES -->
 ```json
 {
-  "sourceRoot": "/Users/tnt/git/mine",
+  "sourceRoot": "<mining-repo>",
   "capturedDate": "2026-10-12",
   "historicalEvidenceDate": "2026-10-11",
   "files": [
@@ -103,8 +103,11 @@ The SHA-256 URNs resolve conceptually to the exact local files below. Paths are 
     {
       "sourceId": "eng-src-drift-exact",
       "path": "macos/StrataMiner/Research/sn9-equivalence-suite/results/m5-max-drift-2026-10-11/drift-exact-embedding-20261011.json",
-      "sha256": "ebaa9a4d3c3b4bbe42465ee5c2c9a35e0e73fdf1f280ff14dcac787b39da30fc",
-      "bytes": 755
+      "sha256": "ff4fbc10cdb3c267b4f26ce0fb9add1edd752592bb3d1f14c4f89cccaebef215",
+      "bytes": 725,
+      "redaction": "local absolute paths replaced with ~/ placeholders; sha256/bytes describe the redacted snapshot",
+      "originalSha256": "ebaa9a4d3c3b4bbe42465ee5c2c9a35e0e73fdf1f280ff14dcac787b39da30fc",
+      "originalBytes": 755
     },
     {
       "sourceId": "eng-src-original-forward",
@@ -449,7 +452,7 @@ class EngineeringCPU(unittest.TestCase):
     def test_19_pins_and_saved_summary_consistency(self):
         sources={s['id']:s for s in DATA['sources']};loaded={}
         for entry in PINS['files']:
-            blob=(Path(PINS['sourceRoot'])/entry['path']).read_bytes()
+            blob=(ROOT/'evidence/snapshots'/(entry['sourceId']+'.txt')).read_bytes()
             self.assertEqual(hashlib.sha256(blob).hexdigest(),entry['sha256'],entry['path'])
             self.assertTrue(sources[entry['sourceId']]['url'].endswith(entry['sha256']))
             if entry['path'].endswith('.json'):loaded[entry['sourceId']]=json.loads(blob)
