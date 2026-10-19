@@ -1,3 +1,30 @@
+# Core 0.1.45 published, accepted and deployed to the pilot; tailnet apps checked — 2026-10-19
+
+- Published: Core 0.1.45 prerelease.
+  - Tag object 323f121 on d09fcc7. 26/26 check runs green on d09fcc7. Release run 39290082456, attempt 1.
+  - Artifact 12209714769, digest 66e304b3…. Manifest 8d76b82c….
+  - 911 source members match Git. Hosted assets are byte-identical to the candidate.
+  - Merged PRs since 0.1.44: #151 (tailnet `--tcp` setup docs), #152 (admin and learner work in a non-secure context), #155 (version).
+- Qualification, each acceptance run once against the candidate bytes before publication (scripted models only, no timeout increases):
+  - Migration rehearsal on a fresh copy of the 0.1.44 pilot applied nothing. 577 rows unchanged.
+  - HTTP: 56/56 episodes.
+  - Feature flow: passed.
+  - Browser: passed on phone (56 episodes), desktop and tablet.
+  - Non-secure context: admin and learner saves succeeded with `crypto.randomUUID` and `crypto.subtle` removed, and from a plain-http Tailscale-range origin. All 7 idempotency keys were v4 UUIDs. Disposable database, placeholder keys only.
+- Deployed to the pilot on this Mac, 0.1.44 → 0.1.45.
+  - Backup backup-20261019183339615-168e79. Restore drill: 127 tables, 643 rows.
+  - Health ok. Still 66 migrations; none new.
+  - The QA enrollment is unchanged (checked with read-only SQL before and after acceptance).
+  - Pilot acceptance passed: phone completed fnd-e01-01, tablet and desktop resumed. The operator is unenrolled.
+- Tailnet: checked signed out from the pilot host through its tailnet address (plain http).
+  - Admin and learner pages load on phone and desktop sizes. `isSecureContext` is false and `crypto.randomUUID` is undefined. There are no page errors; the only console error is the expected signed-out 401.
+  - The served admin and learner bundles are byte-identical to the installed 0.1.45 exports and include the `getRandomValues` fallback.
+  - Sign-in from the tailnet origin is accepted (an unknown user gets 401 LOGIN_FAILED).
+  - Not done: a signed-in save over the tailnet address on the pilot, which needs the operator's password. The qualification check covered signed-in saves in a non-secure context on a disposable database. Not yet checked from a second physical device.
+- Not live-verified: no real provider call has been made. Course 0.1.6 declares no activities, so the activity runtime is covered only by Core CI.
+- User actions: model prices, allowances, placement on per course; optionally confirm one signed-in admin save from a second tailnet device.
+- Evidence: evidence/core-0.1.45-release-and-pilot.json.
+
 # Core 0.1.44 published, accepted and deployed to the pilot, with tailnet access — 2026-10-18
 
 - Published: Core 0.1.44 prerelease.

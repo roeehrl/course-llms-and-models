@@ -1,0 +1,404 @@
+{
+  "schemaVersion": 1,
+  "coreVersion": "0.1.45",
+  "coreTag": "v0.1.45",
+  "coreCommit": "d09fcc7d50e3918b9bff79fd73050912789cadc3",
+  "coreTagObject": "323f12178000f3abfe703360d408b207963d48a9",
+  "coreTree": "77ba8f2a79e7b8a300f2cc2be84b810e965515dd",
+  "versionBumpPr": 155,
+  "coreMainCi": "all 26 check runs on d09fcc7 success; release run 12/12 in manifest",
+  "coreReleaseRun": 39290082456,
+  "coreReleaseRunAttempt": 1,
+  "coreCandidateArtifact": 12209714769,
+  "coreCandidateArtifactName": "course-core-v0.1.45-d09fcc7d50e3918b9bff79fd73050912789cadc3-39290082456-1",
+  "coreArtifactDigest": "sha256:66e304b36c6f26a4cfd46cd401af28c62e24162571bd267a7c510f75bd743c17",
+  "coreManifestSha256": "8d76b82c25e382acf16744ed2e41985e6d37e95232c21ce88147531a196c280f",
+  "sha256sumsFileSha256": "79caa9521bf37c10c327b03faa9008bea96a447c88d767cb13f6e8a1809a08ae",
+  "assetSha256": {
+    "course-core-source-0.1.45.tar.gz": "13e36c49db26623de4a8ac95687f959e25a6eeab1fdffbb371ad4ec069c6de17",
+    "course-core-runtime-0.1.45.tar.gz": "8886921757fb86341b02e21872b8be73da257552de609e0c1b1e050b64e00cc8",
+    "course-core-learner-web-0.1.45.tar.gz": "ab53fafb918ade7530efe4903b56b2d4e5031d5a363a3f07972dc68589c4764a",
+    "course-core-admin-web-0.1.45.tar.gz": "957afe0fd535cf31aad84494491a1f6dd371704f3e6ba4013c7e128dc3d402eb",
+    "course-core-visuals-0.1.1.tgz": "1f36f86e37dda83fbb1a48fde818afd2e846a20afdd192860f683a91d3117e22"
+  },
+  "coreRelease": null,
+  "prerelease": true,
+  "published": true,
+  "coreChangesSince": "0.1.44",
+  "skippedVersions": [],
+  "mergedPrs": [
+    151,
+    152,
+    155
+  ],
+  "mergedPrsNote": "PRs whose merge commit is in v0.1.45 and not in v0.1.44",
+  "migrations": [],
+  "consumerChecks": {
+    "artifactZipSha256MatchesUploadDigest": true,
+    "artifactZipFilesIdenticalToCoordinatorExtraction": 7,
+    "sha256sumsAllOk": true,
+    "sha256sumsCovers": 5,
+    "manifestIdentity": {
+      "tree": "77ba8f2a79e7b8a300f2cc2be84b810e965515dd",
+      "treeMatchesGit": true,
+      "tagObjectMatchesLocalAndRemote": true,
+      "workflowRef": "roeehrl/course-core/.github/workflows/release.yml@refs/tags/v0.1.45",
+      "ciRunId": 39290082456,
+      "ciAttempt": 1,
+      "ciJobs": 12,
+      "allSuccess": true,
+      "state": "verified_candidate"
+    },
+    "sourceMembersComparedToGitTree": 911,
+    "assetMembersMatchManifest": {
+      "source": 911,
+      "runtime": 1190,
+      "learner": 7,
+      "admin": 10,
+      "visuals": 24
+    },
+    "unsafeMembers": 0,
+    "sourceMaps": 0,
+    "licensesPresentInEveryAsset": true,
+    "moduleLocksMatchGit": 11,
+    "builtAdapterDigestsMatch": true,
+    "adapterDigestsIdenticalTo0144Build": true,
+    "codeBankAdapterDigest": "05d8ba2439c6b2e26a06a1dfd4d366700f08a3b964eb1f1d24ea3fd73e9f7cc2",
+    "visuals": {
+      "version": "0.1.1",
+      "distFilesIdenticalTo0144Build": 21,
+      "tgzSha256": "1f36f86e37dda83fbb1a48fde818afd2e846a20afdd192860f683a91d3117e22",
+      "identicalTo0144Tgz": true
+    },
+    "installedRuntimeCheck": {
+      "checkedMembers": 2118,
+      "uniqueFiles": 1194
+    },
+    "installNote": "runtime root = source + runtime archives, installed with its own orchestrator (install api, install supervisor; public audit 912 files, 10 locks) under a temporary git index (removed after); published learner/admin exports re-overlaid after install; Temporal CLI copied byte-identical (sha256 33c298d4...) from the pilot's releases/v0.1.44 root (read-only)"
+  },
+  "migrationRehearsal": {
+    "what": "fresh pg_dump -Fc of the live pilot DB (on 0.1.44; read-only session via default_transaction_read_only) restored into disposable course_core_test_rc0145_rehearsal; candidate migrate-cli applied no migrations; a second run applied none; QA pin, memberships, course releases, schema_migrations names+digests and every table's row count unchanged; DB dropped and dump deleted; no other query was run against the pilot DB",
+    "pilotSchemaBefore": {
+      "lastMigration": "076_activity_observation_digests.sql",
+      "count": 66
+    },
+    "newMigrations": [],
+    "migrateApplied": [],
+    "rerunApplied": [],
+    "rehearsalSchemaAfter": {
+      "count": 66,
+      "lastMigration": "076_activity_observation_digests.sql",
+      "publicTables": 127,
+      "schemaMigrationsDigestsUnchanged": true
+    },
+    "rowCounts": {
+      "tables": 126,
+      "totalRowsBefore": 577,
+      "totalRowsAfter": 577,
+      "unchanged": true
+    },
+    "qaPin": {
+      "enrollment": "6d7439c7-43b0-42d9-a2e2-c0ad5f8367ec",
+      "course": "0.1.4",
+      "status": "active",
+      "revision": 9,
+      "currentEpisode": "fnd-e01-01",
+      "evidence": 2,
+      "unchanged": true
+    },
+    "result": "passed"
+  },
+  "privateReleasedConsumerAcceptanceBeforePublication": {
+    "ranAgainst": "candidate artifact bytes, before the GitHub release was published",
+    "courseVersion": "0.1.6",
+    "courseRepo": "course main ecab604 + local pin commit ec2eb70 (branch rc-0145-acceptance in worktree wt/rc-0141-acceptance, not pushed)",
+    "models": "scripted only",
+    "timeoutsIncreased": false,
+    "attemptsPerAcceptance": 1,
+    "environmentSetupBeforeAttempts": "runtime installed and verified, npm ci, npm test 26/26, .local generated-teaching regenerated by npm test, Playwright browsers in a private path, disposable DB course_core_test_rc0145 created (dropped after)",
+    "harnessRehearsal": "not needed: harness unchanged since it passed against 0.1.41-0.1.44",
+    "http": {
+      "result": "passed",
+      "runs": 1,
+      "episodes": 56,
+      "practicalFamiliesRecovered": 3,
+      "committedRecoveryAssignments": 6,
+      "unearnedCompletionRejectedEveryEpisode": true,
+      "writtenExplanationsPendingWithoutBlocking": 4,
+      "failedFiniteBank": {
+        "replacements": 2,
+        "gateUnchanged": true,
+        "noFurtherCharge": true
+      },
+      "placementSettings": {
+        "offByDefault": true,
+        "enabledByStaff": true
+      },
+      "timings": {
+        "medianBeforeFirstRecoveryMs": 985,
+        "medianFromEpisode16Ms": 1404,
+        "rangeFromEpisode16Ms": [
+          1283,
+          5755
+        ],
+        "totalSeconds": 84,
+        "wallSeconds": 111
+      }
+    },
+    "featureFlow": {
+      "result": "passed",
+      "runs": 1,
+      "wallSeconds": 51,
+      "operatorModelPrice": {
+        "refusedWithoutPriceByDefault": true
+      },
+      "placementSettings": {
+        "offByDefault": true,
+        "enabledByStaff": true
+      },
+      "remedialEpisodeApplied": true,
+      "placementDeclined": true,
+      "placementAccepted": {
+        "placedEpisodes": 10
+      },
+      "retention": "retained",
+      "writtenExplanationReviewed": "met",
+      "visualsPublished": 56
+    },
+    "browser": {
+      "result": "passed",
+      "runs": 1,
+      "wallSeconds": 246,
+      "phone": {
+        "completedEpisodes": 56,
+        "writtenExplanationsSubmitted": 4,
+        "totalSeconds": 137,
+        "medianFromEpisode16Ms": 2375
+      },
+      "desktop": {
+        "completedEpisodes": 16,
+        "placement": "declined"
+      },
+      "tablet": {
+        "completedEpisodes": 4,
+        "placement": "accepted",
+        "placedEpisodes": 12
+      },
+      "recovery": true,
+      "reloadPreservedCode": true,
+      "horizontalOverflow": false,
+      "codeAccessibility": true,
+      "pageErrors": 0
+    },
+    "ownerUnenrolled": true,
+    "hostLoadAverageAtStart": 4.09
+  },
+  "nonSecureContextCheck": {
+    "result": "passed",
+    "runs": 1,
+    "wallSeconds": 9,
+    "runtime": "qualified 0.1.45 runtime (admin + learner exports served by its API), disposable DB course_core_test_rc0145_insecure (dropped after), public example pack number-line imported over HTTP as setup",
+    "modeA": {
+      "how": "loopback origin; addInitScript deletes Crypto.prototype.randomUUID and Crypto.prototype.subtle before page scripts",
+      "viewport": "desktop 1280x900",
+      "cryptoState": {
+        "isSecureContext": true,
+        "randomUUID": "undefined",
+        "subtle": "undefined",
+        "getRandomValues": "function"
+      },
+      "adminSaves": [
+        "release submit-review",
+        "approve",
+        "publish (idempotency-key header)",
+        "provider connection with fake placeholder key (idempotencyKey body)"
+      ],
+      "learnerSave": "mark lesson part read (idempotencyKey body)",
+      "allStatus200": true
+    },
+    "modeB": {
+      "how": "a plain-http Tailscale-range (100.64.0.0/10) additional origin via a local forwarding proxy to the loopback API; no init script",
+      "viewport": "phone 390x844",
+      "cryptoState": {
+        "isSecureContext": false,
+        "randomUUID": "undefined",
+        "subtle": "undefined",
+        "getRandomValues": "function"
+      },
+      "adminSaves": [
+        "provider connection with fake placeholder key"
+      ],
+      "learnerSave": "mark lesson part read",
+      "allStatus200": true
+    },
+    "idempotencyKeysRfc4122V4": 7,
+    "idempotencyKeysTotal": 7,
+    "pageErrors": 0,
+    "cryptoRelatedConsoleErrors": 0,
+    "otherConsoleErrors": "only the expected 401 from GET /auth/session before sign-in (one per mode)",
+    "draftErrorShown": false,
+    "horizontalOverflow": false,
+    "server": {
+      "providerSetupRevision": 2,
+      "adapters": [
+        {
+          "id": "connection-05ff1b16",
+          "kind": "google"
+        },
+        {
+          "id": "connection-355a121e",
+          "kind": "anthropic"
+        }
+      ],
+      "configuredCredentials": 2,
+      "enrollments": 1,
+      "vaultFiles": 1,
+      "plaintextKeyInVault": false
+    },
+    "noRealKeysOrProviderCalls": "placeholder keys FAKE-PLACEHOLDER-NOT-A-REAL-KEY-*; 'Inspect model metadata' never clicked; API outbound HTTP(S) pointed at a dead local proxy",
+    "screenshots": "kept locally, not committed"
+  },
+  "liveProviderAcceptance": false,
+  "notVerified": [
+    "live provider behaviour (Google or Anthropic)",
+    "real costs",
+    "generated prose and reviewer-draft quality",
+    "learning efficacy",
+    "physical devices",
+    "real hardware passkey authenticators",
+    "native app binaries",
+    "admin UI signed in on the pilot",
+    "external agent tools over HTTP/MCP with a real agent",
+    "optional S3-compatible artifact store (not configured)",
+    "conversational gates with a real model",
+    "activity runtime with a real course's activities (course 0.1.6 declares none; covered only by Core CI)",
+    "non-secure context from a second physical tailnet device; signed-in saves over the pilot's tailnet address (would need the operator's password; signed-in saves in a non-secure context were covered by the qualification check on a disposable DB)",
+    "clipboard fallback for connected-agent keys",
+    "companion code-focus hash and admin visual inspector digest paths in a non-secure context (not exercised)"
+  ],
+  "userActions": [
+    "to reach the pilot from the tailnet IP keep using tailscale serve --bg --tcp=4310 tcp://127.0.0.1:4310 (the --http form returns 404 for the IP host)",
+    "enter model prices (Providers > Model prices) for every role-bound model, or paid work stays refused",
+    "set paid-work allowances (workspace and QA enrollment) if not done",
+    "placement remains OFF by default per course (Admin > Placement)",
+    "optionally confirm one signed-in admin save (e.g. a provider connection draft) from a second tailnet device"
+  ],
+  "observedAt": "2026-10-19T18:45:00Z",
+  "hostedAssetsByteIdenticalToCandidate": true,
+  "publishedRelease": {
+    "prerelease": true,
+    "draft": false,
+    "publishedAt": "2026-10-19T18:32:38Z",
+    "assets": 7,
+    "sha256sumsAllOk": true,
+    "manifestSha256Matches": true
+  },
+  "nativePilotUpgrade": {
+    "from": "0.1.44",
+    "to": "0.1.45",
+    "origin": "http://localhost:4310",
+    "runtimeRoot": "~/Library/Application Support/Course Core/Pilot/releases/v0.1.45/course-core",
+    "installedFrom": "hosted release assets (byte-identical to the candidate); Temporal CLI copied from the v0.1.44 root (same sha256 33c298d4…)",
+    "installedRuntimeCheck": {
+      "checkedMembers": 2118,
+      "uniqueFiles": 1194,
+      "adapterDigestsMatch": true
+    },
+    "tool": "deploy/local/upgrade.mjs of 0.1.45",
+    "result": {
+      "status": "upgraded",
+      "backup": "backups/backup-20261019183339615-168e79",
+      "restoreDrill": {
+        "tables": 127,
+        "rows": 643
+      },
+      "steps": [
+        "stopped",
+        "backed_up",
+        "restore_verified",
+        "started_new_runtime"
+      ],
+      "providerAcceptance": "not_verified"
+    },
+    "migrationsAfter": {
+      "count": 66,
+      "lastMigration": "076_activity_observation_digests.sql",
+      "new": []
+    },
+    "health": "ok",
+    "runningFrom": "releases/v0.1.45",
+    "enrollmentPins": {
+      "qaEnrollment": "6d7439c7-43b0-42d9-a2e2-c0ad5f8367ec",
+      "course": "0.1.4",
+      "status": "active",
+      "revision": 9,
+      "currentEpisode": "fnd-e01-01",
+      "evidence": 2,
+      "enrollmentCount": 1,
+      "checkedWith": "read-only SQL before and after pilot acceptance",
+      "unchanged": true,
+      "identicalToAfter0144Acceptance": true
+    },
+    "pilotAcceptance": {
+      "result": "passed",
+      "runs": 1,
+      "harness": "verification/pilot-acceptance.mjs from course main ecab604 + local pin commit ec2eb70 (not pushed)",
+      "package": "the pilot's installed, verified course 0.1.4 package (the QA enrollment's pinned release)",
+      "course": "0.1.4",
+      "phone": "completed fnd-e01-01",
+      "tablet": "resumed fnd-e01-02",
+      "desktop": "resumed fnd-e01-02",
+      "resumedExistingEnrollment": true,
+      "operatorEnrolled": false,
+      "adminSignedIn": false,
+      "qaRoleCheck": "verified_read_only_in_database",
+      "knownAxeDefectsObserved": [],
+      "liveProviderAcceptance": false,
+      "at": "2026-10-19T18:35:33Z"
+    }
+  },
+  "tailnetAccess": {
+    "additionalOrigins": [
+      "the pilot host's Tailscale IPv4 address on port 4310 (plain http), unchanged since 0.1.44"
+    ],
+    "forwarding": "tailscale serve --bg --tcp=4310 tcp://127.0.0.1:4310 (tailnet only; API still bound to 127.0.0.1)",
+    "checks": {
+      "adminPage": 200,
+      "learnerRoot": 200,
+      "loginFromTailnetOrigin": "401 LOGIN_FAILED for an unknown user (origin accepted)",
+      "browser": {
+        "engine": "Chromium, phone 390x844 and desktop 1280x800, admin /admin/ and learner /, signed out",
+        "isSecureContext": false,
+        "cryptoRandomUUID": "undefined",
+        "cryptoSubtle": "undefined",
+        "cryptoGetRandomValues": "function",
+        "pageErrors": 0,
+        "consoleErrors": "only the expected signed-out 401 from GET /auth/session",
+        "signInFormRendered": true,
+        "horizontalOverflow": false,
+        "servedBundles": {
+          "admin": {
+            "files": [
+              "assets/index-Cp0h2Pzv.js",
+              "assets/rolldown-runtime-CbXtAM7H.js"
+            ],
+            "indexSha256": "2daf250f9e223eea8efa151f382fa0db62814ce518cd5fbb02eb8b439c23b3d3",
+            "containsGetRandomValuesFallback": true
+          },
+          "learner": {
+            "files": [
+              "_expo/static/js/web/index-981574769e6ce375b92a08acc5196e88.js"
+            ],
+            "sha256": "db4595040e75e2bd4b6bbf8c0c3b70be5d7c364dc15b1f91aa12a78015d09ffa",
+            "containsGetRandomValues": true
+          },
+          "byteIdenticalToInstalled0145Runtime": true,
+          "differFrom0144Bundles": true,
+          "note": "the 0.1.44 admin bundle had no getRandomValues; the 0.1.44 learner bundle already referenced getRandomValues (dependency code), so for the learner the hash match with the installed 0.1.45 export is the deciding check"
+        }
+      }
+    },
+    "signedInSaveOverTailnet": "not done: needs the operator's password",
+    "checkedFrom": "the pilot host through its own tailnet address"
+  }
+}
