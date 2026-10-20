@@ -1,3 +1,33 @@
+# Core 0.1.47 published, accepted and deployed to the pilot; tailnet apps checked — 2026-10-20
+
+- Published: Core 0.1.47 prerelease.
+  - Tag object e386588 on cc0961e. 26/26 check runs green on cc0961e. Release run 39369288302, attempt 1.
+  - Artifact 12242320938, digest e3588c06…. Manifest bb4a7af8….
+  - 937 source members match Git. Hosted assets are byte-identical to the candidate (7 of 7).
+  - Merged PRs since 0.1.46: #158 (learner browser tests wait for profile panels), #159 and #160 (profile panels keep their space while loading), #161 (`security insecure-origin-check on|off|status`; the 0.1.46 form still works with a deprecation note), #162 (version). No migrations.
+- Status by stage: implemented, tested in Core CI, merged and released as above; deployed to the local pilot; live-verified only by the pilot acceptance and the signed-out tailnet check below.
+- Qualification, each acceptance run once against the candidate bytes before publication (scripted models only, no timeout increases):
+  - Migration rehearsal on a fresh copy of the 0.1.46 pilot applied no migrations, twice. 585 rows in 130 tables unchanged.
+  - HTTP: 56/56 episodes. The first HTTP invocation was stopped by the harness precondition `course_build_missing_run_npm_run_build_first` (the `--worked-course` flag was missing) before the runtime started or any database was touched; it then ran once correctly.
+  - Feature flow: passed.
+  - Browser: passed on phone (56 episodes), desktop and tablet.
+  - Profile layout on phone, tablet and desktop, with each panel's read delayed: the controls below "Personal lesson support", "Your personal changes", "Reviews of your written answers" and "Staff access to your record" did not move. Placeholders are hidden from screen readers and not focusable; no axe violations. Learning memory and teaching ideas still grow on the first load in a session (documented limit). The measurement script was rerun four times because of errors in the script itself, not the candidate (3 aborted before measuring, 1 complete run superseded); all logs are kept.
+  - Security command on a temporary state folder: 21 invocations as expected; only the old form prints the deprecation note; invalid arguments are refused.
+- Deployed to the pilot on this Mac, 0.1.46 → 0.1.47, at 05:17 UTC.
+  - Backup backup-20261020051718596-93102b. Restore drill: 131 tables, 653 rows.
+  - Health ok. Still 68 migrations, last 078. The 4 course package and update tables are still empty.
+  - The QA enrollment, memberships, course releases and migration list are unchanged (read-only SQL before and after acceptance).
+  - Pilot acceptance passed, one run: phone signed in (fnd-e01-01 was already complete), tablet and desktop resumed fnd-e01-02. The operator is unenrolled.
+- Insecure-address checks on the pilot: still OFF, as the operator set it under 0.1.46. `config.json` has `allowInsecureOrigins: true`; the API runs with `ALLOW_INSECURE_ORIGINS=true` and only the Tailscale origin in `ADDITIONAL_ORIGINS`.
+- Tailnet: checked signed out from the pilot host through its tailnet address (plain http), once.
+  - Admin and learner pages load on phone, tablet and desktop sizes. There are no page errors. Every page shows the expected signed-out 401; the first page also logged one 404, most likely Chrome's favicon request.
+  - The served bundles are byte-identical to the installed 0.1.47 exports. The learner bundle is new; the admin bundle is unchanged from 0.1.46.
+  - Sign-in from the tailnet origin is accepted (an unknown user gets 401 LOGIN_FAILED).
+  - The first launch of the check script failed before any request (no bundled headless browser installed); it then ran once with the installed Chrome.
+- Not verified: signed-in saves over the tailnet (needs the operator's password); the admin insecure-address notice on the pilot (needs a signed-in admin); LAN devices (no LAN origin is configured, and no second physical device was used); live providers (no real provider call); real model quality. The profile-layout fix and the new security command were checked in qualification only, not on the pilot.
+- User actions: model prices, allowances, placement on per course. To turn the insecure-address check back on, use `pilot.mjs security insecure-origin-check on` after removing any plain-http LAN origins.
+- Evidence: evidence/core-0.1.47-release-and-pilot.json.
+
 # Core 0.1.46 published, accepted and deployed to the pilot; tailnet apps checked — 2026-10-20
 
 - Published: Core 0.1.46 prerelease.
