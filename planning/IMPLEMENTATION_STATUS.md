@@ -1,3 +1,33 @@
+# Core 0.1.46 published, accepted and deployed to the pilot; tailnet apps checked — 2026-10-20
+
+- Published: Core 0.1.46 prerelease.
+  - Tag object 1e7c6ca on c30bab4. 26/26 check runs green on c30bab4. Release run 39347966119, attempt 1.
+  - Artifact 12233427563, digest 2c2ca6dd…. Manifest 24399010….
+  - 934 source members match Git. Hosted assets are byte-identical to the candidate.
+  - Merged PRs since 0.1.45: #153 (install a course from a course package), #154 (course updates from a GitHub repository or a host folder), #156 (operator switch for the insecure-address check), #157 (version).
+- Qualification, each acceptance run once against the candidate bytes before publication (scripted models only, no timeout increases):
+  - Migration rehearsal on a fresh copy of the 0.1.45 pilot applied exactly 077 and 078; a second run applied none. 581 existing rows unchanged; the 4 new tables are empty.
+  - HTTP: 56/56 episodes.
+  - Feature flow: passed.
+  - Browser: passed on phone (56 episodes), desktop and tablet.
+  - Feature checks on a disposable database with a synthetic public fixture course: an uploaded package installed and published through the admin dialog; tampered packages were refused (`PACKAGE_CORRUPT`, `PACKAGE_MEMBER_DIGEST_MISMATCH`) with no staged rows; a host-folder source found 1.1.0 and installed it as a draft with automatic updates still off; the insecure-address switch refused a LAN origin by default and, when switched off, accepted it with the log line and the admin notice (phone and desktop).
+- Deployed to the pilot on this Mac, 0.1.45 → 0.1.46.
+  - Backup backup-20261020012948726-4ef67b. Restore drill: 127 tables, 647 rows.
+  - Health ok. 68 migrations; 077 and 078 are new. The 4 new tables are empty.
+  - The QA enrollment is unchanged (checked with read-only SQL before and after acceptance).
+  - Pilot acceptance passed: phone completed fnd-e01-01, tablet and desktop resumed. The operator is unenrolled.
+- Insecure-address checks on the pilot: OFF, at the operator's explicit request (`pilot.mjs security insecure-origins on`, then a restart). The API runs with `ALLOW_INSECURE_ORIGINS=true`.
+  - The only extra origin is still the Tailscale address. No plain-http LAN origins are configured, so the set of trusted origins has not changed.
+  - The pilot launcher discards the API's output, so the `origins.insecure_allowed` start-up line is not kept. The admin notice was not checked on the pilot because it needs a signed-in admin. Both were checked in qualification.
+- Tailnet: checked signed out from the pilot host through its tailnet address (plain http).
+  - Admin and learner pages load on phone and desktop sizes. There are no page errors; the only console error is the expected signed-out 401.
+  - The served admin and learner bundles are byte-identical to the installed 0.1.46 exports. The admin bundle is new; the learner bundle is unchanged from 0.1.45.
+  - Sign-in from the tailnet origin is accepted (an unknown user gets 401 LOGIN_FAILED).
+  - Not done: a signed-in save over the tailnet address on the pilot, which needs the operator's password. Not yet checked from a second physical device.
+- Not verified: no real provider call has been made. Installing from a real GitHub release link, the automatic update levels and the background tick were not exercised. No real course package exists yet (course 0.1.6 is not published as a `.course.tgz`). The insecure-address switch was not tried from a real LAN device. Course 0.1.6 declares no activities, so the activity runtime is covered only by Core CI.
+- User actions: model prices, allowances, placement on per course. Before adding a LAN origin, note that its traffic, sign-in included, is unencrypted. Remove such origins before turning the checks back on or rolling back to 0.1.45.
+- Evidence: evidence/core-0.1.46-release-and-pilot.json.
+
 # Core 0.1.45 published, accepted and deployed to the pilot; tailnet apps checked — 2026-10-19
 
 - Published: Core 0.1.45 prerelease.
