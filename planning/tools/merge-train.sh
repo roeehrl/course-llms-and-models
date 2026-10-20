@@ -1,5 +1,5 @@
 #!/bin/bash
-# Merge PRs in order once 12/12 green on a head that contains current main; rebase the next.
+# Merge PRs in order once every check (at least 12) is green on a head that contains current main; rebase the next.
 R=roeehrl/course-core
 for n in "$@"; do
   while true; do
@@ -11,7 +11,7 @@ for n in "$@"; do
       echo "$(date +%T) PR $n behind main; rebasing"; gh pr update-branch $n -R $R --rebase || { echo "PR $n rebase conflict"; exit 2; }; sleep 60; continue; fi
     s=$(gh pr checks $n -R $R 2>/dev/null | awk -F'\t' '{print $2}' | sort | uniq -c | tr -s ' ' | tr '\n' ',')
     if [[ $s == *fail* ]]; then echo "$(date +%T) PR $n FAILED: $s"; exit 1; fi
-    if [[ $s == " 12 pass," ]]; then gh pr merge $n -R $R --rebase --match-head-commit $h && echo "$(date +%T) MERGED PR $n ($h)"; break; fi
+    if [[ $s =~ ^\ ([0-9]+)\ pass,$ ]] && (( BASH_REMATCH[1] >= 12 )); then gh pr merge $n -R $R --rebase --match-head-commit $h && echo "$(date +%T) MERGED PR $n ($h)"; break; fi
     sleep 120
   done
 done
