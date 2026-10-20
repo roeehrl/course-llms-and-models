@@ -1,3 +1,36 @@
+# Core 0.1.48 published, accepted and deployed to the pilot; tailnet apps checked — 2026-10-20
+
+- Published: Core 0.1.48 prerelease.
+  - Tag object 95f3041 on 0e5c220. 32/32 check runs green on 0e5c220. Release run 39485233739, attempt 1.
+  - Artifact 12293239847, digest 9e76f5f4…. Manifest cd8d2a66….
+  - 1097 source members match Git. Hosted assets are byte-identical to the candidate (8 of 8; this release adds a CycloneDX SBOM, listed in SHA256SUMS). All 7 release files verify with `gh attestation verify`.
+  - Merged PRs since 0.1.47: #163–#183. Main changes: Python practice runs in the browser via Pyodide 314.0.7 served from Core (#176); debug inspector, supervisor-run retry and attempt regrade (#170); evaluation gate for new companion and supervisor-plan configurations (#175); research studies (#179); cross-course concept mappings and suggestions (#181); visuals 0.4.0 (#177, #178, #180); login throttling per client and login name, `TRUSTED_PROXIES` off by default (#166, #169); reliability fixes (#164, #165, #168); backup encryption and ops notes (#163); Temporal CLI digest pin, SBOM and attestations (#167); CI scans and recovery runs (#171–#174, #182); version (#183).
+  - Six new migrations: 079, 080, 081, 083, 085, 086 (tables and nullable columns only).
+- Status by stage: implemented, tested in Core CI, merged and released as above; deployed to the local pilot; live-verified only by the pilot acceptance and the signed-out tailnet check below. None of the new 0.1.48 features was exercised on the pilot.
+- Qualification, each acceptance run once against the candidate bytes before publication (scripted models only, no timeout increases):
+  - Migration rehearsal on a fresh copy of the 0.1.47 pilot applied exactly the six new migrations, then none on a second run. 587 rows in the 130 existing tables, the QA pin and the 68 existing migration digests unchanged; 15 new tables, all empty.
+  - The rehearsal's pre-migration provider-bindings query failed: it read a column that only exists after 083 (an error in the script, not the candidate). The pilot has no provider bindings, so grandfathering of existing bindings was not exercised.
+  - HTTP: 56/56 episodes. Feature flow: all 8 reports passed; course 0.1.6 (built for visuals 0.1.x) published with all 56 visuals on visuals 0.4.0. Browser: passed on phone (56 episodes), desktop and tablet.
+  - Temporal pin: the pilot's Temporal CLI 1.9.1 is accepted; a copy with one byte added is refused.
+  - Pyodide: the five served files match their pinned digests. No in-browser Python run (the example courses have no Python checks).
+  - Evaluation gate: a new companion or supervisor-plan configuration without an evaluation is refused with `PROVIDER_EVAL_REQUIRED`; an owner override lets it activate.
+  - Login throttle with `TRUSTED_PROXIES` unset: repeated failures from one client lock only the affected login names; the owner still signs in.
+  - Web bundles: admin and learner sign-in pages load on phone and desktop with 0 page errors. The check script exited 1 because it counts any console line as an error; the only line was one per page, the browser's record of the expected 401 from the signed-out session check. Not rerun.
+- Deployed to the pilot on this Mac, 0.1.47 → 0.1.48, at 20:24 UTC.
+  - Backup backup-20261020202402186-de6b70 (not encrypted). Restore drill: 131 tables, 655 rows. Steps: stopped, backed up, restore verified, started new runtime.
+  - Installed runtime: 2565 members verified, adapter digests match, Temporal CLI byte-identical to 0.1.47's.
+  - Health ok. 74 migrations, last 086. The 15 new tables and the 4 course package and update tables are empty.
+  - The QA enrollment, memberships, course releases and migration list are unchanged (read-only SQL before and after acceptance).
+  - Pilot acceptance passed, one run: phone signed in (fnd-e01-01 was already complete), tablet and desktop resumed fnd-e01-02. The operator is unenrolled.
+- Insecure-address checks on the pilot: still OFF, as the operator set it under 0.1.46. `config.json` has `allowInsecureOrigins: true`; the API runs with `ALLOW_INSECURE_ORIGINS=true`, only the Tailscale origin in `ADDITIONAL_ORIGINS`, and `TRUSTED_PROXIES` unset.
+- Tailnet: checked signed out from the pilot host through its tailnet address (plain http), once.
+  - Admin and learner pages load on phone, tablet and desktop sizes. There are no page errors. Every page shows the expected signed-out 401; the first page also logged one 404, most likely Chrome's favicon request. Same as 0.1.47.
+  - The served bundles are byte-identical to the installed 0.1.48 exports. The learner bundle and the admin bundle are both new.
+  - Sign-in from the tailnet origin is accepted (an unknown user gets 401 LOGIN_FAILED).
+- Not verified: signed-in saves over the tailnet (needs the operator's password); the admin insecure-address notice on the pilot (needs a signed-in admin); LAN devices (no LAN origin is configured, and no second physical device was used); live providers (no real provider call); real model quality; an in-browser Python run on the pilot (or anywhere); grandfathering of existing provider bindings (the pilot has none); studies and cross-course flows on the pilot (Core CI only). The inspector, evaluation gate, login throttle and new visuals were checked in qualification or CI only, not on the pilot.
+- User actions: model prices, allowances, placement on per course. New or changed companion and supervisor-plan configurations now need a passing evaluation or an owner override. To turn the insecure-address check back on, use `pilot.mjs security insecure-origin-check on` after removing any plain-http LAN origins.
+- Evidence: evidence/core-0.1.48-release-and-pilot.json.
+
 # Core 0.1.47 published, accepted and deployed to the pilot; tailnet apps checked — 2026-10-20
 
 - Published: Core 0.1.47 prerelease.

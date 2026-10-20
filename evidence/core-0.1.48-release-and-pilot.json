@@ -1,0 +1,519 @@
+{
+  "schemaVersion": 1,
+  "coreVersion": "0.1.48",
+  "coreTag": "v0.1.48",
+  "coreCommit": "0e5c2205297a9cef622f542a410ee755ac1d95c4",
+  "coreTagObject": "95f304190b6c3901045d338296dba4b7820c68b7",
+  "coreTree": "376bf32948b9b09c9b5351e73fec00b32a847c06",
+  "versionBumpPr": 183,
+  "coreMainCi": "32/32 completed success (15 main Public CI + 15 Full CI + Assemble + Bind in the release run); release run 12/12 jobs in manifest",
+  "coreReleaseRun": 39485233739,
+  "coreReleaseRunAttempt": 1,
+  "coreCandidateArtifact": 12293239847,
+  "coreCandidateArtifactName": "course-core-v0.1.48-0e5c2205297a9cef622f542a410ee755ac1d95c4-39485233739-1",
+  "coreArtifactDigest": "sha256:9e76f5f4cd87157aeff69270e4fa0d7c7e060581137b0000481442597ebd8a8b",
+  "coreManifestSha256": "cd8d2a66c2078545571a1df4e108df76d5ef27fd5bb788e3534f89605dd32dfe",
+  "sha256sumsFileSha256": "a6706bb013633dca060e91390b4b4e11582987a8e631239c6cbe6c875e35d3ec",
+  "assetSha256": {
+    "course-core-source-0.1.48.tar.gz": "2cbe582a2145f458bc5218459bbd65c931320e49942fe837b35a6bb352396e1a",
+    "course-core-runtime-0.1.48.tar.gz": "9e80eb2405c1756b9e24471c862e2024b17d537a5774b7e4f0ba1220cc6e4fab",
+    "course-core-learner-web-0.1.48.tar.gz": "e12f1601cc7eec905b24e1630969741348105c5b099e97a9016001d234e99997",
+    "course-core-admin-web-0.1.48.tar.gz": "737c6bf0db9639091584dd2fa19e78ee1afcabf36d1c428e890a2611acc08bc7",
+    "course-core-visuals-0.4.0.tgz": "8fb9f15979f1fddfee5d8889738c87c3d757f6f4a30338103c3835529859b1e3",
+    "course-core-sbom-0.1.48.cdx.json": "585364a8975835feed1a11b4bbc54bad9e48c07414c402a93bfd98670e9fa2cd"
+  },
+  "coreRelease": null,
+  "prerelease": true,
+  "published": true,
+  "coreChangesSince": "0.1.47",
+  "skippedVersions": [],
+  "mergedPrs": [
+    163,
+    164,
+    165,
+    166,
+    167,
+    168,
+    169,
+    170,
+    171,
+    172,
+    173,
+    174,
+    175,
+    176,
+    177,
+    178,
+    179,
+    180,
+    181,
+    182,
+    183
+  ],
+  "mergedPrsNote": "21 PRs whose commits are in v0.1.48 and not in v0.1.47 (36 commits, every commit maps to one of them)",
+  "migrations": [
+    "079_trace_links.sql",
+    "080_session_purge.sql",
+    "081_scoped_corrections.sql",
+    "083_provider_evaluations.sql",
+    "085_study_arms.sql",
+    "086_cross_course.sql"
+  ],
+  "statusByStage": {
+    "implemented": "browser practice runs for Python checks via Pyodide 314.0.7 served from Core (#176); debug inspector for enrolled staff, supervisor-run retry and attempt regrade (#170); evaluation gate for new companion and supervisor-plan configurations (#175); research studies with consent, arms, instruments and pseudonymous export (#179); cross-course concept mappings and opt-in suggestions (#181); visuals 0.4.0 (#177, #178, #180); reliability and security fixes incl. login throttling per client and login name and TRUSTED_PROXIES (#164, #165, #166, #168, #169); backup encryption, threat model and budgets (#163); Temporal CLI digest pin, CycloneDX SBOM and attestations (#167); nightly scans, recovery runs and requirement-to-test map (#171-#174, #182); version (#183)",
+    "tested": "Core CI on each PR and on main; before publication, the course's released-consumer acceptance and separate Temporal-pin, Pyodide-serving, evaluation-gate, login-throttle and web-bundle checks against the candidate bytes (scripted models only)",
+    "merged": "#163-#183 on course-core main",
+    "released": "v0.1.48 GitHub prerelease; hosted assets byte-identical to the candidate (8 of 8, including the new CycloneDX SBOM); all 7 release files verify with gh attestation verify",
+    "deployed": "the local pilot on this Mac upgraded 0.1.47 -> 0.1.48 with deploy/local/upgrade.mjs; six migrations applied; health ok",
+    "liveVerified": "pilot acceptance (QA learner on phone, tablet, desktop; operator unenrolled) and a signed-out tailnet check of the pilot's admin and learner pages on phone, tablet and desktop sizes. None of the 0.1.48 features (Python practice runs, inspector, evaluation gate, studies, cross-course, new visuals) was exercised on the pilot. Not live-verified: see notVerified"
+  },
+  "consumerChecks": {
+    "artifactApiDigestMatches": true,
+    "artifactNote": "artifact metadata (id, name, digest, run, head sha) checked via the API; the zip itself was downloaded and unpacked by the coordinator, not re-hashed here",
+    "sha256sumsAllOk": true,
+    "sha256sumsCovers": 7,
+    "manifestIdentity": {
+      "tree": "376bf32948b9b09c9b5351e73fec00b32a847c06",
+      "treeMatchesGit": true,
+      "tagObjectMatchesLocalAndRemote": true,
+      "workflowRef": "roeehrl/course-core/.github/workflows/release.yml@refs/tags/v0.1.48",
+      "ciRunId": 39485233739,
+      "ciAttempt": 1,
+      "ciJobs": 12,
+      "allSuccess": true,
+      "state": "verified_candidate"
+    },
+    "sourceMembersComparedToGitTree": 1097,
+    "assetMembersMatchManifest": {
+      "source": 1097,
+      "runtime": 1447,
+      "learner": 7,
+      "admin": 14,
+      "visuals": 42
+    },
+    "licensesPresentInEveryAsset": true,
+    "moduleLocksMatchGit": 11,
+    "migrationFilesAddedSince0147": [
+      "079_trace_links.sql",
+      "080_session_purge.sql",
+      "081_scoped_corrections.sql",
+      "083_provider_evaluations.sql",
+      "085_study_arms.sql",
+      "086_cross_course.sql"
+    ],
+    "migrationFilesModifiedOrDeletedSince0147": 0,
+    "sbom": {
+      "inSha256Sums": true,
+      "manifestSbomKeySha256Matches": true,
+      "sizeMatches": true,
+      "format": "CycloneDX 1.5",
+      "components": 892,
+      "rootComponent": "@course-core/repository@0.1.48 Apache-2.0"
+    },
+    "attestations": {
+      "filesVerified": 7,
+      "allExit0": true,
+      "predicate": "https://slsa.dev/provenance/v1",
+      "signer": "roeehrl/course-core/.github/workflows/release.yml@refs/tags/v0.1.48",
+      "run": "39485233739/attempts/1",
+      "sourceDigest": "0e5c2205297a9cef622f542a410ee755ac1d95c4",
+      "note": "one attestation per file, each with all 8 release files (incl. SHA256SUMS) as subjects"
+    },
+    "builtAdapterDigestsMatch": true,
+    "adapterDigestsIdenticalTo0147Build": true,
+    "visuals": {
+      "version": "0.4.0",
+      "tgzSha256": "8fb9f15979f1fddfee5d8889738c87c3d757f6f4a30338103c3835529859b1e3"
+    },
+    "installedRuntimeCheck": {
+      "checkedMembers": 2565,
+      "uniqueFiles": 1451
+    },
+    "installNote": "runtime root = source + runtime archives, installed with its own orchestrator; Temporal CLI copied byte-identical (sha256 33c298d4...) from the pilot's releases/v0.1.47 root (read-only)"
+  },
+  "migrationRehearsal": {
+    "what": "fresh pg_dump -Fc of the live pilot DB (on 0.1.47; read-only session via PGOPTIONS default_transaction_read_only=on) restored into a disposable database; candidate migrate-cli applied the six new migrations; a second run applied none; QA pin, memberships, course releases, the 68 pre-existing schema_migrations names+digests and every pre-existing table's row count unchanged; DB dropped and dump deleted",
+    "migrateApplied": [
+      "079_trace_links.sql",
+      "080_session_purge.sql",
+      "081_scoped_corrections.sql",
+      "083_provider_evaluations.sql",
+      "085_study_arms.sql",
+      "086_cross_course.sql"
+    ],
+    "rerunApplied": [],
+    "schemaMigrationsBefore": 68,
+    "schemaMigrations": 74,
+    "lastMigration": "086_cross_course.sql",
+    "preExistingSchemaMigrationsNamesDigestsUnchanged": true,
+    "rowCounts": {
+      "preExistingTables": 130,
+      "preExistingRows": 587,
+      "unchanged": true,
+      "newTables": 15,
+      "newTablesRows": 0,
+      "publicTables": "131 -> 146"
+    },
+    "qaPinUnchanged": true,
+    "providerBindings": {
+      "workspaceProviderVersions": 0,
+      "workspaceProviderSettings": 0,
+      "companionBindings": 0,
+      "supervisorPlanBindings": 0,
+      "candidateStatusCall": "ProviderEvaluations.status() over every workspace with an active provider version returned [] (no such workspace)",
+      "conclusion": "the pilot has no saved provider configuration, so there are no existing companion or supervisor-plan bindings to grandfather; the check is vacuous on pilot data (not a failure, not a proof)"
+    },
+    "scriptErrorDisclosure": "the rehearsal's pre-migration provider-bindings query failed (column v.evaluation does not exist): it read a column that only exists after 083, an error in the query script, not the candidate. Row counts show workspace_provider_versions and workspace_provider_settings were 0 before and after; the post-migration query and the status() call ran cleanly. The pilot has no provider bindings",
+    "result": "passed (grandfathering check not applicable: 0 bindings in pilot data)"
+  },
+  "privateReleasedConsumerAcceptanceBeforePublication": {
+    "ranAgainst": "candidate artifact bytes, before the GitHub release was published",
+    "courseVersion": "0.1.6",
+    "courseRepo": "course origin/main 55dd087 + local pin commit 12daddf (branch rc-0148-acceptance in the acceptance worktree, not pushed)",
+    "models": "scripted only",
+    "timeoutsIncreased": false,
+    "attemptsPerAcceptance": 1,
+    "reruns": 0,
+    "visualsCompatibility": "course 0.1.6 is built against @course-core/visuals 0.1.0 (package.json/node_modules); the candidate runtime ships packages/visuals 0.4.0 and the feature flow published the course with all 56 visuals and 158 profiles (publishedWithAllIllustrations true)",
+    "http": {
+      "result": "passed",
+      "runs": 1,
+      "episodes": 56,
+      "practicalFamiliesRecovered": 3,
+      "committedRecoveryAssignments": 6,
+      "unearnedCompletionRejectedEveryEpisode": true,
+      "writtenExplanationsPendingWithoutBlocking": 4,
+      "failedFiniteBank": {
+        "replacements": 2,
+        "gateUnchanged": true,
+        "noFurtherCharge": true,
+        "unavailableExplained": true
+      },
+      "timings": {
+        "medianFromEpisode16Ms": 1433,
+        "totalSeconds": 87,
+        "wallSeconds": 115
+      }
+    },
+    "featureFlow": {
+      "result": "passed",
+      "runs": 1,
+      "wallSeconds": 53,
+      "reportsPassed": [
+        "operatorModelPrice",
+        "placementSettings",
+        "setup",
+        "remedialEpisode",
+        "placementDeclined",
+        "placementAccepted",
+        "retention",
+        "writtenExplanation"
+      ],
+      "visualsPublished": 56,
+      "profiles": 158
+    },
+    "browser": {
+      "result": "passed",
+      "runs": 1,
+      "wallSeconds": 253,
+      "phone": {
+        "completedEpisodes": 56,
+        "writtenExplanationsSubmitted": 4,
+        "totalSeconds": 140,
+        "medianFromEpisode16Ms": 2440
+      },
+      "desktop": {
+        "completedEpisodes": 16,
+        "placement": "declined"
+      },
+      "tablet": {
+        "completedEpisodes": 4,
+        "placement": "accepted",
+        "placedEpisodes": 12
+      },
+      "recovery": true,
+      "reloadPreservedCode": true,
+      "codeAccessibility": true,
+      "horizontalOverflow": false,
+      "pageErrors": 0
+    },
+    "disposableDb": "course_core_test_rc0148 (dropped)"
+  },
+  "featureChecks": {
+    "where": "qualified 0.1.48 runtime on disposable databases and temporary state (the real pilot was never touched by these)",
+    "temporalPin": {
+      "result": "passed",
+      "pilotBinaryCopy": {
+        "sha256": "33c298d41f6eefebf01a28a3511f444480e939e21d3518cb0c12a4abad467c4b",
+        "exit": 0,
+        "output": {
+          "source": "pinned",
+          "version": "1.9.1",
+          "platform": "darwin-arm64"
+        }
+      },
+      "modifiedCopyOneByteAppended": {
+        "exit": 1,
+        "stderr": "temporal_cli_digest_unknown"
+      }
+    },
+    "pyodideServing": {
+      "result": "passed",
+      "version": "314.0.7",
+      "files": 5,
+      "allServed200": true,
+      "allBytesMatchSourcePins": true,
+      "gzipDecodedMatches": true,
+      "metadataAssetsEqualSourcePins": true,
+      "unpinnedFile404": true,
+      "runnerStatus": "ready",
+      "purpose": "practice_only",
+      "evidence": "none",
+      "limits": {
+        "timeoutMs": 10000,
+        "outputBytes": 65536,
+        "memoryBytes": 268435456,
+        "sourceBytes": 64000
+      },
+      "browserPracticeRun": "not run: the seeded example course packs (number-line, plant-journal, spanish-greetings) contain no Python or code checks (only choice, numeric and text assessments)"
+    },
+    "agentEvalGate": {
+      "result": "passed",
+      "controlSupervisorToolLoop": "200, revision 1, supervisor not_covered",
+      "afterOwnerOverride": "override 200, then save 200 revision 2 (companion: override)",
+      "adminUiMapsCodeTo": "eval_required (ProviderEvalPanel lists the revisions needing evidence)",
+      "newCompanionWithoutEval": "409 PROVIDER_EVAL_REQUIRED",
+      "newSupervisorPlanWithoutEval": "409 PROVIDER_EVAL_REQUIRED"
+    },
+    "loginThrottle": {
+      "result": "passed",
+      "trustedProxies": "unset",
+      "source": "one loopback client (shared source)",
+      "accountA11Attempts": "401,401,401,401,401,401,401,401,401,401,429",
+      "retryAfterSeconds": 900,
+      "ownerAfterAccountA": 200,
+      "spreadFailures": 96,
+      "repeatedNameAfterSourceBudget": 429,
+      "freshNameAfterSourceBudget": 401,
+      "ownerAfterSourceBudget": 200
+    },
+    "webBundles": {
+      "result": "failed on the literal criterion (no console errors); 0 page errors",
+      "pages": [
+        "admin-phone",
+        "admin-desktop",
+        "learner-phone",
+        "learner-desktop"
+      ],
+      "http200": true,
+      "pageErrors": 0,
+      "consoleErrors": 4,
+      "consoleErrorText": "Failed to load resource: the server responded with a status of 401 (Unauthorized)  [GET /auth/session, one per page]",
+      "consoleWarnings": 0,
+      "horizontalOverflow": false,
+      "assetsAllMatchInstalled": true,
+      "signInFormShown": true,
+      "disclosure": "the bundle-check script exited 1 by design because it treats any console error as a failure; the only console error was one line per page, Chrome's network log of the expected 401 from the signed-out GET /auth/session check, with 0 page errors. The 0.1.47 pilot shows the same line. Not rerun"
+    }
+  },
+  "liveProviderAcceptance": false,
+  "notVerified": [
+    "signed-in saves over the pilot's tailnet address (would need the operator's password)",
+    "the admin insecure-address notice on the pilot (shown only to a signed-in admin); the origins.insecure_allowed start-up line on the pilot (the pilot launcher discards child output)",
+    "LAN devices: no plain-http LAN origin is configured on the pilot, and nothing was tried from a LAN device or a second physical tailnet device",
+    "live providers (Google or Anthropic): no real provider call was made; real costs",
+    "real model quality: generated prose and reviewer-draft quality, conversational gates with a real model, learning efficacy, and the quality of the public agent-evaluation suite against a real model",
+    "an in-browser Python practice run on the pilot (or anywhere: the courses used in qualification have no Python checks; only the serving of the five pinned Pyodide files was checked, in qualification)",
+    "grandfathering of existing companion and supervisor-plan bindings: the pilot has no saved provider configuration, so there was nothing to grandfather; the check is vacuous, not a proof",
+    "research studies and cross-course flows on the pilot (studies, consent, arms, export, concept mappings, cross-course suggestions): covered only by Core CI; all their pilot tables are empty",
+    "the debug inspector, supervisor-run retry and attempt regrade on the pilot (need a signed-in staff member)",
+    "the evaluation gate, login throttling and Temporal pin on the pilot itself (checked in qualification only)",
+    "the new visuals 0.4.0 features on the pilot (the pilot acceptance uses course 0.1.4)",
+    "optional age-encrypted backups (the pilot upgrade's backup was not encrypted)",
+    "physical devices, real hardware passkey authenticators, native app binaries",
+    "admin UI signed in on the pilot",
+    "installing from a real GitHub release link, the automatic update levels and the background tick",
+    "a real course package (course 0.1.6 is not published as a .course.tgz)",
+    "external agent tools over HTTP/MCP with a real agent; optional S3-compatible artifact store (not configured)"
+  ],
+  "userActions": [
+    "to reach the pilot from the tailnet IP keep using tailscale serve --bg --tcp=4310 tcp://127.0.0.1:4310; TRUSTED_PROXIES stays unset, so sign-in throttling treats every tailnet client as the one forwarding address and counts failures per login name too",
+    "insecure-address checks are still OFF on the pilot at the operator's request; only the Tailscale origin is configured. pilot.mjs security insecure-origin-check on|off|status (on = enforce). Remove any plain-http LAN origin before turning the check back on or rolling back",
+    "new or changed companion and supervisor-plan configurations now need a passing evaluation on the public suite or an owner's recorded override before they can be activated",
+    "automatic course updates stay OFF until a level is chosen per course",
+    "enter model prices for every role-bound model, or paid work stays refused",
+    "set paid-work allowances (workspace and QA enrollment) if not done",
+    "placement remains OFF by default per course"
+  ],
+  "observedAt": "2026-10-20T20:25:54Z",
+  "hostedAssetsByteIdenticalToCandidate": true,
+  "publishedRelease": {
+    "prerelease": true,
+    "draft": false,
+    "publishedAt": "2026-10-20T20:23:14Z",
+    "assets": 8,
+    "hostedAssetsCmpIdentical": "8 of 8",
+    "newAsset": "course-core-sbom-0.1.48.cdx.json (CycloneDX 1.5, listed in SHA256SUMS)",
+    "sha256sumsAllOk": true,
+    "manifestSha256Matches": true,
+    "attestationsVerified": "7 of 7 files (gh attestation verify)"
+  },
+  "nativePilotUpgrade": {
+    "from": "0.1.47",
+    "to": "0.1.48",
+    "origin": "http://localhost:4310",
+    "runtimeRoot": "~/Library/Application Support/Course Core/Pilot/releases/v0.1.48/course-core",
+    "installedFrom": "hosted release assets (byte-identical to the candidate); Temporal CLI copied from the v0.1.47 root (same sha256 33c298d4..., accepted by the new pinned-digest check)",
+    "installedRuntimeCheck": {
+      "checkedMembers": 2565,
+      "uniqueFiles": 1451,
+      "adapterDigestsMatch": true
+    },
+    "tool": "deploy/local/upgrade.mjs of 0.1.48",
+    "at": "2026-10-20T20:24Z",
+    "result": {
+      "status": "upgraded",
+      "backup": "backups/backup-20261020202402186-de6b70",
+      "restoreDrill": {
+        "tables": 131,
+        "rows": 655
+      },
+      "steps": [
+        "stopped",
+        "backed_up",
+        "restore_verified",
+        "started_new_runtime"
+      ],
+      "providerAcceptance": "not_verified"
+    },
+    "migrationsAfter": {
+      "count": 74,
+      "lastMigration": "086_cross_course.sql",
+      "new": [
+        "079_trace_links.sql",
+        "080_session_purge.sql",
+        "081_scoped_corrections.sql",
+        "083_provider_evaluations.sql",
+        "085_study_arms.sql",
+        "086_cross_course.sql"
+      ],
+      "unchangedAcrossAcceptance": true
+    },
+    "newAndPackageTablesEmpty": {
+      "course_package_staging": 0,
+      "course_release_packages": 0,
+      "course_update_sources": 0,
+      "course_update_attempts": 0,
+      "attempt_regrades": 0,
+      "concept_mapping_versions": 0,
+      "concept_mappings": 0,
+      "cross_course_consent_changes": 0,
+      "cross_course_consents": 0,
+      "cross_course_learners": 0,
+      "cross_course_suggestions": 0,
+      "cross_course_wakeups": 0,
+      "provider_eval_overrides": 0,
+      "provider_eval_results": 0,
+      "studies": 0,
+      "study_consent_changes": 0,
+      "study_exports": 0,
+      "study_participants": 0,
+      "supervisor_job_retries": 0,
+      "checkedWith": "read-only SQL before and after pilot acceptance"
+    },
+    "health": "ok",
+    "runningFrom": "releases/v0.1.48",
+    "enrollmentPins": {
+      "qaEnrollment": "6d7439c7-43b0-42d9-a2e2-c0ad5f8367ec",
+      "course": "0.1.4",
+      "status": "active",
+      "revision": 9,
+      "currentEpisode": "fnd-e01-01",
+      "evidence": 2,
+      "enrollmentCount": 1,
+      "checkedWith": "read-only SQL (default_transaction_read_only=on) before and after pilot acceptance; logs pins-preaccept.txt and pins-postaccept.txt",
+      "unchanged": true,
+      "identicalToAfter0147Acceptance": true
+    },
+    "pilotAcceptance": {
+      "result": "passed",
+      "runs": 1,
+      "exit": 0,
+      "harness": "verification/pilot-acceptance.mjs from course main 55dd087 + local pin commit 12daddf (not pushed; the pilot-acceptance harness is unchanged since 0.1.47)",
+      "package": "the pilot's installed, verified course 0.1.4 package (the QA enrollment's pinned release)",
+      "course": "0.1.4",
+      "phone": "signed in; fnd-e01-01 already completed before this run (completedInThisRun false), moved on to the second episode",
+      "tablet": "resumed fnd-e01-02",
+      "desktop": "resumed fnd-e01-02",
+      "resumedExistingEnrollment": true,
+      "completedInThisRun": false,
+      "operatorEnrolled": false,
+      "adminSignedIn": false,
+      "qaRoleCheck": "verified_read_only_in_database",
+      "knownAxeDefectsObserved": [],
+      "liveProviderAcceptance": false,
+      "ranWithInsecureAddressChecksOff": true,
+      "writesByDesign": "the harness sets a fresh random password for the dedicated QA account through the runtime's set-password CLI (never printed or stored), signs that account in, and writes its receipt and screenshots to the pilot's acceptance folder; it changed no enrollment, evidence, membership, release or migration row",
+      "at": "2026-10-20T20:25:54Z"
+    }
+  },
+  "operatorSecuritySwitch": {
+    "insecureAddressChecks": "still off after the upgrade, as the operator set it under 0.1.46; not changed by this deployment",
+    "configAllowInsecureOrigins": true,
+    "apiEnvironment": "ALLOW_INSECURE_ORIGINS=true, ADDITIONAL_ORIGINS = the tailnet origin, TRUSTED_PROXIES unset (observed after the upgrade)",
+    "additionalOrigins": "only the pilot host's Tailscale IPv4 origin on port 4310 (unchanged since 0.1.44); no non-Tailscale (LAN) origins configured",
+    "startupLogLine": "not retained: the pilot launcher discards child stdout/stderr",
+    "adminNotice": "not checked on the pilot (shown to signed-in admins)",
+    "effect": "none beyond the Tailscale origin that was already trusted"
+  },
+  "tailnetAccess": {
+    "additionalOrigins": [
+      "the pilot host's Tailscale IPv4 address on port 4310 (plain http), unchanged since 0.1.44"
+    ],
+    "forwarding": "tailscale serve --bg --tcp=4310 tcp://127.0.0.1:4310 (tailnet only; API still bound to 127.0.0.1)",
+    "runs": 1,
+    "at": "2026-10-20T20:26:16Z",
+    "checks": {
+      "adminPage": 200,
+      "learnerRoot": 200,
+      "loginFromTailnetOrigin": "401 LOGIN_FAILED for an unknown user (origin accepted)",
+      "browser": {
+        "engine": "installed Chrome via Playwright, phone 390x844, tablet 834x1112 and desktop 1280x800, admin /admin/ and learner /, signed out",
+        "isSecureContext": false,
+        "cryptoRandomUUID": "undefined",
+        "cryptoSubtle": "undefined",
+        "cryptoGetRandomValues": "function",
+        "pageErrors": 0,
+        "consoleErrors": "the expected signed-out 401 from GET /auth/session, one line on every page (same as 0.1.47); plus one 404 console line on the first page loaded (admin-phone) that the page's response listener did not see, most likely Chrome's automatic /favicon.ico request (same as 0.1.47)",
+        "signInFormRendered": true,
+        "horizontalOverflow": false,
+        "servedBundles": {
+          "admin": {
+            "files": [
+              "assets/RunsView-CT7mONVd.js",
+              "assets/index-BImoGQel.js",
+              "assets/rolldown-runtime-CbXtAM7H.js"
+            ],
+            "indexSha256": "9e70aaf456819f96c224602b65b594c151aa86d459eb39f26b9472517a518c1c",
+            "containsGetRandomValuesFallback": false,
+            "filesIdenticalTo0147": [
+              "assets/rolldown-runtime-CbXtAM7H.js"
+            ]
+          },
+          "learner": {
+            "files": [
+              "_expo/static/js/web/index-0141573386004fda7841eb6850f77aef.js"
+            ],
+            "sha256": "ab6d17be8de6c5b7e6be3d45ef06cfb8515809d583e9101d281498f82687facf",
+            "containsGetRandomValues": true,
+            "identicalTo0147": false
+          },
+          "byteIdenticalToInstalled0148Runtime": true,
+          "note": "the learner bundle and the admin index and RunsView chunks are new in 0.1.48; only the admin rolldown runtime chunk is byte-identical to 0.1.47's"
+        }
+      }
+    },
+    "signedInSaveOverTailnet": "not done: needs the operator's password",
+    "checkedFrom": "the pilot host through its own tailnet address"
+  }
+}
