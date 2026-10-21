@@ -39,3 +39,82 @@ jobs:
         run: npm run verify:content
       # Full authored coverage is separate from practical/live platform acceptance.
       # No private bundles or source evidence are uploaded as public artifacts.
+
+  # Released Core integration: the course runs on the exact Core release it is pinned to
+  # (expectedCoreRelease), installed from the public release assets, with a disposable
+  # Postgres 17 and the Docker code sandbox. Scripted models only; no live provider.
+  released-core:
+    name: Released Core integration / Postgres 17
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17@sha256:a63c1ea3f6a3a5a1621f97d2aba3b30faecfab4224c1b0000cc85ced57bb1939
+        env:
+          POSTGRES_DB: course_core_ci
+          POSTGRES_USER: course_ci
+          # Public disposable CI credential, never an application credential.
+          POSTGRES_PASSWORD: course_ci_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U course_ci -d course_core_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgres://course_ci:course_ci_test_only@127.0.0.1:5432/course_core_ci
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '26'
+          package-manager-cache: false
+      - name: Install locked SDK artifact without lifecycle scripts
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Download, checksum and install the pinned released Core runtime; pull its sandbox image
+        run: node scripts/install-released-core.mjs --pull-sandbox-image
+      - name: Run the worked course through the released Core CLI and HTTP surface with scripted models
+        run: node verification/learner-flow.mjs --runtime-dir .local/released-core-v* --release-dir .local/released-core-assets-v* --worked-course
+
+  # Accessibility: the same released runtime and course, walked in Chromium at phone,
+  # tablet and desktop sizes with axe checks on each learner screen.
+  accessibility:
+    name: Accessibility / learner browser
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    services:
+      postgres:
+        image: postgres:17@sha256:a63c1ea3f6a3a5a1621f97d2aba3b30faecfab4224c1b0000cc85ced57bb1939
+        env:
+          POSTGRES_DB: course_core_ci
+          POSTGRES_USER: course_ci
+          # Public disposable CI credential, never an application credential.
+          POSTGRES_PASSWORD: course_ci_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U course_ci -d course_core_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgres://course_ci:course_ci_test_only@127.0.0.1:5432/course_core_ci
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '26'
+          package-manager-cache: false
+      - name: Install locked SDK artifact without lifecycle scripts
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Download, checksum and install the pinned released Core runtime; pull its sandbox image
+        run: node scripts/install-released-core.mjs --pull-sandbox-image
+      - name: Install the Chromium paired with the locked Playwright
+        run: npx playwright install --with-deps chromium
+      - name: Walk the released learner app at phone, tablet and desktop with axe checks
+        run: node verification/learner-flow.mjs --runtime-dir .local/released-core-v* --release-dir .local/released-core-assets-v* --worked-course --browser

@@ -26,3 +26,11 @@ policy; existing enrollments require an explicit policy migration.
 Practical graders, verified novel questions, interactive visuals, live supervision,
 deployment and learner acceptance remain tracked in `planning/IMPLEMENTATION_STATUS.md`.
 The authored review files contain answer material and must not be served as lessons.
+
+CI (`.github/workflows/ci.yml`) runs three jobs on every pull request and push to
+`main`: the authoring, arithmetic, practical, recovery, visual and content checks;
+the worked course on the released Core runtime it is pinned to (installed from the
+public release assets by `node scripts/install-released-core.mjs`, Postgres 17,
+Docker code sandbox, scripted models); and an accessibility walk of that released
+learner app at phone, tablet and desktop sizes with axe (WCAG 2.1 A/AA rules). None of
+these call a live model provider or prove deployment.
