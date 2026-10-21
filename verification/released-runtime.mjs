@@ -12,7 +12,8 @@ export const expectedCoreRelease37={version:'0.1.37',tag:'v0.1.37',commit:'6fc6a
 export const expectedCoreRelease38={version:'0.1.38',tag:'v0.1.38',commit:'ded66f27124dd4c128f47d92fa05fa85f7790745',tagObject:'9d72b3c1dc23c3d9a8667078aef2e7b33603d088',runId:38599534149,manifestSha256:'9199311b94abe3ce832902c431917200863849db359f2a2fd35d5a4f49894654'};
 export const expectedCoreRelease39={version:'0.1.39',tag:'v0.1.39',commit:'56b3cda473c7ffe26b4c88547df07853cbe25760',tagObject:'68b3b331965015a9745b46f6846eb967ead64dda',runId:38790654821,manifestSha256:'4bc32171d915aae85d794aaea0d3b3926efb8a8e87fddee3fd583d1cad4150ff'};
 export const expectedCoreRelease49={version:'0.1.49',tag:'v0.1.49',commit:'d0f734e7085e9653dfcccd4a7db0b7bec30e9dc5',tagObject:'cbc10ab0a9ed9117e4567ff36efdd6a84656e8a4',runId:39567464359,manifestSha256:'d2f8bfd74877248235c2a39ea77f2541283ea8982ec90685badfd4c65cd58b85'};
-export const expectedCoreRelease={version:'0.1.50',tag:'v0.1.50',commit:'3f703d5085c681cffc467ffe9ed0b8c6e2bcaea5',tagObject:'9d177c5b2c3b2fcae7a130cc6d6ad9001fffb396',runId:39587955374,manifestSha256:'ffdf00971491e8eb51c7b832d7397426ac6d61fb5a0f6f6758e044d07215de9b'};
+export const expectedCoreRelease50={version:'0.1.50',tag:'v0.1.50',commit:'3f703d5085c681cffc467ffe9ed0b8c6e2bcaea5',tagObject:'9d177c5b2c3b2fcae7a130cc6d6ad9001fffb396',runId:39587955374,manifestSha256:'ffdf00971491e8eb51c7b832d7397426ac6d61fb5a0f6f6758e044d07215de9b'};
+export const expectedCoreRelease={version:'0.1.52',tag:'v0.1.52',commit:'8115fe63579cd5c3c14d73dc232ba4c5b90bd237',tagObject:'8881b18fdd8102be0b4d2763c3d6d9387ac2e924',runId:39652246992,manifestSha256:'9b8a988d71675e6b6f6932e27c58dbada315ab0e7e83df8269c0efc6b8fd4d13'};
 /** A fresh checkout has no gitignored .local/ tree, so a harness that reads a released
  * runtime or its assets from a default location says where they come from instead of
  * failing on a bare ENOENT. --runtime-dir and --release-dir override the defaults. */
