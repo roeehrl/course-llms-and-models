@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "id": "portfolio",
+  "purpose": "The final portfolio as a graded practical: one reviewed rubric item in the final episode. It joins the final gate as an extra first family without changing the gate threshold, exactly like the written explanations, so review never blocks completion; the reviewer grades it against required criteria that each demand cited artifacts.",
+  "extensions": [
+    {
+      "id": "course-core-reviewed-rubric",
+      "version": "1.0.0",
+      "integrity": "sha256-d162a0182dad8fa60245e1eeee433a6efe7f52c9fa17d514de4822f0bf2adea3",
+      "entrypoint": "extensions/course-core-reviewed-rubric.json",
+      "execution": "server",
+      "platforms": [
+        "web"
+      ],
+      "capabilities": [
+        "assessment.evaluate"
+      ],
+      "accessibility": {
+        "keyboard": true,
+        "reducedMotion": true,
+        "textAlternative": "Written explanations reviewed by a person against published criteria."
+      }
+    }
+  ],
+  "assessments": [
+    {
+      "id": "portfolio-final",
+      "type": "rubric",
+      "objectiveIds": [
+        "eng-o14-04"
+      ],
+      "familyId": "portfolio-final",
+      "role": "transfer",
+      "prompt": "Final portfolio, a graded practical reviewed by a person against the criteria below.\n\nSubmit one plain-text or Markdown report (paste it here) that links each claim to an artifact you produced in this course. Name every artifact by its course item (for example \"Capstone A suite\", \"Chapter 3 lab\", \"Chapter 12 lab\") and quote the exact numbers or output lines you rely on. The reviewer checks each criterion against what you quote; an impression or a screenshot description is not evidence.\n\nRequired sections:\n1. Tiny model and gradient tests. Describe a small model you implemented (Capstone A autodiff, or Capstone B tiny decoder). Give one analytic gradient and the independent finite-difference value you compared it with, the tolerance, and one negative control: a deliberately wrong implementation (for example stale gradient accumulation that is not reset between steps) and the check that rejected it.\n2. Execution trace. For one training step, list in order what forward, backward and the optimizer update read and write, which buffers hold parameters, gradients and optimizer state, and when each changes. State the step at which parameters change.\n3. Incident reconstruction. Reconstruct the chapter 12 corruption incident from the course material: separate what was measured (failed gates, digests, dates) from what was inferred, date every historical statement, and state what remains uncertain. Do not claim shared-run corruption, accepted work or payment from a healthy loss plot or a completed job.\n4. Bounded improvement proposal. Propose one narrow optimization (tiling, fusion, recomputation or scheduling). State the predicted bottleneck, the correctness invariant (forward values, gradients and several optimizer transitions from identical initial state), the memory bound, a matched benchmark, the conditions under which you would abandon the idea, and which artifacts would need new evidence after the change.\n5. Limits. State plainly what the portfolio does not establish: it is not professional certification, not proof of production safety, and not a rollout approval.\n\nYou may use notes and your own earlier work. Record any help you received; assisted work is reported, not hidden. The short checks of this episode still decide completion; this practical is graded separately by a reviewer.",
+      "grading": {
+        "evaluatorId": "course-core-reviewed-rubric",
+        "rubric": [
+          {
+            "id": "model-gradient-check",
+            "required": true,
+            "description": "Section 1 names a model the learner implemented (a capstone or lab) and quotes one analytic gradient value together with an independent finite-difference value and the tolerance used; the two values agree within that tolerance."
+          },
+          {
+            "id": "negative-control",
+            "required": true,
+            "description": "Section 1 describes a deliberately wrong implementation (for example stale gradient accumulation, a wrong update sign or a missing shared-path sum) and quotes the check output or test case that rejected it."
+          },
+          {
+            "id": "state-trace",
+            "required": true,
+            "description": "Section 2 lists forward, backward and optimizer update in order and states that backward writes gradient buffers while parameters change only at the optimizer update; parameters, gradients and optimizer state are named as separate buffers."
+          },
+          {
+            "id": "evidence-separation",
+            "required": true,
+            "description": "Section 3 separates measured evidence (named failed gate, digest or dated result quoted from the course material) from inference, and states at least one remaining uncertainty explicitly."
+          },
+          {
+            "id": "no-overclaim",
+            "required": true,
+            "description": "Section 3 does not infer shared-run corruption, accepted work or payment from a healthy loss plot or a completed job."
+          },
+          {
+            "id": "proposal-invariant",
+            "required": true,
+            "description": "Section 4 states a correctness invariant that compares forward values, gradients and at least two optimizer transitions from identical initial state, not only finite outputs or loss."
+          },
+          {
+            "id": "proposal-benchmark",
+            "required": true,
+            "description": "Section 4 names a matched benchmark (same shapes, data, precision and warm-up for baseline and change) and the predicted bottleneck it tests."
+          },
+          {
+            "id": "proposal-abandon",
+            "required": true,
+            "description": "Section 4 states concrete conditions under which the proposal would be abandoned and which artifacts need new evidence after the change."
+          },
+          {
+            "id": "limits",
+            "required": true,
+            "description": "Section 5 states that the portfolio is not professional certification, not proof of production safety and not a rollout approval."
+          },
+          {
+            "id": "assistance-recorded",
+            "required": false,
+            "description": "The report records any assistance or hints received, or states that none was used."
+          },
+          {
+            "id": "artifact-citations",
+            "required": false,
+            "description": "Every section names the course item each artifact comes from and quotes the exact numbers or output lines relied on."
+          }
+        ]
+      }
+    }
+  ],
+  "gateBindings": [
+    {
+      "episodeId": "eng-e14-04",
+      "assessmentId": "portfolio-final",
+      "prefix": "portfolio"
+    }
+  ]
+}

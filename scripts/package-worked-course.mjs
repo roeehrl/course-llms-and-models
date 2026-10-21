@@ -7,19 +7,24 @@ import {promisify} from 'node:util';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {verifyCompiledCourse} from '@course-core/sdk/compiler';
-import {stageWorkedExamples,ROOT} from './stage-worked-examples.mjs';
+import {stageWorkedExamples,ROOT,COURSE_VERSION} from './stage-worked-examples.mjs';
 import {readFileSync} from 'node:fs';
 
 /** The SDK the package was compiled with, read from the installed released package. */
 export const SDK_VERSION=JSON.parse(readFileSync(new URL('node_modules/@course-core/sdk/package.json',ROOT),'utf8')).version;
 /** Accepted package contracts: earlier packages stay verifiable after the upgrade. */
-const CONTRACTS={'0.1.4':{sdkVersion:'0.2.0',minimumCoreVersion:'0.1.17'},'0.1.5':{sdkVersion:'0.2.0',minimumCoreVersion:'0.1.17'},'0.1.6':{sdkVersion:'0.4.0',minimumCoreVersion:'0.1.34',profiles:158,remedialEpisodes:4}};
+/** 0.1.7 adds one reviewed remedial episode (the worked adaptive episode's personal detour). */
+const PROFILES_0_1_7=159,REMEDIAL_0_1_7=5;
+const MEMBERS_0_1_6=['course.compiled.json','course.manifest.json','course.learner.json','adaptation-registry.json','worked-example-verifier.json','practical-registries.json','code-fixtures-autodiff-qualified.json','code-fixtures-decoder-qualified.json','code-fixtures-qualification-qualified.json'];
+const CONTRACTS={'0.1.4':{sdkVersion:'0.2.0',minimumCoreVersion:'0.1.17',members:MEMBERS_0_1_6},'0.1.5':{sdkVersion:'0.2.0',minimumCoreVersion:'0.1.17',members:MEMBERS_0_1_6},'0.1.6':{sdkVersion:'0.4.0',minimumCoreVersion:'0.1.34',profiles:158,remedialEpisodes:4,members:MEMBERS_0_1_6},
+  '0.1.7':{sdkVersion:'0.5.0',minimumCoreVersion:'0.1.48',profiles:PROFILES_0_1_7,remedialEpisodes:REMEDIAL_0_1_7,members:[...MEMBERS_0_1_6,'code-fixtures-labs-a.json','code-fixtures-labs-b.json']}};
 
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const json=value=>Buffer.from(JSON.stringify(value,null,2)+'\n');
 // Course bundles hold deep expression trees; indentation would multiply their size.
 const compact=value=>Buffer.from(JSON.stringify(value)+'\n');
-export const packageNames=['course.compiled.json','course.manifest.json','course.learner.json','adaptation-registry.json','worked-example-verifier.json','practical-registries.json','code-fixtures-autodiff-qualified.json','code-fixtures-decoder-qualified.json','code-fixtures-qualification-qualified.json'];
+/** Members of a package for the course version staged now; earlier contracts keep theirs. */
+export const packageNames=CONTRACTS[COURSE_VERSION].members;
 /** The compiled course's two halves are already package members, and Core imports only
  * course.manifest.json and recompiles it. Embedding both halves again would store every
  * visual twice in one member, so course.compiled.json names them by digest instead. */
@@ -66,7 +71,7 @@ export async function verifyWorkedPackage(directory){
   const contract=Object.hasOwn(CONTRACTS,manifest.courseVersion)?CONTRACTS[manifest.courseVersion]:undefined;
   assert(manifest.schemaVersion===1&&contract&&manifest.minimumCoreVersion===contract.minimumCoreVersion&&manifest.sdkVersion===contract.sdkVersion,'Unexpected package contract');
   assert(/^[a-f0-9]{40}$/.test(manifest.sourceCommit),'Invalid package source');
-  assert.deepEqual(manifest.members.map(m=>m.name).sort(),[...packageNames].sort(),'Unexpected package members');
+  assert.deepEqual(manifest.members.map(m=>m.name).sort(),[...contract.members].sort(),'Unexpected package members');
   const members=new Map();
   for(const member of manifest.members){const bytes=await privateBytes(path.join(directory,member.name));assert(bytes.length===member.bytes&&hash(bytes)===member.sha256,'Package member integrity failed');members.set(member.name,bytes);}
   const compiled=resolveCompiled(JSON.parse(members.get('course.compiled.json')),members);assert(verifyCompiledCourse(compiled)&&compiled.digest===manifest.courseDigest,'Compiled course integrity failed');

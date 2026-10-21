@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "id": "labs-a",
+  "purpose": "Chapter labs for chapters 1, 2, 3, 5, 6 and 8 as Python code tasks graded by hidden reference cases on the host sandbox. Each lab is an ungated assessment block at the end of its episode: graded and recorded as practical evidence, never a gate requirement. Fixtures: runtime/code-fixtures-labs-a.json; reference and generator: runtime/lab-reference-a.py; independent qualification: verification/labs-a.py.",
+  "extensions": [
+    {
+      "id": "llm-practical-labs-a",
+      "version": "0.1.0",
+      "platforms": [
+        "web"
+      ],
+      "execution": "server",
+      "capabilities": [
+        "assessment.evaluate"
+      ],
+      "entrypoint": "runtime/code-fixtures-labs-a.json",
+      "integrity": "sha256-ed4f9e37c4214efd2c9c541d7b9684833e4c2fbc22a255a5f0380c937fcd43cd",
+      "accessibility": {
+        "keyboard": true,
+        "reducedMotion": true,
+        "textAlternative": "Plain-text protocols, editable Python and textual diagnostic results; no motion, audio or canvas required."
+      }
+    }
+  ],
+  "assessments": [
+    {
+      "id": "llm-lab-ch01-state-ledger",
+      "type": "code",
+      "objectiveIds": [
+        "fnd-o01-02"
+      ],
+      "familyId": "llm-lab-ch01-state-ledger",
+      "language": "python",
+      "starterCode": "import json\n\ndef solve(data):\n    # Return the JSON value described in the task.\n    pass\n\nif __name__ == \"__main__\":\n    practice = json.loads(\"{\\\"task\\\":\\\"state_ledger\\\",\\\"params\\\":{\\\"w\\\":-1.75,\\\"b\\\":0.375},\\\"events\\\":[{\\\"op\\\":\\\"forward\\\",\\\"x\\\":1.5,\\\"y\\\":0.0},{\\\"op\\\":\\\"load\\\",\\\"params\\\":{\\\"w\\\":2.0,\\\"b\\\":-1.625}},{\\\"op\\\":\\\"backward\\\"},{\\\"op\\\":\\\"backward\\\"},{\\\"op\\\":\\\"step\\\",\\\"lr\\\":0.25},{\\\"op\\\":\\\"step\\\",\\\"lr\\\":0.05},{\\\"op\\\":\\\"load\\\",\\\"params\\\":{\\\"w\\\":1.5,\\\"b\\\":-0.25}},{\\\"op\\\":\\\"load\\\",\\\"params\\\":{\\\"w\\\":1.625,\\\"b\\\":1.125}},{\\\"op\\\":\\\"forward\\\",\\\"x\\\":1.375,\\\"y\\\":-0.125},{\\\"op\\\":\\\"backward\\\"},{\\\"op\\\":\\\"backward\\\"},{\\\"op\\\":\\\"step\\\",\\\"lr\\\":0.125}]}\")\n    print(json.dumps(solve(practice)))\n",
+      "prompt": "Chapter 1 lab: a state ledger for forward, backward, step and load\n\nImplement a standard-library Python function `solve(data)` and return the specified JSON value instead of printing it. The runner calls it once per hidden case; each call must be independent of earlier calls. Object-key order is irrelevant; array order, shape and discrete types (booleans, integers used as IDs, null) matter. Numeric outputs must be finite. No network, file access or third-party package is available. A whole attempt has 128 MiB memory, half a CPU, five seconds and 64 KiB combined output. Test with the separate practice input in the starter; it is not a graded case and its output is not supplied.\n\nGrading: hidden reference cases are compared with absolute tolerance 1e-7 plus relative tolerance 1e-7 on every number; everything else must match exactly. This lab is graded and recorded as practical evidence, but it does not block your progress: the episode's independent checks still decide completion.\n\nInput: `{\"task\":\"state_ledger\",\"params\":{\"w\":w,\"b\":b},\"frozen\":[names]?,\"events\":[...]}`. The model is `prediction = w*x + b`; with a target y the loss is `(prediction - y)^2 / 2`. `frozen` (optional, default empty) lists parameters excluded from training: backward adds nothing to their gradient buffers and `step` never changes them, yet they still affect predictions.\n\nGradient buffers `grad_w` and `grad_b` start at 0. Process the events in order:\n- `{\"op\":\"forward\",\"x\":x,\"y\":y}` computes the prediction and loss with the current parameters and SAVES the residual `prediction - y` and `x` for a later backward. Without `\"y\"` (pure inference) it computes only the prediction, its loss is null, and it clears the saved values.\n- `{\"op\":\"backward\"}` ADDS `residual*x` to `grad_w` and `residual` to `grad_b` (only for non-frozen parameters), using the values saved by the most recent forward, even if parameters changed since. It never changes a parameter. Inputs never contain a backward without saved values.\n- `{\"op\":\"step\",\"lr\":lr}` sets `p = p - lr*grad_p` for each non-frozen parameter. It does not clear the gradients.\n- `{\"op\":\"zero_grad\"}` sets both gradient buffers to 0.\n- `{\"op\":\"load\",\"params\":{\"w\":..,\"b\":..}}` replaces both parameters (for example, starting fine-tuning from a checkpoint). Gradients and saved values are untouched.\n\nReturn `{\"ledger\":[row,...],\"parameter_changes\":n}` with one row per event: `{\"op\":op,\"w\":w,\"b\":b,\"grad_w\":gw,\"grad_b\":gb,\"prediction\":p|null,\"loss\":l|null}` giving the state AFTER the event and the prediction/loss that event produced (null for every event that is not a forward; loss null for an inference forward). `parameter_changes` counts events after which `w` or `b` differs from its value before that event.\n\nThe ledger separates what each boundary changes: a forward produces values, a backward produces gradients, only a step or load changes parameters, and two backward calls before one step accumulate.",
+      "grading": {
+        "evaluatorId": "llm-practical-labs-a",
+        "fixtureRef": "llm-lab-ch01-state-ledger-v1"
+      }
+    },
+    {
+      "id": "llm-lab-ch02-strided-views",
+      "type": "code",
+      "objectiveIds": [
+        "fnd-o02-02"
+      ],
+      "familyId": "llm-lab-ch02-strided-views",
+      "language": "python",
+      "starterCode": "import json\n\ndef solve(data):\n    # Return the JSON value described in the task.\n    pass\n\nif __name__ == \"__main__\":\n    practice = json.loads(\"{\\\"task\\\":\\\"strided_views\\\",\\\"storage\\\":[10,20,30,40,50,60,70,80,90,100,110,120,130,140,150],\\\"views\\\":[{\\\"name\\\":\\\"a\\\",\\\"offset\\\":2,\\\"shape\\\":[3,4],\\\"strides\\\":[4,1]},{\\\"name\\\":\\\"t\\\",\\\"transpose\\\":\\\"a\\\",\\\"dims\\\":[0,1]},{\\\"name\\\":\\\"s\\\",\\\"slice\\\":\\\"t\\\",\\\"dim\\\":0,\\\"start\\\":1,\\\"stop\\\":4,\\\"step\\\":2},{\\\"name\\\":\\\"r\\\",\\\"slice\\\":\\\"a\\\",\\\"dim\\\":0,\\\"start\\\":2,\\\"stop\\\":3,\\\"step\\\":1},{\\\"name\\\":\\\"col\\\",\\\"slice\\\":\\\"a\\\",\\\"dim\\\":1,\\\"start\\\":1,\\\"stop\\\":4,\\\"step\\\":4},{\\\"name\\\":\\\"e\\\",\\\"expand\\\":\\\"col\\\",\\\"shape\\\":[2,3,3]}],\\\"ops\\\":[{\\\"op\\\":\\\"read\\\",\\\"view\\\":\\\"e\\\",\\\"index\\\":[0,0,2]},{\\\"op\\\":\\\"read\\\",\\\"view\\\":\\\"r\\\",\\\"index\\\":[0,0]},{\\\"op\\\":\\\"read\\\",\\\"view\\\":\\\"col\\\",\\\"index\\\":[0,0]},{\\\"op\\\":\\\"read\\\",\\\"view\\\":\\\"e\\\",\\\"index\\\":[1,0,1]},{\\\"op\\\":\\\"read\\\",\\\"view\\\":\\\"a\\\",\\\"index\\\":[1,0]},{\\\"op\\\":\\\"read\\\",\\\"view\\\":\\\"s\\\",\\\"index\\\":[0,1]},{\\\"op\\\":\\\"write\\\",\\\"view\\\":\\\"a\\\",\\\"index\\\":[2,0],\\\"value\\\":777},{\\\"op\\\":\\\"read\\\",\\\"view\\\":\\\"t\\\",\\\"index\\\":[0,2]},{\\\"op\\\":\\\"read\\\",\\\"view\\\":\\\"t\\\",\\\"index\\\":[0,1]}]}\")\n    print(json.dumps(solve(practice)))\n",
+      "prompt": "Chapter 2 lab: strided views, aliasing and a transpose that must not be assumed contiguous\n\nImplement a standard-library Python function `solve(data)` and return the specified JSON value instead of printing it. The runner calls it once per hidden case; each call must be independent of earlier calls. Object-key order is irrelevant; array order, shape and discrete types (booleans, integers used as IDs, null) matter. Numeric outputs must be finite. No network, file access or third-party package is available. A whole attempt has 128 MiB memory, half a CPU, five seconds and 64 KiB combined output. Test with the separate practice input in the starter; it is not a graded case and its output is not supplied.\n\nGrading: hidden reference cases are compared with absolute tolerance 1e-7 plus relative tolerance 1e-7 on every number; everything else must match exactly. This lab is graded and recorded as practical evidence, but it does not block your progress: the episode's independent checks still decide completion.\n\nInput: `{\"task\":\"strided_views\",\"storage\":[numbers],\"views\":[...],\"ops\":[...]}`. Strides are in elements. A view has an offset, a shape and strides; logical index `(i0,i1,...)` addresses storage element `offset + i0*s0 + i1*s1 + ...`. Views are defined in order and may build on earlier views. They never copy storage.\n- `{\"name\":n,\"offset\":o,\"shape\":[...],\"strides\":[...]}` is a view of storage.\n- `{\"name\":n,\"transpose\":src,\"dims\":[i,j]}` swaps dimensions i and j of src: both its shape entries and its stride entries swap; the offset is unchanged.\n- `{\"name\":n,\"slice\":src,\"dim\":d,\"start\":a,\"stop\":z,\"step\":k}` keeps indices a, a+k, ... below z along d (0 <= a < z <= size, k >= 1): the offset grows by `a*stride_d`, the new size is `ceil((z-a)/k)` and the stride becomes `stride_d*k`. Other dimensions are unchanged.\n- `{\"name\":n,\"expand\":src,\"shape\":[...]}` broadcasts src to the target shape, aligning dimensions from the right: new leading dimensions and dimensions of size 1 that grow get stride 0; dimensions whose size is unchanged keep their stride.\n\nOps run in order on the shared storage: `{\"op\":\"read\",\"view\":n,\"index\":[...]}` reads one element; `{\"op\":\"write\",\"view\":n,\"index\":[...],\"value\":v}` writes through the view (writes never target an expanded view). Indices are always in bounds.\n\nReturn `{\"reads\":[values in read order],\"storage\":[final storage],\"views\":{name:{\"offset\":o,\"shape\":[...],\"strides\":[...],\"contiguous\":bool}}}` for every defined view. `contiguous` is true exactly when, for every dimension of size greater than 1, the stride equals the row-major stride for the shape (the product of the sizes after that dimension).\n\nHidden cases write through one view and read through its transpose, use asymmetric positions such as (0,1), slice transposed views and read broadcast views, so a transpose that assumes contiguous strides, a slice that forgets the offset or a copy instead of a view all fail.",
+      "grading": {
+        "evaluatorId": "llm-practical-labs-a",
+        "fixtureRef": "llm-lab-ch02-strided-views-v1"
+      }
+    },
+    {
+      "id": "llm-lab-ch03-gradient-descent",
+      "type": "code",
+      "objectiveIds": [
+        "fnd-o03-03"
+      ],
+      "familyId": "llm-lab-ch03-gradient-descent",
+      "language": "python",
+      "starterCode": "import json\n\ndef solve(data):\n    # Return the JSON value described in the task.\n    pass\n\nif __name__ == \"__main__\":\n    practice = json.loads(\"{\\\"task\\\":\\\"gradient_descent\\\",\\\"examples\\\":[{\\\"x\\\":-2.625,\\\"y\\\":3.375}],\\\"w\\\":-0.125,\\\"b\\\":-0.375,\\\"eta\\\":0.1,\\\"steps\\\":5,\\\"reduction\\\":\\\"sum\\\",\\\"h\\\":0.0001}\")\n    print(json.dumps(solve(practice)))\n",
+      "prompt": "Chapter 3 lab: gradient descent with a finite-difference check, understepping and overshooting\n\nImplement a standard-library Python function `solve(data)` and return the specified JSON value instead of printing it. The runner calls it once per hidden case; each call must be independent of earlier calls. Object-key order is irrelevant; array order, shape and discrete types (booleans, integers used as IDs, null) matter. Numeric outputs must be finite. No network, file access or third-party package is available. A whole attempt has 128 MiB memory, half a CPU, five seconds and 64 KiB combined output. Test with the separate practice input in the starter; it is not a graded case and its output is not supplied.\n\nGrading: hidden reference cases are compared with absolute tolerance 1e-7 plus relative tolerance 1e-7 on every number; everything else must match exactly. This lab is graded and recorded as practical evidence, but it does not block your progress: the episode's independent checks still decide completion.\n\nInput: `{\"task\":\"gradient_descent\",\"examples\":[{\"x\":x,\"y\":y},...],\"w\":w,\"b\":b,\"eta\":eta,\"steps\":K,\"reduction\":\"mean\"|\"sum\",\"h\":h}`. The model is `prediction = w*x + b`, each example's loss is `(prediction - y)^2 / 2`, and the objective is the mean or the sum of the example losses as `reduction` says.\n\nRun K plain gradient-descent steps `w = w - eta*dObjective/dw`, `b = b - eta*dObjective/db`. Compute both gradients from the same parameter state before changing either parameter.\n\nReturn `{\"trajectory\":[entry,...],\"finite_difference\":[dw,db],\"outcome\":o}`. `trajectory` has K+1 entries: entry k is `{\"w\":..,\"b\":..,\"loss\":..,\"grad_w\":..,\"grad_b\":..}` for the state after k steps (entry 0 is the initial state), with loss and gradients recomputed at that state. `finite_difference` is the central difference of the objective at the INITIAL parameters, `(f(w+h,b)-f(w-h,b))/(2h)` and `(f(w,b+h)-f(w,b-h))/(2h)`; it should agree with entry 0's analytic gradients, which is the check. `outcome` is \"decreased\" if the final loss is below the initial loss, \"increased\" if it is above, otherwise \"unchanged\".\n\nLearning rates range from tiny (slow progress) to large enough to overshoot and diverge; summed objectives scale gradients with the number of examples. Judge each new state with a freshly recomputed loss, never the old prediction.",
+      "grading": {
+        "evaluatorId": "llm-practical-labs-a",
+        "fixtureRef": "llm-lab-ch03-gradient-descent-v1"
+      }
+    },
+    {
+      "id": "llm-lab-ch05-optimizer-resume",
+      "type": "code",
+      "objectiveIds": [
+        "ttf-o05-03"
+      ],
+      "familyId": "llm-lab-ch05-optimizer-resume",
+      "language": "python",
+      "starterCode": "import json\n\ndef solve(data):\n    # Return the JSON value described in the task.\n    pass\n\nif __name__ == \"__main__\":\n    practice = json.loads(\"{\\\"task\\\":\\\"optimizer_resume\\\",\\\"optimizer\\\":\\\"adamw\\\",\\\"hyper\\\":{\\\"eta\\\":0.01,\\\"beta1\\\":0.9,\\\"beta2\\\":0.999,\\\"eps\\\":1e-08,\\\"weight_decay\\\":0.0},\\\"params\\\":[-0.5,1.375,-0.125],\\\"grads\\\":[[1.25,-2.875,-1.125],[-0.375,-0.625,-2.625],[2.375,-0.75,-0.375],[0.25,2.25,1.875],[-2.75,1.0,0.5]],\\\"checkpoint_after\\\":4,\\\"restore\\\":\\\"params_only\\\"}\")\n    print(json.dumps(solve(practice)))\n",
+      "prompt": "Chapter 5 lab: optimizer state, checkpoints and resume equivalence\n\nImplement a standard-library Python function `solve(data)` and return the specified JSON value instead of printing it. The runner calls it once per hidden case; each call must be independent of earlier calls. Object-key order is irrelevant; array order, shape and discrete types (booleans, integers used as IDs, null) matter. Numeric outputs must be finite. No network, file access or third-party package is available. A whole attempt has 128 MiB memory, half a CPU, five seconds and 64 KiB combined output. Test with the separate practice input in the starter; it is not a graded case and its output is not supplied.\n\nGrading: hidden reference cases are compared with absolute tolerance 1e-7 plus relative tolerance 1e-7 on every number; everything else must match exactly. This lab is graded and recorded as practical evidence, but it does not block your progress: the episode's independent checks still decide completion.\n\nInput: `{\"task\":\"optimizer_resume\",\"optimizer\":\"sgd_momentum\"|\"adamw\",\"hyper\":{...},\"params\":[p...],\"grads\":[[g...] per step],\"checkpoint_after\":k,\"restore\":\"full\"|\"params_only\"}`. Gradients are supplied for every step (no model): step s uses `grads[s]`.\n\nOptimizer state is `{\"step\":t,\"m\":[...],\"v\":[...]}`, initially t=0 and zero vectors. Each step first increments t, then per parameter:\n- `sgd_momentum` (hyper `eta`, `mu`): `m = mu*m + g`; `p = p - eta*m` (no dampening, no Nesterov; v is unused).\n- `adamw` (hyper `eta`, `beta1`, `beta2`, `eps`, `weight_decay`): `m = beta1*m + (1-beta1)*g`; `v = beta2*v + (1-beta2)*g^2`; `mhat = m/(1-beta1^t)`; `vhat = v/(1-beta2^t)`; `p = (1 - eta*weight_decay)*p - eta*mhat/(sqrt(vhat)+eps)` (decoupled decay, not added to g).\n\nRun the first k steps (k may be 0), then take a checkpoint of the parameters and state. Restore it: with `\"full\"` continue from the checkpointed parameters and state; with `\"params_only\"` keep the parameters but restart the state from t=0 and zero vectors. Run the remaining steps.\n\nReturn `{\"checkpoint\":{\"params\":[...],\"state\":S},\"params\":[final],\"state\":S,\"matches_uninterrupted\":bool}`. S is `{\"step\":t,\"m\":[...]}` for sgd_momentum and `{\"step\":t,\"m\":[...],\"v\":[...]}` for adamw. `matches_uninterrupted` is true exactly when the final parameters equal those of one uninterrupted run over all steps, computed the same way (compare your own two runs exactly).\n\nThis tests state ownership: the current parameters and gradient alone do not determine a stateful optimizer's next step, and the step counter is state.",
+      "grading": {
+        "evaluatorId": "llm-practical-labs-a",
+        "fixtureRef": "llm-lab-ch05-optimizer-resume-v1"
+      }
+    },
+    {
+      "id": "llm-lab-ch06-next-token-loss",
+      "type": "code",
+      "objectiveIds": [
+        "ttf-o06-02"
+      ],
+      "familyId": "llm-lab-ch06-next-token-loss",
+      "language": "python",
+      "starterCode": "import json\n\ndef solve(data):\n    # Return the JSON value described in the task.\n    pass\n\nif __name__ == \"__main__\":\n    practice = json.loads(\"{\\\"task\\\":\\\"next_token_loss\\\",\\\"tokens\\\":[1,0,0,1,0,1],\\\"logits\\\":[[-60.0,-3.75,0.0],[1.75,-0.5,-2.5],[-3.5,-4.0,3.5],[3.25,-2.0,3.25],[3.5,3.25,2.25]],\\\"ignore\\\":[false,false,false,false,false]}\")\n    print(json.dumps(solve(practice)))\n",
+      "prompt": "Chapter 6 lab: next-token probabilities, cross-entropy and logit gradients\n\nImplement a standard-library Python function `solve(data)` and return the specified JSON value instead of printing it. The runner calls it once per hidden case; each call must be independent of earlier calls. Object-key order is irrelevant; array order, shape and discrete types (booleans, integers used as IDs, null) matter. Numeric outputs must be finite. No network, file access or third-party package is available. A whole attempt has 128 MiB memory, half a CPU, five seconds and 64 KiB combined output. Test with the separate practice input in the starter; it is not a graded case and its output is not supplied.\n\nGrading: hidden reference cases are compared with absolute tolerance 1e-7 plus relative tolerance 1e-7 on every number; everything else must match exactly. This lab is graded and recorded as practical evidence, but it does not block your progress: the episode's independent checks still decide completion.\n\nInput: `{\"task\":\"next_token_loss\",\"tokens\":[t0,...,tT],\"logits\":[[...V scores] x T],\"ignore\":[bool x T]}`. Position i's logits predict the NEXT token, so its target is `tokens[i+1]` (teacher forcing). Token IDs index the vocabulary of size V. Positions with `ignore[i]` true do not count. At least one position counts.\n\nReturn `{\"targets\":[...T ids],\"probs\":[[...] x T],\"losses\":[l or null x T],\"mean_loss\":x,\"greedy_accuracy\":a,\"grad\":[[...] x T]}`:\n- `probs[i]` is softmax of `logits[i]` (for every position, including ignored ones).\n- `losses[i]` is the natural-log cross-entropy `-log(probs[i][target])` for counted positions and null for ignored ones.\n- `mean_loss` averages the counted losses over the counted positions only.\n- `greedy_accuracy` is the fraction of counted positions whose highest logit is the target (ties go to the lowest ID).\n- `grad[i]` is the derivative of `mean_loss` with respect to `logits[i]`: `(probs[i][j] - [j == target]) / counted` for counted positions and a row of zeros for ignored ones.\n\nSome hidden logits are near 1000 and some targets are sharply unfavourable, so compute softmax and the loss stably (subtract the row maximum; log-sum-exp). An ignored target leaves both the numerator and the denominator of the mean.",
+      "grading": {
+        "evaluatorId": "llm-practical-labs-a",
+        "fixtureRef": "llm-lab-ch06-next-token-loss-v1"
+      }
+    },
+    {
+      "id": "llm-lab-ch08-lora-adapter",
+      "type": "code",
+      "objectiveIds": [
+        "ttf-o08-04"
+      ],
+      "familyId": "llm-lab-ch08-lora-adapter",
+      "language": "python",
+      "starterCode": "import json\n\ndef solve(data):\n    # Return the JSON value described in the task.\n    pass\n\nif __name__ == \"__main__\":\n    practice = json.loads(\"{\\\"task\\\":\\\"lora_adapter\\\",\\\"W\\\":[[1.5,0.5,0.0,-0.5,1.0],[0.0,-2.0,-1.75,-2.0,2.0],[0.25,0.5,1.0,0.5,-1.75],[0.0,-0.5,-1.5,-0.25,1.75]],\\\"A\\\":[[-2.0,-1.25,-1.5,1.0,0.75],[-1.25,-0.25,0.0,0.5,1.75]],\\\"B\\\":[[-1.75,-1.0],[-1.75,-2.0],[0.5,-0.5],[1.75,1.0]],\\\"alpha\\\":16.0,\\\"r\\\":2,\\\"scale_convention\\\":\\\"alpha_over_r\\\",\\\"inputs\\\":[[-2.5,2.0,-3.0,-1.0,0.0],[2.5,-2.5,1.5,-0.5,0.5],[-1.0,-2.0,-1.0,-3.0,-1.5]]}\")\n    print(json.dumps(solve(practice)))\n",
+      "prompt": "Chapter 8 lab: a low-rank adapter: dense update, merge and parameter budget\n\nImplement a standard-library Python function `solve(data)` and return the specified JSON value instead of printing it. The runner calls it once per hidden case; each call must be independent of earlier calls. Object-key order is irrelevant; array order, shape and discrete types (booleans, integers used as IDs, null) matter. Numeric outputs must be finite. No network, file access or third-party package is available. A whole attempt has 128 MiB memory, half a CPU, five seconds and 64 KiB combined output. Test with the separate practice input in the starter; it is not a graded case and its output is not supplied.\n\nGrading: hidden reference cases are compared with absolute tolerance 1e-7 plus relative tolerance 1e-7 on every number; everything else must match exactly. This lab is graded and recorded as practical evidence, but it does not block your progress: the episode's independent checks still decide completion.\n\nInput: `{\"task\":\"lora_adapter\",\"W\":[[out x in]],\"A\":[[r x in]],\"B\":[[out x r]],\"alpha\":a,\"r\":r,\"scale_convention\":\"alpha_over_r\"|\"alpha\",\"inputs\":[[in numbers],...]}`. Vectors are columns: a layer maps x of length `in` to `W x` of length `out`. The adapter update is `DeltaW = s * B @ A` with scale `s = alpha/r` or `s = alpha` as `scale_convention` declares. W stays frozen; A and B are the trainable factors.\n\nReturn `{\"scale\":s,\"delta\":[[out x in]],\"merged\":[[out x in]],\"outputs_unmerged\":[[out] per input],\"outputs_merged\":[[out] per input],\"trainable_parameters\":n,\"dense_parameters\":m,\"adapter_can_learn\":bool}`:\n- `delta` is DeltaW and `merged` is `W + DeltaW`.\n- `outputs_unmerged[k]` is `W x + s * B (A x)` computed without forming DeltaW; `outputs_merged[k]` is `merged x`. They agree up to rounding.\n- `trainable_parameters` counts the entries of A and B; `dense_parameters` counts the entries of W.\n- `adapter_can_learn` is false exactly when A and B are both entirely zero (then the gradient reaching each factor is zero, because it is multiplied by the other factor), otherwise true.",
+      "grading": {
+        "evaluatorId": "llm-practical-labs-a",
+        "fixtureRef": "llm-lab-ch08-lora-adapter-v1"
+      }
+    }
+  ],
+  "episodeBlocks": [
+    {
+      "episodeId": "fnd-e01-02",
+      "assessmentId": "llm-lab-ch01-state-ledger",
+      "position": "end",
+      "prefix": "lab"
+    },
+    {
+      "episodeId": "fnd-e02-02",
+      "assessmentId": "llm-lab-ch02-strided-views",
+      "position": "end",
+      "prefix": "lab"
+    },
+    {
+      "episodeId": "fnd-e03-03",
+      "assessmentId": "llm-lab-ch03-gradient-descent",
+      "position": "end",
+      "prefix": "lab"
+    },
+    {
+      "episodeId": "ttf-e05-03",
+      "assessmentId": "llm-lab-ch05-optimizer-resume",
+      "position": "end",
+      "prefix": "lab"
+    },
+    {
+      "episodeId": "ttf-e06-02",
+      "assessmentId": "llm-lab-ch06-next-token-loss",
+      "position": "end",
+      "prefix": "lab"
+    },
+    {
+      "episodeId": "ttf-e08-04",
+      "assessmentId": "llm-lab-ch08-lora-adapter",
+      "position": "end",
+      "prefix": "lab"
+    }
+  ]
+}

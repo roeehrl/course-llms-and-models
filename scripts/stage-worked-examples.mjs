@@ -7,14 +7,15 @@ import {compileCourse} from '@course-core/sdk/compiler';
 import {assemble,fragments,loadOverlays,VISUAL_OVERLAYS} from './assemble.mjs';
 
 export const ROOT=new URL('../',import.meta.url);
-/** 0.1.6 moves to SDK 0.4.0 and adds every verified concept illustration, optional
- * placement, reviewed written explanations, delayed retention checks and reviewed
- * remedial episodes to the 0.1.5 worked-example course. */
-export const COURSE_VERSION='0.1.6';
+/** 0.1.7 moves to SDK 0.5.0 and adds misconception hypotheses with diagnostic probes,
+ * chapter labs with hidden tests, the graded final portfolio, the worked adaptive
+ * episode, public research topics and the study instruments to the 0.1.6 course.
+ * Staged here only; tagging and releasing a course version is a separate step. */
+export const COURSE_VERSION='0.1.7';
 export {VISUAL_OVERLAYS};
-/** Placement, retention, reviewed written answers and teaching-bank episode
- * insertion with the restored code-bank digest are first available together in 0.1.34. */
-export const MINIMUM_CORE_VERSION='0.1.34';
+/** SDK 0.5 hypotheses, probes, item roles and research tasks are enforced from Core 0.1.40;
+ * the study tooling the instruments are written for is first released in 0.1.48. */
+export const MINIMUM_CORE_VERSION='0.1.48';
 const read=async file=>JSON.parse(await readFile(new URL(file,ROOT),'utf8'));
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 export function formula(node){

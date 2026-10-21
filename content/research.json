@@ -1,0 +1,1283 @@
+{
+  "schemaVersion": 1,
+  "id": "research",
+  "purpose": "Author-reviewed public research topics and optional research tasks, one reading topic and one video topic per chapter, so a learner (through the supervisor) can request outside resources. Query texts are generic public phrases: they contain no learner data, no private course material and no names of private systems. Every candidate still needs human review (requireReviewedContent) before a learner sees it.",
+  "research": {
+    "publicTopics": [
+      {
+        "id": "topic-ch01-reading",
+        "objectiveIds": [
+          "fnd-o01-01",
+          "fnd-o01-02",
+          "fnd-o01-03",
+          "fnd-o01-04"
+        ],
+        "queryText": "what is a machine learning model parameters inference versus training versus fine-tuning explained",
+        "allowedDomains": [
+          "d2l.ai",
+          "docs.pytorch.org",
+          "huggingface.co"
+        ]
+      },
+      {
+        "id": "topic-ch01-video",
+        "objectiveIds": [
+          "fnd-o01-01",
+          "fnd-o01-02",
+          "fnd-o01-03",
+          "fnd-o01-04"
+        ],
+        "queryText": "how a neural network model separates code, parameters and inference for programmers",
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ]
+      },
+      {
+        "id": "topic-ch02-reading",
+        "objectiveIds": [
+          "fnd-o02-01",
+          "fnd-o02-02",
+          "fnd-o02-03",
+          "fnd-o02-04"
+        ],
+        "queryText": "tensor strides views broadcasting memory layout floating point bfloat16 precision",
+        "allowedDomains": [
+          "docs.pytorch.org",
+          "numpy.org",
+          "d2l.ai"
+        ]
+      },
+      {
+        "id": "topic-ch02-video",
+        "objectiveIds": [
+          "fnd-o02-01",
+          "fnd-o02-02",
+          "fnd-o02-03",
+          "fnd-o02-04"
+        ],
+        "queryText": "tensor strides, views and broadcasting explained",
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ]
+      },
+      {
+        "id": "topic-ch03-reading",
+        "objectiveIds": [
+          "fnd-o03-01",
+          "fnd-o03-02",
+          "fnd-o03-03",
+          "fnd-o03-04"
+        ],
+        "queryText": "gradient descent learning rate chain rule finite difference gradient check tutorial",
+        "allowedDomains": [
+          "d2l.ai",
+          "cs231n.github.io"
+        ]
+      },
+      {
+        "id": "topic-ch03-video",
+        "objectiveIds": [
+          "fnd-o03-01",
+          "fnd-o03-02",
+          "fnd-o03-03",
+          "fnd-o03-04"
+        ],
+        "queryText": "gradient descent and the chain rule for loss functions explained",
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ]
+      },
+      {
+        "id": "topic-ch04-reading",
+        "objectiveIds": [
+          "fnd-o04-01",
+          "fnd-o04-02",
+          "fnd-o04-03",
+          "fnd-o04-04"
+        ],
+        "queryText": "reverse-mode automatic differentiation computation graph backpropagation gradient accumulation",
+        "allowedDomains": [
+          "d2l.ai",
+          "docs.pytorch.org",
+          "cs231n.github.io"
+        ]
+      },
+      {
+        "id": "topic-ch04-video",
+        "objectiveIds": [
+          "fnd-o04-01",
+          "fnd-o04-02",
+          "fnd-o04-03",
+          "fnd-o04-04"
+        ],
+        "queryText": "build a tiny autograd engine backpropagation from scratch",
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ]
+      },
+      {
+        "id": "topic-ch05-reading",
+        "objectiveIds": [
+          "ttf-o05-01",
+          "ttf-o05-02",
+          "ttf-o05-03",
+          "ttf-o05-04"
+        ],
+        "queryText": "neural network training loop optimizer state momentum AdamW checkpoint reproducibility",
+        "allowedDomains": [
+          "docs.pytorch.org",
+          "d2l.ai",
+          "arxiv.org"
+        ]
+      },
+      {
+        "id": "topic-ch05-video",
+        "objectiveIds": [
+          "ttf-o05-01",
+          "ttf-o05-02",
+          "ttf-o05-03",
+          "ttf-o05-04"
+        ],
+        "queryText": "AdamW optimizer state and training loop debugging explained",
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ]
+      },
+      {
+        "id": "topic-ch06-reading",
+        "objectiveIds": [
+          "ttf-o06-01",
+          "ttf-o06-02",
+          "ttf-o06-03",
+          "ttf-o06-04"
+        ],
+        "queryText": "language model tokenization embeddings softmax cross-entropy causal mask KV cache",
+        "allowedDomains": [
+          "huggingface.co",
+          "d2l.ai",
+          "docs.pytorch.org"
+        ]
+      },
+      {
+        "id": "topic-ch06-video",
+        "objectiveIds": [
+          "ttf-o06-01",
+          "ttf-o06-02",
+          "ttf-o06-03",
+          "ttf-o06-04"
+        ],
+        "queryText": "how language models predict the next token softmax cross-entropy causal masking",
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ]
+      },
+      {
+        "id": "topic-ch07-reading",
+        "objectiveIds": [
+          "ttf-o07-01",
+          "ttf-o07-02",
+          "ttf-o07-03",
+          "ttf-o07-04"
+        ],
+        "queryText": "transformer self-attention queries keys values multi-head grouped-query attention RoPE RMSNorm",
+        "allowedDomains": [
+          "arxiv.org",
+          "d2l.ai",
+          "huggingface.co"
+        ]
+      },
+      {
+        "id": "topic-ch07-video",
+        "objectiveIds": [
+          "ttf-o07-01",
+          "ttf-o07-02",
+          "ttf-o07-03",
+          "ttf-o07-04"
+        ],
+        "queryText": "transformer attention from scratch queries keys values explained",
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ]
+      },
+      {
+        "id": "topic-ch08-reading",
+        "objectiveIds": [
+          "ttf-o08-01",
+          "ttf-o08-02",
+          "ttf-o08-03",
+          "ttf-o08-04"
+        ],
+        "queryText": "PyTorch autograd dispatch asynchronous execution MLX lazy evaluation LoRA fine-tuning",
+        "allowedDomains": [
+          "docs.pytorch.org",
+          "pytorch.org",
+          "ml-explore.github.io",
+          "huggingface.co"
+        ]
+      },
+      {
+        "id": "topic-ch08-video",
+        "objectiveIds": [
+          "ttf-o08-01",
+          "ttf-o08-02",
+          "ttf-o08-03",
+          "ttf-o08-04"
+        ],
+        "queryText": "PyTorch internals dispatcher and MLX lazy evaluation explained",
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ]
+      },
+      {
+        "id": "topic-ch09-reading",
+        "objectiveIds": [
+          "sys-o09-01",
+          "sys-o09-02",
+          "sys-o09-03",
+          "sys-o09-04"
+        ],
+        "queryText": "GPU threadgroups SIMD groups parallel reduction tiling arithmetic intensity roofline Metal",
+        "allowedDomains": [
+          "developer.apple.com",
+          "docs.nvidia.com"
+        ]
+      },
+      {
+        "id": "topic-ch09-video",
+        "objectiveIds": [
+          "sys-o09-01",
+          "sys-o09-02",
+          "sys-o09-03",
+          "sys-o09-04"
+        ],
+        "queryText": "GPU parallel reduction tiling and arithmetic intensity roofline model",
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ]
+      },
+      {
+        "id": "topic-ch10-reading",
+        "objectiveIds": [
+          "sys-o10-01",
+          "sys-o10-02",
+          "sys-o10-03",
+          "sys-o10-04"
+        ],
+        "queryText": "data tensor pipeline parallelism microbatches pipeline bubble distributed training",
+        "allowedDomains": [
+          "docs.pytorch.org",
+          "arxiv.org",
+          "huggingface.co"
+        ]
+      },
+      {
+        "id": "topic-ch10-video",
+        "objectiveIds": [
+          "sys-o10-01",
+          "sys-o10-02",
+          "sys-o10-03",
+          "sys-o10-04"
+        ],
+        "queryText": "pipeline parallelism microbatches and pipeline bubbles explained",
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ]
+      },
+      {
+        "id": "topic-ch11-reading",
+        "objectiveIds": [
+          "sys-o11-01",
+          "sys-o11-02",
+          "sys-o11-03",
+          "sys-o11-04"
+        ],
+        "queryText": "pipeline parallel training stage boundary activations and gradients sent between stages",
+        "allowedDomains": [
+          "docs.pytorch.org",
+          "arxiv.org"
+        ]
+      },
+      {
+        "id": "topic-ch11-video",
+        "objectiveIds": [
+          "sys-o11-01",
+          "sys-o11-02",
+          "sys-o11-03",
+          "sys-o11-04"
+        ],
+        "queryText": "how pipeline-parallel stages exchange activations and gradients",
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ]
+      },
+      {
+        "id": "topic-ch12-reading",
+        "objectiveIds": [
+          "eng-o12-01",
+          "eng-o12-02",
+          "eng-o12-03",
+          "eng-o12-04"
+        ],
+        "queryText": "numerical correctness testing deterministic floating point memory layout bug finite difference test",
+        "allowedDomains": [
+          "docs.pytorch.org",
+          "docs.python.org",
+          "arxiv.org"
+        ]
+      },
+      {
+        "id": "topic-ch12-video",
+        "objectiveIds": [
+          "eng-o12-01",
+          "eng-o12-02",
+          "eng-o12-03",
+          "eng-o12-04"
+        ],
+        "queryText": "testing numerical code correctness beyond finite outputs",
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ]
+      },
+      {
+        "id": "topic-ch13-reading",
+        "objectiveIds": [
+          "eng-o13-01",
+          "eng-o13-02",
+          "eng-o13-03",
+          "eng-o13-04"
+        ],
+        "queryText": "kernel optimization fused normalization recomputation attention qualification benchmarking methodology",
+        "allowedDomains": [
+          "docs.pytorch.org",
+          "arxiv.org",
+          "docs.nvidia.com"
+        ]
+      },
+      {
+        "id": "topic-ch13-video",
+        "objectiveIds": [
+          "eng-o13-01",
+          "eng-o13-02",
+          "eng-o13-03",
+          "eng-o13-04"
+        ],
+        "queryText": "GPU kernel fusion and benchmarking without changing numerical results",
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ]
+      },
+      {
+        "id": "topic-ch14-reading",
+        "objectiveIds": [
+          "eng-o14-01",
+          "eng-o14-02",
+          "eng-o14-03",
+          "eng-o14-04"
+        ],
+        "queryText": "reading machine learning papers reproducible experiment report benchmark methodology",
+        "allowedDomains": [
+          "arxiv.org",
+          "docs.pytorch.org"
+        ]
+      },
+      {
+        "id": "topic-ch14-video",
+        "objectiveIds": [
+          "eng-o14-01",
+          "eng-o14-02",
+          "eng-o14-03",
+          "eng-o14-04"
+        ],
+        "queryText": "how to read machine learning papers and run reproducible experiments",
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ]
+      }
+    ]
+  },
+  "researchTasks": [
+    {
+      "id": "research-ch01-reading",
+      "objectiveIds": [
+        "fnd-o01-01",
+        "fnd-o01-02",
+        "fnd-o01-03",
+        "fnd-o01-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch01-reading"
+      ],
+      "modalities": [
+        "article",
+        "worked_example"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "d2l.ai",
+          "docs.pytorch.org",
+          "huggingface.co"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch01-video",
+      "objectiveIds": [
+        "fnd-o01-01",
+        "fnd-o01-02",
+        "fnd-o01-03",
+        "fnd-o01-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch01-video"
+      ],
+      "modalities": [
+        "video"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch02-reading",
+      "objectiveIds": [
+        "fnd-o02-01",
+        "fnd-o02-02",
+        "fnd-o02-03",
+        "fnd-o02-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch02-reading"
+      ],
+      "modalities": [
+        "article",
+        "worked_example"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "docs.pytorch.org",
+          "numpy.org",
+          "d2l.ai"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch02-video",
+      "objectiveIds": [
+        "fnd-o02-01",
+        "fnd-o02-02",
+        "fnd-o02-03",
+        "fnd-o02-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch02-video"
+      ],
+      "modalities": [
+        "video"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch03-reading",
+      "objectiveIds": [
+        "fnd-o03-01",
+        "fnd-o03-02",
+        "fnd-o03-03",
+        "fnd-o03-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch03-reading"
+      ],
+      "modalities": [
+        "article",
+        "worked_example"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "d2l.ai",
+          "cs231n.github.io"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch03-video",
+      "objectiveIds": [
+        "fnd-o03-01",
+        "fnd-o03-02",
+        "fnd-o03-03",
+        "fnd-o03-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch03-video"
+      ],
+      "modalities": [
+        "video"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch04-reading",
+      "objectiveIds": [
+        "fnd-o04-01",
+        "fnd-o04-02",
+        "fnd-o04-03",
+        "fnd-o04-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch04-reading"
+      ],
+      "modalities": [
+        "article",
+        "worked_example"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "d2l.ai",
+          "docs.pytorch.org",
+          "cs231n.github.io"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch04-video",
+      "objectiveIds": [
+        "fnd-o04-01",
+        "fnd-o04-02",
+        "fnd-o04-03",
+        "fnd-o04-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch04-video"
+      ],
+      "modalities": [
+        "video"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch05-reading",
+      "objectiveIds": [
+        "ttf-o05-01",
+        "ttf-o05-02",
+        "ttf-o05-03",
+        "ttf-o05-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch05-reading"
+      ],
+      "modalities": [
+        "article",
+        "worked_example"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "docs.pytorch.org",
+          "d2l.ai",
+          "arxiv.org"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch05-video",
+      "objectiveIds": [
+        "ttf-o05-01",
+        "ttf-o05-02",
+        "ttf-o05-03",
+        "ttf-o05-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch05-video"
+      ],
+      "modalities": [
+        "video"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch06-reading",
+      "objectiveIds": [
+        "ttf-o06-01",
+        "ttf-o06-02",
+        "ttf-o06-03",
+        "ttf-o06-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch06-reading"
+      ],
+      "modalities": [
+        "article",
+        "worked_example"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "huggingface.co",
+          "d2l.ai",
+          "docs.pytorch.org"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch06-video",
+      "objectiveIds": [
+        "ttf-o06-01",
+        "ttf-o06-02",
+        "ttf-o06-03",
+        "ttf-o06-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch06-video"
+      ],
+      "modalities": [
+        "video"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch07-reading",
+      "objectiveIds": [
+        "ttf-o07-01",
+        "ttf-o07-02",
+        "ttf-o07-03",
+        "ttf-o07-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch07-reading"
+      ],
+      "modalities": [
+        "article",
+        "worked_example"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "arxiv.org",
+          "d2l.ai",
+          "huggingface.co"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch07-video",
+      "objectiveIds": [
+        "ttf-o07-01",
+        "ttf-o07-02",
+        "ttf-o07-03",
+        "ttf-o07-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch07-video"
+      ],
+      "modalities": [
+        "video"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch08-reading",
+      "objectiveIds": [
+        "ttf-o08-01",
+        "ttf-o08-02",
+        "ttf-o08-03",
+        "ttf-o08-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch08-reading"
+      ],
+      "modalities": [
+        "article",
+        "worked_example"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "docs.pytorch.org",
+          "pytorch.org",
+          "ml-explore.github.io",
+          "huggingface.co"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch08-video",
+      "objectiveIds": [
+        "ttf-o08-01",
+        "ttf-o08-02",
+        "ttf-o08-03",
+        "ttf-o08-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch08-video"
+      ],
+      "modalities": [
+        "video"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch09-reading",
+      "objectiveIds": [
+        "sys-o09-01",
+        "sys-o09-02",
+        "sys-o09-03",
+        "sys-o09-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch09-reading"
+      ],
+      "modalities": [
+        "article",
+        "worked_example"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "developer.apple.com",
+          "docs.nvidia.com"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch09-video",
+      "objectiveIds": [
+        "sys-o09-01",
+        "sys-o09-02",
+        "sys-o09-03",
+        "sys-o09-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch09-video"
+      ],
+      "modalities": [
+        "video"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch10-reading",
+      "objectiveIds": [
+        "sys-o10-01",
+        "sys-o10-02",
+        "sys-o10-03",
+        "sys-o10-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch10-reading"
+      ],
+      "modalities": [
+        "article",
+        "worked_example"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "docs.pytorch.org",
+          "arxiv.org",
+          "huggingface.co"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch10-video",
+      "objectiveIds": [
+        "sys-o10-01",
+        "sys-o10-02",
+        "sys-o10-03",
+        "sys-o10-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch10-video"
+      ],
+      "modalities": [
+        "video"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch11-reading",
+      "objectiveIds": [
+        "sys-o11-01",
+        "sys-o11-02",
+        "sys-o11-03",
+        "sys-o11-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch11-reading"
+      ],
+      "modalities": [
+        "article",
+        "worked_example"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "docs.pytorch.org",
+          "arxiv.org"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch11-video",
+      "objectiveIds": [
+        "sys-o11-01",
+        "sys-o11-02",
+        "sys-o11-03",
+        "sys-o11-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch11-video"
+      ],
+      "modalities": [
+        "video"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch12-reading",
+      "objectiveIds": [
+        "eng-o12-01",
+        "eng-o12-02",
+        "eng-o12-03",
+        "eng-o12-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch12-reading"
+      ],
+      "modalities": [
+        "article",
+        "worked_example"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "docs.pytorch.org",
+          "docs.python.org",
+          "arxiv.org"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch12-video",
+      "objectiveIds": [
+        "eng-o12-01",
+        "eng-o12-02",
+        "eng-o12-03",
+        "eng-o12-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch12-video"
+      ],
+      "modalities": [
+        "video"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch13-reading",
+      "objectiveIds": [
+        "eng-o13-01",
+        "eng-o13-02",
+        "eng-o13-03",
+        "eng-o13-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch13-reading"
+      ],
+      "modalities": [
+        "article",
+        "worked_example"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "docs.pytorch.org",
+          "arxiv.org",
+          "docs.nvidia.com"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch13-video",
+      "objectiveIds": [
+        "eng-o13-01",
+        "eng-o13-02",
+        "eng-o13-03",
+        "eng-o13-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch13-video"
+      ],
+      "modalities": [
+        "video"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch14-reading",
+      "objectiveIds": [
+        "eng-o14-01",
+        "eng-o14-02",
+        "eng-o14-03",
+        "eng-o14-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch14-reading"
+      ],
+      "modalities": [
+        "article",
+        "worked_example"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "arxiv.org",
+          "docs.pytorch.org"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    },
+    {
+      "id": "research-ch14-video",
+      "objectiveIds": [
+        "eng-o14-01",
+        "eng-o14-02",
+        "eng-o14-03",
+        "eng-o14-04"
+      ],
+      "publicTopicIds": [
+        "topic-ch14-video"
+      ],
+      "modalities": [
+        "video"
+      ],
+      "languages": [
+        "en"
+      ],
+      "requiredOrOptional": "optional",
+      "sourcePolicy": {
+        "allowedDomains": [
+          "www.youtube.com",
+          "youtube.com",
+          "youtu.be"
+        ],
+        "requireReviewedContent": true,
+        "maxCandidates": 5,
+        "maxToolCalls": 12,
+        "deadlineSeconds": 120
+      }
+    }
+  ],
+  "review": {
+    "reviewedAt": "2026-10-21",
+    "note": "Domains are exact hosts. Reading topics are limited to official documentation and primary-paper hosts; video topics to YouTube hosts. Owner should confirm the allowlists before opening research to learners."
+  }
+}

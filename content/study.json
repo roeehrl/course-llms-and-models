@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "definition": {
+    "title": "Gradients and updates: fixed lessons vs companion vs supervision",
+    "purpose": "We want to learn which version of this course helps people understand gradients and training updates best. Taking part is voluntary. If you join, you are placed by chance in one of three versions of the course: the fixed lessons only; the lessons with the AI companion you can ask questions; or the full course with the AI companion and personal AI supervision. The version you get stays the same while the study runs. You will see a few short optional study checks: some before the chapter 3 derivative lesson, some after the chapter 4 accumulation lesson, a few new problems at the end of chapter 4, and the course's usual later review questions. Study checks never count toward your progress or completion, and answering \"I don't know\" is fine. We record your study code (not your name or email), which version you used, your answers to the study checks and when you gave them, and how many lessons you completed. Results are only reported for groups large enough that no one can be singled out. You can withdraw at any time from the study panel. Withdrawing stops your data being included and returns you to the course as everyone else has it; it does not affect your progress.",
+    "arms": [
+      {
+        "id": "fixed",
+        "label": "Fixed lessons",
+        "behaviour": "fixed"
+      },
+      {
+        "id": "chat_only",
+        "label": "Lessons with companion",
+        "behaviour": "chat_only"
+      },
+      {
+        "id": "supervisor",
+        "label": "Full course",
+        "behaviour": "supervisor"
+      }
+    ],
+    "instruments": {
+      "pre": [
+        "study-pre-chain",
+        "study-pre-descent",
+        "study-pre-paths",
+        "study-pre-accum"
+      ],
+      "post": [
+        "study-post-chain",
+        "study-post-descent",
+        "study-post-paths",
+        "study-post-accum"
+      ],
+      "transfer": [
+        "study-transfer-stage",
+        "study-transfer-fd",
+        "study-transfer-scale",
+        "study-transfer-microbatch"
+      ],
+      "delayed": [
+        "ret-03-03-1",
+        "ret-03-03-2",
+        "ret-04-03-1",
+        "ret-04-03-2"
+      ]
+    },
+    "minCellSize": 5
+  },
+  "coreVersion": "0.1.48",
+  "protocol": {
+    "question": "Does a course version with the AI companion, or with the companion plus personal AI supervision, produce larger learning gains on gradients, descent updates, path accumulation and microbatch accumulation than the fixed lessons, and do gains transfer and persist?",
+    "hypotheses": [
+      "H1: post minus pre score is higher in the supervisor arm than in the fixed arm.",
+      "H2: post minus pre score is higher in the chat_only arm than in the fixed arm.",
+      "H3: the same ordering holds on the transfer set and on the delayed retention checks."
+    ],
+    "primaryOutcome": "Per participant: correct first attempts on the 4 post items minus correct first attempts on the 4 matched pre items (same four objectives, parallel forms).",
+    "secondaryOutcomes": [
+      "Correct first attempts on the 4 transfer items.",
+      "Correct first attempts on the delayed retention checks (course retention schedule 2/7/21 days).",
+      "Lessons completed; abstentions per set."
+    ],
+    "design": "Three-arm randomized comparison using Core permuted-block allocation at consent. Instruments are held out of every gate, so progress rules are identical in all arms.",
+    "analysis": "Report per-arm means with 95% bootstrap intervals for the primary outcome, and pairwise differences against the fixed arm. Pre-register before opening. Treat results as exploratory unless every arm has at least 30 participants with complete pre and post sets; cells below minCellSize are suppressed by Core in exports.",
+    "inclusion": "Enrolled learners on the study release who consent in the learner study panel. Exclude participants whose pre items were first attempted after the chapter 3 lesson they precede (Core export reports first-attempt timing).",
+    "withdrawal": "Withdrawal at any time from the study panel; data are excluded from export and arm restrictions lift immediately (Core behaviour).",
+    "threats": [
+      "Pre items are optional and may be skipped; report completion rates per arm.",
+      "Learners in the fixed arm may use outside AI tools.",
+      "Placement can skip chapter 3 for placed learners; analyse placed and non-placed learners separately.",
+      "Small samples; this is a pilot evaluation, not proof of learning efficacy.",
+      "No live AI provider has been exercised yet; the chat_only and supervisor arms only differ from fixed once a provider is connected."
+    ],
+    "status": "Defined, not run. No participant has consented and no live provider is connected."
+  },
+  "adminSteps": [
+    "Install the course release that contains content/study-instruments.json (course 0.1.7 or later).",
+    "Admin > Course > Study: create a study against that release, pasting definition.title, definition.purpose, the arms, the instrument lists and minCellSize from this file.",
+    "Review Core's warnings (expected: none) and the allocation check, then open recruiting.",
+    "Close the study when the planned sample is reached; export the pseudonymous CSV for analysis."
+  ]
+}

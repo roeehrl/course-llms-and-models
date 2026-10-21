@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "critical-misconceptions",
+  "status": "prepared_not_applied",
+  "requiresSdk": "0.6.0",
+  "purpose": "PREPARED FOR SDK 0.6.0; NOT APPLIED. Marks ten declared misconceptions as critical so that, after the course moves to SDK 0.6.0 and its gates are migrated to versioned gates, each affected gate requires the no_critical_misconception criterion. SDK 0.5.0 reports that criterion as met without any evidence, and Core then rejects the decision as unlinked; SDK 0.6.0 (course-sdk 250a8d9) requires independent evidence first. Each listed hypothesis is already exposed by a gate distractor, which a versioned gate requires (MISSING_MISCONCEPTION_CHECK).",
+  "critical": [
+    "mis-01-02-b",
+    "mis-03-01-a",
+    "mis-04-02-a",
+    "mis-05-03-a",
+    "mis-05-04-a",
+    "mis-06-03-a",
+    "mis-09-03-b",
+    "mis-12-04-a",
+    "mis-13-03-b",
+    "mis-14-04-a"
+  ],
+  "switchOn": [
+    "Upgrade @course-core/sdk to the released 0.6.0 asset and confirm the installed Core consumes 0.6.0.",
+    "Add 'critical-misconceptions' handling to loadOverlays (scripts/critical-misconceptions.mjs applyCriticalMisconceptions), which refuses to run on an SDK below 0.6.0.",
+    "Run `npx course migrate` on the assembled manifest and review the versioned gates it produces: gates over these objectives gain a no_critical_misconception criterion.",
+    "Re-run npm test, verify:* and the build; stage a new course version for the coordinator to release."
+  ]
+}

@@ -21,6 +21,20 @@
       "version": "0.1.0",
       "sha256": "428fe268ccaca6238ec0dbcd56811d399b786ff1a557dc6a7e32aa6252eacfc1",
       "bytes": 768719
+    },
+    {
+      "file": "runtime/code-fixtures-labs-a.json",
+      "id": "llm-practical-labs-a",
+      "version": "0.1.0",
+      "sha256": "ed4f9e37c4214efd2c9c541d7b9684833e4c2fbc22a255a5f0380c937fcd43cd",
+      "bytes": 497196
+    },
+    {
+      "file": "runtime/code-fixtures-labs-b.json",
+      "id": "llm-practical-labs-b",
+      "version": "0.1.0",
+      "sha256": "62c6ad39487749a9598d30326a244be8ad70f7278ba861c696385f72c5ce0a7e",
+      "bytes": 158403
     }
   ]
 }

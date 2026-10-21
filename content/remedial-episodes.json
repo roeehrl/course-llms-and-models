@@ -103,6 +103,35 @@
       "classification": "optional",
       "plannedMinutes": 8,
       "additionalEpisodes": 1
+    },
+    {
+      "id": "remedial-two-backward",
+      "anchorEpisodeId": "fnd-e04-02",
+      "objectiveIds": [
+        "fnd-o04-02"
+      ],
+      "title": "Parameter buffers and gradient buffers",
+      "blocks": [
+        {
+          "id": "why",
+          "markdown": "This short personal episode slows down one idea from *Backward propagates sensitivities*: backward writes gradients, and only the update writes parameters. It is not graded. It was offered because an answer suggested that backward might change the weights, or that a second backward replaces the gradient instead of adding to it. You can open the hypothesis behind this detour, correct it if it does not describe you, ask for another explanation, or skip straight back to the episode; nothing on your path is removed.\n\nUse the program from the episode's Forward/Backward/Update scene: `p = w*x + b` and `L = (p - y)^2/2` with `x = 2`, target `y = 3`, `w = 0.5`, `b = 0` and learning rate `0.1`. One forward gives `p = 1` and `L = 2`. One backward gives `dL/dw = (p - y)*x = -4` and `dL/db = p - y = -2`."
+        },
+        {
+          "id": "buffers",
+          "markdown": "A training step touches two different sets of memory. The parameter buffers hold `w` and `b`. The gradient buffers (`w.grad`, `b.grad`) hold sensitivities. Now run forward and backward on the same example twice, without clearing the gradients and without an update in between, then run one update.\n\n| Step | w | b | w.grad | b.grad | What was written |\n| --- | --- | --- | --- | --- | --- |\n| start | 0.5 | 0 | none | none | nothing |\n| forward 1 | 0.5 | 0 | none | none | saved values p = 1, L = 2 |\n| backward 1 | 0.5 | 0 | -4 | -2 | gradient buffers only |\n| forward 2 | 0.5 | 0 | -4 | -2 | saved values p = 1, L = 2 again |\n| backward 2 | 0.5 | 0 | -8 | -4 | gradient buffers, added to |\n| update | 1.3 | 0.4 | -8 | -4 | parameter buffers only |\n| clear | 1.3 | 0.4 | none | none | gradient buffers reset |\n\nThe parameter columns do not move until the update row. The gradient columns add, they do not overwrite: two backward calls on the same example give the gradient of `2L`, so the update `w = 0.5 - 0.1*(-8) = 1.3`, `b = 0 - 0.1*(-4) = 0.4` is twice the single-backward step. Deliberate microbatch accumulation relies on exactly this sum; forgetting to clear before the next step turns it into a stale-gradient bug."
+        },
+        {
+          "id": "trace",
+          "markdown": "Here is the same trace as a program you can run. The assertions are the memory table above.\n\n```python\nx, y, lr = 2.0, 3.0, 0.1\nparams = {\"w\": 0.5, \"b\": 0.0}       # parameter buffers\ngrads = {\"w\": 0.0, \"b\": 0.0}        # separate gradient buffers\n\ndef forward():\n    p = params[\"w\"] * x + params[\"b\"]\n    return p, (p - y) ** 2 / 2\n\ndef backward(p):\n    r = p - y                       # dL/dp\n    grads[\"w\"] += r * x             # accumulate, never overwrite\n    grads[\"b\"] += r\n\nfor _ in range(2):                  # two backward calls, no update between\n    p, L = forward()\n    assert (p, L) == (1.0, 2.0)\n    backward(p)\n    assert params == {\"w\": 0.5, \"b\": 0.0}   # backward wrote only grads\nassert grads == {\"w\": -8.0, \"b\": -4.0}\n\nfor k in params:                    # one update reads grads, writes params\n    params[k] -= lr * grads[k]\nassert abs(params[\"w\"] - 1.3) < 1e-12 and abs(params[\"b\"] - 0.4) < 1e-12\ngrads = {\"w\": 0.0, \"b\": 0.0}        # clear before the next backward\n```"
+        },
+        {
+          "id": "contrast",
+          "markdown": "Compare three wrong mental models with the trace.\n\n- If backward replaced the gradient, `w.grad` would end at `-4` and the update would give `w = 0.9`, `b = 0.2`: the single-backward result, with the first pass silently lost.\n- If the update added instead of subtracting, `w = 0.5 + 0.1*(-8) = -0.3` and `b = 0 + 0.1*(-4) = -0.4`, moving uphill.\n- If backward already changed `w`, the second forward would not reproduce `p = 1`, and the assertion after each backward would fail.\n\nWhen you return, press Reset in the scene and predict each buffer before pressing Forward, Backward and Update."
+        }
+      ],
+      "classification": "optional",
+      "plannedMinutes": 8,
+      "additionalEpisodes": 1
     }
   ]
 }

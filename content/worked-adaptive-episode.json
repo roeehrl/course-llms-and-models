@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "id": "worked-adaptive-episode",
+  "purpose": "The complete adaptive episode of design section 16, hosted by fnd-e04-02 (backward calculates gradients; the optimizer changes parameters). The Forward/Backward/Update scene is content/worked-adaptive-visuals.json; this overlay adds the in-episode check whose distractors raise declared misconceptions, a discriminating probe Core can schedule for those hypotheses, and two novel transfer items about a middle pipeline split. The personal episode is the remedial-two-backward entry of content/remedial-episodes.json. None of these items joins a gate: they are recorded as evidence and never block progress.",
+  "hypotheses": [
+    {
+      "id": "wae-backward-mutates",
+      "kind": "misconception",
+      "statement": "Backward itself changes the parameters: after loss.backward() the weights already hold their updated values, so the optimizer step is a formality or applies the change a second time.",
+      "objectiveIds": ["fnd-o04-02"]
+    },
+    {
+      "id": "wae-grad-overwrite",
+      "kind": "misconception",
+      "statement": "Each backward call replaces the gradient buffer, so two backward calls without clearing leave only the latest gradient instead of the sum of both.",
+      "objectiveIds": ["fnd-o04-02"]
+    },
+    {
+      "id": "wae-update-sign",
+      "kind": "misconception",
+      "statement": "A gradient-descent update adds learning rate times gradient to the parameter, moving it in the direction that increases the loss.",
+      "objectiveIds": ["fnd-o04-02"]
+    }
+  ],
+  "assessments": [
+    {
+      "id": "wae-check-after-backward",
+      "type": "choice",
+      "objectiveIds": ["fnd-o04-02"],
+      "familyId": "wae-family-after-backward",
+      "prompt": "Worked episode check (not counted toward progress). Use the scene's program: prediction = w*x + b and loss = (prediction - target)^2/2 with x = 2, target = 3, w = 0.5 and b = 0, learning rate 0.1. Forward has run and backward has just finished. The optimizer has not run. What has changed since forward finished?",
+      "options": [
+        { "id": "a", "text": "Only the gradient buffers: w.grad = -4 and b.grad = -2. w is still 0.5 and b is still 0." },
+        { "id": "b", "text": "w is now 0.9 and b is now 0.2, because backward applies the learning rate.", "misconceptionId": "wae-backward-mutates" },
+        { "id": "c", "text": "Nothing yet: gradients are only computed when the optimizer step runs." }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "The residual is 1 - 3 = -2, so dL/dw = -2*2 = -4 and dL/db = -2. Backward reads the saved forward values and writes these gradient buffers. Only the update writes parameters: w = 0.5 - 0.1*(-4) = 0.9 and b = 0 - 0.1*(-2) = 0.2 happen at the Update step, not at backward."
+      }
+    },
+    {
+      "id": "wae-probe-two-backward",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": ["fnd-o04-02"],
+      "familyId": "wae-family-probe-two-backward",
+      "prompt": "Misconception probe. Same program: prediction = w*x + b, loss = (prediction - target)^2/2, x = 2, target = 3, starting at w = 0.5, b = 0. The code runs forward and backward on this example twice without clearing gradients, then takes one plain gradient-descent step with learning rate 0.1. Which pair (w.grad just before the step, w just after the step) is correct?",
+      "options": [
+        { "id": "a", "text": "w.grad = -8; w = 1.3" },
+        { "id": "b", "text": "w.grad = -4; w = 0.9", "misconceptionId": "wae-grad-overwrite" },
+        { "id": "c", "text": "w.grad = -8; w = -0.3", "misconceptionId": "wae-update-sign" },
+        { "id": "d", "text": "w.grad = -8; w = 2.1, because the two backward calls already moved w to 1.3 and the step moves it again", "misconceptionId": "wae-backward-mutates" }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "Each backward adds dL/dw = -4 to the buffer, giving -8; w stays 0.5 until the step. The step gives w = 0.5 - 0.1*(-8) = 1.3. Keeping only the latest gradient gives 0.9, adding instead of subtracting gives -0.3, and treating backward as an update applies the change twice."
+      }
+    },
+    {
+      "id": "wae-transfer-split-grad",
+      "type": "numeric",
+      "role": "transfer",
+      "objectiveIds": ["fnd-o04-02"],
+      "familyId": "wae-family-transfer-split-grad",
+      "prompt": "Transfer check (not counted toward progress). A model is trained with pipeline parallelism across three splits. The middle split computes h2 = w*h1 + b from the activation h1 it received from the upstream split; it saved h1 = 4 and holds w = 3, b = 1. During backward the downstream split sends the middle split one number: dL/dh2 = 0.5, the sensitivity of the loss to the middle split's output. The middle split never sees the loss or the downstream weights. What is the middle split's weight gradient dL/dw?",
+      "grading": {
+        "expected": 2,
+        "absoluteTolerance": 1e-9,
+        "explanation": "Locally dh2/dw = h1 = 4, so dL/dw = dL/dh2 * h1 = 0.5*4 = 2. The middle split needs exactly the downstream sensitivity dL/dh2 plus its own saved activation h1. It also sends dL/dh1 = 0.5*w = 1.5 upstream."
+      }
+    },
+    {
+      "id": "wae-transfer-split-state",
+      "type": "numeric",
+      "role": "transfer",
+      "objectiveIds": ["fnd-o04-02"],
+      "familyId": "wae-family-transfer-split-state",
+      "prompt": "Transfer check (not counted toward progress). Same middle pipeline split: h2 = w*h1 + b with saved h1 = 4, w = 3, b = 1. It receives dL/dh2 = 0.5 from the downstream split and finishes its own backward: it computes its weight gradient and the sensitivity it sends upstream. No optimizer step has run yet. What is the value of w now?",
+      "grading": {
+        "expected": 3,
+        "absoluteTolerance": 1e-9,
+        "explanation": "Receiving a gradient message and running backward write gradient buffers only (dL/dw = 2, dL/db = 0.5); the weight is still 3. Only an optimizer step changes it, for example plain descent with learning rate 0.1 would later give 3 - 0.1*2 = 2.8."
+      }
+    }
+  ],
+  "probes": [
+    {
+      "id": "probe-wae-two-backward",
+      "objectiveId": "fnd-o04-02",
+      "assessmentId": "wae-probe-two-backward",
+      "distinguishes": ["wae-backward-mutates", "wae-grad-overwrite", "wae-update-sign"],
+      "signals": [
+        { "hypothesisId": "wae-grad-overwrite", "optionIds": ["b"] },
+        { "hypothesisId": "wae-update-sign", "optionIds": ["c"] },
+        { "hypothesisId": "wae-backward-mutates", "optionIds": ["d"] }
+      ]
+    }
+  ],
+  "episodeBlocks": [
+    { "episodeId": "fnd-e04-02", "assessmentId": "wae-check-after-backward", "position": "end", "prefix": "worked" },
+    { "episodeId": "fnd-e04-03", "assessmentId": "wae-transfer-split-grad", "position": "end", "prefix": "worked", "crossEpisode": true },
+    { "episodeId": "fnd-e04-03", "assessmentId": "wae-transfer-split-state", "position": "end", "prefix": "worked", "crossEpisode": true }
+  ],
+  "annotations": {
+    "designSection16": {
+      "topic": "Backward calculates gradients; the optimizer changes parameters. Host episode fnd-e04-02.",
+      "forwardBackwardUpdateControls": "content/worked-adaptive-visuals.json scene worked-forward-backward-update (Forward, Backward, Update and Reset buttons; numbers, code-line highlighting and the graph change together).",
+      "askAfterBackward": "wae-check-after-backward (ungated block at the end of fnd-e04-02); its wrong option b raises wae-backward-mutates.",
+      "discriminatingProbe": "probe-wae-two-backward: Core schedules it for an active hypothesis instead of diagnosing from one wrong answer.",
+      "personalEpisode": "content/remedial-episodes.json entry remedial-two-backward (parameter vs gradient buffers, two backward calls before one update, executable trace, memory table), inserted after fnd-e04-02 only on learner opt-in.",
+      "oracles": "verification/worked-adaptive-episode.py: closed-form scalar oracle, an independent tape-based reverse-mode autograd and finite differences; overwrite-accumulation, wrong-sign and backward-mutates implementations must fail.",
+      "transfer": "wae-transfer-split-grad and wae-transfer-split-state, ungated blocks at the end of fnd-e04-03 (after a delay, not in the host episode).",
+      "learnerControls": "Inspecting why the detour exists, editing the hypothesis, asking for another explanation and returning to the path are Core features over the declared hypotheses (teaching hypotheses panel)."
+    },
+    "revisit": {
+      "objectiveId": "fnd-o04-02",
+      "itemIds": ["wae-transfer-split-grad", "wae-transfer-split-state"],
+      "intervalsDays": [2, 7, 21],
+      "mechanism": "Not scheduled yet: fnd-o04-02 has no held-out retention items. A delayed revisit needs new retention items for fnd-o04-02 generated through scripts/create-retention-checks.mjs (owner decision).",
+      "assistanceState": "Core stores attempt assistance with every answer; nothing course-side is needed."
+    },
+    "wae-backward-mutates": { "correction": "loss.backward() reads saved forward values and writes .grad buffers; parameters change only in optimizer.step() (or an explicit update).", "basis": "fnd-04-02-text-2 (after backward, w is still 2 and b is still 1)" },
+    "wae-grad-overwrite": { "correction": "Gradient buffers accumulate (+=) across backward calls until they are cleared; this is what makes deliberate microbatch accumulation work and stale gradients a bug.", "basis": "fnd-04-02-text-1 (contributions add) and fnd-e04-03 accumulation" },
+    "wae-update-sign": { "correction": "Plain descent subtracts: w_new = w - lr * dL/dw, which moves against the gradient to reduce loss for a small enough step.", "basis": "fnd-e03-03 gradient descent" }
+  }
+}

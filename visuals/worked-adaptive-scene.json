@@ -1,0 +1,3207 @@
+{
+  "schemaVersion": 1,
+  "scenes": [
+    {
+      "version": 1,
+      "id": "worked-forward-backward-update",
+      "title": "Forward, backward, update: who writes which buffer",
+      "description": "Press Forward, Backward and Update one at a time. Watch which buffer each step writes: backward fills the gradient buffers, and only the update changes w and b.",
+      "state": {
+        "phase": {
+          "kind": "enum",
+          "label": "Training step",
+          "initial": "ready",
+          "options": [
+            "ready",
+            "forward",
+            "backward",
+            "update",
+            "forward2",
+            "backward2"
+          ]
+        }
+      },
+      "controls": [
+        "phase"
+      ],
+      "nodes": [
+        {
+          "kind": "rect",
+          "id": "wae-stage",
+          "x": 0,
+          "y": 0,
+          "width": 880,
+          "height": 740,
+          "fill": "#F8FAF7",
+          "cornerRadius": 24
+        },
+        {
+          "kind": "text",
+          "id": "wae-title",
+          "text": "FORWARD · BACKWARD · UPDATE · one example",
+          "x": 28,
+          "y": 40,
+          "fontSize": 18,
+          "fill": "#087B69",
+          "weight": "bold"
+        },
+        {
+          "kind": "text",
+          "id": "wae-title-compact",
+          "text": "FORWARD · BACKWARD · UPDATE",
+          "x": 16,
+          "y": 34,
+          "fontSize": 17,
+          "fill": "#087B69",
+          "weight": "bold",
+          "opacity": 0
+        },
+        {
+          "kind": "group",
+          "id": "slot-forward",
+          "x": 0,
+          "y": 0,
+          "children": [
+            {
+              "kind": "group",
+              "id": "btn-forward",
+              "label": "Forward step",
+              "x": 0,
+              "y": 0,
+              "visible": {
+                "op": "eq",
+                "args": [
+                  {
+                    "state": "phase"
+                  },
+                  "ready"
+                ]
+              },
+              "manipulate": {
+                "activate": {
+                  "state": "phase",
+                  "value": "forward"
+                }
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "btn-forward-bg",
+                  "x": 0,
+                  "y": 0,
+                  "width": 194,
+                  "height": 52,
+                  "fill": "#E8F6ED",
+                  "cornerRadius": 12,
+                  "visible": {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "ready"
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "btn-forward-label",
+                  "text": "Forward",
+                  "x": 97,
+                  "y": 34,
+                  "fontSize": 19,
+                  "fill": "#087B69",
+                  "align": "middle",
+                  "weight": "bold",
+                  "visible": {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "ready"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "btn-forward2",
+              "label": "Forward step",
+              "x": 0,
+              "y": 0,
+              "visible": {
+                "op": "eq",
+                "args": [
+                  {
+                    "state": "phase"
+                  },
+                  "update"
+                ]
+              },
+              "manipulate": {
+                "activate": {
+                  "state": "phase",
+                  "value": "forward2"
+                }
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "btn-forward2-bg",
+                  "x": 0,
+                  "y": 0,
+                  "width": 194,
+                  "height": 52,
+                  "fill": "#E8F6ED",
+                  "cornerRadius": 12,
+                  "visible": {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "update"
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "btn-forward2-label",
+                  "text": "Forward",
+                  "x": 97,
+                  "y": 34,
+                  "fontSize": 19,
+                  "fill": "#087B69",
+                  "align": "middle",
+                  "weight": "bold",
+                  "visible": {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "update"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "btn-forward-off",
+              "x": 0,
+              "y": 0,
+              "visible": {
+                "op": "not",
+                "args": [
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "ready"
+                        ]
+                      },
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "update"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "btn-forward-off-bg",
+                  "x": 0,
+                  "y": 0,
+                  "width": 194,
+                  "height": 52,
+                  "fill": "#E3E7E6",
+                  "cornerRadius": 12,
+                  "visible": {
+                    "op": "not",
+                    "args": [
+                      {
+                        "op": "or",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "ready"
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "update"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "btn-forward-off-label",
+                  "text": "Forward",
+                  "x": 97,
+                  "y": 34,
+                  "fontSize": 19,
+                  "fill": "#5C6F73",
+                  "align": "middle",
+                  "visible": {
+                    "op": "not",
+                    "args": [
+                      {
+                        "op": "or",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "ready"
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "update"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "group",
+          "id": "slot-backward",
+          "x": 0,
+          "y": 0,
+          "children": [
+            {
+              "kind": "group",
+              "id": "btn-backward",
+              "label": "Backward step",
+              "x": 0,
+              "y": 0,
+              "visible": {
+                "op": "eq",
+                "args": [
+                  {
+                    "state": "phase"
+                  },
+                  "forward"
+                ]
+              },
+              "manipulate": {
+                "activate": {
+                  "state": "phase",
+                  "value": "backward"
+                }
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "btn-backward-bg",
+                  "x": 0,
+                  "y": 0,
+                  "width": 194,
+                  "height": 52,
+                  "fill": "#F2EDFB",
+                  "cornerRadius": 12,
+                  "visible": {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "forward"
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "btn-backward-label",
+                  "text": "Backward",
+                  "x": 97,
+                  "y": 34,
+                  "fontSize": 19,
+                  "fill": "#7050A4",
+                  "align": "middle",
+                  "weight": "bold",
+                  "visible": {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "forward"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "btn-backward2",
+              "label": "Backward step",
+              "x": 0,
+              "y": 0,
+              "visible": {
+                "op": "eq",
+                "args": [
+                  {
+                    "state": "phase"
+                  },
+                  "forward2"
+                ]
+              },
+              "manipulate": {
+                "activate": {
+                  "state": "phase",
+                  "value": "backward2"
+                }
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "btn-backward2-bg",
+                  "x": 0,
+                  "y": 0,
+                  "width": 194,
+                  "height": 52,
+                  "fill": "#F2EDFB",
+                  "cornerRadius": 12,
+                  "visible": {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "forward2"
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "btn-backward2-label",
+                  "text": "Backward",
+                  "x": 97,
+                  "y": 34,
+                  "fontSize": 19,
+                  "fill": "#7050A4",
+                  "align": "middle",
+                  "weight": "bold",
+                  "visible": {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "forward2"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "btn-backward-off",
+              "x": 0,
+              "y": 0,
+              "visible": {
+                "op": "not",
+                "args": [
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "forward"
+                        ]
+                      },
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "forward2"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "btn-backward-off-bg",
+                  "x": 0,
+                  "y": 0,
+                  "width": 194,
+                  "height": 52,
+                  "fill": "#E3E7E6",
+                  "cornerRadius": 12,
+                  "visible": {
+                    "op": "not",
+                    "args": [
+                      {
+                        "op": "or",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "forward"
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "forward2"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "btn-backward-off-label",
+                  "text": "Backward",
+                  "x": 97,
+                  "y": 34,
+                  "fontSize": 19,
+                  "fill": "#5C6F73",
+                  "align": "middle",
+                  "visible": {
+                    "op": "not",
+                    "args": [
+                      {
+                        "op": "or",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "forward"
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "forward2"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "group",
+          "id": "slot-update",
+          "x": 0,
+          "y": 0,
+          "children": [
+            {
+              "kind": "group",
+              "id": "btn-update",
+              "label": "Update step",
+              "x": 0,
+              "y": 0,
+              "visible": {
+                "op": "eq",
+                "args": [
+                  {
+                    "state": "phase"
+                  },
+                  "backward"
+                ]
+              },
+              "manipulate": {
+                "activate": {
+                  "state": "phase",
+                  "value": "update"
+                }
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "btn-update-bg",
+                  "x": 0,
+                  "y": 0,
+                  "width": 194,
+                  "height": 52,
+                  "fill": "#FCF3DF",
+                  "cornerRadius": 12,
+                  "visible": {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "backward"
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "btn-update-label",
+                  "text": "Update",
+                  "x": 97,
+                  "y": 34,
+                  "fontSize": 19,
+                  "fill": "#80601E",
+                  "align": "middle",
+                  "weight": "bold",
+                  "visible": {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "backward"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "btn-update-off",
+              "x": 0,
+              "y": 0,
+              "visible": {
+                "op": "not",
+                "args": [
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "backward"
+                    ]
+                  }
+                ]
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "btn-update-off-bg",
+                  "x": 0,
+                  "y": 0,
+                  "width": 194,
+                  "height": 52,
+                  "fill": "#E3E7E6",
+                  "cornerRadius": 12,
+                  "visible": {
+                    "op": "not",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "backward"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "kind": "text",
+                  "id": "btn-update-off-label",
+                  "text": "Update",
+                  "x": 97,
+                  "y": 34,
+                  "fontSize": 19,
+                  "fill": "#5C6F73",
+                  "align": "middle",
+                  "visible": {
+                    "op": "not",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "backward"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "group",
+          "id": "slot-reset",
+          "x": 0,
+          "y": 0,
+          "children": [
+            {
+              "kind": "group",
+              "id": "btn-reset",
+              "label": "Reset step",
+              "x": 0,
+              "y": 0,
+              "visible": true,
+              "manipulate": {
+                "activate": {
+                  "state": "phase",
+                  "value": "ready"
+                }
+              },
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "btn-reset-bg",
+                  "x": 0,
+                  "y": 0,
+                  "width": 194,
+                  "height": 52,
+                  "fill": "#E3E7E6",
+                  "cornerRadius": 12,
+                  "visible": true
+                },
+                {
+                  "kind": "text",
+                  "id": "btn-reset-label",
+                  "text": "Reset",
+                  "x": 97,
+                  "y": 34,
+                  "fontSize": 19,
+                  "fill": "#19383E",
+                  "align": "middle",
+                  "weight": "bold",
+                  "visible": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "group",
+          "id": "code-card",
+          "x": 28,
+          "y": 132,
+          "children": [
+            {
+              "kind": "rect",
+              "id": "code-card-bg",
+              "x": 0,
+              "y": 0,
+              "width": 400,
+              "height": 232,
+              "fill": "#FCF3DF",
+              "cornerRadius": 14
+            },
+            {
+              "kind": "text",
+              "id": "code-title",
+              "text": "CODE · x=2, y=3, lr=0.1",
+              "x": 18,
+              "y": 30,
+              "fontSize": 17,
+              "fill": "#80601E",
+              "weight": "bold"
+            },
+            {
+              "kind": "rect",
+              "id": "code-hl-0",
+              "x": 8,
+              "y": 44,
+              "width": 384,
+              "height": 28,
+              "fill": "#FFE3A3",
+              "cornerRadius": 6,
+              "opacity": {
+                "op": "if",
+                "args": [
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "forward"
+                        ]
+                      },
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "forward2"
+                        ]
+                      }
+                    ]
+                  },
+                  1,
+                  0
+                ]
+              }
+            },
+            {
+              "kind": "text",
+              "id": "code-line-0",
+              "text": "p = w*x + b",
+              "x": 18,
+              "y": 64,
+              "fontSize": 17,
+              "fill": "#19383E"
+            },
+            {
+              "kind": "rect",
+              "id": "code-hl-1",
+              "x": 8,
+              "y": 74,
+              "width": 384,
+              "height": 28,
+              "fill": "#FFE3A3",
+              "cornerRadius": 6,
+              "opacity": {
+                "op": "if",
+                "args": [
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "forward"
+                        ]
+                      },
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "forward2"
+                        ]
+                      }
+                    ]
+                  },
+                  1,
+                  0
+                ]
+              }
+            },
+            {
+              "kind": "text",
+              "id": "code-line-1",
+              "text": "L = (p - y)**2 / 2",
+              "x": 18,
+              "y": 94,
+              "fontSize": 17,
+              "fill": "#19383E"
+            },
+            {
+              "kind": "rect",
+              "id": "code-hl-2",
+              "x": 8,
+              "y": 104,
+              "width": 384,
+              "height": 28,
+              "fill": "#FFE3A3",
+              "cornerRadius": 6,
+              "opacity": {
+                "op": "if",
+                "args": [
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "backward"
+                        ]
+                      },
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "backward2"
+                        ]
+                      }
+                    ]
+                  },
+                  1,
+                  0
+                ]
+              }
+            },
+            {
+              "kind": "text",
+              "id": "code-line-2",
+              "text": "L.backward()",
+              "x": 18,
+              "y": 124,
+              "fontSize": 17,
+              "fill": "#19383E"
+            },
+            {
+              "kind": "rect",
+              "id": "code-hl-3",
+              "x": 8,
+              "y": 134,
+              "width": 384,
+              "height": 28,
+              "fill": "#FFE3A3",
+              "cornerRadius": 6,
+              "opacity": {
+                "op": "if",
+                "args": [
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "update"
+                    ]
+                  },
+                  1,
+                  0
+                ]
+              }
+            },
+            {
+              "kind": "text",
+              "id": "code-line-3",
+              "text": "w -= lr * w.grad",
+              "x": 18,
+              "y": 154,
+              "fontSize": 17,
+              "fill": "#19383E"
+            },
+            {
+              "kind": "rect",
+              "id": "code-hl-4",
+              "x": 8,
+              "y": 164,
+              "width": 384,
+              "height": 28,
+              "fill": "#FFE3A3",
+              "cornerRadius": 6,
+              "opacity": {
+                "op": "if",
+                "args": [
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "update"
+                    ]
+                  },
+                  1,
+                  0
+                ]
+              }
+            },
+            {
+              "kind": "text",
+              "id": "code-line-4",
+              "text": "b -= lr * b.grad",
+              "x": 18,
+              "y": 184,
+              "fontSize": 17,
+              "fill": "#19383E"
+            },
+            {
+              "kind": "rect",
+              "id": "code-hl-5",
+              "x": 8,
+              "y": 194,
+              "width": 384,
+              "height": 28,
+              "fill": "#FFE3A3",
+              "cornerRadius": 6,
+              "opacity": {
+                "op": "if",
+                "args": [
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "update"
+                    ]
+                  },
+                  1,
+                  0
+                ]
+              }
+            },
+            {
+              "kind": "text",
+              "id": "code-line-5",
+              "text": "w.grad = b.grad = None",
+              "x": 18,
+              "y": 214,
+              "fontSize": 17,
+              "fill": "#19383E"
+            }
+          ]
+        },
+        {
+          "kind": "group",
+          "id": "buf-card",
+          "x": 452,
+          "y": 132,
+          "children": [
+            {
+              "kind": "rect",
+              "id": "buf-card-bg",
+              "x": 0,
+              "y": 0,
+              "width": 400,
+              "height": 232,
+              "fill": "#F2EDFB",
+              "cornerRadius": 14
+            },
+            {
+              "kind": "text",
+              "id": "buf-params-label",
+              "text": "PARAMETER BUFFERS",
+              "x": 18,
+              "y": 30,
+              "fontSize": 17,
+              "fill": "#7050A4",
+              "weight": "bold"
+            },
+            {
+              "kind": "text",
+              "id": "buf-w",
+              "text": {
+                "op": "concat",
+                "args": [
+                  "w = ",
+                  {
+                    "op": "div",
+                    "args": [
+                      {
+                        "op": "round",
+                        "args": [
+                          {
+                            "op": "mul",
+                            "args": [
+                              {
+                                "op": "if",
+                                "args": [
+                                  {
+                                    "op": "or",
+                                    "args": [
+                                      {
+                                        "op": "or",
+                                        "args": [
+                                          {
+                                            "op": "eq",
+                                            "args": [
+                                              {
+                                                "state": "phase"
+                                              },
+                                              "update"
+                                            ]
+                                          },
+                                          {
+                                            "op": "eq",
+                                            "args": [
+                                              {
+                                                "state": "phase"
+                                              },
+                                              "forward2"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "op": "eq",
+                                        "args": [
+                                          {
+                                            "state": "phase"
+                                          },
+                                          "backward2"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  0.9,
+                                  0.5
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      },
+                      1000
+                    ]
+                  }
+                ]
+              },
+              "x": 18,
+              "y": 60,
+              "fontSize": 20,
+              "fill": "#19383E"
+            },
+            {
+              "kind": "text",
+              "id": "buf-b",
+              "text": {
+                "op": "concat",
+                "args": [
+                  "b = ",
+                  {
+                    "op": "div",
+                    "args": [
+                      {
+                        "op": "round",
+                        "args": [
+                          {
+                            "op": "mul",
+                            "args": [
+                              {
+                                "op": "if",
+                                "args": [
+                                  {
+                                    "op": "or",
+                                    "args": [
+                                      {
+                                        "op": "or",
+                                        "args": [
+                                          {
+                                            "op": "eq",
+                                            "args": [
+                                              {
+                                                "state": "phase"
+                                              },
+                                              "update"
+                                            ]
+                                          },
+                                          {
+                                            "op": "eq",
+                                            "args": [
+                                              {
+                                                "state": "phase"
+                                              },
+                                              "forward2"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "op": "eq",
+                                        "args": [
+                                          {
+                                            "state": "phase"
+                                          },
+                                          "backward2"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  0.2,
+                                  0
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      },
+                      1000
+                    ]
+                  }
+                ]
+              },
+              "x": 200,
+              "y": 60,
+              "fontSize": 20,
+              "fill": "#19383E"
+            },
+            {
+              "kind": "text",
+              "id": "buf-grads-label",
+              "text": "GRADIENT BUFFERS",
+              "x": 18,
+              "y": 100,
+              "fontSize": 17,
+              "fill": "#7050A4",
+              "weight": "bold"
+            },
+            {
+              "kind": "text",
+              "id": "buf-gw",
+              "text": {
+                "op": "if",
+                "args": [
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "backward"
+                    ]
+                  },
+                  {
+                    "op": "concat",
+                    "args": [
+                      "w.grad = ",
+                      {
+                        "op": "div",
+                        "args": [
+                          {
+                            "op": "round",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  -4,
+                                  1000
+                                ]
+                              }
+                            ]
+                          },
+                          1000
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "backward2"
+                        ]
+                      },
+                      {
+                        "op": "concat",
+                        "args": [
+                          "w.grad = ",
+                          {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "round",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      -2,
+                                      1000
+                                    ]
+                                  }
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      },
+                      "w.grad = none"
+                    ]
+                  }
+                ]
+              },
+              "x": 18,
+              "y": 130,
+              "fontSize": 18,
+              "fill": "#19383E"
+            },
+            {
+              "kind": "text",
+              "id": "buf-gb",
+              "text": {
+                "op": "if",
+                "args": [
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "backward"
+                    ]
+                  },
+                  {
+                    "op": "concat",
+                    "args": [
+                      "b.grad = ",
+                      {
+                        "op": "div",
+                        "args": [
+                          {
+                            "op": "round",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  -2,
+                                  1000
+                                ]
+                              }
+                            ]
+                          },
+                          1000
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "backward2"
+                        ]
+                      },
+                      {
+                        "op": "concat",
+                        "args": [
+                          "b.grad = ",
+                          {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "round",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      -1,
+                                      1000
+                                    ]
+                                  }
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      },
+                      "b.grad = none"
+                    ]
+                  }
+                ]
+              },
+              "x": 200,
+              "y": 130,
+              "fontSize": 18,
+              "fill": "#19383E"
+            },
+            {
+              "kind": "text",
+              "id": "buf-saved-label",
+              "text": "LAST FORWARD",
+              "x": 18,
+              "y": 170,
+              "fontSize": 17,
+              "fill": "#7050A4",
+              "weight": "bold"
+            },
+            {
+              "kind": "text",
+              "id": "buf-pred",
+              "text": {
+                "op": "if",
+                "args": [
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "ready"
+                    ]
+                  },
+                  "prediction = none",
+                  {
+                    "op": "concat",
+                    "args": [
+                      "prediction = ",
+                      {
+                        "op": "div",
+                        "args": [
+                          {
+                            "op": "round",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "op": "or",
+                                        "args": [
+                                          {
+                                            "op": "or",
+                                            "args": [
+                                              {
+                                                "op": "eq",
+                                                "args": [
+                                                  {
+                                                    "state": "phase"
+                                                  },
+                                                  "forward"
+                                                ]
+                                              },
+                                              {
+                                                "op": "eq",
+                                                "args": [
+                                                  {
+                                                    "state": "phase"
+                                                  },
+                                                  "backward"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "op": "eq",
+                                            "args": [
+                                              {
+                                                "state": "phase"
+                                              },
+                                              "update"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      1,
+                                      2
+                                    ]
+                                  },
+                                  1000
+                                ]
+                              }
+                            ]
+                          },
+                          1000
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "x": 18,
+              "y": 200,
+              "fontSize": 18,
+              "fill": "#19383E"
+            },
+            {
+              "kind": "text",
+              "id": "buf-loss",
+              "text": {
+                "op": "if",
+                "args": [
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "ready"
+                    ]
+                  },
+                  "loss = none",
+                  {
+                    "op": "concat",
+                    "args": [
+                      "loss = ",
+                      {
+                        "op": "div",
+                        "args": [
+                          {
+                            "op": "round",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "op": "or",
+                                        "args": [
+                                          {
+                                            "op": "or",
+                                            "args": [
+                                              {
+                                                "op": "eq",
+                                                "args": [
+                                                  {
+                                                    "state": "phase"
+                                                  },
+                                                  "forward"
+                                                ]
+                                              },
+                                              {
+                                                "op": "eq",
+                                                "args": [
+                                                  {
+                                                    "state": "phase"
+                                                  },
+                                                  "backward"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "op": "eq",
+                                            "args": [
+                                              {
+                                                "state": "phase"
+                                              },
+                                              "update"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      2,
+                                      0.5
+                                    ]
+                                  },
+                                  1000
+                                ]
+                              }
+                            ]
+                          },
+                          1000
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "x": 230,
+              "y": 200,
+              "fontSize": 18,
+              "fill": "#19383E"
+            }
+          ]
+        },
+        {
+          "kind": "group",
+          "id": "graph-card",
+          "x": 28,
+          "y": 384,
+          "children": [
+            {
+              "kind": "rect",
+              "id": "graph-card-bg",
+              "x": 0,
+              "y": 0,
+              "width": 824,
+              "height": 230,
+              "fill": "#E8F6ED",
+              "cornerRadius": 14
+            },
+            {
+              "kind": "text",
+              "id": "graph-title",
+              "text": "COMPUTATION GRAPH",
+              "x": 18,
+              "y": 30,
+              "fontSize": 17,
+              "fill": "#087B69",
+              "weight": "bold"
+            },
+            {
+              "kind": "group",
+              "id": "g-w",
+              "x": 20,
+              "y": 46,
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "g-w-bg",
+                  "x": 0,
+                  "y": 0,
+                  "width": 170,
+                  "height": 70,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 12
+                },
+                {
+                  "kind": "text",
+                  "id": "g-w-val",
+                  "text": {
+                    "op": "concat",
+                    "args": [
+                      "w = ",
+                      {
+                        "op": "div",
+                        "args": [
+                          {
+                            "op": "round",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "op": "or",
+                                        "args": [
+                                          {
+                                            "op": "or",
+                                            "args": [
+                                              {
+                                                "op": "eq",
+                                                "args": [
+                                                  {
+                                                    "state": "phase"
+                                                  },
+                                                  "update"
+                                                ]
+                                              },
+                                              {
+                                                "op": "eq",
+                                                "args": [
+                                                  {
+                                                    "state": "phase"
+                                                  },
+                                                  "forward2"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "op": "eq",
+                                            "args": [
+                                              {
+                                                "state": "phase"
+                                              },
+                                              "backward2"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      0.9,
+                                      0.5
+                                    ]
+                                  },
+                                  1000
+                                ]
+                              }
+                            ]
+                          },
+                          1000
+                        ]
+                      }
+                    ]
+                  },
+                  "x": 12,
+                  "y": 30,
+                  "fontSize": 17,
+                  "fill": "#19383E",
+                  "weight": "bold"
+                },
+                {
+                  "kind": "text",
+                  "id": "g-w-grad",
+                  "text": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "backward"
+                        ]
+                      },
+                      {
+                        "op": "concat",
+                        "args": [
+                          "grad = ",
+                          {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "round",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      -4,
+                                      1000
+                                    ]
+                                  }
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "op": "concat",
+                        "args": [
+                          "grad = ",
+                          {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "round",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      -2,
+                                      1000
+                                    ]
+                                  }
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "x": 12,
+                  "y": 58,
+                  "fontSize": 17,
+                  "fill": "#7050A4",
+                  "opacity": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "or",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "backward"
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "backward2"
+                            ]
+                          }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "g-x",
+              "x": 20,
+              "y": 146,
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "g-x-bg",
+                  "x": 0,
+                  "y": 0,
+                  "width": 170,
+                  "height": 70,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 12
+                },
+                {
+                  "kind": "text",
+                  "id": "g-x-val",
+                  "text": "x = 2",
+                  "x": 12,
+                  "y": 30,
+                  "fontSize": 17,
+                  "fill": "#19383E",
+                  "weight": "bold"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "g-mul",
+              "x": 220,
+              "y": 96,
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "g-mul-bg",
+                  "x": 0,
+                  "y": 0,
+                  "width": 170,
+                  "height": 70,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 12
+                },
+                {
+                  "kind": "text",
+                  "id": "g-mul-val",
+                  "text": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "ready"
+                        ]
+                      },
+                      "w*x = ?",
+                      {
+                        "op": "concat",
+                        "args": [
+                          "w*x = ",
+                          {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "round",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "op": "or",
+                                            "args": [
+                                              {
+                                                "op": "or",
+                                                "args": [
+                                                  {
+                                                    "op": "eq",
+                                                    "args": [
+                                                      {
+                                                        "state": "phase"
+                                                      },
+                                                      "forward"
+                                                    ]
+                                                  },
+                                                  {
+                                                    "op": "eq",
+                                                    "args": [
+                                                      {
+                                                        "state": "phase"
+                                                      },
+                                                      "backward"
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "op": "eq",
+                                                "args": [
+                                                  {
+                                                    "state": "phase"
+                                                  },
+                                                  "update"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "op": "mul",
+                                            "args": [
+                                              0.5,
+                                              2
+                                            ]
+                                          },
+                                          {
+                                            "op": "mul",
+                                            "args": [
+                                              0.9,
+                                              2
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      1000
+                                    ]
+                                  }
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "x": 12,
+                  "y": 30,
+                  "fontSize": 17,
+                  "fill": "#19383E",
+                  "weight": "bold"
+                },
+                {
+                  "kind": "text",
+                  "id": "g-mul-grad",
+                  "text": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "backward"
+                        ]
+                      },
+                      {
+                        "op": "concat",
+                        "args": [
+                          "grad = ",
+                          {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "round",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      -2,
+                                      1000
+                                    ]
+                                  }
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "op": "concat",
+                        "args": [
+                          "grad = ",
+                          {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "round",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      -1,
+                                      1000
+                                    ]
+                                  }
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "x": 12,
+                  "y": 58,
+                  "fontSize": 17,
+                  "fill": "#7050A4",
+                  "opacity": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "or",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "backward"
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "backward2"
+                            ]
+                          }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "g-add",
+              "x": 420,
+              "y": 46,
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "g-add-bg",
+                  "x": 0,
+                  "y": 0,
+                  "width": 170,
+                  "height": 70,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 12
+                },
+                {
+                  "kind": "text",
+                  "id": "g-add-val",
+                  "text": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "ready"
+                        ]
+                      },
+                      "p = ?",
+                      {
+                        "op": "concat",
+                        "args": [
+                          "p = ",
+                          {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "round",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "op": "or",
+                                            "args": [
+                                              {
+                                                "op": "or",
+                                                "args": [
+                                                  {
+                                                    "op": "eq",
+                                                    "args": [
+                                                      {
+                                                        "state": "phase"
+                                                      },
+                                                      "forward"
+                                                    ]
+                                                  },
+                                                  {
+                                                    "op": "eq",
+                                                    "args": [
+                                                      {
+                                                        "state": "phase"
+                                                      },
+                                                      "backward"
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "op": "eq",
+                                                "args": [
+                                                  {
+                                                    "state": "phase"
+                                                  },
+                                                  "update"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          1,
+                                          2
+                                        ]
+                                      },
+                                      1000
+                                    ]
+                                  }
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "x": 12,
+                  "y": 30,
+                  "fontSize": 17,
+                  "fill": "#19383E",
+                  "weight": "bold"
+                },
+                {
+                  "kind": "text",
+                  "id": "g-add-grad",
+                  "text": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "backward"
+                        ]
+                      },
+                      {
+                        "op": "concat",
+                        "args": [
+                          "grad = ",
+                          {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "round",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      -2,
+                                      1000
+                                    ]
+                                  }
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "op": "concat",
+                        "args": [
+                          "grad = ",
+                          {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "round",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      -1,
+                                      1000
+                                    ]
+                                  }
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "x": 12,
+                  "y": 58,
+                  "fontSize": 17,
+                  "fill": "#7050A4",
+                  "opacity": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "or",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "backward"
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "backward2"
+                            ]
+                          }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "g-b",
+              "x": 420,
+              "y": 146,
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "g-b-bg",
+                  "x": 0,
+                  "y": 0,
+                  "width": 170,
+                  "height": 70,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 12
+                },
+                {
+                  "kind": "text",
+                  "id": "g-b-val",
+                  "text": {
+                    "op": "concat",
+                    "args": [
+                      "b = ",
+                      {
+                        "op": "div",
+                        "args": [
+                          {
+                            "op": "round",
+                            "args": [
+                              {
+                                "op": "mul",
+                                "args": [
+                                  {
+                                    "op": "if",
+                                    "args": [
+                                      {
+                                        "op": "or",
+                                        "args": [
+                                          {
+                                            "op": "or",
+                                            "args": [
+                                              {
+                                                "op": "eq",
+                                                "args": [
+                                                  {
+                                                    "state": "phase"
+                                                  },
+                                                  "update"
+                                                ]
+                                              },
+                                              {
+                                                "op": "eq",
+                                                "args": [
+                                                  {
+                                                    "state": "phase"
+                                                  },
+                                                  "forward2"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "op": "eq",
+                                            "args": [
+                                              {
+                                                "state": "phase"
+                                              },
+                                              "backward2"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      0.2,
+                                      0
+                                    ]
+                                  },
+                                  1000
+                                ]
+                              }
+                            ]
+                          },
+                          1000
+                        ]
+                      }
+                    ]
+                  },
+                  "x": 12,
+                  "y": 30,
+                  "fontSize": 17,
+                  "fill": "#19383E",
+                  "weight": "bold"
+                },
+                {
+                  "kind": "text",
+                  "id": "g-b-grad",
+                  "text": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "backward"
+                        ]
+                      },
+                      {
+                        "op": "concat",
+                        "args": [
+                          "grad = ",
+                          {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "round",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      -2,
+                                      1000
+                                    ]
+                                  }
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "op": "concat",
+                        "args": [
+                          "grad = ",
+                          {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "round",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      -1,
+                                      1000
+                                    ]
+                                  }
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "x": 12,
+                  "y": 58,
+                  "fontSize": 17,
+                  "fill": "#7050A4",
+                  "opacity": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "or",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "backward"
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "backward2"
+                            ]
+                          }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "id": "g-loss",
+              "x": 620,
+              "y": 96,
+              "children": [
+                {
+                  "kind": "rect",
+                  "id": "g-loss-bg",
+                  "x": 0,
+                  "y": 0,
+                  "width": 170,
+                  "height": 70,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 12
+                },
+                {
+                  "kind": "text",
+                  "id": "g-loss-val",
+                  "text": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "ready"
+                        ]
+                      },
+                      "L = ?",
+                      {
+                        "op": "concat",
+                        "args": [
+                          "L = ",
+                          {
+                            "op": "div",
+                            "args": [
+                              {
+                                "op": "round",
+                                "args": [
+                                  {
+                                    "op": "mul",
+                                    "args": [
+                                      {
+                                        "op": "if",
+                                        "args": [
+                                          {
+                                            "op": "or",
+                                            "args": [
+                                              {
+                                                "op": "or",
+                                                "args": [
+                                                  {
+                                                    "op": "eq",
+                                                    "args": [
+                                                      {
+                                                        "state": "phase"
+                                                      },
+                                                      "forward"
+                                                    ]
+                                                  },
+                                                  {
+                                                    "op": "eq",
+                                                    "args": [
+                                                      {
+                                                        "state": "phase"
+                                                      },
+                                                      "backward"
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "op": "eq",
+                                                "args": [
+                                                  {
+                                                    "state": "phase"
+                                                  },
+                                                  "update"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          2,
+                                          0.5
+                                        ]
+                                      },
+                                      1000
+                                    ]
+                                  }
+                                ]
+                              },
+                              1000
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "x": 12,
+                  "y": 30,
+                  "fontSize": 17,
+                  "fill": "#19383E",
+                  "weight": "bold"
+                },
+                {
+                  "kind": "text",
+                  "id": "g-loss-grad",
+                  "text": "grad = 1",
+                  "x": 12,
+                  "y": 58,
+                  "fontSize": 17,
+                  "fill": "#7050A4",
+                  "opacity": {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "or",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "backward"
+                            ]
+                          },
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "backward2"
+                            ]
+                          }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "link",
+              "id": "e-w-mul",
+              "from": {
+                "node": "g-w-bg",
+                "anchor": "auto"
+              },
+              "to": {
+                "node": "g-mul-bg",
+                "anchor": "auto"
+              },
+              "arrow": true,
+              "stroke": "#087B69",
+              "strokeWidth": 3,
+              "fill": "none"
+            },
+            {
+              "kind": "link",
+              "id": "e-x-mul",
+              "from": {
+                "node": "g-x-bg",
+                "anchor": "auto"
+              },
+              "to": {
+                "node": "g-mul-bg",
+                "anchor": "auto"
+              },
+              "arrow": true,
+              "stroke": "#087B69",
+              "strokeWidth": 3,
+              "fill": "none"
+            },
+            {
+              "kind": "link",
+              "id": "e-mul-add",
+              "from": {
+                "node": "g-mul-bg",
+                "anchor": "auto"
+              },
+              "to": {
+                "node": "g-add-bg",
+                "anchor": "auto"
+              },
+              "arrow": true,
+              "stroke": "#087B69",
+              "strokeWidth": 3,
+              "fill": "none"
+            },
+            {
+              "kind": "link",
+              "id": "e-b-add",
+              "from": {
+                "node": "g-b-bg",
+                "anchor": "auto"
+              },
+              "to": {
+                "node": "g-add-bg",
+                "anchor": "auto"
+              },
+              "arrow": true,
+              "stroke": "#087B69",
+              "strokeWidth": 3,
+              "fill": "none"
+            },
+            {
+              "kind": "link",
+              "id": "e-add-loss",
+              "from": {
+                "node": "g-add-bg",
+                "anchor": "auto"
+              },
+              "to": {
+                "node": "g-loss-bg",
+                "anchor": "auto"
+              },
+              "arrow": true,
+              "stroke": "#087B69",
+              "strokeWidth": 3,
+              "fill": "none"
+            }
+          ]
+        },
+        {
+          "kind": "group",
+          "id": "note-card",
+          "x": 28,
+          "y": 630,
+          "children": [
+            {
+              "kind": "rect",
+              "id": "note-card-bg",
+              "x": 0,
+              "y": 0,
+              "width": 824,
+              "height": 96,
+              "fill": "#FFFFFF",
+              "cornerRadius": 14
+            },
+            {
+              "kind": "text",
+              "id": "note-0",
+              "text": {
+                "op": "if",
+                "args": [
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "forward"
+                    ]
+                  },
+                  "Forward: p = 1, loss = 2.",
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "backward"
+                        ]
+                      },
+                      "Backward wrote w.grad = -4",
+                      {
+                        "op": "if",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "update"
+                            ]
+                          },
+                          "Update: w = 0.5 - 0.1*(-4)",
+                          {
+                            "op": "if",
+                            "args": [
+                              {
+                                "op": "eq",
+                                "args": [
+                                  {
+                                    "state": "phase"
+                                  },
+                                  "forward2"
+                                ]
+                              },
+                              "Fresh forward at w = 0.9:",
+                              {
+                                "op": "if",
+                                "args": [
+                                  {
+                                    "op": "eq",
+                                    "args": [
+                                      {
+                                        "state": "phase"
+                                      },
+                                      "backward2"
+                                    ]
+                                  },
+                                  "New gradients at w = 0.9:",
+                                  "Press Forward to evaluate"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "x": 18,
+              "y": 30,
+              "fontSize": 17,
+              "fill": "#19383E"
+            },
+            {
+              "kind": "text",
+              "id": "note-1",
+              "text": {
+                "op": "if",
+                "args": [
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "forward"
+                    ]
+                  },
+                  "It read w and b and saved",
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "backward"
+                        ]
+                      },
+                      "and b.grad = -2. w is still",
+                      {
+                        "op": "if",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "update"
+                            ]
+                          },
+                          "= 0.9, b = 0.2. The update",
+                          {
+                            "op": "if",
+                            "args": [
+                              {
+                                "op": "eq",
+                                "args": [
+                                  {
+                                    "state": "phase"
+                                  },
+                                  "forward2"
+                                ]
+                              },
+                              "p = 2 and loss = 0.5.",
+                              {
+                                "op": "if",
+                                "args": [
+                                  {
+                                    "op": "eq",
+                                    "args": [
+                                      {
+                                        "state": "phase"
+                                      },
+                                      "backward2"
+                                    ]
+                                  },
+                                  "w.grad = -2, b.grad = -1.",
+                                  "p = w*x + b at w = 0.5."
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "x": 18,
+              "y": 56,
+              "fontSize": 17,
+              "fill": "#19383E"
+            },
+            {
+              "kind": "text",
+              "id": "note-2",
+              "text": {
+                "op": "if",
+                "args": [
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "state": "phase"
+                      },
+                      "forward"
+                    ]
+                  },
+                  "values; it changed neither.",
+                  {
+                    "op": "if",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "args": [
+                          {
+                            "state": "phase"
+                          },
+                          "backward"
+                        ]
+                      },
+                      "0.5 and b is still 0.",
+                      {
+                        "op": "if",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "args": [
+                              {
+                                "state": "phase"
+                              },
+                              "update"
+                            ]
+                          },
+                          "then cleared both grads.",
+                          {
+                            "op": "if",
+                            "args": [
+                              {
+                                "op": "eq",
+                                "args": [
+                                  {
+                                    "state": "phase"
+                                  },
+                                  "forward2"
+                                ]
+                              },
+                              "The loss fell from 2.",
+                              {
+                                "op": "if",
+                                "args": [
+                                  {
+                                    "op": "eq",
+                                    "args": [
+                                      {
+                                        "state": "phase"
+                                      },
+                                      "backward2"
+                                    ]
+                                  },
+                                  "Press Reset to replay.",
+                                  "No gradient exists yet."
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "x": 18,
+              "y": 82,
+              "fontSize": 17,
+              "fill": "#19383E"
+            }
+          ]
+        }
+      ],
+      "layouts": {
+        "compact": {
+          "width": 350,
+          "height": 1160,
+          "overrides": {
+            "wae-stage": {
+              "width": 350,
+              "height": 1160
+            },
+            "wae-title": {
+              "opacity": 0
+            },
+            "wae-title-compact": {
+              "opacity": 1
+            },
+            "slot-forward": {
+              "x": 16,
+              "y": 52
+            },
+            "btn-forward-bg": {
+              "width": 152,
+              "height": 48
+            },
+            "btn-forward-label": {
+              "x": 76,
+              "y": 32
+            },
+            "btn-forward2-bg": {
+              "width": 152,
+              "height": 48
+            },
+            "btn-forward2-label": {
+              "x": 76,
+              "y": 32
+            },
+            "btn-forward-off-bg": {
+              "width": 152,
+              "height": 48
+            },
+            "btn-forward-off-label": {
+              "x": 76,
+              "y": 32
+            },
+            "slot-backward": {
+              "x": 182,
+              "y": 52
+            },
+            "btn-backward-bg": {
+              "width": 152,
+              "height": 48
+            },
+            "btn-backward-label": {
+              "x": 76,
+              "y": 32
+            },
+            "btn-backward2-bg": {
+              "width": 152,
+              "height": 48
+            },
+            "btn-backward2-label": {
+              "x": 76,
+              "y": 32
+            },
+            "btn-backward-off-bg": {
+              "width": 152,
+              "height": 48
+            },
+            "btn-backward-off-label": {
+              "x": 76,
+              "y": 32
+            },
+            "slot-update": {
+              "x": 16,
+              "y": 112
+            },
+            "btn-update-bg": {
+              "width": 152,
+              "height": 48
+            },
+            "btn-update-label": {
+              "x": 76,
+              "y": 32
+            },
+            "btn-update-off-bg": {
+              "width": 152,
+              "height": 48
+            },
+            "btn-update-off-label": {
+              "x": 76,
+              "y": 32
+            },
+            "slot-reset": {
+              "x": 182,
+              "y": 112
+            },
+            "btn-reset-bg": {
+              "width": 152,
+              "height": 48
+            },
+            "btn-reset-label": {
+              "x": 76,
+              "y": 32
+            },
+            "code-card": {
+              "x": 16,
+              "y": 176
+            },
+            "code-card-bg": {
+              "width": 318
+            },
+            "code-hl-0": {
+              "width": 302
+            },
+            "code-hl-1": {
+              "width": 302
+            },
+            "code-hl-2": {
+              "width": 302
+            },
+            "code-hl-3": {
+              "width": 302
+            },
+            "code-hl-4": {
+              "width": 302
+            },
+            "code-hl-5": {
+              "width": 302
+            },
+            "buf-card": {
+              "x": 16,
+              "y": 424
+            },
+            "buf-card-bg": {
+              "width": 318,
+              "height": 300
+            },
+            "buf-b": {
+              "x": 180
+            },
+            "buf-gb": {
+              "x": 18,
+              "y": 160
+            },
+            "buf-saved-label": {
+              "y": 200
+            },
+            "buf-pred": {
+              "y": 230
+            },
+            "buf-loss": {
+              "x": 18,
+              "y": 260
+            },
+            "graph-card": {
+              "x": 16,
+              "y": 740
+            },
+            "graph-card-bg": {
+              "width": 318,
+              "height": 310
+            },
+            "g-w": {
+              "x": 12,
+              "y": 46
+            },
+            "g-x": {
+              "x": 166,
+              "y": 46
+            },
+            "g-mul": {
+              "x": 12,
+              "y": 136
+            },
+            "g-b": {
+              "x": 166,
+              "y": 136
+            },
+            "g-add": {
+              "x": 12,
+              "y": 226
+            },
+            "g-loss": {
+              "x": 166,
+              "y": 226
+            },
+            "g-w-bg": {
+              "width": 140
+            },
+            "g-x-bg": {
+              "width": 140
+            },
+            "g-mul-bg": {
+              "width": 140
+            },
+            "g-b-bg": {
+              "width": 140
+            },
+            "g-add-bg": {
+              "width": 140
+            },
+            "g-loss-bg": {
+              "width": 140
+            },
+            "note-card": {
+              "x": 16,
+              "y": 1056
+            },
+            "note-card-bg": {
+              "width": 318
+            }
+          }
+        },
+        "expanded": {
+          "width": 880,
+          "height": 740,
+          "overrides": {
+            "slot-forward": {
+              "x": 28,
+              "y": 60
+            },
+            "slot-backward": {
+              "x": 238,
+              "y": 60
+            },
+            "slot-update": {
+              "x": 448,
+              "y": 60
+            },
+            "slot-reset": {
+              "x": 658,
+              "y": 60
+            }
+          }
+        },
+        "breakpoint": 640
+      },
+      "timeline": {
+        "durationMs": 1000,
+        "tracks": [],
+        "cues": [
+          {
+            "atMs": 0,
+            "text": "Each button runs exactly one step of the training loop."
+          },
+          {
+            "atMs": 500,
+            "text": "Backward writes gradients; only Update writes parameters."
+          }
+        ]
+      },
+      "accessibility": {
+        "text": "One training example with x = 2, target y = 3, starting parameters w = 0.5 and b = 0, learning rate 0.1. Program: p = w*x + b, L = (p - y)^2/2, then L.backward(), then the update w -= lr*w.grad and b -= lr*b.grad, then the gradients are cleared. Forward computes p = 1 and loss 2 and changes no parameter. Backward writes the gradient buffers w.grad = -4 and b.grad = -2; w is still 0.5 and b is still 0. Update subtracts learning rate times gradient: w = 0.5 - 0.1*(-4) = 0.9 and b = 0 - 0.1*(-2) = 0.2, then clears the gradients. A fresh forward gives p = 2 and loss 0.5. A second backward at the new parameters gives w.grad = -2 and b.grad = -1. The Forward, Backward, Update and Reset buttons, or the phase selector, move one step at a time; the highlighted code line, the memory readouts and the graph show the same step.",
+        "reducedMotion": {
+          "atMs": 1000,
+          "description": "One training example with x = 2, target y = 3, starting parameters w = 0.5 and b = 0, learning rate 0.1. Program: p = w*x + b, L = (p - y)^2/2, then L.backward(), then the update w -= lr*w.grad and b -= lr*b.grad, then the gradients are cleared. Forward computes p = 1 and loss 2 and changes no parameter. Backward writes the gradient buffers w.grad = -4 and b.grad = -2; w is still 0.5 and b is still 0. Update subtracts learning rate times gradient: w = 0.5 - 0.1*(-4) = 0.9 and b = 0 - 0.1*(-2) = 0.2, then clears the gradients. A fresh forward gives p = 2 and loss 0.5. A second backward at the new parameters gives w.grad = -2 and b.grad = -1. The Forward, Backward, Update and Reset buttons, or the phase selector, move one step at a time; the highlighted code line, the memory readouts and the graph show the same step."
+        }
+      },
+      "referenceChecks": []
+    }
+  ],
+  "bindings": [
+    {
+      "visualId": "worked-forward-backward-update",
+      "episodeId": "fnd-e04-02",
+      "afterBlockId": "fnd-04-02-text-2"
+    }
+  ]
+}

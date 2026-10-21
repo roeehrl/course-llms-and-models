@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "id": "labs-b",
+  "purpose": "Chapter labs for chapters 9, 10, 11, 12 and 14 as Python code tasks graded by hidden reference cases (registry llm-practical-labs-b). Each lab is an ungated assessment block at the end of its lab episode: it records practical evidence without changing any gate. Chapters 4, 7 and 13 use capstone suites A, B and C; chapters 1-3, 5, 6 and 8 are in labs-a. All data are synthetic teaching fixtures.",
+  "extensions": [
+    {
+      "id": "llm-practical-labs-b",
+      "version": "0.1.0",
+      "platforms": [
+        "web"
+      ],
+      "execution": "server",
+      "capabilities": [
+        "assessment.evaluate"
+      ],
+      "entrypoint": "runtime/code-fixtures-labs-b.json",
+      "integrity": "sha256-62c6ad39487749a9598d30326a244be8ad70f7278ba861c696385f72c5ce0a7e",
+      "accessibility": {
+        "keyboard": true,
+        "reducedMotion": true,
+        "textAlternative": "Plain-text protocols, editable Python and textual diagnostic results; no motion, audio or canvas required."
+      }
+    }
+  ],
+  "assessments": [
+    {
+      "id": "llm-lab-ch09-tiling",
+      "type": "code",
+      "objectiveIds": [
+        "sys-o09-02"
+      ],
+      "familyId": "llm-lab-ch09",
+      "language": "python",
+      "starterCode": "import json\n\n\ndef solve(data):\n    # Implement the lab protocol described in the prompt.\n    pass\n\n\nif __name__ == \"__main__\":\n    practice = json.loads('{\"task\":\"tiled_matmul\",\"a\":[[1,2,0],[0,1,3]],\"b\":[[2,1],[1,0],[4,-1]],\"tile\":2,\"chunk\":2,\"bytes_per_value\":4,\"peak_ops_per_s\":2000000000000,\"bandwidth_bytes_per_s\":200000000000}')\n    print(json.dumps(solve(practice)))\n",
+      "prompt": "Chapter 9 lab: tiled matrix multiplication simulator\n\nImplement a standard-library Python function `solve(data)` that returns the specified JSON value. Return it; do not print it. The runner calls solve once per hidden case, and one process may receive several cases, so each call must be independent of previous calls. Numeric outputs must be finite. Object-key order is irrelevant; array order, shape and discrete types (strings, booleans, null) matter. No network, third-party package or file access is available. A whole attempt has 128 MiB of memory, half a CPU, five seconds and 64 KiB of combined output. Test your function with the separate practice input in the starter's main block; that input is not a graded case and its answer is not supplied.\n\nInput is `{\"task\":\"tiled_matmul\",\"a\":A,\"b\":B,\"tile\":t,\"chunk\":c,\"bytes_per_value\":v,\"peak_ops_per_s\":P,\"bandwidth_bytes_per_s\":W}`. A is an M-by-K list of integer rows and B is K-by-N (1 ≤ M,K,N ≤ 8). `t` is the output tile width for both output dimensions and `c` is the inner-dimension chunk width (1 ≤ t,c ≤ 8). Dimensions need not be divisible by t or c: edge tiles and edge chunks are smaller.\n\nUse the episode's logical accounting model, counting elements at one memory level with no cache reuse across steps:\n- Operations: each multiply-add counts as two operations, so ops = 2*M*N*K.\n- Naive traffic: every product reads one A and one B element (2*M*N*K reads), plus one write per C element; C is never read.\n- Tiled traffic: for every output tile (rows r ≤ t, columns s ≤ t) and every inner chunk (depth d ≤ c) of that tile, load the needed A block once (r*d elements) and the needed B block once (d*s elements); then write each C element once.\n- Lower bound: read A once, read B once, write C once.\nMultiply element counts by `bytes_per_value`.\n\nReturn `{\"c\":C,\"ops\":int,\"naive_bytes\":int,\"tiled_bytes\":int,\"lower_bound_bytes\":int,\"tiled_intensity\":number,\"roofline_ops_per_s\":number,\"bound\":string}` where C is the exact integer product A·B (M rows of N integers), tiled_intensity = ops/tiled_bytes, roofline_ops_per_s = min(P, W*tiled_intensity), and bound is \"bandwidth\" when W*tiled_intensity < P and \"compute\" otherwise. The roofline value is a ceiling under this model, not a predicted benchmark. Numbers are compared with absolute and relative tolerance 1e-9; integers and strings must match exactly.\n\nGrading: this chapter lab is graded by hidden reference cases on the server. It is recorded as practical evidence but does not block your progress: the episode's independent checks still decide completion. The hidden cases include edge cases chosen to reject plausible wrong implementations. Passing them shows agreement with this teaching model on those cases; it is not a measurement of any real device, fleet or deployment.",
+      "grading": {
+        "evaluatorId": "llm-practical-labs-b",
+        "fixtureRef": "llm-lab-ch09-tiling-v1"
+      }
+    },
+    {
+      "id": "llm-lab-ch10-pipeline",
+      "type": "code",
+      "objectiveIds": [
+        "sys-o10-02"
+      ],
+      "familyId": "llm-lab-ch10",
+      "language": "python",
+      "starterCode": "import json\n\n\ndef solve(data):\n    # Implement the lab protocol described in the prompt.\n    pass\n\n\nif __name__ == \"__main__\":\n    practice = json.loads('{\"task\":\"pipeline_schedule\",\"stage_times\":[1,3],\"microbatches\":3,\"pause\":{\"stage\":0,\"start\":1,\"end\":3}}')\n    print(json.dumps(solve(practice)))\n",
+      "prompt": "Chapter 10 lab: pause a simulated stage and inspect queues, deadlines and accepted completions\n\nImplement a standard-library Python function `solve(data)` that returns the specified JSON value. Return it; do not print it. The runner calls solve once per hidden case, and one process may receive several cases, so each call must be independent of previous calls. Numeric outputs must be finite. Object-key order is irrelevant; array order, shape and discrete types (strings, booleans, null) matter. No network, third-party package or file access is available. A whole attempt has 128 MiB of memory, half a CPU, five seconds and 64 KiB of combined output. Test your function with the separate practice input in the starter's main block; that input is not a graded case and its answer is not supplied.\n\nEach input is one of two deterministic simulations; dispatch on `data[\"task\"]`. Nothing contacts a peer.\n\nTask `pipeline_schedule`: `{\"task\":\"pipeline_schedule\",\"stage_times\":[d0,...],\"microbatches\":m,\"pause\":null|{\"stage\":s,\"start\":a,\"end\":b}}`. A forward-only pipeline has one worker per stage; stage s takes the integer time d_s per microbatch. All m microbatches are available to stage 0 at time 0, each stage processes microbatches in order 0..m-1, one at a time, and a microbatch can start at stage s only after it finished stage s-1 and the stage finished the previous microbatch. There is no communication cost. If `pause` is given, that stage cannot START a microbatch at any time t with a ≤ t < b; a microbatch already running continues (no preemption), and a start that would fall in the window moves to b. Return `{\"finish\":[time each microbatch finishes the last stage],\"makespan\":int,\"busy_fraction\":[m*d_s/makespan per stage],\"queued_time\":[per stage, the sum over microbatches of start time minus arrival time]}`. Arrival at stage 0 is time 0; at later stages it is the finish time at the previous stage.\n\nTask `cache_admission`: `{\"task\":\"cache_admission\",\"capacity\":n,\"deadline\":null|D,\"events\":[{\"t\":time,\"type\":\"forward\"|\"gradient\",\"id\":name},...]}`. A stage keeps the cached forward context of each admitted activation until its gradient returns; it holds at most `capacity` entries. Events are already in processing order (times never decrease; equal times are processed in list order). For each event at time t, in this order: (1) if a deadline is set, every cached entry with admitted_at + D ≤ t expires (oldest admission first) and is removed; (2) admit waiting forwards from the FIFO queue into free slots, with admitted_at = t; (3) process the event. A forward joins the back of the FIFO queue and is then admitted at once if a slot is free. A gradient whose id is currently cached is an accepted completion: remove the entry, then admit waiting forwards into free slots at time t. A gradient for anything not currently cached (expired, still queued, already completed or unknown) is rejected; a late gradient is never attached to another activation. Queued forwards do not expire. Return `{\"accepted\":[ids in acceptance order],\"expired\":[ids in expiry order],\"rejected\":[ids in event order],\"admitted_at\":{id:time for every admitted id},\"max_queue\":largest queue length after any event,\"cached_end\":[ids still cached, admission order],\"queued_end\":[ids still queued, FIFO order]}`.\n\nBusy fractions are compared with tolerance 1e-12; everything else must match exactly.\n\nGrading: this chapter lab is graded by hidden reference cases on the server. It is recorded as practical evidence but does not block your progress: the episode's independent checks still decide completion. The hidden cases include edge cases chosen to reject plausible wrong implementations. Passing them shows agreement with this teaching model on those cases; it is not a measurement of any real device, fleet or deployment.",
+      "grading": {
+        "evaluatorId": "llm-practical-labs-b",
+        "fixtureRef": "llm-lab-ch10-pipeline-v1"
+      }
+    },
+    {
+      "id": "llm-lab-ch11-journal",
+      "type": "code",
+      "objectiveIds": [
+        "sys-o11-04"
+      ],
+      "familyId": "llm-lab-ch11",
+      "language": "python",
+      "starterCode": "import json\n\n\ndef solve(data):\n    # Implement the lab protocol described in the prompt.\n    pass\n\n\nif __name__ == \"__main__\":\n    practice = json.loads('{\"task\":\"journal_ledger\",\"threshold\":2,\"events\":[{\"t\":0,\"session\":\"x\",\"event\":\"registration_started\"},{\"t\":2,\"session\":\"x\",\"event\":\"registered\"},{\"t\":5,\"session\":\"x\",\"event\":\"backward_complete\",\"activation\":\"p\",\"ok\":true},{\"t\":6,\"session\":\"x\",\"event\":\"reset\"},{\"t\":4,\"session\":\"x\",\"event\":\"backward_complete\",\"activation\":\"q\",\"ok\":true}]}')\n    print(json.dumps(solve(practice)))\n",
+      "prompt": "Chapter 11 lab: follow a synthetic sample through a typed event journal\n\nImplement a standard-library Python function `solve(data)` that returns the specified JSON value. Return it; do not print it. The runner calls solve once per hidden case, and one process may receive several cases, so each call must be independent of previous calls. Numeric outputs must be finite. Object-key order is irrelevant; array order, shape and discrete types (strings, booleans, null) matter. No network, third-party package or file access is available. A whole attempt has 128 MiB of memory, half a CPU, five seconds and 64 KiB of combined output. Test your function with the separate practice input in the starter's main block; that input is not a graded case and its answer is not supplied.\n\nInput is `{\"task\":\"journal_ledger\",\"threshold\":T,\"events\":[...]}`. The journal is invented teaching data in the style of the chapter's typed events; it describes no real worker. Each event is `{\"t\":monotonic_seconds,\"session\":id,\"event\":kind}` plus `\"activation\"` for activation events and `\"ok\"` (boolean) for backward_complete. Kinds: registration_started, registered, forward_complete, backward_complete, upload_attempted, submitted, accepted, reset. Process events in LIST order (ingestion order); a stale record can arrive late with an older time.\n\nRules:\n- registration_started records that session's start time. registered makes that session current, starts a fresh accumulation window (pending 0, no activations seen) and, if a start time was recorded for that session, appends registered.t minus start.t to admission_wait.\n- Any other event whose session is not the current session (including any event while no session is current) is stale: count it in stale_ignored and otherwise ignore it. Never let a stale record revive an old session.\n- reset of the current session ends it: no session is current, and its pending window is discarded (pending 0).\n- backward_complete with ok true for an activation not yet counted in this session is one local contribution: add it to local_backward; on the session's first such contribution append t minus the session's registered time to time_to_first_backward; increment pending, and when pending reaches T record one optimizer step and set pending to 0. A backward_complete with ok false, or a repeat for an already counted activation, changes nothing except not_counted (+1).\n- submitted and accepted add their activation to the submitted or accepted set. forward_complete and upload_attempted change no output. A local backward is not acceptance: only an explicit accepted event is.\n\nReturn `{\"current_session\":id|null,\"admission_wait\":[...],\"time_to_first_backward\":[...],\"optimizer_steps\":int,\"pending\":int,\"local_backward\":[sorted ids],\"submitted\":[sorted ids],\"accepted\":[sorted ids],\"computed_not_accepted\":[sorted ids in local_backward but not accepted],\"stale_ignored\":int,\"not_counted\":int}`. Interval values are elapsed times containing queueing, transfer and computation, not pure GPU durations. Everything must match exactly.\n\nGrading: this chapter lab is graded by hidden reference cases on the server. It is recorded as practical evidence but does not block your progress: the episode's independent checks still decide completion. The hidden cases include edge cases chosen to reject plausible wrong implementations. Passing them shows agreement with this teaching model on those cases; it is not a measurement of any real device, fleet or deployment.",
+      "grading": {
+        "evaluatorId": "llm-practical-labs-b",
+        "fixtureRef": "llm-lab-ch11-journal-v1"
+      }
+    },
+    {
+      "id": "llm-lab-ch12-layout",
+      "type": "code",
+      "objectiveIds": [
+        "eng-o12-02"
+      ],
+      "familyId": "llm-lab-ch12",
+      "language": "python",
+      "starterCode": "import json\n\n\ndef solve(data):\n    # Implement the lab protocol described in the prompt.\n    pass\n\n\nif __name__ == \"__main__\":\n    practice = json.loads('{\"task\":\"layout_replay\",\"q\":[[0.5],[1.0]],\"k\":[[1.0],[-0.5]],\"v\":[[2.0],[4.0]],\"d_out\":[[1.0],[-1.0]],\"scale\":1.0,\"perm\":[0,2,1,3]}')\n    print(json.dumps(solve(practice)))\n",
+      "prompt": "Chapter 12 lab: replay a tiny analogous layout bug through forward and backward\n\nImplement a standard-library Python function `solve(data)` that returns the specified JSON value. Return it; do not print it. The runner calls solve once per hidden case, and one process may receive several cases, so each call must be independent of previous calls. Numeric outputs must be finite. Object-key order is irrelevant; array order, shape and discrete types (strings, booleans, null) matter. No network, third-party package or file access is available. A whole attempt has 128 MiB of memory, half a CPU, five seconds and 64 KiB of combined output. Test your function with the separate practice input in the starter's main block; that input is not a graded case and its answer is not supplied.\n\nInput is `{\"task\":\"layout_replay\",\"q\":Q,\"k\":K,\"v\":V,\"d_out\":dO,\"scale\":s,\"perm\":perm}`. Q and K are n-by-d, V and dO are n-by-e (n is 2 or 3; d,e ≤ 3), all lists of rows. This is the episode's analogy, not the real hardware lane mapping.\n\nReference attention (no mask): P = row-wise softmax(s·Q·Kᵀ), O = P·V. Its pullback for upstream sensitivity dO: dP = dO·Vᵀ, D_i = Σ_j dO[i][j]·O[i][j], dS[i][j] = P[i][j]·(dP[i][j] − D_i), dQ = s·dS·K, dK = s·dSᵀ·Q, dV = Pᵀ·dO.\n\nCandidate with a coordinate-layout bug: flatten P row-major to p (length n²). The faulty conversion exposes P_bad[i][j] = p[perm[i·n+j]] at logical coordinate (i,j), and the candidate forward uses it: O_bad = P_bad·V. The candidate backward is otherwise the reference pullback but reads its own output: dP is unchanged, D_bad uses O_bad, dS_bad = P·(dP − D_bad), dQ_bad = s·dS_bad·K, dK_bad = s·dS_badᵀ·Q, and dV_bad = Pᵀ·dO.\n\nReturn `{\"reference\":{\"o\":O,\"dq\":dQ,\"dk\":dK,\"dv\":dV},\"candidate\":{\"o\":O_bad,\"dq\":dQ_bad,\"dk\":dK_bad,\"dv\":dV_bad},\"mismatch\":{\"o\":c,\"d\":c,\"dq\":c,\"dk\":c,\"dv\":c},\"first_mismatch\":name|null,\"coordinate_mismatches\":int}`. A mismatch count is the number of elements where |candidate − reference| > 1e-9·(1 + |reference|) (for \"d\", compare the vectors D_bad and D). first_mismatch is the first stage with a nonzero count in the boundary order o, d, dq, dk, dv, or null when all agree. coordinate_mismatches counts logical coordinates whose source label differs (perm[i] ≠ i), regardless of the values stored there: equal values at wrong coordinates are still wrong coordinates. Matrices are compared with absolute tolerance 1e-9 and relative tolerance 1e-7; counts and names exactly. Every output is finite. Note what the hidden cases illustrate: dV can stay correct while O, dQ and dK are damaged, and a relabeling can leave every value unchanged.\n\nGrading: this chapter lab is graded by hidden reference cases on the server. It is recorded as practical evidence but does not block your progress: the episode's independent checks still decide completion. The hidden cases include edge cases chosen to reject plausible wrong implementations. Passing them shows agreement with this teaching model on those cases; it is not a measurement of any real device, fleet or deployment.",
+      "grading": {
+        "evaluatorId": "llm-practical-labs-b",
+        "fixtureRef": "llm-lab-ch12-layout-v1"
+      }
+    },
+    {
+      "id": "llm-lab-ch14-evidence",
+      "type": "code",
+      "objectiveIds": [
+        "eng-o14-02"
+      ],
+      "familyId": "llm-lab-ch14",
+      "language": "python",
+      "starterCode": "import json\n\n\ndef solve(data):\n    # Implement the lab protocol described in the prompt.\n    pass\n\n\nif __name__ == \"__main__\":\n    practice = json.loads('{\"task\":\"evidence_ledger\",\"candidate_digest\":\"d9\",\"reference_ms\":[50,null,70],\"candidate_ms\":[45,40,72],\"required\":[\"forward\",\"gradients\"],\"checks\":[{\"name\":\"forward\",\"digest\":\"d9\",\"status\":\"pass\",\"independent\":true},{\"name\":\"gradients\",\"digest\":\"d8\",\"status\":\"pass\",\"independent\":true}]}')\n    print(json.dumps(solve(practice)))\n",
+      "prompt": "Chapter 14 lab: reduce a paired experiment and evidence ledger to scoped claims\n\nImplement a standard-library Python function `solve(data)` that returns the specified JSON value. Return it; do not print it. The runner calls solve once per hidden case, and one process may receive several cases, so each call must be independent of previous calls. Numeric outputs must be finite. Object-key order is irrelevant; array order, shape and discrete types (strings, booleans, null) matter. No network, third-party package or file access is available. A whole attempt has 128 MiB of memory, half a CPU, five seconds and 64 KiB of combined output. Test your function with the separate practice input in the starter's main block; that input is not a graded case and its answer is not supplied.\n\nInput is `{\"task\":\"evidence_ledger\",\"candidate_digest\":id,\"reference_ms\":[...],\"candidate_ms\":[...],\"required\":[check names],\"checks\":[{\"name\":str,\"digest\":str,\"status\":\"pass\"|\"fail\"|\"timeout\"|null,\"independent\":bool},...]}`. The two timing lists have equal length; position i is one matched block measured for both versions. A null entry is a run that produced no timing. All numbers are invented teaching data.\n\nPaired timing: use only positions where both timings are present (complete_pairs). median_saving_ms is the median of reference minus candidate over those pairs and median_speedup the median of reference/candidate; with an even count the median is the mean of the two middle values; with no complete pair both are null. Never compare the median of one list with the median of the other.\n\nEvidence ledger, for each required check name: consider only records with that name whose digest equals candidate_digest (a result for another digest is evidence about a different artifact). No such record → \"not_run\". Otherwise \"fail\" if any of them failed, else \"pass\" if any passed, else \"inconclusive\" (timeouts and null statuses never become a pass). A missing metric never defaults to pass.\n\nClaims: numerical is \"fail\" if any required check is fail; \"pass\" if every required check is pass and at least one passing matching record is marked independent; otherwise \"inconclusive\". speed is \"unmeasured\" with no complete pair, \"faster\" if median_saving_ms > 0, otherwise \"not_faster\". claim is \"supported\" only if numerical is pass and speed is faster; \"refuted\" if numerical is fail or speed is not_faster; otherwise \"inconclusive\". A faster time never compensates for a failed or missing numerical check.\n\nReturn `{\"complete_pairs\":int,\"median_saving_ms\":number|null,\"median_speedup\":number|null,\"ledger\":{name:state},\"numerical\":str,\"speed\":str,\"claim\":str}`. Numbers are compared with tolerance 1e-9; everything else exactly.\n\nGrading: this chapter lab is graded by hidden reference cases on the server. It is recorded as practical evidence but does not block your progress: the episode's independent checks still decide completion. The hidden cases include edge cases chosen to reject plausible wrong implementations. Passing them shows agreement with this teaching model on those cases; it is not a measurement of any real device, fleet or deployment.",
+      "grading": {
+        "evaluatorId": "llm-practical-labs-b",
+        "fixtureRef": "llm-lab-ch14-evidence-v1"
+      }
+    }
+  ],
+  "episodeBlocks": [
+    {
+      "episodeId": "sys-e09-02",
+      "assessmentId": "llm-lab-ch09-tiling",
+      "position": "end",
+      "prefix": "lab"
+    },
+    {
+      "episodeId": "sys-e10-02",
+      "assessmentId": "llm-lab-ch10-pipeline",
+      "position": "end",
+      "prefix": "lab"
+    },
+    {
+      "episodeId": "sys-e11-04",
+      "assessmentId": "llm-lab-ch11-journal",
+      "position": "end",
+      "prefix": "lab"
+    },
+    {
+      "episodeId": "eng-e12-02",
+      "assessmentId": "llm-lab-ch12-layout",
+      "position": "end",
+      "prefix": "lab"
+    },
+    {
+      "episodeId": "eng-e14-02",
+      "assessmentId": "llm-lab-ch14-evidence",
+      "position": "end",
+      "prefix": "lab"
+    }
+  ]
+}

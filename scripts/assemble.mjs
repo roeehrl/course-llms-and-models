@@ -7,7 +7,7 @@ export const fragments = ['foundations', 'training-and-transformers', 'systems-a
 export const fields = ['objectives', 'chapters', 'assessments', 'gates', 'sources', 'visuals', 'media', 'extensions'];
 /** Every verified illustration overlay, oldest first. Assembly, recovery binding and
  * packaging all read this one list so a packaged course cannot silently drop one. */
-export const VISUAL_OVERLAYS = ['visuals', 'systems-visuals', 'learning-visuals', 'concept-visuals'];
+export const VISUAL_OVERLAYS = ['visuals', 'systems-visuals', 'learning-visuals', 'concept-visuals', 'worked-adaptive-visuals'];
 const contentRoot = new URL('../content/', import.meta.url);
 const readContent = async name => JSON.parse(await readFile(new URL(`${name}.json`, contentRoot), 'utf8'));
 /** All overlays of the complete course. Pass recovery: false to build the unadapted
@@ -18,9 +18,94 @@ export async function loadOverlays({ recovery = true } = {}) {
     visualOverlay: first, visualOverlays: rest, practicalOverlay: await readContent('practicals-qualified'),
     ...(recovery ? { recoveryOverlay: await readContent('recovery-runtime') } : {}),
     writtenOverlay: await readContent('written-explanations'), placementOverlay: await readContent('placement'), retentionOverlay: await readContent('retention-checks'),
+    authoringOverlays: (await Promise.all(AUTHORING_OVERLAYS.map(readOptional))).filter(Boolean),
   };
 }
+/** Additive authoring overlays on the SDK 0.5 contracts, applied in this order after the
+ * learner-evidence overlays. Each file is optional so partial checkouts still assemble. */
+export const AUTHORING_OVERLAYS = ['misconceptions', 'worked-adaptive-episode', 'labs-a', 'labs-b', 'portfolio', 'research', 'study-instruments'];
+const readOptional = async name => { try { return await readContent(name); } catch (error) { if (error.code === 'ENOENT') return undefined; throw error; } };
 const allEpisodes = course => course.chapters.flatMap(chapter => chapter.episodes);
+/** Fields of an authoring overlay. Anything else (notes, annotations, review metadata) is
+ * authoring-only and never reaches the compiled course. */
+const AUTHORING_FIELDS = new Set(['schemaVersion', 'id', 'purpose', 'source', 'sources', 'extensions', 'assessments', 'hypotheses', 'probes', 'distractorLinks',
+  'episodeBlocks', 'gateBindings', 'research', 'researchTasks', 'annotations', 'chapterProbes', 'review']);
+/**
+ * Applies one additive authoring overlay. It may declare new server-only contracts
+ * (hypotheses, probes, research), new items that never join a gate (probes, labs, study
+ * instruments), links from existing distractors to declared misconceptions, and reviewed
+ * rubric items that join a gate as an extra first family without changing its threshold.
+ * It never edits teaching text, an existing answer key, a gate threshold or the policy.
+ */
+export function applyAuthoringOverlay(course, overlay) {
+  assert(overlay?.schemaVersion === 1 && typeof overlay.id === 'string', 'Invalid authoring overlay');
+  for (const key of Object.keys(overlay)) assert(AUTHORING_FIELDS.has(key), `Unknown authoring overlay field ${key} in ${overlay.id}`);
+  const episodes = allEpisodes(course), byId = new Map(course.assessments.map(a => [a.id, a]));
+  for (const source of overlay.sources ?? (overlay.source ? [overlay.source] : [])) {
+    const existing = course.sources.find(s => s.id === source.id);
+    if (existing) assert.deepEqual(existing, source, `Conflicting source ${source.id}`); else course.sources.push(structuredClone(source));
+  }
+  for (const extension of overlay.extensions ?? []) {
+    const existing = course.extensions.find(e => e.id === extension.id);
+    if (existing) assert.deepEqual(existing, extension, `Conflicting extension ${extension.id}`); else course.extensions.push(structuredClone(extension));
+  }
+  for (const item of overlay.assessments ?? []) {
+    assert(!byId.has(item.id), `Authoring overlay ${overlay.id} redefines assessment ${item.id}`);
+    const copy = structuredClone(item); course.assessments.push(copy); byId.set(copy.id, copy);
+  }
+  for (const field of ['hypotheses', 'probes', 'researchTasks']) if (overlay[field]?.length) {
+    course[field] ??= [];
+    for (const entry of overlay[field]) {
+      assert(!course[field].some(e => e.id === entry.id), `Duplicate ${field} id ${entry.id}`);
+      course[field].push(structuredClone(entry));
+    }
+  }
+  if (overlay.research?.publicTopics?.length) {
+    course.research ??= { publicTopics: [] };
+    for (const topic of overlay.research.publicTopics) {
+      assert(!course.research.publicTopics.some(t => t.id === topic.id), `Duplicate research topic ${topic.id}`);
+      course.research.publicTopics.push(structuredClone(topic));
+    }
+  }
+  const hypotheses = new Set((course.hypotheses ?? []).map(h => h.id));
+  for (const link of overlay.distractorLinks ?? []) {
+    const item = byId.get(link.assessmentId), option = item?.type === 'choice' ? item.options.find(o => o.id === link.optionId) : undefined;
+    assert(option && option.id !== item.grading.correctOptionId, `Invalid distractor link ${link.assessmentId}/${link.optionId}`);
+    assert(hypotheses.has(link.hypothesisId), `Distractor link to undeclared hypothesis ${link.hypothesisId}`);
+    assert(option.misconceptionId === undefined || option.misconceptionId === link.hypothesisId, `Distractor ${link.assessmentId}/${link.optionId} already linked`);
+    option.misconceptionId = link.hypothesisId;
+  }
+  const gated = () => new Set(course.gates.flatMap(g => g.assessmentIds));
+  for (const binding of overlay.episodeBlocks ?? []) {
+    // Ungated items: answerable from their episode, recorded as evidence, never a gate requirement.
+    const episode = episodes.find(e => e.id === binding.episodeId), item = byId.get(binding.assessmentId);
+    assert(episode && item && !gated().has(item.id), `Invalid ungated episode block ${binding.episodeId}/${binding.assessmentId}`);
+    assert(item.objectiveIds.some(id => episode.objectiveIds.includes(id)) || binding.crossEpisode === true, `Episode block outside its episode objectives: ${item.id}`);
+    assert(['start', 'end', 'beforeAssessments'].includes(binding.position), `Invalid block position for ${item.id}`);
+    const block = { id: `${binding.prefix ?? 'item'}-${item.id}`, type: 'assessment', assessmentId: item.id };
+    assert(!episode.blocks.some(b => b.id === block.id), `Duplicate block ${block.id}`);
+    if (binding.position === 'start') episode.blocks.unshift(block);
+    else if (binding.position === 'end') episode.blocks.push(block);
+    else { const at = episode.blocks.findIndex(b => b.type === 'assessment'); episode.blocks.splice(at < 0 ? episode.blocks.length : at, 0, block); }
+  }
+  for (const binding of overlay.gateBindings ?? []) {
+    // Same contract as written explanations: a reviewed rubric item joins as a new first
+    // family; the family threshold is unchanged, so review never blocks completion.
+    const episode = episodes.find(e => e.id === binding.episodeId), item = byId.get(binding.assessmentId);
+    assert(episode && item?.type === 'rubric', `Invalid gate binding ${binding.episodeId}/${binding.assessmentId}`);
+    const gate = course.gates.find(g => g.id === episode.gateId), before = structuredClone(gate);
+    assert(item.objectiveIds.every(id => gate.objectiveIds.includes(id)), 'Rubric item outside its gate scope');
+    assert(!course.assessments.filter(a => gate.assessmentIds.includes(a.id)).some(a => a.familyId === item.familyId), 'Rubric item must be a new family');
+    gate.assessmentIds.unshift(item.id);
+    assert.deepEqual({ ...gate, assessmentIds: before.assessmentIds }, before, 'Gate threshold changed');
+    const at = episode.blocks.findIndex(block => block.type === 'assessment');
+    episode.blocks.splice(at < 0 ? episode.blocks.length : at, 0, { id: `${binding.prefix ?? 'rubric'}-${item.id}`, type: 'assessment', assessmentId: item.id });
+  }
+  // Probes and other diagnostic items never become gate evidence.
+  const probeItems = new Set((course.probes ?? []).map(p => p.assessmentId));
+  for (const id of gated()) assert(!probeItems.has(id) && byId.get(id)?.role !== 'diagnostic_probe', `Diagnostic probe ${id} joined a gate`);
+  return course;
+}
 /** Written explanations, optional placement and delayed retention checks. Each
  * overlay is additive: no teaching text, existing item, gate threshold or policy changes. */
 export function applyLearnerEvidence(course, { writtenOverlay, placementOverlay, retentionOverlay } = {}) {
@@ -69,7 +154,7 @@ export function applyLearnerEvidence(course, { writtenOverlay, placementOverlay,
   return course;
 }
 
-export function assemble(config, modules, { preview = false, visualOverlay, visualOverlays = [], practicalOverlay,practicalRuntimeOverlay,recoveryOverlay, writtenOverlay, placementOverlay, retentionOverlay } = {}) {
+export function assemble(config, modules, { preview = false, visualOverlay, visualOverlays = [], practicalOverlay,practicalRuntimeOverlay,recoveryOverlay, writtenOverlay, placementOverlay, retentionOverlay, authoringOverlays = [] } = {}) {
   const course = structuredClone(config);
   for (const field of fields) course[field] = modules.flatMap(module => {
     assert(Array.isArray(module[field]), `Fragment lacks ${field}`);
@@ -136,6 +221,7 @@ export function assemble(config, modules, { preview = false, visualOverlay, visu
     for(const assessment of course.assessments)if(assessment.type==='code'&&assessment.grading.evaluatorId===practicalOverlay.extension.id)assessment.grading.evaluatorId=replacement.id;
   }
   applyLearnerEvidence(course, { writtenOverlay, placementOverlay, retentionOverlay });
+  for (const overlay of authoringOverlays) applyAuthoringOverlay(course, overlay);
   if (preview) {
     course.id += '-preview'; course.title += ' · development preview';
     course.summary = `Partial course preview. ${course.chapters.length} chapters are available; this is not the complete 14-chapter course. ${course.summary}`;

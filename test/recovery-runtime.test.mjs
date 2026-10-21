@@ -47,7 +47,7 @@ test('qualified suites require both original tasks and keep families, thresholds
   for(const a of codeRecovery.assessments){assert.match(a.prompt,/Neither task is optional/);assert(!compiled.server.assessments.some(b=>b.id===a.id));assert(!JSON.stringify(compiled.learner).includes(a.prompt));assert(!JSON.stringify(compiled.learner).includes(a.grading.fixtureRef));}
   const first=structuredClone(codeRecovery);first.assessments[0].grading.evaluatorId='arbitrary-evaluator';assert.throws(()=>bindRecoveryRuntime({...input,baseCourse:suiteBase.server,codeRecovery:first}),/Practical evaluator changed/);
   const excessive=structuredClone(codeRecovery);excessive.bindings[0].plannedMinutes=46;assert.throws(()=>bindRecoveryRuntime({...input,baseCourse:suiteBase.server,codeRecovery:excessive}),/Invalid practical effort/);
-  assert.equal(registryMetadata.registries.length,3);
-  for(const r of registryMetadata.registries){const bytes=await readFile(new URL(r.file,root));assert(bytes.length<=1024*1024);assert.equal(bytes.length,r.bytes);assert.equal(createHash('sha256').update(bytes).digest('hex'),r.sha256);assert(qualified.extensions.some(e=>e.id===r.id&&e.integrity==='sha256-'+r.sha256));}
+  assert.equal(registryMetadata.registries.length,5);const labs=await Promise.all(['labs-a','labs-b'].map(n=>read(`content/${n}.json`)));const declared=[...qualified.extensions,...labs.flatMap(l=>l.extensions)];
+  for(const r of registryMetadata.registries){const bytes=await readFile(new URL(r.file,root));assert(bytes.length<=1024*1024);assert.equal(bytes.length,r.bytes);assert.equal(createHash('sha256').update(bytes).digest('hex'),r.sha256);assert(declared.some(e=>e.id===r.id&&e.integrity==='sha256-'+r.sha256));}
   const legacy=await readFile(new URL('runtime/code-fixtures.json',root));assert.equal(createHash('sha256').update(legacy).digest('hex'),'e4254dd60781f612e3cdf1a3633833ab2c0d59cc17047331f71945ccdac6a51f');
 });
