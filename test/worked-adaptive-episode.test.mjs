@@ -73,3 +73,15 @@ test('independent oracle, tape autograd and finite differences agree; wrong impl
   const scene = JSON.parse(visual.stdout);
   assert(scene.rejectedWrongSignUpdate && scene.rejectedBackwardWritesParameters && scene.verifiedFrames === 12);
 });
+
+test('the section 16 phase selector shows labels in the course locale, never internal phase ids', async () => {
+  const { PHASES, PHASE_LABELS, buildScene } = await import('../scripts/create-worked-adaptive-scene.mjs');
+  const shipped = full.learner.visuals.find(v => v.id === 'worked-forward-backward-update');
+  const text = JSON.stringify(shipped);
+  const labels = PHASE_LABELS[config.locale];
+  assert(labels, `labels exist for the course locale ${config.locale}`);
+  for (const id of PHASES) assert(text.includes(JSON.stringify(labels[id])), `${id} label shipped`);
+  assert(!/"(?:ready|forward2|backward2)"/.test(text), 'a raw phase id is in the learner scene');
+  for (const locale of Object.keys(PHASE_LABELS)) assert.deepEqual(buildScene({ locale }).state.phase.options, PHASES.map(p => PHASE_LABELS[locale][p]));
+  assert.throws(() => buildScene({ locale: 'fr' }), /No phase labels/);
+});

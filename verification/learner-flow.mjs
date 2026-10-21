@@ -12,6 +12,7 @@ import {verifyReleasedRuntime,expectedCoreRelease} from './released-runtime.mjs'
 import {stageWorkedExamples} from '../scripts/stage-worked-examples.mjs';
 import {writtenAnswers} from './written-answers.mjs';
 import {enablePlacement} from './placement-settings.mjs';
+import {labSubmissions} from './lab-submissions.mjs';
 import {harnessPassword,runWithPassword} from './password-login.mjs';
 const exec=promisify(execFile),root=fileURLToPath(new URL('../',import.meta.url));
 class Failure extends Error {constructor(code){super(code);this.code=code;}}
@@ -25,8 +26,10 @@ const worked=workedCourse?await stageWorkedExamples():null,compiled=worked?.comp
 let verifierFile;if(worked){verifierFile=path.join(root,'.local/generated-teaching/verifier.json');await mkdir(path.dirname(verifierFile),{recursive:true,mode:0o700});await writeFile(verifierFile,worked.bytes,{mode:0o600});}
 const candidate=(await exec('python3',['-B','-c',"import importlib.util;s=importlib.util.spec_from_file_location('r','runtime/recovery-code-reference.py');r=importlib.util.module_from_spec(s);s.loader.exec_module(r);print(r.candidate_source())"],{cwd:root,maxBuffer:64000})).stdout;
 const registryMetadata=JSON.parse(await readFile(path.join(root,'runtime/practical-registries.json'),'utf8'));
-check(registryMetadata.schemaVersion===1&&registryMetadata.registries.length===3,'qualified_registries_required');
-for(const r of registryMetadata.registries){check(/^runtime\/code-fixtures-(autodiff|decoder|qualification)-qualified\.json$/.test(r.file),'qualified_registry_path');const bytes=await readFile(path.join(root,r.file));check(bytes.length===r.bytes&&bytes.length<=1024*1024&&createHash('sha256').update(bytes).digest('hex')===r.sha256,'qualified_registry_bytes_changed');}
+// Course 0.1.7 adds the two chapter-lab registries to the three qualified practical ones.
+check(registryMetadata.schemaVersion===1&&registryMetadata.registries.length===(course.assessments.some(a=>/^llm-lab-/.test(a.id))?5:3),'qualified_registries_required');
+const labs=await labSubmissions();
+for(const r of registryMetadata.registries){check(/^runtime\/code-fixtures-((autodiff|decoder|qualification)-qualified|labs-[ab])\.json$/.test(r.file),'qualified_registry_path');const bytes=await readFile(path.join(root,r.file));check(bytes.length===r.bytes&&bytes.length<=1024*1024&&createHash('sha256').update(bytes).digest('hex')===r.sha256,'qualified_registry_bytes_changed');}
 const schema='course_private_flow_'+randomUUID().replaceAll('-',''),admin=new pg.Pool({connectionString:url.href,max:1});
 const pgVersion=Number((await admin.query("SELECT current_setting('server_version_num') AS version")).rows[0].version);check(pgVersion>=170000&&pgVersion<180000,'postgres_17_required');
 // The child intentionally receives a minimal environment. Preserve the already
@@ -93,12 +96,25 @@ try{
   if(browserMode){
     const {browserAcceptance}=await import('./learner-browser.mjs');reports.push(await browserAcceptance({origin,bootstrap,request,requireOk,course,candidate,check,state}));
   }else{
-  const first=await enroll('private-full-path');let recovered=0,written=0;
+  const first=await enroll('private-full-path');let recovered=0,written=0;const labRuns=[];
   for(const episode of course.chapters.flatMap(c=>c.episodes)){
     const episodeStarted=performance.now();
     const before=await snapshot(first);check(before.nextEpisodeId===episode.id,'linear_path_wrong');
     const bypass=await request(first,'POST',`/api/enrollments/${first.enrollmentId}/complete`,{expectedRevision:before.revision,idempotencyKey:randomUUID(),episodeId:episode.id});check(bypass.status===409,'unearned_completion_accepted');
     for(const block of episode.blocks)if(!['assessment','activity'].includes(block.type))await command(first,'read',{episodeId:episode.id,blockId:block.id});
+    // Chapter labs are ungated practicals graded by the released code grader in the real
+    // Docker sandbox: the starter and a plausible wrong implementation must fail and the
+    // reference must pass every hidden case. They never change the gate.
+    for(const block of episode.blocks.filter(b=>b.type==='assessment'&&labs.has(b.assessmentId))){
+      const a=course.assessments.find(x=>x.id===block.assessmentId),lab=labs.get(a.id),gateBefore=JSON.stringify((await snapshot(first)).lessons.find(l=>l.id===episode.id).gate);
+      check(a.type==='code'&&a.grading.evaluatorId===lab.registry&&!course.gates.some(g=>g.assessmentIds.includes(a.id)),'lab_binding_wrong');
+      const timed=async code=>{const started=performance.now(),r=await answer(first,episode,a,code);return {result:r.result,ms:Math.round(performance.now()-started)};};
+      const starter=await timed(lab.starter),mutant=await timed(lab.mutant),reference=await timed(lab.reference);
+      check(!starter.result.passed&&!mutant.result.passed,'lab_wrong_code_accepted');check(reference.result.passed,'lab_reference_rejected_'+a.id);
+      check(JSON.stringify((await snapshot(first)).lessons.find(l=>l.id===episode.id).gate)===gateBefore,'lab_changed_gate');
+      labRuns.push({lab:a.id,episodeId:episode.id,registry:lab.registry,fixture:lab.fixtureRef,starterRejected:true,wrongImplementationRejected:true,referencePassed:true,referenceMs:reference.ms});
+      console.log(JSON.stringify({labRun:a.id,referenceMs:reference.ms,mutantMs:mutant.ms,starterMs:starter.ms}));
+    }
     const gate=course.gates.find(g=>g.id===episode.gateId),families=new Map();for(const a of course.assessments.filter(a=>gate.assessmentIds.includes(a.id))){const values=families.get(a.familyId)??[];values.push(a);families.set(a.familyId,values);}
     for(const values of families.values()){
       const a=values[0];
@@ -115,12 +131,21 @@ try{
       const state=await snapshot(first),objective=state.lessons.find(l=>l.id===episode.id).gate.objectives[0];check(objective.required===3&&objective.families.includes(a.familyId),'practical_gate_weakened');
     }
     const completed=await command(first,'complete',{episodeId:episode.id}),count=completed.lessons.filter(l=>l.status==='completed').length;
+    // Design section 16: the transfer is revisited later. Completing its episode must open a
+    // delayed-check schedule for fnd-o04-02 with all four held-out revisit items unused.
+    if(episode.id==='fnd-e04-02'&&course.retention?.objectiveIds.includes('fnd-o04-02')){
+      const view=requireOk(await request(first,'GET',`/api/enrollments/${first.enrollmentId}/retention`),'retention_view'),item=view.items.find(i=>i.objectiveId==='fnd-o04-02');
+      check(item&&item.state==='demonstrated'&&!item.due&&item.freshItemsLeft===4&&Date.parse(item.dueAt)-Date.parse(item.demonstratedAt)===course.retention.intervalsDays[0]*86400000,'transfer_revisit_not_scheduled');
+      const early=await request(first,'POST',`/api/enrollments/${first.enrollmentId}/retention/check`,{expectedRevision:(await snapshot(first)).revision,idempotencyKey:randomUUID(),objectiveId:'fnd-o04-02'});check(early.status===409&&early.value?.error==='RETENTION_NOT_DUE','transfer_revisit_due_early');
+      reports.push({flow:'transfer_revisit_scheduled',objectiveId:'fnd-o04-02',dueAfterDays:course.retention.intervalsDays[0],freshItemsLeft:4,notDueYetRefused:true});
+    }
     console.log(JSON.stringify({episodeTiming:'full_course',episode:count,episodeId:episode.id,ms:Math.round(performance.now()-episodeStarted)}));
     if(count%14===0)console.log(JSON.stringify({checkpoint:'full_course_progress',completedEpisodes:count,recoveredPracticalFamilies:recovered}));
   }
   const end=await snapshot(first);check(end.nextEpisodeId===null&&end.complete===true&&end.lessons.filter(l=>l.status==='completed').length===56&&recovered===3&&written===course.assessments.filter(a=>a.type==='rubric').length,'full_course_path_incomplete');
   const reservationRows=(await db.query('SELECT snapshot FROM policy_states WHERE enrollment_id=$1',[first.enrollmentId])).rows[0].snapshot.reservations,committed=reservationRows.filter(r=>r.state==='committed');check(committed.length===6,'recovery_cost_receipts_missing');
   check(committed.reduce((n,r)=>n+r.work.additionalMinutes,0)===270&&committed.reduce((n,r)=>n+r.work.additionalEpisodes,0)===6,'recovery_cost_terms_changed');
+  if(labs.size&&course.assessments.some(a=>labs.has(a.id))){check(labRuns.length===11,'lab_runs_incomplete');reports.push({flow:'chapter_labs_real_sandbox',labs:labRuns});}
   reports.push({flow:'all_56_episodes_with_recovery',episodes:56,practicalFamiliesRecovered:recovered,committedRecoveryAssignments:6,unearnedCompletionRejectedEveryEpisode:true,writtenExplanationsPendingWithoutBlocking:written});
   // Separate learner proves a finite bank can end without silently granting credit.
   const exhausted=await enroll('private-exhaustion');

@@ -10,6 +10,7 @@ introduce numbers the course does not teach. No model call or learner data.
 import importlib.util
 import json
 import math
+from fractions import Fraction
 import pathlib
 import re
 
@@ -61,7 +62,41 @@ exposed = {i for g in gates.values() for i in g['assessmentIds']} | set(placemen
 exposed |= {b['assessmentId'] for e in episodes.values() for b in e['blocks'] if b['type'] == 'assessment'}
 recovery_prompts = {a['prompt'] for a in fresh['assessments']} | {a['prompt'] for a in assessments.values()}
 check(retention['intervalsDays'] == sorted(set(retention['intervalsDays'])) and all(1 <= d <= 365 for d in retention['intervalsDays']), 'Retention intervals must increase within SDK bounds')
+transfer_items = {a['id'] for a in load('worked-adaptive-episode')['assessments'] if a.get('role') == 'transfer'}
+
+
+def split_oracle(v):
+    """Independent middle-split arithmetic in exact fractions: h2 = w*h1 + b, upstream sends dL/dh2."""
+    g, h1, w = Fraction(str(v['g'])), Fraction(str(v['h1'])), Fraction(str(v['w']))
+    grad_w, grad_h1 = g * h1, g * w  # chain rule through the multiply node
+    return {'weight_gradient': grad_w, 'weight_before_step': w, 'upstream_sensitivity': grad_h1,
+            'weight_after_step': w - Fraction(str(v.get('lr', 0))) * grad_w}[v['ask']]
+
+
 for entry in retention['objectives']:
+    if entry.get('procedure') == 'pipeline-middle-split':
+        # The section 16 transfer revisit: authored, not from a recipe.
+        items = [a for a in retention['assessments'] if a['familyId'] == 'ret-family-' + entry['key']]
+        check(len(items) == len(entry['variables']) >= len(retention['intervalsDays']) + 1, 'Each retention objective needs one item per interval plus a retry')
+        check(objectives[entry['objectiveId']]['critical'] and episodes[entry['episodeId']]['objectiveIds'] == [entry['objectiveId']], 'Retention targets a core objective of its episode')
+        check(entry['objectiveId'] == 'fnd-o04-02' and transfer_items, 'The revisit follows the worked episode transfer items')
+        check({v['ask'] for v in entry['variables']} == {'weight_gradient', 'weight_before_step', 'upstream_sensitivity', 'weight_after_step'}, 'The revisit asks each part of the transfer')
+        for item, values in zip(items, entry['variables']):
+            check(item['id'] not in exposed and item['id'] not in transfer_items and item['type'] == 'numeric' and item['objectiveIds'] == [entry['objectiveId']], 'Retention item is held out')
+            expected = split_oracle(values)
+            check(item['grading']['expected'] == float(expected), f'{item["id"]} answer disagrees with the independent split arithmetic')
+            check((expected * 1000).denominator == 1, f'{item["id"]} needs too many decimals to type')
+            check(item['prompt'] not in recovery_prompts, 'Retention prompt duplicates an existing question')
+            shown = {'h1': 'h1 = ', 'w': 'w = ', 'b': 'b = ', 'g': 'dL/dh2 = ', 'lr': 'learning rate '}
+            for name in [n for n in shown if n in values]:
+                check(f'{shown[name]}{values[name]}' in item['prompt'], f'{item["id"]} prompt omits {name}')
+            # The transfer's own numbers (h1 = 4, w = 3, b = 1, dL/dh2 = 0.5) are not reused.
+            check((values['h1'], values['w'], values['b'], values['g']) != (4, 3, 1, 0.5), f'{item["id"]} repeats the transfer example')
+            # A learner who answers with another part of the procedure must be wrong.
+            others = {split_oracle({**values, 'ask': ask, 'lr': values.get('lr', 0)}) for ask in ('weight_gradient', 'weight_before_step', 'upstream_sensitivity')} - {expected}
+            check(all(o != expected for o in others) and split_oracle({**values, 'ask': 'weight_gradient'}) != values['w'], f'{item["id"]} does not discriminate gradient from weight')
+        check(len({a['grading']['expected'] for a in items}) == len(items), 'Retention items for one objective need distinct answers')
+        continue
     recipe = next(r for r in authored['adaptation']['numericalRecipes'] if r['id'] == entry['recipeId'])
     family = next(f for f in authored['adaptation']['families'] if recipe['id'] in f['numericalRecipeIds'])
     items = [a for a in retention['assessments'] if a['familyId'] == 'ret-family-' + entry['key']]

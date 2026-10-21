@@ -18,6 +18,7 @@
     "verify:practical-recovery": "python3 -B verification/recovery-practicals.py",
     "verify:worked": "python3 -B verification/worked-examples.py",
     "package:worked": "node scripts/package-worked-course.mjs",
+    "package:release": "node scripts/pack-course-release.mjs",
     "verify:worked:broker": "node verification/worked-example-broker.mjs",
     "verify:worked:application": "node verification/worked-example-flow.mjs",
     "verify:worked:browser": "node verification/worked-example-flow.mjs --browser",

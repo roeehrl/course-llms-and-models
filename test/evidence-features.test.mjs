@@ -34,7 +34,7 @@ test('placement offers only the existing short checks of placeable chapters and 
   const {placement,retention}=full.server;
   assert.equal(placement.objectiveIds.length,12);assert.equal(placement.assessmentIds.length,24);assert.equal(placement.maxItems,24);
   assert(placement.assessmentIds.every(id=>['choice','numeric'].includes(full.server.assessments.find(a=>a.id===id).type)));
-  assert.deepEqual(retention.intervalsDays,[2,7,21]);assert.equal(retention.objectiveIds.length,6);assert.equal(retention.assessmentIds.length,24);
+  assert.deepEqual(retention.intervalsDays,[2,7,21]);assert.equal(retention.objectiveIds.length,7);assert.equal(retention.assessmentIds.length,28);assert(retention.objectiveIds.includes("fnd-o04-02"),"the section 16 transfer revisit is scheduled");
   const shown=new Set([...full.server.gates.flatMap(g=>g.assessmentIds),...placement.assessmentIds]);
   assert(retention.assessmentIds.every(id=>!shown.has(id)));
   const learner=JSON.stringify(full.learner);assert(!retention.assessmentIds.some(id=>learner.includes(id)));assert(!learner.includes('Delayed retention check'));
@@ -74,7 +74,7 @@ test('packaging includes every verified illustration overlay and the same learne
 test('independent CPU checks recompute every retention answer and every remedial and written-explanation number',()=>{
   const result=spawnSync('python3',['-B','verification/evidence-features.py'],{cwd:root,encoding:'utf8',timeout:30000});
   assert.equal(result.status,0,result.stderr);const report=JSON.parse(result.stdout);
-  assert.equal(report.retentionItems,24);assert.equal(report.remedialEpisodes,5);assert.equal(report.writtenItems,4);assert.equal(report.learningEffectiveness,'not_measured');
+  assert.equal(report.retentionItems,28);assert.equal(report.remedialEpisodes,5);assert.equal(report.writtenItems,4);assert.equal(report.learningEffectiveness,'not_measured');
 });
 
 test('acceptance written answers cite every criterion with an exact quote of the learner text',async()=>{

@@ -7,7 +7,7 @@ import { readFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { VisualRuntime, flattenNodes, fromVisualExperience } from '@course-core/visuals/headless';
-import { buildScene, PHASES, BINDING } from '../scripts/create-worked-adaptive-scene.mjs';
+import { buildScene, PHASES, PHASE_LABELS, SELECTOR_LABEL, BINDING } from '../scripts/create-worked-adaptive-scene.mjs';
 
 const root = new URL('../', import.meta.url);
 const read = async name => JSON.parse(await readFile(new URL(name, root), 'utf8'));
@@ -22,6 +22,22 @@ assert.deepEqual(scene, buildScene(), 'Authored scene differs from its generator
 assert.deepEqual(overlay.bindings, [BINDING]); assert.deepEqual(authored.bindings, [BINDING]);
 const registered = (await read('content/visuals.json')).extension, strip = e => ({ ...e, accessibility: { ...e.accessibility, textAlternative: '' } });
 assert.deepEqual(strip(overlay.extension), strip(registered), 'Renderer identity differs from the registered renderer');
+
+// The released renderer shows each enum option's value as the selector's text, so the
+// options must be the course locale's labels, never the internal phase ids.
+const { locale } = await read('content/course-config.json'), labels = PHASE_LABELS[locale];
+assert(labels, `No phase labels for the course locale ${locale}`);
+assert.deepEqual(scene.state.phase.options, PHASES.map(p => labels[p]), 'Phase selector options are not the locale labels');
+assert.equal(scene.state.phase.label, SELECTOR_LABEL[locale]); assert.equal(scene.state.phase.initial, labels.ready);
+assert(scene.state.phase.options.every(o => !PHASES.includes(o) && !/^[a-z]+\d*$/.test(o)), 'A raw phase id would be shown to learners');
+for (const [other, table] of Object.entries(PHASE_LABELS)) {
+  const localized = buildScene({ locale: other });
+  assert.deepEqual(localized.state.phase.options, PHASES.map(p => table[p]), `${other} selector options`);
+  // Same drawing whichever locale labels the phases (only option text and button targets differ).
+  const a = new VisualRuntime(scene, { viewportWidth: 960 }), b = new VisualRuntime(localized, { viewportWidth: 960 });
+  for (const p of PHASES) { a.setState({ phase: labels[p] }); b.setState({ phase: table[p] }); const drawn = f => JSON.stringify(f.nodes, (k, v) => k === 'manipulate' ? undefined : v); assert.equal(drawn(b.seek(1000)), drawn(a.seek(1000)), `${other} ${p} frame`); }
+}
+assert.throws(() => buildScene({ locale: 'xx' }), /No phase labels/);
 
 const lastNumber = t => t?.match(/(-?\d+(?:\.\d+)?)\D*$/)?.[1];
 const numbersIn = t => (t.match(/(?<![\w.])-?\d+(?:\.\d+)?/g) ?? []).map(Number);
@@ -50,7 +66,7 @@ function lint(frame) {
 function check(candidate, width) {
   const runtime = new VisualRuntime(candidate, { viewportWidth: width });
   for (const phase of PHASES) {
-    runtime.setState({ phase }); const frame = runtime.seek(1000), ref = reference[phase];
+    runtime.setState({ phase: labels[phase] }); const frame = runtime.seek(1000), ref = reference[phase];
     const nodes = new Map(flattenNodes(frame.nodes).map(n => [n.id, n]));
     for (const [id, expected] of Object.entries(ref.numeric)) {
       const value = lastNumber(nodes.get(id)?.text);
@@ -78,6 +94,7 @@ assert.equal(press('btn-update'), false, 'Update is not operable before backward
 assert.equal(press('btn-backward'), false, 'Backward is not operable before forward');
 for (const [id, expected] of sequence) {
   assert.equal(press(id), true, `${id} operable`);
+  assert.equal(runtime.getSnapshot().frame.state.phase, labels[expected], `${id} sets the ${expected} label`);
   const nodes = new Map(flattenNodes(runtime.getSnapshot().frame.nodes).map(n => [n.id, n]));
   const shown = reference[expected];
   for (const [nid, value] of Object.entries(shown.numeric)) assert(Math.abs(Number(lastNumber(nodes.get(nid).text)) - value) <= 0.000501, `keyboard ${expected} ${nid}`);
@@ -88,4 +105,4 @@ assert.equal(press('btn-forward2'), false, 'the post-update forward is not opera
 const rejects = candidate => { try { check(candidate, 960); return false; } catch (error) { return error instanceof assert.AssertionError; } };
 const wrongSign = rejects(buildScene({ sign: 1 })), mutating = rejects(buildScene({ mutateAtBackward: true }));
 assert(wrongSign && mutating, 'An altered scene was accepted');
-console.log(JSON.stringify({ scene: scene.id, verifiedFrames: frames, widths: [350, 960], keyboardSteps: sequence.length, rejectedWrongSignUpdate: wrongSign, rejectedBackwardWritesParameters: mutating, runtime: 'released-package' }));
+console.log(JSON.stringify({ scene: scene.id, locale, selectorOptions: scene.state.phase.options, verifiedFrames: frames, widths: [350, 960], keyboardSteps: sequence.length, rejectedWrongSignUpdate: wrongSign, rejectedBackwardWritesParameters: mutating, runtime: 'released-package' }));

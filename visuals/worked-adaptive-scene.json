@@ -10,14 +10,14 @@
         "phase": {
           "kind": "enum",
           "label": "Training step",
-          "initial": "ready",
+          "initial": "Start (nothing run)",
           "options": [
-            "ready",
-            "forward",
-            "backward",
-            "update",
-            "forward2",
-            "backward2"
+            "Start (nothing run)",
+            "1. Forward",
+            "2. Backward",
+            "3. Update",
+            "4. Forward again",
+            "5. Backward again"
           ]
         }
       },
@@ -74,13 +74,13 @@
                   {
                     "state": "phase"
                   },
-                  "ready"
+                  "Start (nothing run)"
                 ]
               },
               "manipulate": {
                 "activate": {
                   "state": "phase",
-                  "value": "forward"
+                  "value": "1. Forward"
                 }
               },
               "children": [
@@ -99,7 +99,7 @@
                       {
                         "state": "phase"
                       },
-                      "ready"
+                      "Start (nothing run)"
                     ]
                   }
                 },
@@ -119,7 +119,7 @@
                       {
                         "state": "phase"
                       },
-                      "ready"
+                      "Start (nothing run)"
                     ]
                   }
                 }
@@ -137,13 +137,13 @@
                   {
                     "state": "phase"
                   },
-                  "update"
+                  "3. Update"
                 ]
               },
               "manipulate": {
                 "activate": {
                   "state": "phase",
-                  "value": "forward2"
+                  "value": "4. Forward again"
                 }
               },
               "children": [
@@ -162,7 +162,7 @@
                       {
                         "state": "phase"
                       },
-                      "update"
+                      "3. Update"
                     ]
                   }
                 },
@@ -182,7 +182,7 @@
                       {
                         "state": "phase"
                       },
-                      "update"
+                      "3. Update"
                     ]
                   }
                 }
@@ -205,7 +205,7 @@
                           {
                             "state": "phase"
                           },
-                          "ready"
+                          "Start (nothing run)"
                         ]
                       },
                       {
@@ -214,7 +214,7 @@
                           {
                             "state": "phase"
                           },
-                          "update"
+                          "3. Update"
                         ]
                       }
                     ]
@@ -243,7 +243,7 @@
                               {
                                 "state": "phase"
                               },
-                              "ready"
+                              "Start (nothing run)"
                             ]
                           },
                           {
@@ -252,7 +252,7 @@
                               {
                                 "state": "phase"
                               },
-                              "update"
+                              "3. Update"
                             ]
                           }
                         ]
@@ -281,7 +281,7 @@
                               {
                                 "state": "phase"
                               },
-                              "ready"
+                              "Start (nothing run)"
                             ]
                           },
                           {
@@ -290,7 +290,7 @@
                               {
                                 "state": "phase"
                               },
-                              "update"
+                              "3. Update"
                             ]
                           }
                         ]
@@ -320,13 +320,13 @@
                   {
                     "state": "phase"
                   },
-                  "forward"
+                  "1. Forward"
                 ]
               },
               "manipulate": {
                 "activate": {
                   "state": "phase",
-                  "value": "backward"
+                  "value": "2. Backward"
                 }
               },
               "children": [
@@ -345,7 +345,7 @@
                       {
                         "state": "phase"
                       },
-                      "forward"
+                      "1. Forward"
                     ]
                   }
                 },
@@ -365,7 +365,7 @@
                       {
                         "state": "phase"
                       },
-                      "forward"
+                      "1. Forward"
                     ]
                   }
                 }
@@ -383,13 +383,13 @@
                   {
                     "state": "phase"
                   },
-                  "forward2"
+                  "4. Forward again"
                 ]
               },
               "manipulate": {
                 "activate": {
                   "state": "phase",
-                  "value": "backward2"
+                  "value": "5. Backward again"
                 }
               },
               "children": [
@@ -408,7 +408,7 @@
                       {
                         "state": "phase"
                       },
-                      "forward2"
+                      "4. Forward again"
                     ]
                   }
                 },
@@ -428,7 +428,7 @@
                       {
                         "state": "phase"
                       },
-                      "forward2"
+                      "4. Forward again"
                     ]
                   }
                 }
@@ -451,7 +451,7 @@
                           {
                             "state": "phase"
                           },
-                          "forward"
+                          "1. Forward"
                         ]
                       },
                       {
@@ -460,7 +460,7 @@
                           {
                             "state": "phase"
                           },
-                          "forward2"
+                          "4. Forward again"
                         ]
                       }
                     ]
@@ -489,7 +489,7 @@
                               {
                                 "state": "phase"
                               },
-                              "forward"
+                              "1. Forward"
                             ]
                           },
                           {
@@ -498,7 +498,7 @@
                               {
                                 "state": "phase"
                               },
-                              "forward2"
+                              "4. Forward again"
                             ]
                           }
                         ]
@@ -527,7 +527,7 @@
                               {
                                 "state": "phase"
                               },
-                              "forward"
+                              "1. Forward"
                             ]
                           },
                           {
@@ -536,7 +536,7 @@
                               {
                                 "state": "phase"
                               },
-                              "forward2"
+                              "4. Forward again"
                             ]
                           }
                         ]
@@ -566,13 +566,13 @@
                   {
                     "state": "phase"
                   },
-                  "backward"
+                  "2. Backward"
                 ]
               },
               "manipulate": {
                 "activate": {
                   "state": "phase",
-                  "value": "update"
+                  "value": "3. Update"
                 }
               },
               "children": [
@@ -591,7 +591,7 @@
                       {
                         "state": "phase"
                       },
-                      "backward"
+                      "2. Backward"
                     ]
                   }
                 },
@@ -611,7 +611,7 @@
                       {
                         "state": "phase"
                       },
-                      "backward"
+                      "2. Backward"
                     ]
                   }
                 }
@@ -631,7 +631,7 @@
                       {
                         "state": "phase"
                       },
-                      "backward"
+                      "2. Backward"
                     ]
                   }
                 ]
@@ -655,7 +655,7 @@
                           {
                             "state": "phase"
                           },
-                          "backward"
+                          "2. Backward"
                         ]
                       }
                     ]
@@ -679,7 +679,7 @@
                           {
                             "state": "phase"
                           },
-                          "backward"
+                          "2. Backward"
                         ]
                       }
                     ]
@@ -705,7 +705,7 @@
               "manipulate": {
                 "activate": {
                   "state": "phase",
-                  "value": "ready"
+                  "value": "Start (nothing run)"
                 }
               },
               "children": [
@@ -783,7 +783,7 @@
                           {
                             "state": "phase"
                           },
-                          "forward"
+                          "1. Forward"
                         ]
                       },
                       {
@@ -792,7 +792,7 @@
                           {
                             "state": "phase"
                           },
-                          "forward2"
+                          "4. Forward again"
                         ]
                       }
                     ]
@@ -832,7 +832,7 @@
                           {
                             "state": "phase"
                           },
-                          "forward"
+                          "1. Forward"
                         ]
                       },
                       {
@@ -841,7 +841,7 @@
                           {
                             "state": "phase"
                           },
-                          "forward2"
+                          "4. Forward again"
                         ]
                       }
                     ]
@@ -881,7 +881,7 @@
                           {
                             "state": "phase"
                           },
-                          "backward"
+                          "2. Backward"
                         ]
                       },
                       {
@@ -890,7 +890,7 @@
                           {
                             "state": "phase"
                           },
-                          "backward2"
+                          "5. Backward again"
                         ]
                       }
                     ]
@@ -927,7 +927,7 @@
                       {
                         "state": "phase"
                       },
-                      "update"
+                      "3. Update"
                     ]
                   },
                   1,
@@ -962,7 +962,7 @@
                       {
                         "state": "phase"
                       },
-                      "update"
+                      "3. Update"
                     ]
                   },
                   1,
@@ -997,7 +997,7 @@
                       {
                         "state": "phase"
                       },
-                      "update"
+                      "3. Update"
                     ]
                   },
                   1,
@@ -1073,7 +1073,7 @@
                                               {
                                                 "state": "phase"
                                               },
-                                              "update"
+                                              "3. Update"
                                             ]
                                           },
                                           {
@@ -1082,7 +1082,7 @@
                                               {
                                                 "state": "phase"
                                               },
-                                              "forward2"
+                                              "4. Forward again"
                                             ]
                                           }
                                         ]
@@ -1093,7 +1093,7 @@
                                           {
                                             "state": "phase"
                                           },
-                                          "backward2"
+                                          "5. Backward again"
                                         ]
                                       }
                                     ]
@@ -1148,7 +1148,7 @@
                                               {
                                                 "state": "phase"
                                               },
-                                              "update"
+                                              "3. Update"
                                             ]
                                           },
                                           {
@@ -1157,7 +1157,7 @@
                                               {
                                                 "state": "phase"
                                               },
-                                              "forward2"
+                                              "4. Forward again"
                                             ]
                                           }
                                         ]
@@ -1168,7 +1168,7 @@
                                           {
                                             "state": "phase"
                                           },
-                                          "backward2"
+                                          "5. Backward again"
                                         ]
                                       }
                                     ]
@@ -1214,7 +1214,7 @@
                       {
                         "state": "phase"
                       },
-                      "backward"
+                      "2. Backward"
                     ]
                   },
                   {
@@ -1250,7 +1250,7 @@
                           {
                             "state": "phase"
                           },
-                          "backward2"
+                          "5. Backward again"
                         ]
                       },
                       {
@@ -1299,7 +1299,7 @@
                       {
                         "state": "phase"
                       },
-                      "backward"
+                      "2. Backward"
                     ]
                   },
                   {
@@ -1335,7 +1335,7 @@
                           {
                             "state": "phase"
                           },
-                          "backward2"
+                          "5. Backward again"
                         ]
                       },
                       {
@@ -1394,7 +1394,7 @@
                       {
                         "state": "phase"
                       },
-                      "ready"
+                      "Start (nothing run)"
                     ]
                   },
                   "prediction = none",
@@ -1426,7 +1426,7 @@
                                                   {
                                                     "state": "phase"
                                                   },
-                                                  "forward"
+                                                  "1. Forward"
                                                 ]
                                               },
                                               {
@@ -1435,7 +1435,7 @@
                                                   {
                                                     "state": "phase"
                                                   },
-                                                  "backward"
+                                                  "2. Backward"
                                                 ]
                                               }
                                             ]
@@ -1446,7 +1446,7 @@
                                               {
                                                 "state": "phase"
                                               },
-                                              "update"
+                                              "3. Update"
                                             ]
                                           }
                                         ]
@@ -1484,7 +1484,7 @@
                       {
                         "state": "phase"
                       },
-                      "ready"
+                      "Start (nothing run)"
                     ]
                   },
                   "loss = none",
@@ -1516,7 +1516,7 @@
                                                   {
                                                     "state": "phase"
                                                   },
-                                                  "forward"
+                                                  "1. Forward"
                                                 ]
                                               },
                                               {
@@ -1525,7 +1525,7 @@
                                                   {
                                                     "state": "phase"
                                                   },
-                                                  "backward"
+                                                  "2. Backward"
                                                 ]
                                               }
                                             ]
@@ -1536,7 +1536,7 @@
                                               {
                                                 "state": "phase"
                                               },
-                                              "update"
+                                              "3. Update"
                                             ]
                                           }
                                         ]
@@ -1637,7 +1637,7 @@
                                                   {
                                                     "state": "phase"
                                                   },
-                                                  "update"
+                                                  "3. Update"
                                                 ]
                                               },
                                               {
@@ -1646,7 +1646,7 @@
                                                   {
                                                     "state": "phase"
                                                   },
-                                                  "forward2"
+                                                  "4. Forward again"
                                                 ]
                                               }
                                             ]
@@ -1657,7 +1657,7 @@
                                               {
                                                 "state": "phase"
                                               },
-                                              "backward2"
+                                              "5. Backward again"
                                             ]
                                           }
                                         ]
@@ -1694,7 +1694,7 @@
                           {
                             "state": "phase"
                           },
-                          "backward"
+                          "2. Backward"
                         ]
                       },
                       {
@@ -1763,7 +1763,7 @@
                               {
                                 "state": "phase"
                               },
-                              "backward"
+                              "2. Backward"
                             ]
                           },
                           {
@@ -1772,7 +1772,7 @@
                               {
                                 "state": "phase"
                               },
-                              "backward2"
+                              "5. Backward again"
                             ]
                           }
                         ]
@@ -1840,7 +1840,7 @@
                           {
                             "state": "phase"
                           },
-                          "ready"
+                          "Start (nothing run)"
                         ]
                       },
                       "w*x = ?",
@@ -1872,7 +1872,7 @@
                                                       {
                                                         "state": "phase"
                                                       },
-                                                      "forward"
+                                                      "1. Forward"
                                                     ]
                                                   },
                                                   {
@@ -1881,7 +1881,7 @@
                                                       {
                                                         "state": "phase"
                                                       },
-                                                      "backward"
+                                                      "2. Backward"
                                                     ]
                                                   }
                                                 ]
@@ -1892,7 +1892,7 @@
                                                   {
                                                     "state": "phase"
                                                   },
-                                                  "update"
+                                                  "3. Update"
                                                 ]
                                               }
                                             ]
@@ -1943,7 +1943,7 @@
                           {
                             "state": "phase"
                           },
-                          "backward"
+                          "2. Backward"
                         ]
                       },
                       {
@@ -2012,7 +2012,7 @@
                               {
                                 "state": "phase"
                               },
-                              "backward"
+                              "2. Backward"
                             ]
                           },
                           {
@@ -2021,7 +2021,7 @@
                               {
                                 "state": "phase"
                               },
-                              "backward2"
+                              "5. Backward again"
                             ]
                           }
                         ]
@@ -2061,7 +2061,7 @@
                           {
                             "state": "phase"
                           },
-                          "ready"
+                          "Start (nothing run)"
                         ]
                       },
                       "p = ?",
@@ -2093,7 +2093,7 @@
                                                       {
                                                         "state": "phase"
                                                       },
-                                                      "forward"
+                                                      "1. Forward"
                                                     ]
                                                   },
                                                   {
@@ -2102,7 +2102,7 @@
                                                       {
                                                         "state": "phase"
                                                       },
-                                                      "backward"
+                                                      "2. Backward"
                                                     ]
                                                   }
                                                 ]
@@ -2113,7 +2113,7 @@
                                                   {
                                                     "state": "phase"
                                                   },
-                                                  "update"
+                                                  "3. Update"
                                                 ]
                                               }
                                             ]
@@ -2152,7 +2152,7 @@
                           {
                             "state": "phase"
                           },
-                          "backward"
+                          "2. Backward"
                         ]
                       },
                       {
@@ -2221,7 +2221,7 @@
                               {
                                 "state": "phase"
                               },
-                              "backward"
+                              "2. Backward"
                             ]
                           },
                           {
@@ -2230,7 +2230,7 @@
                               {
                                 "state": "phase"
                               },
-                              "backward2"
+                              "5. Backward again"
                             ]
                           }
                         ]
@@ -2289,7 +2289,7 @@
                                                   {
                                                     "state": "phase"
                                                   },
-                                                  "update"
+                                                  "3. Update"
                                                 ]
                                               },
                                               {
@@ -2298,7 +2298,7 @@
                                                   {
                                                     "state": "phase"
                                                   },
-                                                  "forward2"
+                                                  "4. Forward again"
                                                 ]
                                               }
                                             ]
@@ -2309,7 +2309,7 @@
                                               {
                                                 "state": "phase"
                                               },
-                                              "backward2"
+                                              "5. Backward again"
                                             ]
                                           }
                                         ]
@@ -2346,7 +2346,7 @@
                           {
                             "state": "phase"
                           },
-                          "backward"
+                          "2. Backward"
                         ]
                       },
                       {
@@ -2415,7 +2415,7 @@
                               {
                                 "state": "phase"
                               },
-                              "backward"
+                              "2. Backward"
                             ]
                           },
                           {
@@ -2424,7 +2424,7 @@
                               {
                                 "state": "phase"
                               },
-                              "backward2"
+                              "5. Backward again"
                             ]
                           }
                         ]
@@ -2464,7 +2464,7 @@
                           {
                             "state": "phase"
                           },
-                          "ready"
+                          "Start (nothing run)"
                         ]
                       },
                       "L = ?",
@@ -2496,7 +2496,7 @@
                                                       {
                                                         "state": "phase"
                                                       },
-                                                      "forward"
+                                                      "1. Forward"
                                                     ]
                                                   },
                                                   {
@@ -2505,7 +2505,7 @@
                                                       {
                                                         "state": "phase"
                                                       },
-                                                      "backward"
+                                                      "2. Backward"
                                                     ]
                                                   }
                                                 ]
@@ -2516,7 +2516,7 @@
                                                   {
                                                     "state": "phase"
                                                   },
-                                                  "update"
+                                                  "3. Update"
                                                 ]
                                               }
                                             ]
@@ -2563,7 +2563,7 @@
                               {
                                 "state": "phase"
                               },
-                              "backward"
+                              "2. Backward"
                             ]
                           },
                           {
@@ -2572,7 +2572,7 @@
                               {
                                 "state": "phase"
                               },
-                              "backward2"
+                              "5. Backward again"
                             ]
                           }
                         ]
@@ -2694,7 +2694,7 @@
                       {
                         "state": "phase"
                       },
-                      "forward"
+                      "1. Forward"
                     ]
                   },
                   "Forward: p = 1, loss = 2.",
@@ -2707,7 +2707,7 @@
                           {
                             "state": "phase"
                           },
-                          "backward"
+                          "2. Backward"
                         ]
                       },
                       "Backward wrote w.grad = -4",
@@ -2720,7 +2720,7 @@
                               {
                                 "state": "phase"
                               },
-                              "update"
+                              "3. Update"
                             ]
                           },
                           "Update: w = 0.5 - 0.1*(-4)",
@@ -2733,7 +2733,7 @@
                                   {
                                     "state": "phase"
                                   },
-                                  "forward2"
+                                  "4. Forward again"
                                 ]
                               },
                               "Fresh forward at w = 0.9:",
@@ -2746,7 +2746,7 @@
                                       {
                                         "state": "phase"
                                       },
-                                      "backward2"
+                                      "5. Backward again"
                                     ]
                                   },
                                   "New gradients at w = 0.9:",
@@ -2778,7 +2778,7 @@
                       {
                         "state": "phase"
                       },
-                      "forward"
+                      "1. Forward"
                     ]
                   },
                   "It read w and b and saved",
@@ -2791,7 +2791,7 @@
                           {
                             "state": "phase"
                           },
-                          "backward"
+                          "2. Backward"
                         ]
                       },
                       "and b.grad = -2. w is still",
@@ -2804,7 +2804,7 @@
                               {
                                 "state": "phase"
                               },
-                              "update"
+                              "3. Update"
                             ]
                           },
                           "= 0.9, b = 0.2. The update",
@@ -2817,7 +2817,7 @@
                                   {
                                     "state": "phase"
                                   },
-                                  "forward2"
+                                  "4. Forward again"
                                 ]
                               },
                               "p = 2 and loss = 0.5.",
@@ -2830,7 +2830,7 @@
                                       {
                                         "state": "phase"
                                       },
-                                      "backward2"
+                                      "5. Backward again"
                                     ]
                                   },
                                   "w.grad = -2, b.grad = -1.",
@@ -2862,7 +2862,7 @@
                       {
                         "state": "phase"
                       },
-                      "forward"
+                      "1. Forward"
                     ]
                   },
                   "values; it changed neither.",
@@ -2875,7 +2875,7 @@
                           {
                             "state": "phase"
                           },
-                          "backward"
+                          "2. Backward"
                         ]
                       },
                       "0.5 and b is still 0.",
@@ -2888,7 +2888,7 @@
                               {
                                 "state": "phase"
                               },
-                              "update"
+                              "3. Update"
                             ]
                           },
                           "then cleared both grads.",
@@ -2901,7 +2901,7 @@
                                   {
                                     "state": "phase"
                                   },
-                                  "forward2"
+                                  "4. Forward again"
                                 ]
                               },
                               "The loss fell from 2.",
@@ -2914,7 +2914,7 @@
                                       {
                                         "state": "phase"
                                       },
-                                      "backward2"
+                                      "5. Backward again"
                                     ]
                                   },
                                   "Press Reset to replay.",
