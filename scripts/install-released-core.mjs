@@ -10,7 +10,8 @@
 // the learner and admin web archives overlay apps/*/dist, and each server module installs its
 // own locked dependencies with lifecycle scripts disabled. verifyReleasedRuntime then checks
 // every installed delivery file against the manifest. --pull-sandbox-image pulls the
-// digest-pinned Python image the released sandbox qualifies for this architecture.
+// digest-pinned Python image the released sandbox qualifies for this architecture and runs
+// one throwaway container from it.
 import {readFile,writeFile,mkdir,rm,rename,mkdtemp,lstat} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {execFile} from 'node:child_process';
@@ -90,4 +91,10 @@ if(args.includes('--pull-sandbox-image')){
   const {stdout}=await run('docker',['image','inspect',image,'--format','{{json .RepoDigests}}']);
   JSON.parse(stdout).some(d=>d.endsWith(image.slice('python'.length)))||fail('sandbox_image_digest_mismatch');
   console.log(`Sandbox image pulled and inspected: ${platform} ${image}`);
+  // Start one throwaway container from the image so the first graded container (the released
+  // API qualifies its teaching verifier at startup, within the sandbox's 5 s budget) is not also
+  // the first container this host has ever created from a freshly pulled image.
+  const warmStarted=Date.now();
+  await run('docker',['run','--rm','--pull=never','--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','--user=65532:65532','--platform',platform,image,'python','-I','-B','-c','pass']);
+  console.log(`Sandbox image warmed: first container ran in ${Date.now()-warmStarted} ms`);
 }
