@@ -182,6 +182,43 @@
           "o": 16
         }
       ]
+    },
+    {
+      "objectiveId": "fnd-o04-02",
+      "episodeId": "fnd-e04-02",
+      "procedure": "pipeline-middle-split",
+      "key": "04-02",
+      "variables": [
+        {
+          "ask": "weight_gradient",
+          "h1": 6,
+          "w": 2,
+          "b": 1,
+          "g": 0.25
+        },
+        {
+          "ask": "weight_before_step",
+          "h1": 5,
+          "w": 1.75,
+          "b": -1,
+          "g": 0.5
+        },
+        {
+          "ask": "upstream_sensitivity",
+          "h1": 3,
+          "w": -2,
+          "b": 0.5,
+          "g": 0.75
+        },
+        {
+          "ask": "weight_after_step",
+          "h1": 2,
+          "w": 0.5,
+          "b": 2,
+          "g": -1.5,
+          "lr": 0.25
+        }
+      ]
     }
   ],
   "assessments": [
@@ -519,6 +556,62 @@
         "expected": 1.375,
         "absoluteTolerance": 1e-12,
         "explanation": "Computation: ((28 + 16) ÷ (((28 ÷ 2) + 16) + 2)) = 1.375. This applies the same procedure as Benchmarking, memory gates, fault injection and guarded rollout."
+      }
+    },
+    {
+      "id": "ret-04-02-1",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o04-02"
+      ],
+      "familyId": "ret-family-04-02",
+      "prompt": "Delayed retention check. Three pipeline splits train one model. The middle split computes h2 = w*h1 + b; it saved h1 = 6 during its forward pass and holds w = 2 and b = 1. During backward the downstream split sends it dL/dh2 = 0.25. What is dL/dw at the middle split?",
+      "grading": {
+        "expected": 1.5,
+        "absoluteTolerance": 1e-9,
+        "explanation": "Computation: dL/dw = dL/dh2 * h1 = 0.25 * 6 = 1.5. Receiving a gradient message and running backward never change a weight; only the optimizer step does. This revisits the transfer question of Backward propagates sensitivities."
+      }
+    },
+    {
+      "id": "ret-04-02-2",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o04-02"
+      ],
+      "familyId": "ret-family-04-02",
+      "prompt": "Delayed retention check. Three pipeline splits train one model. The middle split computes h2 = w*h1 + b; it saved h1 = 5 during its forward pass and holds w = 1.75 and b = -1. During backward the downstream split sends it dL/dh2 = 0.5. The middle split receives the message and finishes its own backward. No optimizer step has run yet. What is the value of w now?",
+      "grading": {
+        "expected": 1.75,
+        "absoluteTolerance": 1e-9,
+        "explanation": "Computation: receiving dL/dh2 and running backward write only gradient buffers (dL/dw = 2.5), so w is still 1.75. Receiving a gradient message and running backward never change a weight; only the optimizer step does. This revisits the transfer question of Backward propagates sensitivities."
+      }
+    },
+    {
+      "id": "ret-04-02-3",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o04-02"
+      ],
+      "familyId": "ret-family-04-02",
+      "prompt": "Delayed retention check. Three pipeline splits train one model. The middle split computes h2 = w*h1 + b; it saved h1 = 3 during its forward pass and holds w = -2 and b = 0.5. During backward the downstream split sends it dL/dh2 = 0.75. What sensitivity dL/dh1 does the middle split send to the upstream split?",
+      "grading": {
+        "expected": -1.5,
+        "absoluteTolerance": 1e-9,
+        "explanation": "Computation: dL/dh1 = dL/dh2 * w = 0.75 * -2 = -1.5. Receiving a gradient message and running backward never change a weight; only the optimizer step does. This revisits the transfer question of Backward propagates sensitivities."
+      }
+    },
+    {
+      "id": "ret-04-02-4",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o04-02"
+      ],
+      "familyId": "ret-family-04-02",
+      "prompt": "Delayed retention check. Three pipeline splits train one model. The middle split computes h2 = w*h1 + b; it saved h1 = 2 during its forward pass and holds w = 0.5 and b = 2. During backward the downstream split sends it dL/dh2 = -1.5. After its backward, one plain gradient-descent step with learning rate 0.25 runs on the middle split. What is w after that step?",
+      "grading": {
+        "expected": 1.25,
+        "absoluteTolerance": 1e-9,
+        "explanation": "Computation: dL/dw = -1.5 * 2 = -3, then w = 0.5 - 0.25 * (-3) = 1.25. Receiving a gradient message and running backward never change a weight; only the optimizer step does. This revisits the transfer question of Backward propagates sensitivities."
       }
     }
   ]

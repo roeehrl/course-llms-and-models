@@ -4,6 +4,7 @@ import {mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {writtenAnswers} from './written-answers.mjs';
 import {expectResponse} from './browser-responses.mjs';
+import {checkWorkedScene} from './worked-scene-browser.mjs';
 
 /** Actual private learner UI. Author keys live only in this test driver. */
 export async function browserAcceptance({origin,bootstrap,request,requireOk,course,candidate,check,state}){
@@ -60,7 +61,7 @@ export async function browserAcceptance({origin,bootstrap,request,requireOk,cour
         }
         await page.getByRole('button',{name:'Continue learning →',exact:true}).click();
         const snapshot=async()=>requireOk(await request(session,'GET',`/api/enrollments/${enrollmentId}`),'browser_snapshot');
-        let completed=0,recovery=false,written=0;
+        let completed=0,recovery=false,written=0,scene=null;
         for(const episode of episodes.slice(placed)){
           const episodeStarted=performance.now();
           await page.getByRole('heading',{name:episode.title,exact:true}).waitFor();
@@ -70,6 +71,10 @@ export async function browserAcceptance({origin,bootstrap,request,requireOk,cour
           // second click can land on the part just read and be ignored, leaving a part unread.
           const reading=episode.blocks.filter(b=>!['assessment','activity'].includes(b.type));
           for(let part=1;part<=reading.length;part++){
+            // The section 16 scene is exercised while its own part is the current card; once
+            // marked read the app moves on and the card is no longer shown.
+            if(reading[part-1].type==='visual'&&reading[part-1].visualId==='worked-forward-backward-update')
+              scene=await checkWorkedScene({page,scope:page.getByRole('article',{name:`Reading part ${part}`,exact:true}),course,check,state,viewport:name});
             const read=expectResponse(page,pathname('/read'));
             await page.getByRole('article',{name:`Reading part ${part}`,exact:true}).getByRole('button',{name:'Mark this part read',exact:true}).click();
             check((await read).ok(),'browser_read_failed');
@@ -120,7 +125,8 @@ export async function browserAcceptance({origin,bootstrap,request,requireOk,cour
         }
         const end=await snapshot();check(recovery&&errors.length===0,'private_browser_recovery_failed');
         if(full)check(completed===56&&end.complete&&end.nextEpisodeId===null&&written===course.assessments.filter(a=>a.type==='rubric').length,'browser_full_course_incomplete');
-        reports.push({viewport:name,placement,placedEpisodes:placed,writtenExplanationsSubmitted:written,completedEpisodes:completed,recovery:true,reloadPreservedCode:true,horizontalOverflow:false,codeAccessibility:true,pageErrors:errors.length});
+        if(course.visuals.some(v=>v.id==='worked-forward-backward-update'))check(scene,'browser_worked_scene_not_reached');
+        reports.push({viewport:name,worked16Scene:scene,placement,placedEpisodes:placed,writtenExplanationsSubmitted:written,completedEpisodes:completed,recovery:true,reloadPreservedCode:true,horizontalOverflow:false,codeAccessibility:true,pageErrors:errors.length});
       }finally{await context.tracing.stop({path:path.join(state,`private-${name}-trace.zip`)});await context.close();}
     }
   }finally{await browser.close();}

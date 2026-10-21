@@ -1,29 +1,58 @@
 // Authors the design section 16 scene: separate Forward, Backward, Update and Reset
 // controls that change the numbers, the highlighted code line and the computation graph
 // together. Writes visuals/worked-adaptive-scene.json and content/worked-adaptive-visuals.json.
-// Numbers are computed by scene expressions from the example's inputs; the independent
-// reference is verification/worked-adaptive-episode.py.
+//
+// The numbers are fixed at authoring time, on purpose. Design section 16 fixes the
+// example (x = 2, target 3, w = 0.5, b = 0, learning rate 0.1) and asks for controls
+// that keep numbers, code and graph in step; it does not ask for learner-editable
+// inputs. With fixed inputs a live scalar model inside the scene would show exactly
+// the same values, while the phase notes and the accessible text, which state those
+// values in prose, could not follow it. The generator computes each value once with
+// the scalar model below and the scene only selects and rounds them per phase; the
+// independent check is verification/worked-adaptive-episode.py (closed-form oracle,
+// tape autograd and finite differences), which rejects a wrong-sign update and a
+// backward that writes parameters. The renderer's expression depth cap (16) also
+// leaves no room for the full model inside the per-phase selections.
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { toVisualExperience, fromVisualExperience, VisualRuntime } from '@course-core/visuals/headless';
 
 const root = new URL('../', import.meta.url);
+/** Internal phase ids, in order. The learner never sees these: the scene's state uses
+ * the labels below, because the released renderer's phase selector shows each enum
+ * option's value as its text (@course-core/visuals 0.1.0 and 0.4.0 have no separate
+ * option labels). */
 export const PHASES = ['ready', 'forward', 'backward', 'update', 'forward2', 'backward2'];
+/** Phase selector labels for every course locale. SDK 0.5.0 courses declare one locale
+ * (content/course-config.json: en); the Hebrew labels are ready for when the course
+ * gains a second locale, and buildScene refuses a locale without labels. */
+export const PHASE_LABELS = {
+  en: { ready: 'Start (nothing run)', forward: '1. Forward', backward: '2. Backward', update: '3. Update', forward2: '4. Forward again', backward2: '5. Backward again' },
+  he: { ready: 'התחלה (עוד לא רץ דבר)', forward: '1. מעבר קדימה', backward: '2. מעבר אחורה', update: '3. עדכון', forward2: '4. שוב קדימה', backward2: '5. שוב אחורה' },
+};
+export const SELECTOR_LABEL = { en: 'Training step', he: 'שלב באימון' };
+export const phaseLabels = locale => {
+  const labels = PHASE_LABELS[locale];
+  assert(labels && SELECTOR_LABEL[locale] && PHASES.every(p => typeof labels[p] === 'string' && labels[p].trim()), `No phase labels for locale ${locale}`);
+  assert.equal(new Set(PHASES.map(p => labels[p])).size, PHASES.length, `Duplicate phase labels for ${locale}`);
+  return labels;
+};
 export const SCENE_ID = 'worked-forward-backward-update';
 export const BINDING = { visualId: SCENE_ID, episodeId: 'fnd-e04-02', afterBlockId: 'fnd-04-02-text-2' };
 const op = (name, ...args) => ({ op: name, args }), s = state => ({ state });
 const r3 = v => op('div', op('round', op('mul', v, 1000)), 1000);
 const ink = '#19383E', teal = '#087B69', mint = '#E8F6ED', purple = '#7050A4', lilac = '#F2EDFB', gold = '#80601E', sand = '#FCF3DF', grey = '#E3E7E6', muted = '#5C6F73', glow = '#FFE3A3';
-const is = phase => op('eq', s('phase'), phase), any = (...phases) => phases.map(is).reduce((a, b) => op('or', a, b));
-const pick = (pairs, otherwise) => pairs.reduceRight((rest, [phase, value]) => op('if', is(phase), value, rest), otherwise);
 const text = (id, value, x, y, fontSize = 17, fill = ink, extra = {}) => ({ kind: 'text', id, text: value, x, y, fontSize, fill, ...extra });
 const rect = (id, x, y, width, height, fill, cornerRadius = 14) => ({ kind: 'rect', id, x, y, width, height, fill, cornerRadius });
 const card = (id, x, y, width, height, fill, children) => ({ kind: 'group', id, x, y, children: [rect(`${id}-bg`, 0, 0, width, height, fill), ...children] });
 
 /** Builds the scene. Options exist only so the verifier can prove it rejects a wrong-sign
  * update or a backward that writes parameters; the delivered scene uses the defaults. */
-export function buildScene({ sign = -1, mutateAtBackward = false } = {}) {
+export function buildScene({ sign = -1, mutateAtBackward = false, locale = 'en' } = {}) {
+  const labels = phaseLabels(locale);
+  const is = phase => op('eq', s('phase'), labels[phase]), any = (...phases) => phases.map(is).reduce((a, b) => op('or', a, b));
+  const pick = (pairs, otherwise) => pairs.reduceRight((rest, [phase, value]) => op('if', is(phase), value, rest), otherwise);
   const x = 2, y = 3, w0 = 0.5, b0 = 0, lr = 0.1;
   // Plain arithmetic in the generator keeps scene expressions shallow (the renderer caps
   // expression depth); the verifier compares against an independent Python oracle.
@@ -43,7 +72,7 @@ export function buildScene({ sign = -1, mutateAtBackward = false } = {}) {
 
   // Buttons: an enabled variant per target phase (shown only when that step is allowed)
   // and a greyed placeholder otherwise. Enter/Space activates, like a click.
-  const button = (id, label, target, when, fill, color) => ({ kind: 'group', id, label: `${label} step`, x: 0, y: 0, visible: when, manipulate: { activate: { state: 'phase', value: target } },
+  const button = (id, label, target, when, fill, color) => ({ kind: 'group', id, label: `${label} step`, x: 0, y: 0, visible: when, manipulate: { activate: { state: 'phase', value: labels[target] } },
     children: [{ ...rect(`${id}-bg`, 0, 0, 194, 52, fill, 12), visible: when }, text(`${id}-label`, label, 97, 34, 19, color, { align: 'middle', weight: 'bold', visible: when })] });
   const off = (id, label, when) => ({ kind: 'group', id, x: 0, y: 0, visible: when,
     children: [{ ...rect(`${id}-bg`, 0, 0, 194, 52, grey, 12), visible: when }, text(`${id}-label`, label, 97, 34, 19, muted, { align: 'middle', visible: when })] });
@@ -119,7 +148,7 @@ export function buildScene({ sign = -1, mutateAtBackward = false } = {}) {
     + 'The Forward, Backward, Update and Reset buttons, or the phase selector, move one step at a time; the highlighted code line, the memory readouts and the graph show the same step.';
   const scene = { version: 1, id: SCENE_ID, title: 'Forward, backward, update: who writes which buffer',
     description: 'Press Forward, Backward and Update one at a time. Watch which buffer each step writes: backward fills the gradient buffers, and only the update changes w and b.',
-    state: { phase: { kind: 'enum', label: 'Training step', initial: 'ready', options: PHASES } }, controls: ['phase'], nodes,
+    state: { phase: { kind: 'enum', label: SELECTOR_LABEL[locale], initial: labels.ready, options: PHASES.map(p => labels[p]) } }, controls: ['phase'], nodes,
     layouts: { compact: { width: 350, height: 1160, overrides: compact }, expanded: { width: 880, height: 740, overrides: expandedOverrides }, breakpoint: 640 },
     timeline: { durationMs: 1000, tracks: [], cues: [{ atMs: 0, text: 'Each button runs exactly one step of the training loop.' }, { atMs: 500, text: 'Backward writes gradients; only Update writes parameters.' }] },
     accessibility: { text: accessible, reducedMotion: { atMs: 1000, description: accessible } }, referenceChecks: [] };
