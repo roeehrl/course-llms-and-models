@@ -1,3 +1,64 @@
+# Core 0.1.52 published, accepted and deployed to the pilot (0.1.51 dead tag); course 0.1.7 released; tailnet apps checked — 2026-10-21
+
+- Core 0.1.51 is a dead tag. It was tagged (tag object 3083bef on 563b2d6, #201), but its release run 39633764479 failed in the connected learner browser job. It was never published or deployed.
+- Published: Core 0.1.52 prerelease, at 19:13 UTC.
+  - Tag object 8881b18 on 8115fe6 (main at the time). Release run 39652246992, attempt 1, 13 CI jobs, all green.
+  - Artifact 12372165882, zip digest sha256:3d3cf2d8…. Manifest 9b8a988d….
+  - SHA256SUMS OK for all 6 files. Hosted assets are byte-identical to the candidate (8 of 8). All 8 release files verify with `gh attestation verify` (run 39652246992/attempt 1, source 8115fe6). The visuals 0.4.0 tgz is unchanged since 0.1.50.
+  - 1464 source members match Git at 8115fe6. 12 module lockfiles match Git. Manifest identity, tree, CI and SBOM (CycloneDX 1.5, 894 components) checked.
+  - Merged PRs since 0.1.50: #194, #198, #199, #200, #201, #203, #204. Main changes:
+    - The AI quality check runs from the AI services page, with an estimate and a budget hold. Prices are prefilled from a dated table, and each suggested model shows a reason (#200).
+    - A pasted key with look-alike characters gets a per-character message and a "Fix these characters" button (#199).
+    - More admin and learner views are in Hebrew, and admin times format again (#194, #198). A private-file read race is fixed (#198).
+    - Browser-test diagnostic (#203). Versions (#201, #204).
+  - One new migration: 089. It adds the table `provider_quality_checks`, and the spend ledger now accepts `quality_check` rows without an enrollment.
+- Course 0.1.7 released: tag course-v0.1.7 (tag object 0bdc169 on 6ac0b38), archive sha256 38591c82…febd3a, published at 18:35 UTC.
+  - Accepted on Core 0.1.50 before publication, and again in the 0.1.52 qualification below.
+  - Staged next to the pilot, and its two lab fixture registries were added to the pilot configuration (now 5 code fixture files). It is not installed: that needs the operator's password, and the owner will do it. The pilot's course releases are still 0.1.4 and 0.1.5.
+- Status by stage: implemented, tested in Core CI, merged and released as above. Deployed to the local pilot. Live-verified only by the pilot acceptance and the signed-out tailnet check below. The AI services page and the quality check were not exercised on the pilot.
+- Qualification, each acceptance run once against the candidate bytes before publication (scripted models, fake keys, a local stand-in for Google's API, no timeout increases):
+  - Migration rehearsal on a fresh copy of the pilot database (0.1.50, 148 tables): applied exactly 089, then none on a second run. These were unchanged: the 595 rows in the 147 existing tables, the pins, the role bindings (revision 5, 4 roles), the migration digests and the AI setup rows (compared by count and a digest of every row). The release's backup and restore drill passed on the copy (148 tables, 671 rows).
+  - Course 0.1.6 harness: HTTP 56/56 episodes. Feature flow: all 8 reports passed. Browser: passed on phone (56 episodes), desktop and tablet; no overflow, no page errors.
+  - Course 0.1.7: HTTP 56 episodes, 11/11 labs in the real Docker sandbox, revisit scheduled. Feature flow: all 8 passed. Browser: phone 56, desktop 16, tablet 4, worked scene with keyboard, no page errors.
+  - New features in a real browser, English and Hebrew, desktop and phone:
+    - The per-character key message appeared and saving was off. "Fix these characters" produced a plain key, which then tested OK.
+    - Each suggested model showed its reason. The prices were prefilled, including the 2027 change for gemini-3.8-flash.
+    - The quality check ran against Core's public scripted answers, passed, charged $0.0079 and turned the model on.
+    - The key appeared in no API response, page or log.
+  - Upgrade path: a workspace set up on 0.1.50 still showed "AI services are on" after migrating to 0.1.52. Upgrade drill from 0.1.50: a forced drill failure restarted 0.1.50, and a normal upgrade succeeded.
+  - Finding: the "course 0.1.6" harness is the tree from the 0.1.50 qualification. Its packaged digest differs from the course-v0.1.6 release archive, and the pilot never had 0.1.6.
+- Deployed to the pilot on this Mac, 0.1.50 → 0.1.52, at 19:14 UTC.
+  - Backup backup-20261021191455214-850aa5. Restore drill: 148 tables, 671 rows. Steps: stopped, backed up, restore verified, started new runtime.
+  - Installed runtime: 3323 members verified, adapter digests match, Temporal CLI byte-identical to 0.1.48's. (The install script's first verifier call was still pinned to 0.1.50 and stopped with `release_identity_mismatch`. Rerun with the 0.1.52 pin, it passed.)
+  - Health ok. 77 migrations, last 089. 149 tables. `provider_quality_checks` and the course package and update tables are empty (counted only).
+  - All pilot processes run from the 0.1.52 root (launcher, API, Temporal, worker, dispatch loop).
+  - Read-only SQL before and after acceptance found no change:
+    - the QA enrollment, memberships, course releases, table count and migration list (identical to after the 0.1.50 acceptance, plus 089);
+    - the AI setup: 1 connection, 4 prices, 5 provider versions (active revision 5), 1 approval override, 1 workspace budget with limits, and 4 role bindings. Each table's count and row digest match the migrated rehearsal copy.
+  - Provider counters, at the pre-deploy baseline, before acceptance, after acceptance and after the tailnet check: provider_dispatches 0, provider_spend_ledger 0, workspace used_micro_usd 0, supervisor_jobs 4 (all cancelled before this deploy), provider_quality_checks 0.
+  - Pilot acceptance passed, one run: phone signed in (fnd-e01-01 was already complete), tablet and desktop resumed fnd-e01-02. The operator is unenrolled, and the owner was not signed in.
+    - No provider call was possible. AI services are on with the owner's real key, so the run used a copy of the harness with two added stops. It would abort before enrolling, and before answering any check or completing an episode, because those emit supervised events.
+    - Neither stop fired. No companion message, no answers, no episode completion and no quality check.
+- Insecure-address checks on the pilot: still OFF, as the operator set it under 0.1.46. `config.json` has `allowInsecureOrigins: true`; the API runs with `ALLOW_INSECURE_ORIGINS=true` and the Tailscale origin in `ADDITIONAL_ORIGINS`.
+- Tailnet: checked signed out from the pilot host through its tailnet address (plain http), once.
+  - Admin and learner pages load on phone, tablet and desktop sizes, with no page errors and no overflow.
+  - Every page shows the expected signed-out 401. The first page also logged one 404, most likely Chrome's favicon request. Same as 0.1.50.
+  - With a Hebrew browser on a phone, both sign-in pages show Hebrew, right to left.
+  - The served bundles are byte-identical to the installed 0.1.52 exports. The learner bundle and the admin index and RunsView bundles are new.
+  - Sign-in from the tailnet origin is accepted (an unknown user gets 401 LOGIN_FAILED).
+- Not verified:
+  - Live providers (no real provider call), real costs and real model quality. The scripted answers only show that the check, the charges and the gate work.
+  - The quality check's estimate against real token counts.
+  - The AI services page and the quality check on the pilot.
+  - Hebrew on the pilot beyond the signed-out sign-in pages, and Hebrew labels in a running course.
+  - Course 0.1.7 on the pilot (staged, not installed).
+  - Signed-in saves over the tailnet (needs the operator's password).
+  - LAN or second physical devices.
+- User actions:
+  - Install course 0.1.7 from the admin (needs the operator's password). It is staged, and its lab fixture registries are configured.
+  - When ready, run the quality check from the AI services page. It uses the workspace's real key and budget.
+- Evidence: evidence/core-0.1.52-release-and-pilot.json.
+
 # Core 0.1.50 published, accepted and deployed to the pilot (0.1.49 skipped); tailnet apps checked — 2026-10-21
 
 - Core 0.1.49 was published (prerelease; tag object cbc10ab on d0f734e, release run 39567464359) but never deployed.
