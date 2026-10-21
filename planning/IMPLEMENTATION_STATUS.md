@@ -1,3 +1,54 @@
+# Core 0.1.50 published, accepted and deployed to the pilot (0.1.49 skipped); tailnet apps checked — 2026-10-21
+
+- Core 0.1.49 was published (prerelease; tag object cbc10ab on d0f734e, release run 39567464359) but never deployed.
+  - Changes: provider keys stored trimmed, empty and malformed keys refused, and a Test key button (#185). Formatting checks (#184), version (#187).
+  - Its pilot upgrade was blocked with `restored_row_counts_differ`. A key-order bug in the restore drill reported equal row counts as different on the 146-table pilot. No data was lost.
+  - An upgrader bug then left the pilot stopped. The operator restarted 0.1.48 by hand.
+  - Both bugs are fixed in 0.1.50 (#196).
+  - Evidence: evidence/core-0.1.49-release.json.
+- Published: Core 0.1.50 prerelease.
+  - Tag object 9d177c5 on 3f703d5. 34/34 check runs green on 3f703d5. Release run 39587955374, attempt 1, 13 CI jobs (new: Module / i18n).
+  - Artifact 12342124587, digest a8538290…. Manifest ffdf0097….
+  - 1443 source members match Git. Hosted assets are byte-identical to the candidate (8 of 8). All 7 release files verify with `gh attestation verify`.
+  - Merged PRs since 0.1.49: #186, #189, #193, #196, #197. Main changes:
+    - One AI services settings page replaces Providers, and new learners get the workspace's default spending limit (#193).
+    - English and Hebrew, with right-to-left layout and language switchers (#186, #189).
+    - The restore drill no longer depends on table order, and a failed upgrade restarts the previous runtime (#196).
+    - Version (#197).
+  - Two new migrations: 087, 088 (two new tables and nullable columns only).
+- Course harness: the released-runtime check needed one change for the 13th Core CI job (course commit cd318cf). Without it the installed-runtime check fails with `release_ci_mismatch`.
+- Status by stage: implemented, tested in Core CI, merged and released as above. Deployed to the local pilot. Live-verified only by the pilot acceptance and the signed-out tailnet check below. The AI services page, first-run screen and default learner limit were not exercised on the pilot.
+- Qualification, each acceptance run once against the candidate bytes before publication (scripted models, fake keys and a local stub of Google's model listing only, no timeout increases):
+  - Migration rehearsal on a fresh copy of the 0.1.48 pilot applied exactly 087 and 088, then none on a second run. 579 rows in the 145 existing tables, the pins and the migration digests were unchanged. The release's backup and restore drill passed on the copy (146 tables, 653 rows).
+  - HTTP: 56/56 episodes. Feature flow: all 8 reports passed. Browser: passed on phone (56 episodes), desktop and tablet; no overflow, no page errors.
+  - AI services page in English and Hebrew, desktop and phone: an owner went from a new key to "AI services are on". The key appeared in no API response or final page.
+  - An owner without a course reached AI services from the welcome screen. A new learner received the $2 default limit.
+  - Upgrade drill from 0.1.48 with a parallel count plan: a forced drill failure restarted 0.1.48; a normal upgrade succeeded.
+- Deployed to the pilot on this Mac, 0.1.48 → 0.1.50, at 12:00 UTC.
+  - Backup backup-20261021120010825-fdd098. Restore drill: 146 tables, 653 rows. Steps: stopped, backed up, restore verified, started new runtime.
+  - Installed runtime: 3279 members verified, adapter digests match, Temporal CLI byte-identical to 0.1.48's.
+  - Health ok. 76 migrations, last 088. The two new tables and the course package and update tables are empty (counted only).
+  - The QA enrollment, memberships, course releases, table count and migration list are unchanged (read-only SQL before and after acceptance).
+  - Pilot acceptance passed, one run: phone signed in (fnd-e01-01 was already complete), tablet and desktop resumed fnd-e01-02. The operator is unenrolled, and the owner was not signed in.
+- Insecure-address checks on the pilot: still OFF, as the operator set it under 0.1.46. `config.json` has `allowInsecureOrigins: true`; the API runs with `ALLOW_INSECURE_ORIGINS=true` and the Tailscale origin in `ADDITIONAL_ORIGINS`.
+- Tailnet: checked signed out from the pilot host through its tailnet address (plain http), once.
+  - Admin and learner pages load on phone, tablet and desktop sizes, with no page errors and no overflow.
+  - Every page shows the expected signed-out 401. The first page also logged one 404, most likely Chrome's favicon request. Same as 0.1.48.
+  - With a Hebrew browser on a phone, both sign-in pages show Hebrew, right to left.
+  - The served bundles are byte-identical to the installed 0.1.50 exports. The learner bundle and the admin index are new.
+  - Sign-in from the tailnet origin is accepted (an unknown user gets 401 LOGIN_FAILED).
+- Not verified:
+  - Live providers (no real provider call) and real model quality.
+  - Signed-in AI services setup on the pilot (the operator is doing it).
+  - Hebrew on the pilot beyond the signed-out sign-in pages.
+  - The first-run screen and default learner limit on the pilot.
+  - Signed-in saves over the tailnet (needs the operator's password).
+  - LAN or second physical devices.
+- User actions:
+  - Finish AI services on the admin's AI services page: connect a key, then check models, prices and spending limits. Saving the limits records the spending consent.
+  - New learners now start with the workspace's default limit ($2 unless changed).
+- Evidence: evidence/core-0.1.50-release-and-pilot.json and evidence/core-0.1.49-release.json.
+
 # Core 0.1.48 published, accepted and deployed to the pilot; tailnet apps checked — 2026-10-20
 
 - Published: Core 0.1.48 prerelease.

@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "coreVersion": "0.1.49",
+  "coreTag": "v0.1.49",
+  "coreCommit": "d0f734e7085e9653dfcccd4a7db0b7bec30e9dc5",
+  "coreTagObject": "cbc10ab0a9ed9117e4567ff36efdd6a84656e8a4",
+  "coreTree": "057d2c38ac3d05a1d09d763d011c2e676b9a0742",
+  "versionBumpPr": 187,
+  "coreMainCi": "32/32 completed success (main Public CI + Full CI + Assemble + Bind in the release run); release run 12/12 jobs in manifest",
+  "coreReleaseRun": 39567464359,
+  "coreReleaseRunAttempt": 1,
+  "coreCandidateArtifact": 12332291046,
+  "coreCandidateArtifactName": "course-core-v0.1.49-d0f734e7085e9653dfcccd4a7db0b7bec30e9dc5-39567464359-1",
+  "coreArtifactDigest": "sha256:fc5a434f017b4f20cea0eb4ad6a6fe9000c9abd498dca14fbf617535a9edb26d",
+  "coreManifestSha256": "d2f8bfd74877248235c2a39ea77f2541283ea8982ec90685badfd4c65cd58b85",
+  "sha256sumsFileSha256": "ce80668d373d1610919c82a9458a33f26c52b032edcc1909f631af39c45d64eb",
+  "assetSha256": {
+    "course-core-admin-web-0.1.49.tar.gz": "2455c8226b9703c9feb8879e39a72a9802af37d7447bda092b61208564de9e57",
+    "course-core-learner-web-0.1.49.tar.gz": "4af2708032856645a4814a1e1d7a60ab186e84537d822609dfe9648b78f906a5",
+    "course-core-runtime-0.1.49.tar.gz": "913262445bf1e4f55a0a0b3b2d55e89df81774f7c36d5760e00dbc249e190ae5",
+    "course-core-sbom-0.1.49.cdx.json": "29e49a08945dade12adcef491917986963072b83f938e6c845636a4408a2e388",
+    "course-core-source-0.1.49.tar.gz": "d2baa757745eeea469ba2327772c812ab71e8dafba788bd36acbc6c16cec247d",
+    "course-core-visuals-0.4.0.tgz": "8fb9f15979f1fddfee5d8889738c87c3d757f6f4a30338103c3835529859b1e3",
+    "release-manifest.json": "d2f8bfd74877248235c2a39ea77f2541283ea8982ec90685badfd4c65cd58b85"
+  },
+  "prerelease": true,
+  "published": true,
+  "publishedAt": "2026-10-21T09:00:45Z",
+  "coreChangesSince": "0.1.48",
+  "mergedPrs": [
+    184,
+    185,
+    187
+  ],
+  "mergedPrsNote": "5 commits in v0.1.49 and not in v0.1.48, each mapped to one of these PRs",
+  "migrations": [],
+  "summary": "provider keys stored trimmed, empty and malformed keys refused with their own codes, a Test key button that lists the provider's models only, one message per key and inspection failure (#185); admin and visuals formatting checked in CI (#184); version (#187)",
+  "statusByStage": {
+    "implemented": "#184, #185, #187",
+    "tested": "Core CI on each PR and on main; before publication, the course's released-consumer acceptance (course 0.1.6; HTTP 56/56, feature flow 8/8, browser on phone, desktop and tablet) and key-handling checks against a local stub of Google's model listing (fake keys, scripted models only)",
+    "merged": "#184, #185, #187 on course-core main",
+    "released": "v0.1.49 GitHub prerelease; hosted assets byte-identical to the candidate (8 of 8); all 7 release files verify with gh attestation verify",
+    "deployed": false,
+    "liveVerified": false
+  },
+  "deployment": {
+    "result": "not deployed. The pilot stayed on 0.1.48; 0.1.50 replaced 0.1.49 as the next deployment",
+    "installedRuntimeCheck": {
+      "checkedMembers": 2577,
+      "uniqueFiles": 1457,
+      "adapterDigestsMatch": true,
+      "note": "the 0.1.49 runtime was installed next to 0.1.48 in the pilot root and verified, but never started"
+    },
+    "upgradeAttempt": {
+      "tool": "deploy/local/upgrade.mjs of 0.1.49",
+      "from": "0.1.48",
+      "result": {
+        "status": "blocked",
+        "code": "restored_row_counts_differ"
+      },
+      "cause": "upgrader bug: the restore drill compared per-table row counts in the order PostgreSQL listed the tables, and on the pilot (146 tables) the restored copy was listed in a different order, so equal counts were reported as different. No data was lost or changed; the backup itself was fine",
+      "secondBug": "upgrader bug: after the drill failed, the upgrader left the pilot stopped instead of restarting 0.1.48",
+      "recovery": "the operator restarted the 0.1.48 runtime by hand; 0.1.48 then ran unchanged until the 0.1.50 upgrade",
+      "fixedIn": "0.1.50 (#196): the drill compares row counts table by table regardless of order and names the tables that really differ; any failure after the pilot is stopped (backup, drill, start or health) restarts the previous runtime and reports why. Both fixes were exercised in 0.1.50 qualification (forced drill failure restarted 0.1.48; an upgrade with a parallel-append count plan succeeded) and in the real 0.1.48 -> 0.1.50 pilot upgrade (146 tables, restore verified)"
+    }
+  },
+  "liveProviderAcceptance": false,
+  "notVerified": [
+    "anything on the pilot: 0.1.49 never ran there",
+    "the Test key button and the missing-key message in a browser (an owner without a course could not reach Providers in 0.1.49; Core CI's browser suite covers them)",
+    "live providers: the key test ran only against a local stub of Google's model listing with fake keys",
+    "real model quality"
+  ],
+  "supersededBy": "0.1.50 (evidence/core-0.1.50-release-and-pilot.json); the 0.1.49 provider-key changes ship in 0.1.50 and reached the pilot with it"
+}

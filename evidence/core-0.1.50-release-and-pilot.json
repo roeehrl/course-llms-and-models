@@ -1,0 +1,446 @@
+{
+  "schemaVersion": 1,
+  "coreVersion": "0.1.50",
+  "coreTag": "v0.1.50",
+  "coreCommit": "3f703d5085c681cffc467ffe9ed0b8c6e2bcaea5",
+  "coreTagObject": "9d177c5b2c3b2fcae7a130cc6d6ad9001fffb396",
+  "coreTree": "1c2e936cdc57ea8e015697ebb63ddc2a0bac3f7e",
+  "versionBumpPr": 197,
+  "coreMainCi": "34/34 completed success (main Public CI + Full CI + Assemble + Bind in the release run); release run 13/13 jobs in manifest (new: Module / i18n)",
+  "coreReleaseRun": 39587955374,
+  "coreReleaseRunAttempt": 1,
+  "coreCandidateArtifact": 12342124587,
+  "coreCandidateArtifactName": "course-core-v0.1.50-3f703d5085c681cffc467ffe9ed0b8c6e2bcaea5-39587955374-1",
+  "coreArtifactDigest": "sha256:a8538290ab06496e2e021d166e423ed851748d034b33aedc43d92a87574343e0",
+  "coreManifestSha256": "ffdf00971491e8eb51c7b832d7397426ac6d61fb5a0f6f6758e044d07215de9b",
+  "sha256sumsFileSha256": "e282eb1560744ed9898497cf804933986644fe3c03d96bce7d8192ae98f851c3",
+  "assetSha256": {
+    "course-core-admin-web-0.1.50.tar.gz": "1e55c02b8c1eb3705526b8bbae36cbb447669832c09a31f776c0f3f3c56897b0",
+    "course-core-learner-web-0.1.50.tar.gz": "92ad10cbfbf43d176992c78206e460b32f3a84aca5e0f16950f1426070fa7096",
+    "course-core-runtime-0.1.50.tar.gz": "dc4cbd771c19e6b7bb61bd9e856a345e59426c2cdc87bb98275cc60676b95676",
+    "course-core-sbom-0.1.50.cdx.json": "a8cf06fc7a37150bfa1ecc636614a681f38b8b10b7d9da31277e179252ea1416",
+    "course-core-source-0.1.50.tar.gz": "5371455ab45990cbe1a7e8e3d17fb7dd00d2811bb017da903e937aff6f68b966",
+    "course-core-visuals-0.4.0.tgz": "8fb9f15979f1fddfee5d8889738c87c3d757f6f4a30338103c3835529859b1e3",
+    "release-manifest.json": "ffdf00971491e8eb51c7b832d7397426ac6d61fb5a0f6f6758e044d07215de9b"
+  },
+  "prerelease": true,
+  "published": true,
+  "coreChangesSince": "0.1.49",
+  "skippedVersions": [
+    "0.1.49 (released, never deployed; see evidence/core-0.1.49-release.json)"
+  ],
+  "mergedPrs": [
+    186,
+    189,
+    193,
+    196,
+    197
+  ],
+  "mergedPrsNote": "18 commits in v0.1.50 and not in v0.1.49, each mapped to one of these PRs",
+  "migrations": [
+    "087_locale_preferences.sql",
+    "088_ai_services_setup.sql"
+  ],
+  "statusByStage": {
+    "implemented": "one AI services settings page replacing Providers, key tested before save, suggested models, per-model prices, spending limits with consent, owner approval of unevaluated jobs, default learner limit (#193, migration 088); English and Hebrew with right-to-left layout, language switchers, per-user and workspace language (#186, #189, migration 087); order-independent restore drill and restart of the previous runtime on any failed upgrade step (#196); version (#197)",
+    "tested": "Core CI on each PR and on main; before publication, the course's released-consumer acceptance and AI services, first-run, default-limit and upgrade-drill checks against the candidate bytes (scripted models, fake keys and a local stub of Google's model listing only)",
+    "merged": "#186, #189, #193, #196, #197 on course-core main",
+    "released": "v0.1.50 GitHub prerelease; hosted assets byte-identical to the candidate (8 of 8); all 7 release files verify with gh attestation verify",
+    "deployed": "the local pilot upgraded 0.1.48 -> 0.1.50 with deploy/local/upgrade.mjs of 0.1.50; migrations 087 and 088 applied; health ok",
+    "liveVerified": "pilot acceptance (QA learner on phone, tablet, desktop; operator unenrolled, admin not signed in) and a signed-out tailnet check of the pilot's admin and learner sign-in pages on phone, tablet and desktop sizes, plus a Hebrew phone view. The AI services page, first-run screen and default learner limit were not exercised on the pilot. Not live-verified: see notVerified"
+  },
+  "consumerChecks": {
+    "artifactApiDigestMatches": true,
+    "sha256sumsAllOk": true,
+    "sha256sumsCovers": 7,
+    "manifestIdentity": {
+      "tree": "1c2e936cdc57ea8e015697ebb63ddc2a0bac3f7e",
+      "treeMatchesGit": true,
+      "tagObjectMatchesLocalAndRemote": true,
+      "workflowRef": "roeehrl/course-core/.github/workflows/release.yml@refs/tags/v0.1.50",
+      "ciRunId": 39587955374,
+      "ciAttempt": 1,
+      "ciJobs": 13,
+      "allSuccess": true
+    },
+    "sourceMembersComparedToGitTree": 1443,
+    "assetMembersMatchManifest": {
+      "source": 1443,
+      "runtime": 1815,
+      "learner": 7,
+      "admin": 14,
+      "visuals": 42
+    },
+    "licensesPresentInEveryAsset": true,
+    "moduleLocksMatchGit": 12,
+    "migrationFilesAddedSince0149": [
+      "087_locale_preferences.sql",
+      "088_ai_services_setup.sql"
+    ],
+    "migrationFilesInTag": 76,
+    "sbom": {
+      "format": "CycloneDX 1.5",
+      "components": 894,
+      "rootComponent": "@course-core/repository@0.1.50 Apache-2.0",
+      "inSha256Sums": true
+    },
+    "attestations": {
+      "filesVerified": 7,
+      "allExit0": true,
+      "run": "39587955374/attempts/1",
+      "sourceDigest": "3f703d5085c681cffc467ffe9ed0b8c6e2bcaea5"
+    },
+    "builtAdapterDigestsMatch": true,
+    "adapterDigestsIdenticalTo0149Build": true,
+    "temporalCliSha256": "33c298d41f6eefebf01a28a3511f444480e939e21d3518cb0c12a4abad467c4b",
+    "installedRuntimeCheck": {
+      "unmodifiedCourseVerifier": "failed with release_ci_mismatch: the course's released-runtime check expected exactly 12 Core CI jobs and 0.1.50 has 13 (new Module / i18n, success)",
+      "adaptedCourseVerifier": "passed after the course harness change, now on course main as cd318cf (expects the 13 named jobs, still an exact match)",
+      "receipt": {
+        "version": "0.1.50",
+        "commit": "3f703d5085c681cffc467ffe9ed0b8c6e2bcaea5",
+        "manifestSha256": "ffdf00971491e8eb51c7b832d7397426ac6d61fb5a0f6f6758e044d07215de9b",
+        "checkedMembers": 3279,
+        "uniqueFiles": 1819
+      }
+    }
+  },
+  "migrationRehearsal": {
+    "what": "fresh read-only dump of the live pilot DB (on 0.1.48) restored into a disposable database; candidate migrations applied exactly 087 and 088, a second run applied none; the dump and database were deleted",
+    "before": {
+      "migrations": 74,
+      "last": "086_cross_course.sql"
+    },
+    "after": {
+      "migrations": 76,
+      "last": "088_ai_services_setup.sql"
+    },
+    "publicTables": "146 -> 148 (new: provider_setup_drafts, workspace_provider_connections, 0 rows)",
+    "preExistingTables": 145,
+    "preExistingRows": 579,
+    "rowCountsUnchanged": true,
+    "pinsUnchanged": true,
+    "providerBindings": "0 role rows",
+    "migrationNamesAndDigestsUnchanged": true,
+    "defaultLimitAfter088": "1 budget row, 'default'",
+    "sealedCredentialsQueried": false,
+    "backupDrillOnCopy": {
+      "result": "passed",
+      "tables": 146,
+      "rows": 653,
+      "status": "restore_verified",
+      "note": "the release's backup and restore drill on the rehearsal copy (a first try stopped at a precondition because the temporary state path was too long for a control socket; rerun with a short path)"
+    }
+  },
+  "privateReleasedConsumerAcceptanceBeforePublication": {
+    "ranAgainst": "candidate artifact bytes, before the GitHub release was published",
+    "courseVersion": "0.1.6",
+    "courseRepo": "course main b4062de + local commits d1f3975 (pin to the 0.1.50 candidate) and 8322284 (expect the Module / i18n job; the latter is now on course main as cd318cf)",
+    "models": "scripted only",
+    "timeoutsIncreased": false,
+    "attemptsPerAcceptance": 1,
+    "reruns": 0,
+    "http": {
+      "result": "passed",
+      "exit": 0,
+      "wallSeconds": 117,
+      "episodes": 56,
+      "practicalFamiliesRecovered": 3,
+      "committedRecoveryAssignments": 6,
+      "writtenExplanationsPendingWithoutBlocking": 4
+    },
+    "featureFlow": {
+      "result": "passed",
+      "exit": 0,
+      "wallSeconds": 54,
+      "reportsPassed": [
+        "operatorModelPrice",
+        "placementSettings",
+        "setup",
+        "remedialEpisode",
+        "placementDeclined",
+        "placementAccepted",
+        "retention",
+        "writtenExplanation"
+      ],
+      "note": "drives provider-setup and provider-pricing APIs (not the removed Providers UI); those routes still work in 0.1.50"
+    },
+    "browser": {
+      "result": "passed",
+      "exit": 0,
+      "wallSeconds": 252,
+      "viewports": [
+        {
+          "viewport": "phone",
+          "placement": "ignored",
+          "placedEpisodes": 0,
+          "writtenExplanationsSubmitted": 4,
+          "completedEpisodes": 56,
+          "recovery": true,
+          "reloadPreservedCode": true,
+          "horizontalOverflow": false,
+          "codeAccessibility": true,
+          "pageErrors": 0
+        },
+        {
+          "viewport": "desktop",
+          "placement": "declined",
+          "placedEpisodes": 0,
+          "writtenExplanationsSubmitted": 0,
+          "completedEpisodes": 16,
+          "recovery": true,
+          "reloadPreservedCode": true,
+          "horizontalOverflow": false,
+          "codeAccessibility": true,
+          "pageErrors": 0
+        },
+        {
+          "viewport": "tablet",
+          "placement": "accepted",
+          "placedEpisodes": 12,
+          "writtenExplanationsSubmitted": 0,
+          "completedEpisodes": 4,
+          "recovery": true,
+          "reloadPreservedCode": true,
+          "horizontalOverflow": false,
+          "codeAccessibility": true,
+          "pageErrors": 0
+        }
+      ]
+    }
+  },
+  "featureChecks": {
+    "where": "qualified 0.1.50 runtime on disposable databases and temporary state (the real pilot was never touched by these); fake keys and a local stub of Google's model listing; no live provider call",
+    "aiServicesPage": {
+      "result": "passed",
+      "cases": [
+        "en-desktop",
+        "en-phone",
+        "he-desktop",
+        "he-phone"
+      ],
+      "checked": "pasted key tested before save, saved key shown only by its last characters, a suggested model for each job, $25 workspace and $2 per-learner defaults, status line reached 'AI services are on'; Advanced closed; the key appeared in no API response or final page; no overflow, no page errors; Hebrew cases right-to-left"
+    },
+    "firstRunWelcome": {
+      "result": "passed",
+      "cases": [
+        "nocourse-en-desktop",
+        "nocourse-en-phone",
+        "nocourse-he-desktop",
+        "nocourse-he-phone"
+      ],
+      "checked": "an owner without a course signs in, sees the welcome screen and reaches AI services"
+    },
+    "defaultLearnerLimit": {
+      "result": "passed",
+      "limitSource": "default",
+      "limitUsd": 2.0
+    },
+    "upgradeDrill": {
+      "result": "passed",
+      "from": "0.1.48 on pilot-like temporary state with a course and one enrollment",
+      "parallelPlanForced": true,
+      "forcedFailure": "a drill failure after backup (no pg_restore available) returned upgrade_failed_previous_runtime_restarted; 0.1.48 was running and healthy afterwards",
+      "upgrade": "status upgraded, 146 tables restored and verified, then 76 migrations and 148 tables on 0.1.50; the enrollment was kept"
+    }
+  },
+  "liveProviderAcceptance": false,
+  "observedAt": "2026-10-21T12:45:03Z",
+  "hostedAssetsByteIdenticalToCandidate": true,
+  "publishedRelease": {
+    "url": "https://github.com/roeehrl/course-core/releases/tag/v0.1.50",
+    "prerelease": true,
+    "draft": false,
+    "publishedAt": "2026-10-21T11:59:22Z",
+    "assets": 8,
+    "hostedAssetsCmpIdentical": "8 of 8",
+    "sha256sumsAllOk": true,
+    "manifestSha256Matches": true,
+    "attestationsVerified": "7 of 7 files (gh attestation verify)"
+  },
+  "nativePilotUpgrade": {
+    "from": "0.1.48",
+    "to": "0.1.50",
+    "skipped": "0.1.49 (its upgrade was blocked; see evidence/core-0.1.49-release.json)",
+    "origin": "http://localhost:4310",
+    "runtimeRoot": "<pilot root>/releases/v0.1.50/course-core",
+    "installedFrom": "hosted release assets (byte-identical to the candidate); Temporal CLI copied from the v0.1.48 root (same sha256 33c298d4..., accepted by the pinned-digest check)",
+    "installedRuntimeCheck": {
+      "checkedMembers": 3279,
+      "uniqueFiles": 1819,
+      "adapterDigestsMatch": true,
+      "verifier": "course released-runtime check with the 13-job change (cd318cf)"
+    },
+    "tool": "deploy/local/upgrade.mjs of 0.1.50",
+    "at": "2026-10-21T12:00Z",
+    "result": {
+      "status": "upgraded",
+      "backup": "backups/backup-20261021120010825-fdd098",
+      "restoreDrill": {
+        "rows": 653,
+        "tables": 146
+      },
+      "steps": [
+        "stopped",
+        "backed_up",
+        "restore_verified",
+        "started_new_runtime"
+      ],
+      "providerAcceptance": "not_verified"
+    },
+    "restoreDrillNote": "the same 146-table pilot whose drill blocked the 0.1.49 upgrade; with #196 the drill verified the restore",
+    "health": "ok",
+    "migrationsBeforeAcceptance": {
+      "count": 76,
+      "last": "088_ai_services_setup.sql"
+    },
+    "migrationsAfterAcceptance": {
+      "count": 76,
+      "last": "088_ai_services_setup.sql"
+    },
+    "migrationsNew": [
+      "087_locale_preferences.sql",
+      "088_ai_services_setup.sql"
+    ],
+    "publicTables": 148,
+    "newAndPackageTablesRowCounts": {
+      "provider_setup_drafts": 0,
+      "workspace_provider_connections": 0,
+      "course_package_staging": 0,
+      "course_release_packages": 0,
+      "course_update_sources": 0,
+      "course_update_attempts": 0,
+      "studies": 0,
+      "cross_course_learners": 0,
+      "checkedWith": "read-only SQL before and after pilot acceptance (sealed_credentials never queried)"
+    },
+    "pins": {
+      "qaEnrollment": {
+        "subject": "qa:pilot-learner",
+        "courseRelease": "0.1.4",
+        "status": "active",
+        "currentEpisode": "fnd-e01-01",
+        "revision": 9,
+        "evidenceRows": 2
+      },
+      "memberships": {
+        "operator:owner": "owner",
+        "qa:pilot-learner": "learner"
+      },
+      "courseReleases": [
+        "0.1.4 published",
+        "0.1.5 published"
+      ],
+      "checkedWith": "read-only SQL (default_transaction_read_only=on) before and after pilot acceptance; logs pins-preaccept.txt and pins-postaccept.txt",
+      "unchangedAcrossAcceptance": true,
+      "identicalToAfter0148Acceptance": true
+    },
+    "pilotAcceptance": {
+      "result": "passed",
+      "runs": 1,
+      "exit": 0,
+      "harness": "verification/pilot-acceptance.mjs, acceptance worktree at 8322284 (course main cd318cf + the local 0.1.50 pin commit; pilot-acceptance.mjs itself unchanged since 0.1.47)",
+      "package": "the pilot's installed, verified course 0.1.4 package (the QA enrollment's pinned release)",
+      "course": "0.1.4",
+      "phone": "signed in; fnd-e01-01 already completed before this run (completedInThisRun false)",
+      "tablet": "resumed fnd-e01-02",
+      "desktop": "resumed fnd-e01-02",
+      "resumedExistingEnrollment": true,
+      "completedInThisRun": false,
+      "operatorEnrolled": false,
+      "adminSignedIn": false,
+      "qaRoleCheck": "verified_read_only_in_database",
+      "knownAxeDefectsObserved": [],
+      "liveProviderAcceptance": false,
+      "ranWithInsecureAddressChecksOff": true,
+      "writesByDesign": "the harness sets a fresh random password for the dedicated QA account through the runtime's set-password CLI (never printed or stored), signs that account in, and writes its receipt and screenshots to the pilot's acceptance folder; it changed no enrollment, evidence, membership, release or migration row and did not sign in as the owner",
+      "at": "2026-10-21T12:45:03Z"
+    }
+  },
+  "operatorSecuritySwitch": {
+    "insecureAddressChecks": "still off after the upgrade, as the operator set it under 0.1.46; not changed by this deployment",
+    "configAllowInsecureOrigins": true,
+    "apiEnvironment": "ALLOW_INSECURE_ORIGINS=true and the tailnet origin in ADDITIONAL_ORIGINS (observed after the upgrade)",
+    "effect": "none beyond the Tailscale origin that was already trusted"
+  },
+  "tailnetAccess": {
+    "additionalOrigins": [
+      "the pilot host's Tailscale IPv4 address on port 4310 (plain http), unchanged since 0.1.44"
+    ],
+    "runs": 1,
+    "at": "2026-10-21T12:45:27Z",
+    "checks": {
+      "adminPage": 200,
+      "learnerRoot": 200,
+      "loginFromTailnetOrigin": "401 LOGIN_FAILED for an unknown user (origin accepted)",
+      "browser": {
+        "engine": "installed Chrome via Playwright, phone 390x844, tablet 834x1112 and desktop 1280x800 (en-US), plus phone with he-IL; admin /admin/ and learner /, signed out",
+        "isSecureContext": false,
+        "cryptoRandomUUID": "undefined",
+        "cryptoGetRandomValues": "function",
+        "pageErrors": 0,
+        "consoleErrors": "the expected signed-out 401 from GET /auth/session, one line on every page; plus one 404 console line on the first page loaded (admin phone) that the response listener did not see, most likely Chrome's automatic favicon request (same as 0.1.47 and 0.1.48)",
+        "signInFormRendered": true,
+        "horizontalOverflow": false,
+        "languages": {
+          "en-US": "lang en, left-to-right, English sign-in with a Language selector (seen in screenshots)",
+          "he-IL phone": {
+            "admin": {
+              "lang": "he",
+              "dir": "rtl"
+            },
+            "learner": {
+              "lang": "he",
+              "dir": "rtl"
+            },
+            "note": "the signed-out sign-in pages followed the browser language: Hebrew text, right-to-left, Hebrew language selector, no overflow, no page errors"
+          }
+        },
+        "servedBundles": {
+          "admin": {
+            "files": [
+              "assets/RunsView-CRB2a1Yf.js",
+              "assets/index-DY6JK2lq.js",
+              "assets/rolldown-runtime-CbXtAM7H.js"
+            ],
+            "filesIdenticalTo0148": [
+              "assets/rolldown-runtime-CbXtAM7H.js"
+            ]
+          },
+          "learner": {
+            "files": [
+              "_expo/static/js/web/index-7e1ed3a304bb7a45d2b293de4f8abddc.js"
+            ],
+            "identicalTo0148": false
+          },
+          "byteIdenticalToInstalled0150": true
+        }
+      }
+    }
+  },
+  "history0149": {
+    "released": true,
+    "deployed": false,
+    "incident": "the 0.1.49 pilot upgrade was blocked by restored_row_counts_differ, a key-order bug in the restore drill, and an upgrader bug left the pilot stopped; the operator restarted 0.1.48 by hand. Both bugs are fixed in 0.1.50 (#196), and this upgrade went straight from 0.1.48 to 0.1.50",
+    "evidence": "evidence/core-0.1.49-release.json"
+  },
+  "courseHarnessChange": "course commit cd318cf: the released-runtime check now expects the 13th Core CI job, Module / i18n (still an exact list)",
+  "notVerified": [
+    "live providers (Google or Anthropic): no real provider call was made; real costs",
+    "real model quality: generated prose and reviewer-draft quality, conversational gates with a real model, learning efficacy",
+    "signed-in AI services setup on the pilot: the operator is doing it; nothing was checked or changed there, and the pilot's provider tables were only counted",
+    "Hebrew on the pilot beyond the signed-out admin and learner sign-in pages (no signed-in Hebrew view, lessons or admin pages on the pilot)",
+    "the first-run welcome screen and the $2 default learner limit on the pilot (qualification only; no new learner enrolled on the pilot)",
+    "signed-in saves over the pilot's tailnet address (would need the operator's password)",
+    "the admin insecure-address notice on the pilot (shown only to a signed-in admin)",
+    "LAN devices and physical devices: nothing was tried from a second device",
+    "the Test key flow and AI services quality check against a real provider",
+    "grandfathering of existing provider bindings: the pilot had none"
+  ],
+  "userActions": [
+    "finish AI services on the admin's AI services page: connect a key, check models, prices and spending limits; saving the limits records the spending consent",
+    "new learners now get the workspace's default limit ($2 unless changed) instead of $0",
+    "insecure-address checks are still OFF on the pilot; pilot.mjs security insecure-origin-check on|off|status. Remove any plain-http LAN origin before turning the check back on",
+    "the course's released-runtime check expects 13 Core CI jobs from 0.1.50 on (cd318cf)"
+  ]
+}
