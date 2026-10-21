@@ -1,0 +1,280 @@
+{
+ "schemaVersion": 1,
+ "courseVersion": "0.1.7",
+ "status": "staged_not_released",
+ "courseDigest": "e404e0d02d7d713ee5e6384c0f8b37b0bc369ac9dc631db18c1c1aa9c5c0afc3",
+ "sdkVersion": "0.5.0",
+ "minimumCoreVersion": "0.1.48",
+ "adaptationProfiles": 159,
+ "visuals": 57,
+ "core": {
+  "version": "0.1.50",
+  "commit": "3f703d5085c681cffc467ffe9ed0b8c6e2bcaea5",
+  "releaseManifestSha256": "ffdf00971491e8eb51c7b832d7397426ac6d61fb5a0f6f6758e044d07215de9b",
+  "installedFilesChecked": 3279,
+  "releasedAssetsEqualAcceptedCandidate": true
+ },
+ "sandbox": {
+  "kind": "Core DockerSandbox (released API, CODE_FIXTURE_FILES = the five package registries)",
+  "image": "python@sha256:55432fc4ef6d07e33c10449312f0ec00071bbb310bb9bd7ba626a31fbbc2cb0d",
+  "arch": "arm64"
+ },
+ "http": {
+  "exit": 0,
+  "wallSeconds": 206,
+  "episodes": 56,
+  "practicalFamiliesRecovered": 3,
+  "writtenAndPortfolioPendingWithoutBlocking": 5,
+  "chapterLabs": [
+   {
+    "lab": "llm-lab-ch01-state-ledger",
+    "episodeId": "fnd-e01-02",
+    "registry": "llm-practical-labs-a",
+    "fixture": "llm-lab-ch01-state-ledger-v1",
+    "starterRejected": true,
+    "wrongImplementationRejected": true,
+    "referencePassed": true,
+    "referenceMs": 1128
+   },
+   {
+    "lab": "llm-lab-ch02-strided-views",
+    "episodeId": "fnd-e02-02",
+    "registry": "llm-practical-labs-a",
+    "fixture": "llm-lab-ch02-strided-views-v1",
+    "starterRejected": true,
+    "wrongImplementationRejected": true,
+    "referencePassed": true,
+    "referenceMs": 702
+   },
+   {
+    "lab": "llm-lab-ch03-gradient-descent",
+    "episodeId": "fnd-e03-03",
+    "registry": "llm-practical-labs-a",
+    "fixture": "llm-lab-ch03-gradient-descent-v1",
+    "starterRejected": true,
+    "wrongImplementationRejected": true,
+    "referencePassed": true,
+    "referenceMs": 682
+   },
+   {
+    "lab": "llm-lab-ch05-optimizer-resume",
+    "episodeId": "ttf-e05-03",
+    "registry": "llm-practical-labs-a",
+    "fixture": "llm-lab-ch05-optimizer-resume-v1",
+    "starterRejected": true,
+    "wrongImplementationRejected": true,
+    "referencePassed": true,
+    "referenceMs": 706
+   },
+   {
+    "lab": "llm-lab-ch06-next-token-loss",
+    "episodeId": "ttf-e06-02",
+    "registry": "llm-practical-labs-a",
+    "fixture": "llm-lab-ch06-next-token-loss-v1",
+    "starterRejected": true,
+    "wrongImplementationRejected": true,
+    "referencePassed": true,
+    "referenceMs": 637
+   },
+   {
+    "lab": "llm-lab-ch08-lora-adapter",
+    "episodeId": "ttf-e08-04",
+    "registry": "llm-practical-labs-a",
+    "fixture": "llm-lab-ch08-lora-adapter-v1",
+    "starterRejected": true,
+    "wrongImplementationRejected": true,
+    "referencePassed": true,
+    "referenceMs": 725
+   },
+   {
+    "lab": "llm-lab-ch09-tiling",
+    "episodeId": "sys-e09-02",
+    "registry": "llm-practical-labs-b",
+    "fixture": "llm-lab-ch09-tiling-v1",
+    "starterRejected": true,
+    "wrongImplementationRejected": true,
+    "referencePassed": true,
+    "referenceMs": 703
+   },
+   {
+    "lab": "llm-lab-ch10-pipeline",
+    "episodeId": "sys-e10-02",
+    "registry": "llm-practical-labs-b",
+    "fixture": "llm-lab-ch10-pipeline-v1",
+    "starterRejected": true,
+    "wrongImplementationRejected": true,
+    "referencePassed": true,
+    "referenceMs": 790
+   },
+   {
+    "lab": "llm-lab-ch11-journal",
+    "episodeId": "sys-e11-04",
+    "registry": "llm-practical-labs-b",
+    "fixture": "llm-lab-ch11-journal-v1",
+    "starterRejected": true,
+    "wrongImplementationRejected": true,
+    "referencePassed": true,
+    "referenceMs": 1020
+   },
+   {
+    "lab": "llm-lab-ch12-layout",
+    "episodeId": "eng-e12-02",
+    "registry": "llm-practical-labs-b",
+    "fixture": "llm-lab-ch12-layout-v1",
+    "starterRejected": true,
+    "wrongImplementationRejected": true,
+    "referencePassed": true,
+    "referenceMs": 792
+   },
+   {
+    "lab": "llm-lab-ch14-evidence",
+    "episodeId": "eng-e14-02",
+    "registry": "llm-practical-labs-b",
+    "fixture": "llm-lab-ch14-evidence-v1",
+    "starterRejected": true,
+    "wrongImplementationRejected": true,
+    "referencePassed": true,
+    "referenceMs": 1026
+   }
+  ],
+  "transferRevisit": {
+   "flow": "transfer_revisit_scheduled",
+   "objectiveId": "fnd-o04-02",
+   "dueAfterDays": 2,
+   "freshItemsLeft": 4,
+   "notDueYetRefused": true
+  },
+  "otherFlows": [
+   {
+    "flow": "failed_finite_bank",
+    "replacements": 2,
+    "gateUnchanged": true,
+    "noFurtherCharge": true,
+    "unavailableExplained": true
+   }
+  ]
+ },
+ "browser": {
+  "exit": 0,
+  "wallSeconds": 357,
+  "renderer": "released learner app 0.1.50 (VisualRuntimePlayer from @course-core/visuals 0.4.0)",
+  "viewports": [
+   {
+    "viewport": "phone",
+    "worked16Scene": {
+     "viewport": "phone",
+     "selectorOptions": [
+      "Start (nothing run)",
+      "1. Forward",
+      "2. Backward",
+      "3. Update",
+      "4. Forward again",
+      "5. Backward again"
+     ],
+     "phasesChecked": 6,
+     "buttonSteps": 6,
+     "keyboard": true,
+     "horizontalOverflow": false,
+     "accessibilityViolations": 0
+    },
+    "placement": "ignored",
+    "placedEpisodes": 0,
+    "writtenExplanationsSubmitted": 5,
+    "completedEpisodes": 56,
+    "recovery": true,
+    "reloadPreservedCode": true,
+    "horizontalOverflow": false,
+    "codeAccessibility": true,
+    "pageErrors": 0
+   },
+   {
+    "viewport": "desktop",
+    "worked16Scene": {
+     "viewport": "desktop",
+     "selectorOptions": [
+      "Start (nothing run)",
+      "1. Forward",
+      "2. Backward",
+      "3. Update",
+      "4. Forward again",
+      "5. Backward again"
+     ],
+     "phasesChecked": 6,
+     "buttonSteps": 6,
+     "keyboard": true,
+     "horizontalOverflow": false,
+     "accessibilityViolations": 0
+    },
+    "placement": "declined",
+    "placedEpisodes": 0,
+    "writtenExplanationsSubmitted": 0,
+    "completedEpisodes": 16,
+    "recovery": true,
+    "reloadPreservedCode": true,
+    "horizontalOverflow": false,
+    "codeAccessibility": true,
+    "pageErrors": 0
+   },
+   {
+    "viewport": "tablet",
+    "worked16Scene": {
+     "viewport": "tablet",
+     "selectorOptions": [
+      "Start (nothing run)",
+      "1. Forward",
+      "2. Backward",
+      "3. Update",
+      "4. Forward again",
+      "5. Backward again"
+     ],
+     "phasesChecked": 6,
+     "buttonSteps": 6,
+     "keyboard": true,
+     "horizontalOverflow": false,
+     "accessibilityViolations": 0
+    },
+    "placement": "accepted",
+    "placedEpisodes": 12,
+    "writtenExplanationsSubmitted": 0,
+    "completedEpisodes": 4,
+    "recovery": true,
+    "reloadPreservedCode": true,
+    "horizontalOverflow": false,
+    "codeAccessibility": true,
+    "pageErrors": 0
+   }
+  ]
+ },
+ "featureFlow": {
+  "exit": 0,
+  "wallSeconds": 77,
+  "flows": [
+   "operatorModelPrice",
+   "placementAccepted",
+   "placementDeclined",
+   "placementSettings",
+   "remedialEpisode",
+   "retention",
+   "setup",
+   "writtenExplanation"
+  ]
+ },
+ "package": {
+  "reproducible": "two package builds from one commit gave identical members and an identical archive (cmp)",
+  "installFlowOnCore0150": [
+   "wrong_password_refused",
+   "installed_and_selected",
+   "duplicate_refused",
+   "password_never_printed"
+  ],
+  "note": "Archive digests depend on the source commit recorded in package.json; the release archive is built from the merge commit by the coordinator."
+ },
+ "notVerified": [
+  "live providers",
+  "learning effectiveness",
+  "a due retention check answered for fnd-o04-02 (the schedule opening and the not-yet-due refusal were checked; answering a due check is covered for fnd-o03-03 by the feature flow)",
+  "Hebrew phase labels inside a running course (SDK 0.5.0 courses have one locale)",
+  "the pilot install"
+ ],
+ "liveProviderAcceptance": false
+}
