@@ -147,7 +147,13 @@ mean = sum(pi * d for pi, d in zip(probs, dP))
 dS = [pi * (d - mean) for pi, d in zip(probs, dP)]
 check([round(x, 12) for x in probs] == [0.25, 0.75] and math.isclose(out, 5) and [round(x, 12) for x in dS] == [-3, 3] and math.isclose(mean, 20), 'Attention walkthrough values')
 attention = [0.25, 0.75, out, G, 1, 2, 6, 8, 24, mean, -3, 3, 0.5, 4, 1 * 1, 3, 2 * 0.25 + 6 * 0.75]
-computed = {'remedial-strides': strides, 'remedial-chain-rule': chain, 'remedial-backward-fanout': fan + step, 'remedial-attention-mask': attention}
+# Design section 16 personal episode: x=2, y=3, w=0.5, b=0, lr=0.1, two backward calls then one update.
+wx, wy, w0, b0, lr = 2, 3, 0.5, 0, 0.1
+r0 = w0 * wx + b0 - wy
+g2w, g2b = 2 * r0 * wx, 2 * r0
+two = [wx, wy, w0, b0, lr, w0 * wx + b0, r0 * r0 / 2, r0 * wx, r0, g2w, g2b, w0 - lr * g2w, b0 - lr * g2b, w0 - lr * r0 * wx, b0 - lr * r0, w0 + lr * g2w, b0 + lr * g2b, 1e-12]
+check(math.isclose(two[11], 1.3) and math.isclose(two[12], 0.4) and math.isclose(two[15], -0.3), 'Two-backward walkthrough values')
+computed = {'remedial-strides': strides, 'remedial-chain-rule': chain, 'remedial-backward-fanout': fan + step, 'remedial-attention-mask': attention, 'remedial-two-backward': two}
 for entry in remedial['entries']:
     anchor = episodes[entry['anchorEpisodeId']]
     check(entry['objectiveIds'] == anchor['objectiveIds'] and entry['classification'] == 'optional' and entry['additionalEpisodes'] == 1, 'Remedial scope and cost')

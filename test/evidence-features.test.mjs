@@ -12,12 +12,12 @@ const without=assemble(config,modules,{...overlays,writtenOverlay:undefined,plac
 const full=assemble(config,modules,overlays);
 
 test('written explanations join gates as an extra first family without changing any threshold or existing item',()=>{
-  const items=full.server.assessments.filter(a=>a.type==='rubric');assert.equal(items.length,4);
+  const items=full.server.assessments.filter(a=>a.type==='rubric'&&a.id.startsWith('wri-'));assert.equal(items.length,4);
   for(const gate of full.server.gates){
     const old=without.gates.find(g=>g.id===gate.id),added=gate.assessmentIds.filter(id=>!old.assessmentIds.includes(id));
     assert.equal(gate.minimumIndependentFamilies,old.minimumIndependentFamilies);assert.equal(gate.requireAllObjectives,old.requireAllObjectives);
     assert.deepEqual(gate.assessmentIds.filter(id=>old.assessmentIds.includes(id)),old.assessmentIds);
-    if(added.length){assert.deepEqual(added,[gate.assessmentIds[0]]);assert.equal(items.find(a=>a.id===added[0]).objectiveIds.every(o=>gate.objectiveIds.includes(o)),true);}
+    if(added.length){assert.deepEqual(added,[gate.assessmentIds.filter(id=>id!=='portfolio-final')[0]]);assert.equal(items.find(a=>a.id===added[0]).objectiveIds.every(o=>gate.objectiveIds.includes(o)),true);}
   }
   for(const a of without.assessments)assert.deepEqual(full.server.assessments.find(b=>b.id===a.id),a);
   const evaluator=full.server.extensions.find(e=>e.id==='course-core-reviewed-rubric');assert.equal(evaluator.integrity,'sha256-d162a0182dad8fa60245e1eeee433a6efe7f52c9fa17d514de4822f0bf2adea3');
@@ -53,7 +53,7 @@ test('remedial episodes bind as optional metered teaching-bank insertions only i
   const [descriptors,authored,fresh,codeRecovery,remedial]=await Promise.all([read('runtime/installed-adaptation-descriptors.json'),read('content/adaptation-authoring.json'),read('content/fresh-assessments.json'),read('content/practical-recovery.json'),read('content/remedial-episodes.json')]);
   const base=assemble(config,modules,await loadOverlays({recovery:false})).server,input={descriptors:descriptors.adapters,authored,fresh,codeRecovery,remedial,baseCourse:base};
   const {configuration,overlay}=bindRecoveryRuntime(input),inserted=configuration.profiles.filter(p=>p.operation==='insert_episode');
-  assert.equal(inserted.length,4);assert(inserted.every(p=>p.classification==='optional'&&p.additionalEpisodes===1&&p.adapterId==='authored-teaching-bank-v1'&&p.teachingBank.length===1&&p.teachingBank[0].kind==='episode'));
+  assert.equal(inserted.length,5);assert(inserted.every(p=>p.classification==='optional'&&p.additionalEpisodes===1&&p.adapterId==='authored-teaching-bank-v1'&&p.teachingBank.length===1&&p.teachingBank[0].kind==='episode'));
   assert.deepEqual(configuration.profiles.filter(p=>p.operation!=='insert_episode'),(await read('runtime/recovery-registry.json')).profiles.filter(p=>p.operation!=='insert_episode'));
   assert.equal(overlay.qualification.remedialEpisodes,'reviewed_teaching_bank_insert_episode');
   const compiled=assemble(config,modules,{...overlays,recoveryOverlay:overlay});assert(!JSON.stringify(compiled.learner).includes(remedial.entries[0].blocks[0].markdown.slice(0,60)));
@@ -63,9 +63,9 @@ test('remedial episodes bind as optional metered teaching-bank insertions only i
 });
 
 test('packaging includes every verified illustration overlay and the same learner evidence as the assembled course',async()=>{
-  assert.deepEqual(VISUAL_OVERLAYS,['visuals','systems-visuals','learning-visuals','concept-visuals']);
+  assert.deepEqual(VISUAL_OVERLAYS,['visuals','systems-visuals','learning-visuals','concept-visuals','worked-adaptive-visuals']);
   const staged=await stageWorkedExamples(),visuals=(await Promise.all(VISUAL_OVERLAYS.map(n=>read(`content/${n}.json`)))).flatMap(o=>o.visuals);
-  assert.equal(staged.compiled.server.visuals.length,visuals.length);assert.equal(visuals.length,56);
+  assert.equal(staged.compiled.server.visuals.length,visuals.length);assert.equal(visuals.length,57);
   const illustrated=new Set(staged.compiled.server.chapters.flatMap(c=>c.episodes).filter(e=>e.blocks.some(b=>b.type==='visual')).map(e=>e.id));
   assert.equal(illustrated.size,new Set((await Promise.all(VISUAL_OVERLAYS.map(n=>read(`content/${n}.json`)))).flatMap(o=>o.bindings.map(b=>b.episodeId))).size);
   for(const field of ['gates','assessments','placement','retention','chapters','visuals'])assert.deepEqual(staged.compiled.server[field],full.server[field],field);
@@ -74,7 +74,7 @@ test('packaging includes every verified illustration overlay and the same learne
 test('independent CPU checks recompute every retention answer and every remedial and written-explanation number',()=>{
   const result=spawnSync('python3',['-B','verification/evidence-features.py'],{cwd:root,encoding:'utf8',timeout:30000});
   assert.equal(result.status,0,result.stderr);const report=JSON.parse(result.stdout);
-  assert.equal(report.retentionItems,24);assert.equal(report.remedialEpisodes,4);assert.equal(report.writtenItems,4);assert.equal(report.learningEffectiveness,'not_measured');
+  assert.equal(report.retentionItems,24);assert.equal(report.remedialEpisodes,5);assert.equal(report.writtenItems,4);assert.equal(report.learningEffectiveness,'not_measured');
 });
 
 test('acceptance written answers cite every criterion with an exact quote of the learner text',async()=>{

@@ -6,11 +6,11 @@ import {stageWorkedExamples,ROOT} from '../scripts/stage-worked-examples.mjs';
 test('staged worked examples use released SDK contracts and preserve the complete course and evidence requirements',async()=>{
   const staged=await stageWorkedExamples();
   assert.equal(staged.entries.length,39);assert.equal(staged.profiles.length,39);
-  assert.equal(staged.proposedRegistry.profiles.length,158);assert.equal(staged.proposedRegistry.profiles.filter(p=>p.operation==='insert_episode').length,4);
+  assert.equal(staged.proposedRegistry.profiles.length,159);assert.equal(staged.proposedRegistry.profiles.filter(p=>p.operation==='insert_episode').length,5);
   assert.equal(staged.compiled.server.chapters.length,14);
   assert.equal(staged.compiled.server.chapters.flatMap(c=>c.episodes).length,56);
-  assert.equal(staged.compiled.server.version,'0.1.6');
-  assert.equal(staged.minimumCoreVersion,'0.1.34');assert.equal(staged.publishedAuthority,false);
+  assert.equal(staged.compiled.server.version,'0.1.7');
+  assert.equal(staged.minimumCoreVersion,'0.1.48');assert.equal(staged.publishedAuthority,false);
   assert(staged.profiles.every(p=>p.classification==='optional'&&p.plannedMinutes===3&&p.additionalEpisodes===0&&p.generationBrief.length<=3000));
   assert(!('adaptation' in staged.compiled.learner));
   const learner=JSON.stringify(staged.compiled.learner);assert(!learner.includes('def solve(payload)'));assert(!learner.includes('referenceData'));assert(!learner.includes('expectedChecks'));
@@ -20,6 +20,6 @@ test('independent procedural CPU checks accept legitimate variants and reject wr
   const result=spawnSync('python3',['-B','verification/worked-examples.py'],{cwd:ROOT,encoding:'utf8',timeout:30000});
   assert.equal(result.status,0,result.stderr);
   const report=JSON.parse(result.stdout);assert.equal(report.templates,39);assert.equal(report.checks,1654);
-  assert.equal(report.sdkProducer,'released-0.4.0');assert.equal(report.runtimeBrokerQualified,false);
+  assert.equal(report.sdkProducer,'released-0.5.0');assert.equal(report.runtimeBrokerQualified,false);
   assert.equal(report.arbitraryProseVerified,false);assert.equal(report.publishedAuthority,false);assert.equal(report.earnedCredit,false);
 });

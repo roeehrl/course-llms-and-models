@@ -106,7 +106,9 @@ def canonical_reference(data):
 
 
 def verify():
-    generated=R.registry();receipts=json.loads((ROOT/'runtime/practical-registries.json').read_text());assert len(receipts['registries'])==3
+    generated=R.registry();receipts=json.loads((ROOT/'runtime/practical-registries.json').read_text())
+    # Chapter-lab registries are qualified by verification/labs-a.py and labs-b.py.
+    receipts['registries']=[r for r in receipts['registries'] if not r['id'].startswith('llm-practical-labs-')];assert len(receipts['registries'])==3
     delivered=[];registry_bytes={}
     for receipt in receipts['registries']:
         raw=(ROOT/receipt['file']).read_bytes();assert len(raw)==receipt['bytes'] and len(raw)<=1024*1024

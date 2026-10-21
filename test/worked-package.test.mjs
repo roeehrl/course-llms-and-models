@@ -12,7 +12,7 @@ const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 test('deployment rejects altered bytes, replaced private files and unrecognized members; packages are immutable',async()=>{
   const temporary=await mkdtemp(path.join(tmpdir(),'course-worked-package-')),directory=path.join(temporary,'release');
   try {
-    const manifest=await packageWorkedCourse(directory,{sourceCommit:'1'.repeat(40)});assert.equal(manifest.courseVersion,'0.1.6');assert.equal(manifest.sdkVersion,'0.4.0');assert.equal(manifest.minimumCoreVersion,'0.1.34');assert.equal(manifest.members.length,9);
+    const manifest=await packageWorkedCourse(directory,{sourceCommit:'1'.repeat(40)});assert.equal(manifest.courseVersion,'0.1.7');assert.equal(manifest.sdkVersion,'0.5.0');assert.equal(manifest.minimumCoreVersion,'0.1.48');assert.equal(manifest.members.length,11);
     await assert.rejects(packageWorkedCourse(directory,{sourceCommit:'1'.repeat(40)}),{code:'EEXIST'});
     const target=path.join(directory,'course.learner.json'),original=await readFile(target);
     await writeFile(target,Buffer.concat([original,Buffer.from(' ')]));await assert.rejects(verifyWorkedPackage(directory),/integrity/);
@@ -53,8 +53,13 @@ test('the compiled course references its manifest and learner halves once, withi
     await write({...reference,server:resolved.server,note:'x'});await assert.rejects(verifyWorkedPackage(directory),/Invalid compiled course reference/);
     await write({...reference,digest:'0'.repeat(64)});await assert.rejects(verifyWorkedPackage(directory),/Compiled course integrity/);
     // Packages that embed the compiled course whole remain verifiable, and are still checked.
-    await write(resolved);assert.equal((await verifyWorkedPackage(directory)).courseDigest,manifest.courseDigest);
-    await write({...resolved,learner:{...resolved.learner,title:'changed'}});await assert.rejects(verifyWorkedPackage(directory),/Compiled course integrity/);
+    // From 0.1.7 the whole course no longer fits one member, so an embedded copy is refused by
+    // the per-file limit; that is the reason packages reference the two halves instead.
+    if(Buffer.byteLength(JSON.stringify(resolved))+1>4*1024*1024){await write(resolved);await assert.rejects(verifyWorkedPackage(directory),/Rejected private package member/);}
+    else{
+      await write(resolved);assert.equal((await verifyWorkedPackage(directory)).courseDigest,manifest.courseDigest);
+      await write({...resolved,learner:{...resolved.learner,title:'changed'}});await assert.rejects(verifyWorkedPackage(directory),/Compiled course integrity/);
+    }
     await replaceMember(directory,'course.compiled.json',original);assert.equal((await verifyWorkedPackage(directory)).courseDigest,manifest.courseDigest);
   }finally {await rm(temporary,{recursive:true,force:true});}
 });

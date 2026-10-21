@@ -13,8 +13,8 @@
     "test": "node --test test/*.test.mjs",
     "verify:math": "python3 verification/foundations.py && python3 verification/training-and-transformers.py && python3 verification/systems-and-distribution.py && python3 verification/engineering-practice.py && python3 -B verification/evidence-features.py",
     "verify:recovery": "python3 -B verification/adaptation-authoring.py && python3 -B verification/test-adaptation-authoring.py",
-    "verify:practicals": "python3 -B verification/practicals.py && python3 -B verification/recovery-practicals.py",
-    "verify:visuals": "node verification/visuals.mjs && node verification/systems-visuals.mjs && node verification/learning-visuals.mjs && node verification/concept-visuals.mjs",
+    "verify:practicals": "python3 -B verification/practicals.py && python3 -B verification/recovery-practicals.py && python3 -B verification/labs-a.py && python3 -B verification/labs-b.py",
+    "verify:visuals": "node verification/visuals.mjs && node verification/systems-visuals.mjs && node verification/learning-visuals.mjs && node verification/concept-visuals.mjs && node verification/worked-adaptive-visual.mjs",
     "verify:practical-recovery": "python3 -B verification/recovery-practicals.py",
     "verify:worked": "python3 -B verification/worked-examples.py",
     "package:worked": "node scripts/package-worked-course.mjs",
@@ -22,10 +22,11 @@
     "verify:worked:application": "node verification/worked-example-flow.mjs",
     "verify:worked:browser": "node verification/worked-example-flow.mjs --browser",
     "verify:evidence": "python3 -B verification/evidence-features.py",
-    "retention:create": "node scripts/create-retention-checks.mjs"
+    "retention:create": "node scripts/create-retention-checks.mjs",
+    "verify:content": "python3 -B verification/misconceptions.py && python3 -B verification/worked-adaptive-episode.py && node verification/study.mjs"
   },
   "dependencies": {
-    "@course-core/sdk": "https://github.com/roeehrl/course-sdk/releases/download/v0.4.0/course-core-sdk-0.4.0.tgz",
+    "@course-core/sdk": "https://github.com/roeehrl/course-sdk/releases/download/v0.5.0/course-core-sdk-0.5.0.tgz",
     "@course-core/visuals": "https://github.com/roeehrl/course-core/releases/download/v0.1.3/course-core-visuals-0.1.0.tgz"
   },
   "devDependencies": {

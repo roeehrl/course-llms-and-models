@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "id": "study-instruments",
+  "purpose": "Held-out instruments for the course study (content/study.json): parallel pre and post forms on four objectives of chapters 3 and 4, and novel transfer items. They are optional, never join a gate and never count toward progress. Learners reach them as assessment blocks: the pre form before the chapter 3 derivative lesson, the post form after the chapter 4 accumulation lesson, and transfer at the end of chapter 4.",
+  "assessments": [
+    {
+      "id": "study-pre-chain",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o03-02"
+      ],
+      "familyId": "study-pre-family-chain",
+      "role": "application",
+      "prompt": "Study check (optional, not counted toward progress). Let prediction=2*w+1 and L=(prediction-4)^2/2. At w=0, what is dL/dw? Enter one signed number.",
+      "grading": {
+        "expected": -6,
+        "absoluteTolerance": 0,
+        "explanation": "Prediction is 1 and the residual is 1-4=-3. dprediction/dw=2, so dL/dw=-3*2=-6."
+      }
+    },
+    {
+      "id": "study-pre-descent",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o03-03"
+      ],
+      "familyId": "study-pre-family-descent",
+      "role": "application",
+      "prompt": "Study check (optional, not counted toward progress). Use prediction=w*x and L=(prediction-y)^2/2 with w=2, x=2, y=2 and learning rate 0.25. Compute the gradient at the current w and take one plain gradient-descent step. What is the new w?",
+      "grading": {
+        "expected": 1,
+        "absoluteTolerance": 1e-9,
+        "explanation": "Prediction 4, residual 2, gradient 2*2=4. New w=2-0.25*4=1."
+      }
+    },
+    {
+      "id": "study-pre-paths",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o04-02"
+      ],
+      "familyId": "study-pre-family-paths",
+      "role": "application",
+      "prompt": "Study check (optional, not counted toward progress). At x=3, define u=2*x and z=u*x. Seed dz=1. What is dz/dx when every path from x to z is accumulated?",
+      "grading": {
+        "expected": 12,
+        "absoluteTolerance": 0,
+        "explanation": "z=2x^2, so dz/dx=4x=12. Along the paths: through u, dz/du=x=3 times du/dx=2 gives 6; the direct use of x contributes u=6; 6+6=12."
+      }
+    },
+    {
+      "id": "study-pre-accum",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o04-03"
+      ],
+      "familyId": "study-pre-family-accum",
+      "role": "application",
+      "prompt": "Study check (optional, not counted toward progress). A logical batch of 6 examples is processed as two microbatches with no update in between. Microbatch 1 has 2 examples and mean gradient 4; microbatch 2 has 4 examples and mean gradient 1. What is the mean gradient over all 6 examples?",
+      "grading": {
+        "expected": 2,
+        "absoluteTolerance": 1e-9,
+        "explanation": "Weight each microbatch mean by its size: (2*4+4*1)/6=12/6=2. Averaging the two means would give 2.5, a different objective."
+      }
+    },
+    {
+      "id": "study-post-chain",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o03-02"
+      ],
+      "familyId": "study-post-family-chain",
+      "role": "application",
+      "prompt": "Study check (optional, not counted toward progress). Let prediction=4*w-1 and L=(prediction-2)^2/2. At w=1, what is dL/dw? Enter one signed number.",
+      "grading": {
+        "expected": 4,
+        "absoluteTolerance": 0,
+        "explanation": "Prediction is 3 and the residual is 3-2=1. dprediction/dw=4, so dL/dw=1*4=4."
+      }
+    },
+    {
+      "id": "study-post-descent",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o03-03"
+      ],
+      "familyId": "study-post-family-descent",
+      "role": "application",
+      "prompt": "Study check (optional, not counted toward progress). Use prediction=w*x and L=(prediction-y)^2/2 with w=0, x=2, y=3 and learning rate 0.1. Compute the gradient at the current w and take one plain gradient-descent step. What is the new w?",
+      "grading": {
+        "expected": 0.6,
+        "absoluteTolerance": 1e-9,
+        "explanation": "Prediction 0, residual -3, gradient -3*2=-6. New w=0-0.1*(-6)=0.6."
+      }
+    },
+    {
+      "id": "study-post-paths",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o04-02"
+      ],
+      "familyId": "study-post-family-paths",
+      "role": "application",
+      "prompt": "Study check (optional, not counted toward progress). At x=2, define u=x+1 and z=u*u+x. Seed dz=1. What is dz/dx when every path from x to z is accumulated?",
+      "grading": {
+        "expected": 7,
+        "absoluteTolerance": 0,
+        "explanation": "z=(x+1)^2+x, so dz/dx=2(x+1)+1=7. Through u: dz/du=2u=6 times du/dx=1 gives 6; the direct path adds 1."
+      }
+    },
+    {
+      "id": "study-post-accum",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o04-03"
+      ],
+      "familyId": "study-post-family-accum",
+      "role": "application",
+      "prompt": "Study check (optional, not counted toward progress). A logical batch of 5 examples is processed as two microbatches with no update in between. Microbatch 1 has 3 examples and mean gradient 2; microbatch 2 has 2 examples and mean gradient -1.5. What is the mean gradient over all 5 examples?",
+      "grading": {
+        "expected": 0.6,
+        "absoluteTolerance": 1e-9,
+        "explanation": "Weight each microbatch mean by its size: (3*2+2*(-1.5))/5=3/5=0.6. Averaging the two means would give 0.25."
+      }
+    },
+    {
+      "id": "study-transfer-stage",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o04-02"
+      ],
+      "familyId": "study-transfer-stage",
+      "role": "transfer",
+      "prompt": "Study check (optional, not counted toward progress). A model is split into two stages. Stage 1 computes h=w1*x; stage 2 computes p=w2*h and L=(p-y)^2/2. With x=1, w1=2, w2=3 and y=4, stage 2 must send stage 1 the value stage 1 needs to compute its own weight gradient. What is that value, dL/dh?",
+      "grading": {
+        "expected": 6,
+        "absoluteTolerance": 0,
+        "explanation": "p=6, residual 2, dL/dh=residual*w2=6. Stage 1 then computes dL/dw1=dL/dh*x=6. Receiving dL/dh does not change w1; only an optimizer step does."
+      }
+    },
+    {
+      "id": "study-transfer-fd",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o03-02"
+      ],
+      "familyId": "study-transfer-fd",
+      "role": "transfer",
+      "prompt": "Study check (optional, not counted toward progress). You check the derivative of f(w)=w^3 at w=2 with a central difference using step h=0.1: (f(w+h)-f(w-h))/(2h). What number does the check return (it differs slightly from the exact derivative)?",
+      "grading": {
+        "expected": 12.01,
+        "absoluteTolerance": 1e-9,
+        "explanation": "(2.1^3-1.9^3)/0.2=(9.261-6.859)/0.2=12.01. The exact derivative is 12; the central-difference error here is h^2=0.01."
+      }
+    },
+    {
+      "id": "study-transfer-scale",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o03-03"
+      ],
+      "familyId": "study-transfer-scale",
+      "role": "transfer",
+      "prompt": "Study check (optional, not counted toward progress). A training loop with plain gradient descent uses learning rate 0.3. A change multiplies the loss by 3 (for example, summing three equal-sized terms instead of averaging them). What learning rate keeps every update exactly the same?",
+      "grading": {
+        "expected": 0.1,
+        "absoluteTolerance": 1e-9,
+        "explanation": "The gradient is multiplied by 3, so the learning rate must be divided by 3: 0.3/3=0.1."
+      }
+    },
+    {
+      "id": "study-transfer-microbatch",
+      "type": "numeric",
+      "objectiveIds": [
+        "fnd-o04-03"
+      ],
+      "familyId": "study-transfer-microbatch",
+      "role": "transfer",
+      "prompt": "Study check (optional, not counted toward progress). Three microbatches of sizes 2, 3 and 1 report their MEAN gradients 3, -1 and 6 for the same parameter, with no update in between. What is the mean gradient over all 6 examples?",
+      "grading": {
+        "expected": 1.5,
+        "absoluteTolerance": 1e-9,
+        "explanation": "Recover sums: 2*3=6, 3*(-1)=-3, 1*6=6; total 9 over 6 examples gives 1.5. The unweighted mean of the three means would be 8/3."
+      }
+    }
+  ],
+  "episodeBlocks": [
+    {
+      "episodeId": "fnd-e03-02",
+      "assessmentId": "study-pre-chain",
+      "position": "start",
+      "prefix": "study",
+      "crossEpisode": true
+    },
+    {
+      "episodeId": "fnd-e03-02",
+      "assessmentId": "study-pre-descent",
+      "position": "start",
+      "prefix": "study",
+      "crossEpisode": true
+    },
+    {
+      "episodeId": "fnd-e03-02",
+      "assessmentId": "study-pre-paths",
+      "position": "start",
+      "prefix": "study",
+      "crossEpisode": true
+    },
+    {
+      "episodeId": "fnd-e03-02",
+      "assessmentId": "study-pre-accum",
+      "position": "start",
+      "prefix": "study",
+      "crossEpisode": true
+    },
+    {
+      "episodeId": "fnd-e04-03",
+      "assessmentId": "study-post-chain",
+      "position": "end",
+      "prefix": "study",
+      "crossEpisode": true
+    },
+    {
+      "episodeId": "fnd-e04-03",
+      "assessmentId": "study-post-descent",
+      "position": "end",
+      "prefix": "study",
+      "crossEpisode": true
+    },
+    {
+      "episodeId": "fnd-e04-03",
+      "assessmentId": "study-post-paths",
+      "position": "end",
+      "prefix": "study",
+      "crossEpisode": true
+    },
+    {
+      "episodeId": "fnd-e04-03",
+      "assessmentId": "study-post-accum",
+      "position": "end",
+      "prefix": "study",
+      "crossEpisode": true
+    },
+    {
+      "episodeId": "fnd-e04-04",
+      "assessmentId": "study-transfer-stage",
+      "position": "end",
+      "prefix": "study",
+      "crossEpisode": true
+    },
+    {
+      "episodeId": "fnd-e04-04",
+      "assessmentId": "study-transfer-fd",
+      "position": "end",
+      "prefix": "study",
+      "crossEpisode": true
+    },
+    {
+      "episodeId": "fnd-e04-04",
+      "assessmentId": "study-transfer-scale",
+      "position": "end",
+      "prefix": "study",
+      "crossEpisode": true
+    },
+    {
+      "episodeId": "fnd-e04-04",
+      "assessmentId": "study-transfer-microbatch",
+      "position": "end",
+      "prefix": "study",
+      "crossEpisode": true
+    }
+  ]
+}

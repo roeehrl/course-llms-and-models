@@ -1,0 +1,4886 @@
+{
+  "schemaVersion": 1,
+  "id": "misconceptions",
+  "purpose": "Two declared misconception hypotheses for each of the 56 episodes, one diagnostic probe item per episode that distinguishes them (grouped per chapter as that chapter's misconception probe set), and links from existing gate distractors that state a declared misconception. Probes never grant credit and never join a gate; hypotheses are not critical in this release.",
+  "review": {
+    "status": "author_draft_pending_owner_review",
+    "reviewedAt": null,
+    "note": "Drafted from planning/curriculum.json chapter misconceptions and each episode's own text; numeric facts are recomputed by verification/misconceptions.py. Not an independent human content review."
+  },
+  "hypotheses": [
+    {
+      "id": "mis-01-01-a",
+      "kind": "misconception",
+      "statement": "A model's weights are a database of the records it answers from, so any document a model can use must be stored inside its parameters.",
+      "objectiveIds": [
+        "fnd-o01-01"
+      ]
+    },
+    {
+      "id": "mis-01-01-b",
+      "kind": "misconception",
+      "statement": "If a model's output changes, its learned weights must have changed.",
+      "objectiveIds": [
+        "fnd-o01-01"
+      ]
+    },
+    {
+      "id": "mis-01-02-a",
+      "kind": "misconception",
+      "statement": "Computing the gradient in backward applies the parameter update, so after backward the weight already holds its new value.",
+      "objectiveIds": [
+        "fnd-o01-02"
+      ]
+    },
+    {
+      "id": "mis-01-02-b",
+      "kind": "misconception",
+      "statement": "A deployed model learns from every prompt it serves, so logged requests or a growing context mean its weights changed.",
+      "objectiveIds": [
+        "fnd-o01-02"
+      ]
+    },
+    {
+      "id": "mis-01-03-a",
+      "kind": "misconception",
+      "statement": "Generating text trains the model: each emitted token updates the predictor's probabilities toward what it just produced.",
+      "objectiveIds": [
+        "fnd-o01-03"
+      ]
+    },
+    {
+      "id": "mis-01-03-b",
+      "kind": "misconception",
+      "statement": "Token IDs are interchangeable labels: as long as every index stays in range, swapping the tokenizer's text-to-ID mapping cannot change a deterministic model's output.",
+      "objectiveIds": [
+        "fnd-o01-03"
+      ]
+    },
+    {
+      "id": "mis-01-04-a",
+      "kind": "misconception",
+      "statement": "In backward, the downstream stage sends upstream its own parameter gradient, and the upstream stage can compute its gradient from that number.",
+      "objectiveIds": [
+        "fnd-o01-04"
+      ]
+    },
+    {
+      "id": "mis-01-04-b",
+      "kind": "misconception",
+      "statement": "A completed local backward or a sent upload proves the work was accepted, credited and paid.",
+      "objectiveIds": [
+        "fnd-o01-04"
+      ]
+    },
+    {
+      "id": "mis-02-01-a",
+      "kind": "misconception",
+      "statement": "Tensors with the same element count are interchangeable: if the allocation is large enough, (2,3) and (3,2) data are laid out correctly for each other.",
+      "objectiveIds": [
+        "fnd-o02-01"
+      ]
+    },
+    {
+      "id": "mis-02-01-b",
+      "kind": "misconception",
+      "statement": "The number of axes identifies their meaning, so any three-axis activation is (batch, time, feature) in that order.",
+      "objectiveIds": [
+        "fnd-o02-01"
+      ]
+    },
+    {
+      "id": "mis-02-02-a",
+      "kind": "misconception",
+      "statement": "A view such as a transpose or slice is always a copy, so writing through it cannot change the original tensor.",
+      "objectiveIds": [
+        "fnd-o02-02"
+      ]
+    },
+    {
+      "id": "mis-02-02-b",
+      "kind": "misconception",
+      "statement": "If a strided read stays in bounds and returns finite values, its indexing is correct.",
+      "objectiveIds": [
+        "fnd-o02-02"
+      ]
+    },
+    {
+      "id": "mis-02-03-a",
+      "kind": "misconception",
+      "statement": "A dot product is elementwise multiplication: [1,2,3]·[4,-1,2] returns the vector [4,-2,6].",
+      "objectiveIds": [
+        "fnd-o02-03"
+      ]
+    },
+    {
+      "id": "mis-02-03-b",
+      "kind": "misconception",
+      "statement": "Averaging the row sums of a matrix gives the same number as the mean of all its elements.",
+      "objectiveIds": [
+        "fnd-o02-03"
+      ]
+    },
+    {
+      "id": "mis-02-04-a",
+      "kind": "misconception",
+      "statement": "BF16 is at least as precise as FP16 because it has more exponent bits.",
+      "objectiveIds": [
+        "fnd-o02-04"
+      ]
+    },
+    {
+      "id": "mis-02-04-b",
+      "kind": "misconception",
+      "statement": "Floating-point addition is associative, so reordering a sum (as a parallel reduction does) gives identical results.",
+      "objectiveIds": [
+        "fnd-o02-04"
+      ]
+    },
+    {
+      "id": "mis-03-01-a",
+      "kind": "misconception",
+      "statement": "A lower or zero training loss proves the model is correct on future inputs.",
+      "objectiveIds": [
+        "fnd-o03-01"
+      ]
+    },
+    {
+      "id": "mis-03-01-b",
+      "kind": "misconception",
+      "statement": "A lower mean loss means every example, including rare or extreme cases, improved.",
+      "objectiveIds": [
+        "fnd-o03-01"
+      ]
+    },
+    {
+      "id": "mis-03-02-a",
+      "kind": "misconception",
+      "statement": "The gradient points downhill, so adding the gradient to the weight decreases the loss.",
+      "objectiveIds": [
+        "fnd-o03-02"
+      ]
+    },
+    {
+      "id": "mis-03-02-b",
+      "kind": "misconception",
+      "statement": "The derivative is the required change: dL/dw = -6 means the weight should move by exactly 6.",
+      "objectiveIds": [
+        "fnd-o03-02"
+      ]
+    },
+    {
+      "id": "mis-03-03-a",
+      "kind": "misconception",
+      "statement": "Crossing the minimum (overshooting) always means the update failed and the loss got worse.",
+      "objectiveIds": [
+        "fnd-o03-03"
+      ]
+    },
+    {
+      "id": "mis-03-03-b",
+      "kind": "misconception",
+      "statement": "A learning rate that works for one loss scale or reduction gives the same update after the loss is scaled or changed from mean to sum.",
+      "objectiveIds": [
+        "fnd-o03-03"
+      ]
+    },
+    {
+      "id": "mis-03-04-a",
+      "kind": "misconception",
+      "statement": "A file named test stays a held-out estimate even if its score is used repeatedly to choose settings.",
+      "objectiveIds": [
+        "fnd-o03-04"
+      ]
+    },
+    {
+      "id": "mis-03-04-b",
+      "kind": "misconception",
+      "statement": "Fitting normalization statistics on all the data before splitting is harmless because it only rescales inputs.",
+      "objectiveIds": [
+        "fnd-o03-04"
+      ]
+    },
+    {
+      "id": "mis-04-01-a",
+      "kind": "misconception",
+      "statement": "Backward simply runs the forward source code in reverse, line by line, as inverse operations.",
+      "objectiveIds": [
+        "fnd-o04-01"
+      ]
+    },
+    {
+      "id": "mis-04-01-b",
+      "kind": "misconception",
+      "statement": "A node's forward output is enough to compute its local derivatives, so saving p=a*b alone suffices for backward.",
+      "objectiveIds": [
+        "fnd-o04-01"
+      ]
+    },
+    {
+      "id": "mis-04-02-a",
+      "kind": "misconception",
+      "statement": "Backward changes the weights: after backward finishes, each parameter already holds its updated value.",
+      "objectiveIds": [
+        "fnd-o04-02"
+      ]
+    },
+    {
+      "id": "mis-04-02-b",
+      "kind": "misconception",
+      "statement": "When a value reaches the output along several paths, each new contribution replaces its gradient instead of adding to it.",
+      "objectiveIds": [
+        "fnd-o04-02"
+      ]
+    },
+    {
+      "id": "mis-04-03-a",
+      "kind": "misconception",
+      "statement": "Adding equally weighted microbatch mean gradients reproduces the full-batch mean even when the microbatches have different sizes.",
+      "objectiveIds": [
+        "fnd-o04-03"
+      ]
+    },
+    {
+      "id": "mis-04-03-b",
+      "kind": "misconception",
+      "statement": "Recomputing discarded activations during backward is always safe, even if the parameters or random state changed since the original forward.",
+      "objectiveIds": [
+        "fnd-o04-03"
+      ]
+    },
+    {
+      "id": "mis-04-04-a",
+      "kind": "misconception",
+      "statement": "Because a visited set schedules a shared node once, a repeated operand slot such as x*x should also contribute only once.",
+      "objectiveIds": [
+        "fnd-o04-04"
+      ]
+    },
+    {
+      "id": "mis-04-04-b",
+      "kind": "misconception",
+      "statement": "If an engine passes add and multiply tests with distinct leaves, it also handles shared nodes and fan-out correctly.",
+      "objectiveIds": [
+        "fnd-o04-04"
+      ]
+    },
+    {
+      "id": "mis-05-01-a",
+      "kind": "misconception",
+      "statement": "Stacking more affine layers without a nonlinearity lets the network represent more functions.",
+      "objectiveIds": [
+        "ttf-o05-01"
+      ]
+    },
+    {
+      "id": "mis-05-01-b",
+      "kind": "misconception",
+      "statement": "A ReLU unit that passes zero gradient on an example shows the training loop is broken.",
+      "objectiveIds": [
+        "ttf-o05-01"
+      ]
+    },
+    {
+      "id": "mis-05-02-a",
+      "kind": "misconception",
+      "statement": "Initializing hidden units identically (for example all zeros) is harmless, because gradients will make them differ after the first update.",
+      "objectiveIds": [
+        "ttf-o05-02"
+      ]
+    },
+    {
+      "id": "mis-05-02-b",
+      "kind": "misconception",
+      "statement": "Normalizing over the whole batch instead of each token's features is harmless when the output shape is unchanged.",
+      "objectiveIds": [
+        "ttf-o05-02"
+      ]
+    },
+    {
+      "id": "mis-05-03-a",
+      "kind": "misconception",
+      "statement": "The next weight of a stateful optimizer depends only on the current weight and current gradient.",
+      "objectiveIds": [
+        "ttf-o05-03"
+      ]
+    },
+    {
+      "id": "mis-05-03-b",
+      "kind": "misconception",
+      "statement": "Adding lambda*w to the gradient in Adam is the same algorithm as AdamW's decoupled weight decay.",
+      "objectiveIds": [
+        "ttf-o05-03"
+      ]
+    },
+    {
+      "id": "mis-05-04-a",
+      "kind": "misconception",
+      "statement": "A training checkpoint is just the weights: restoring them reproduces the continued run.",
+      "objectiveIds": [
+        "ttf-o05-04"
+      ]
+    },
+    {
+      "id": "mis-05-04-b",
+      "kind": "misconception",
+      "statement": "If the loss goes down, the training loop's update is correct.",
+      "objectiveIds": [
+        "ttf-o05-04"
+      ]
+    },
+    {
+      "id": "mis-06-01-a",
+      "kind": "misconception",
+      "statement": "A token is always a word, so the context length in tokens equals the word count.",
+      "objectiveIds": [
+        "ttf-o06-01"
+      ]
+    },
+    {
+      "id": "mis-06-01-b",
+      "kind": "misconception",
+      "statement": "Each occurrence of a token in a sequence has its own learned embedding copy, so their gradients do not combine.",
+      "objectiveIds": [
+        "ttf-o06-01"
+      ]
+    },
+    {
+      "id": "mis-06-02-a",
+      "kind": "misconception",
+      "statement": "A lower cross-entropy loss always means higher accuracy; loss and accuracy measure the same thing.",
+      "objectiveIds": [
+        "ttf-o06-02"
+      ]
+    },
+    {
+      "id": "mis-06-02-b",
+      "kind": "misconception",
+      "statement": "Applying softmax before a loss that expects logits is harmless, because softmax is idempotent.",
+      "objectiveIds": [
+        "ttf-o06-02"
+      ]
+    },
+    {
+      "id": "mis-06-03-a",
+      "kind": "misconception",
+      "statement": "Once targets are shifted correctly, attention may look at future positions during training; teacher forcing makes the causal mask unnecessary.",
+      "objectiveIds": [
+        "ttf-o06-03"
+      ]
+    },
+    {
+      "id": "mis-06-03-b",
+      "kind": "misconception",
+      "statement": "Padding slots can be counted in the loss denominator; dividing by all slots gives the valid-token mean.",
+      "objectiveIds": [
+        "ttf-o06-03"
+      ]
+    },
+    {
+      "id": "mis-06-04-a",
+      "kind": "misconception",
+      "statement": "Lowering the sampling temperature makes the model's answers more correct, not just its distribution sharper.",
+      "objectiveIds": [
+        "ttf-o06-04"
+      ]
+    },
+    {
+      "id": "mis-06-04-b",
+      "kind": "misconception",
+      "statement": "A KV cache can be reused after a model update as long as token IDs, positions and tensor shapes match.",
+      "objectiveIds": [
+        "ttf-o06-04"
+      ]
+    },
+    {
+      "id": "mis-07-01-a",
+      "kind": "misconception",
+      "statement": "Attention weights alone fully explain a model's decision: a large weight on a position means that token caused the output.",
+      "objectiveIds": [
+        "ttf-o07-01"
+      ]
+    },
+    {
+      "id": "mis-07-01-b",
+      "kind": "misconception",
+      "statement": "In self-attention only the value branch sends gradient back to the input X.",
+      "objectiveIds": [
+        "ttf-o07-01"
+      ]
+    },
+    {
+      "id": "mis-07-02-a",
+      "kind": "misconception",
+      "statement": "Masking only hides blocked positions afterwards; giving a blocked key score 0 before softmax is equivalent to excluding it.",
+      "objectiveIds": [
+        "ttf-o07-02"
+      ]
+    },
+    {
+      "id": "mis-07-02-b",
+      "kind": "misconception",
+      "statement": "Checking that each attention probability row sums to one (and outputs are finite) validates attention backward.",
+      "objectiveIds": [
+        "ttf-o07-02"
+      ]
+    },
+    {
+      "id": "mis-07-03-a",
+      "kind": "misconception",
+      "statement": "Each attention head is its own layer (or its own pipeline stage), not one of several learned mixing operations inside a single layer.",
+      "objectiveIds": [
+        "ttf-o07-03"
+      ]
+    },
+    {
+      "id": "mis-07-03-b",
+      "kind": "misconception",
+      "statement": "RMSNorm subtracts the mean like LayerNorm, so its output always has zero mean.",
+      "objectiveIds": [
+        "ttf-o07-03"
+      ]
+    },
+    {
+      "id": "mis-07-04-a",
+      "kind": "misconception",
+      "statement": "A decreasing training loss on the tiny repeating corpus shows the decoder's masks and gradients are implemented correctly.",
+      "objectiveIds": [
+        "ttf-o07-04"
+      ]
+    },
+    {
+      "id": "mis-07-04-b",
+      "kind": "misconception",
+      "statement": "Initializing every decoder matrix to zero is a safe, neutral starting point.",
+      "objectiveIds": [
+        "ttf-o07-04"
+      ]
+    },
+    {
+      "id": "mis-08-01-a",
+      "kind": "misconception",
+      "statement": "Any layer used in forward is trained: if forward computes correctly, its weights appear in model.parameters() and the optimizer updates them.",
+      "objectiveIds": [
+        "ttf-o08-01"
+      ]
+    },
+    {
+      "id": "mis-08-01-b",
+      "kind": "misconception",
+      "statement": "PyTorch replaces .grad on each backward call, so two backward calls without clearing leave only the latest gradient.",
+      "objectiveIds": [
+        "ttf-o08-01"
+      ]
+    },
+    {
+      "id": "mis-08-02-a",
+      "kind": "misconception",
+      "statement": "Timing the Python call of an asynchronous device operation measures its completion latency.",
+      "objectiveIds": [
+        "ttf-o08-02"
+      ]
+    },
+    {
+      "id": "mis-08-02-b",
+      "kind": "misconception",
+      "statement": "Any mismatch between an optimized kernel and the reference is floating-point rounding, so widening the tolerance is the fix.",
+      "objectiveIds": [
+        "ttf-o08-02"
+      ]
+    },
+    {
+      "id": "mis-08-03-a",
+      "kind": "misconception",
+      "statement": "MLX is a PyTorch backend flag, so PyTorch code runs on it unchanged by selecting that device.",
+      "objectiveIds": [
+        "ttf-o08-03"
+      ]
+    },
+    {
+      "id": "mis-08-03-b",
+      "kind": "misconception",
+      "statement": "In MLX, writing c=a+b performs the computation immediately, so stopping a timer right after building the expressions measures completed work.",
+      "objectiveIds": [
+        "ttf-o08-03"
+      ]
+    },
+    {
+      "id": "mis-08-04-a",
+      "kind": "misconception",
+      "statement": "Next-token pretraining produces a finished instruction-following assistant.",
+      "objectiveIds": [
+        "ttf-o08-04"
+      ]
+    },
+    {
+      "id": "mis-08-04-b",
+      "kind": "misconception",
+      "statement": "If both LoRA factors start at zero, they still learn, because the base model's output is nonzero.",
+      "objectiveIds": [
+        "ttf-o08-04"
+      ]
+    },
+    {
+      "id": "mis-09-01-a",
+      "kind": "misconception",
+      "statement": "A threadgroup barrier synchronizes every threadgroup in the dispatch, so all groups' partial sums are visible after it.",
+      "objectiveIds": [
+        "sys-o09-01"
+      ]
+    },
+    {
+      "id": "mis-09-01-b",
+      "kind": "misconception",
+      "statement": "Threads without valid input can return early, even before a barrier that the rest of their group must reach.",
+      "objectiveIds": [
+        "sys-o09-01"
+      ]
+    },
+    {
+      "id": "mis-09-02-a",
+      "kind": "misconception",
+      "statement": "Halving counted memory traffic halves runtime, because traffic determines performance.",
+      "objectiveIds": [
+        "sys-o09-02"
+      ]
+    },
+    {
+      "id": "mis-09-02-b",
+      "kind": "misconception",
+      "statement": "Larger tiles are always faster because they cut traffic; the registers and threadgroup memory they use cannot reduce occupancy.",
+      "objectiveIds": [
+        "sys-o09-02"
+      ]
+    },
+    {
+      "id": "mis-09-03-a",
+      "kind": "misconception",
+      "statement": "A tensor operation (for example a PyTorch MPS call) runs on the Apple Neural Engine.",
+      "objectiveIds": [
+        "sys-o09-03"
+      ]
+    },
+    {
+      "id": "mis-09-03-b",
+      "kind": "misconception",
+      "statement": "If an API exists on two chips, a custom kernel that passed its tests on one chip is qualified on the other.",
+      "objectiveIds": [
+        "sys-o09-03"
+      ]
+    },
+    {
+      "id": "mis-09-04-a",
+      "kind": "misconception",
+      "statement": "Unified memory is free memory: when CPU and GPU share it, capacity and bandwidth stop being constraints.",
+      "objectiveIds": [
+        "sys-o09-04"
+      ]
+    },
+    {
+      "id": "mis-09-04-b",
+      "kind": "misconception",
+      "statement": "A GPU twice as fast (or a busier GPU) makes the whole training step twice as fast.",
+      "objectiveIds": [
+        "sys-o09-04"
+      ]
+    },
+    {
+      "id": "mis-10-01-a",
+      "kind": "misconception",
+      "statement": "In tensor parallelism the workers' partial outputs are always concatenated, whichever dimension of the matrix was split.",
+      "objectiveIds": [
+        "sys-o10-01"
+      ]
+    },
+    {
+      "id": "mis-10-01-b",
+      "kind": "misconception",
+      "statement": "A pipeline with three stages runs on exactly three permanently wired machines, one per stage.",
+      "objectiveIds": [
+        "sys-o10-01"
+      ]
+    },
+    {
+      "id": "mis-10-02-a",
+      "kind": "misconception",
+      "statement": "Splitting a batch into pipeline microbatches removes idle time: every stage is busy for the whole schedule.",
+      "objectiveIds": [
+        "sys-o10-02"
+      ]
+    },
+    {
+      "id": "mis-10-02-b",
+      "kind": "misconception",
+      "statement": "A late gradient can be applied to whatever activation now occupies its cache slot if the shapes match.",
+      "objectiveIds": [
+        "sys-o10-02"
+      ]
+    },
+    {
+      "id": "mis-10-03-a",
+      "kind": "misconception",
+      "statement": "The course's four motivating Macs form a fixed private pipeline in which each Mac always serves the same stage.",
+      "objectiveIds": [
+        "sys-o10-03"
+      ]
+    },
+    {
+      "id": "mis-10-03-b",
+      "kind": "misconception",
+      "statement": "Every send attempt that returned counts as a successful activation, so three sends mean three completed samples.",
+      "objectiveIds": [
+        "sys-o10-03"
+      ]
+    },
+    {
+      "id": "mis-10-04-a",
+      "kind": "misconception",
+      "statement": "An epoch in this distributed protocol always means one full pass over a fixed dataset.",
+      "objectiveIds": [
+        "sys-o10-04"
+      ]
+    },
+    {
+      "id": "mis-10-04-b",
+      "kind": "misconception",
+      "statement": "pseudo_gradient_batch_count is a normalization divisor: the pseudo-gradient is averaged by dividing by it.",
+      "objectiveIds": [
+        "sys-o10-04"
+      ]
+    },
+    {
+      "id": "mis-11-01-a",
+      "kind": "misconception",
+      "statement": "The TAH GUI itself performs the tensor computations.",
+      "objectiveIds": [
+        "sys-o11-01"
+      ]
+    },
+    {
+      "id": "mis-11-01-b",
+      "kind": "misconception",
+      "statement": "A created worker process, or one registered in a run, is ready and training.",
+      "objectiveIds": [
+        "sys-o11-01"
+      ]
+    },
+    {
+      "id": "mis-11-02-a",
+      "kind": "misconception",
+      "statement": "A head/body/tail split is a single transformer block or a single attention head.",
+      "objectiveIds": [
+        "sys-o11-02"
+      ]
+    },
+    {
+      "id": "mis-11-02-b",
+      "kind": "misconception",
+      "statement": "The tail's forward already computes the training loss, and every split returns an empty state.",
+      "objectiveIds": [
+        "sys-o11-02"
+      ]
+    },
+    {
+      "id": "mis-11-03-a",
+      "kind": "misconception",
+      "statement": "Popping an item from the ready queue means its forward context is no longer needed, so the cached input can be freed.",
+      "objectiveIds": [
+        "sys-o11-03"
+      ]
+    },
+    {
+      "id": "mis-11-03-b",
+      "kind": "misconception",
+      "statement": "If a cached input has expired, recomputing with the next queued sample of the same shape is acceptable.",
+      "objectiveIds": [
+        "sys-o11-03"
+      ]
+    },
+    {
+      "id": "mis-11-04-a",
+      "kind": "misconception",
+      "statement": "An HTTP 200 heartbeat response proves the worker is admitted and training.",
+      "objectiveIds": [
+        "sys-o11-04"
+      ]
+    },
+    {
+      "id": "mis-11-04-b",
+      "kind": "misconception",
+      "statement": "The latest event mentioning training shows the current state, even if it was produced before a reset.",
+      "objectiveIds": [
+        "sys-o11-04"
+      ]
+    },
+    {
+      "id": "mis-12-01-a",
+      "kind": "misconception",
+      "statement": "Outputs that are finite and repeat exactly on every run come from a correct implementation.",
+      "objectiveIds": [
+        "eng-o12-01"
+      ]
+    },
+    {
+      "id": "mis-12-01-b",
+      "kind": "misconception",
+      "statement": "Comparing aggregate statistics such as sums, means or norms with the reference is enough to detect a layout error.",
+      "objectiveIds": [
+        "eng-o12-01"
+      ]
+    },
+    {
+      "id": "mis-12-02-a",
+      "kind": "misconception",
+      "statement": "If dV matches its oracle, the attention probabilities P must be correct everywhere.",
+      "objectiveIds": [
+        "eng-o12-02"
+      ]
+    },
+    {
+      "id": "mis-12-02-b",
+      "kind": "misconception",
+      "statement": "Two cooperative tensor layouts with equal shapes and element counts can be reinterpreted directly as each other.",
+      "objectiveIds": [
+        "eng-o12-02"
+      ]
+    },
+    {
+      "id": "mis-12-03-a",
+      "kind": "misconception",
+      "statement": "A run of the optimized entry point that exits successfully with matching outputs validates the candidate kernel.",
+      "objectiveIds": [
+        "eng-o12-03"
+      ]
+    },
+    {
+      "id": "mis-12-03-b",
+      "kind": "misconception",
+      "statement": "A restart without any source edit runs the same computation as before.",
+      "objectiveIds": [
+        "eng-o12-03"
+      ]
+    },
+    {
+      "id": "mis-12-04-a",
+      "kind": "misconception",
+      "statement": "A healthy aggregate loss curve proves local computation was correct, or that a failed gate cannot matter.",
+      "objectiveIds": [
+        "eng-o12-04"
+      ]
+    },
+    {
+      "id": "mis-12-04-b",
+      "kind": "misconception",
+      "statement": "Two failures on the same chip family must share the same cause.",
+      "objectiveIds": [
+        "eng-o12-04"
+      ]
+    },
+    {
+      "id": "mis-13-01-a",
+      "kind": "misconception",
+      "statement": "With vocabulary tiling, normalizing each tile's logits separately gives the original cross-entropy.",
+      "objectiveIds": [
+        "eng-o13-01"
+      ]
+    },
+    {
+      "id": "mis-13-01-b",
+      "kind": "misconception",
+      "statement": "A finite-check result still protects the update if it is read after the optimizer step or taken from an earlier launch.",
+      "objectiveIds": [
+        "eng-o13-01"
+      ]
+    },
+    {
+      "id": "mis-13-02-a",
+      "kind": "misconception",
+      "statement": "Mean-centering LayerNorm and RMSNorm are interchangeable normalizations, so fusing one in place of the other keeps the function.",
+      "objectiveIds": [
+        "eng-o13-02"
+      ]
+    },
+    {
+      "id": "mis-13-02-b",
+      "kind": "misconception",
+      "statement": "If a fused normalization's forward output matches the reference, its backward is correct too.",
+      "objectiveIds": [
+        "eng-o13-02"
+      ]
+    },
+    {
+      "id": "mis-13-03-a",
+      "kind": "misconception",
+      "statement": "A kernel that passed qualification on one chip or OS build is qualified for another chip in the same family.",
+      "objectiveIds": [
+        "eng-o13-03"
+      ]
+    },
+    {
+      "id": "mis-13-03-b",
+      "kind": "misconception",
+      "statement": "An old passing result stays valid after editing source, flags or the embedded binary if the function names and version label are unchanged.",
+      "objectiveIds": [
+        "eng-o13-03"
+      ]
+    },
+    {
+      "id": "mis-13-04-a",
+      "kind": "misconception",
+      "statement": "Making a kernel N times faster makes the whole job N times faster, raising tokens per hour by the same factor.",
+      "objectiveIds": [
+        "eng-o13-04"
+      ]
+    },
+    {
+      "id": "mis-13-04-b",
+      "kind": "misconception",
+      "statement": "If a harness catches a candidate exception and falls back to the reference, the matching output counts as candidate evidence.",
+      "objectiveIds": [
+        "eng-o13-04"
+      ]
+    },
+    {
+      "id": "mis-14-01-a",
+      "kind": "misconception",
+      "statement": "Because a paper calls its algorithm exact, a port of it is bitwise identical to the reference on every accelerator.",
+      "objectiveIds": [
+        "eng-o14-01"
+      ]
+    },
+    {
+      "id": "mis-14-01-b",
+      "kind": "misconception",
+      "statement": "A paper's published speedup predicts the speedup and accepted throughput of your own system.",
+      "objectiveIds": [
+        "eng-o14-01"
+      ]
+    },
+    {
+      "id": "mis-14-02-a",
+      "kind": "misconception",
+      "statement": "A missing metric or a timed-out comparison can be recorded as a pass when the other checks passed.",
+      "objectiveIds": [
+        "eng-o14-02"
+      ]
+    },
+    {
+      "id": "mis-14-02-b",
+      "kind": "misconception",
+      "statement": "A random seed alone identifies an experiment's inputs, so recording it is enough to reproduce the run.",
+      "objectiveIds": [
+        "eng-o14-02"
+      ]
+    },
+    {
+      "id": "mis-14-03-a",
+      "kind": "misconception",
+      "statement": "A completed upload, or a healthy run loss, shows the contribution was accepted, credited or paid.",
+      "objectiveIds": [
+        "eng-o14-03"
+      ]
+    },
+    {
+      "id": "mis-14-03-b",
+      "kind": "misconception",
+      "statement": "Counting attempts measures useful work, so 60 contributions with three attempts each are 180 units of work.",
+      "objectiveIds": [
+        "eng-o14-03"
+      ]
+    },
+    {
+      "id": "mis-14-04-a",
+      "kind": "misconception",
+      "statement": "Completing the course and passing its gates is equivalent to professional certification or proof of production safety.",
+      "objectiveIds": [
+        "eng-o14-04"
+      ]
+    },
+    {
+      "id": "mis-14-04-b",
+      "kind": "misconception",
+      "statement": "A faster toy benchmark (or an improving loss) establishes that a proposed change is production-equivalent.",
+      "objectiveIds": [
+        "eng-o14-04"
+      ]
+    }
+  ],
+  "annotations": {
+    "mis-01-01-a": {
+      "episodeId": "fnd-e01-01",
+      "correction": "Parameters are coefficients used by fixed code; the two-number model cannot store arbitrary records. Retrieval stores and prompts are separate inputs with their own update paths. Large models can still memorize some examples, so this is not a privacy guarantee either.",
+      "basis": "planning/curriculum.json chapter 01 misconception"
+    },
+    "mis-01-01-b": {
+      "episodeId": "fnd-e01-01",
+      "correction": "Output depends on input, parameters, code and execution settings. A changed input (for example newly retrieved text) changes the output of a fixed-weight model.",
+      "basis": "fnd-01-01-text-2"
+    },
+    "mis-01-02-a": {
+      "episodeId": "fnd-e01-02",
+      "correction": "Backward produces a gradient (a direction signal). Only the optimizer step changes the weight; in the ledger w stays 2 after backward and becomes 2.6 after the update.",
+      "basis": "planning/curriculum.json chapter 04 misconception (state ledger in fnd-01-02-text-1)"
+    },
+    "mis-01-02-b": {
+      "episodeId": "fnd-e01-02",
+      "correction": "Ordinary inference changes request state, logs and caches, not trainable parameters. Training needs a target-dependent objective and an actual update.",
+      "basis": "planning/curriculum.json chapter 01 misconception"
+    },
+    "mis-01-03-a": {
+      "episodeId": "fnd-e01-03",
+      "correction": "Generation appends to the context and produces outputs; the probability table (the parameters) is unchanged. In the episode, after emitting b the next choice uses the same table with a new last token.",
+      "basis": "fnd-01-03-text-2"
+    },
+    "mis-01-03-b": {
+      "episodeId": "fnd-e01-03",
+      "correction": "IDs are categorical keys into tables learned for one mapping. A swapped mapping selects different rows, giving valid but wrong lookups, like an enum/ABI mismatch.",
+      "basis": "fnd-01-03-text-1"
+    },
+    "mis-01-04-a": {
+      "episodeId": "fnd-e01-04",
+      "correction": "The upstream stage needs dL/d(its output), the activation gradient (16 in the episode), not the downstream parameter gradient (24).",
+      "basis": "fnd-01-04-text-2"
+    },
+    "mis-01-04-b": {
+      "episodeId": "fnd-e01-04",
+      "correction": "Computed, submitted, accepted, credited and paid are separate states, each needing its own evidence.",
+      "basis": "fnd-01-04-text-2"
+    },
+    "mis-02-01-a": {
+      "episodeId": "fnd-e02-01",
+      "correction": "Equal payload size is a memory-safety observation, not shape correctness. Different shapes give different index-to-offset maps and axis meanings.",
+      "basis": "fnd-02-01-text-2"
+    },
+    "mis-02-01-b": {
+      "episodeId": "fnd-e02-01",
+      "correction": "Axis names carry meaning that shape and rank cannot enforce; (time,batch,feature) has the same rank and can even have the same lengths.",
+      "basis": "fnd-02-01-text-1"
+    },
+    "mis-02-02-a": {
+      "episodeId": "fnd-e02-02",
+      "correction": "A view shares storage with different strides; a write through the transposed index (0,1) changes original index (1,0). Some reshapes copy, so ownership must be checked, not assumed.",
+      "basis": "planning/curriculum.json chapter 02 misconception"
+    },
+    "mis-02-02-b": {
+      "episodeId": "fnd-e02-02",
+      "correction": "A wrong stride (2,1) instead of (1,3) reads finite, in-bounds values from wrong positions; only a layout-sensitive reference check catches it.",
+      "basis": "fnd-02-02-text-1"
+    },
+    "mis-02-03-a": {
+      "episodeId": "fnd-e02-03",
+      "correction": "A dot product multiplies corresponding elements and then reduces them to one number: 4-2+6 = 8.",
+      "basis": "fnd-02-03-text-1"
+    },
+    "mis-02-03-b": {
+      "episodeId": "fnd-e02-03",
+      "correction": "For A=[[1,2,3],[4,5,6]] the mean of all six elements is 21/6 = 3.5, but the average of row sums 6 and 15 is 10.5. The divisor is part of the reduction.",
+      "basis": "fnd-02-03-text-2"
+    },
+    "mis-02-04-a": {
+      "episodeId": "fnd-e02-04",
+      "correction": "Exponent bits give range; precision comes from the significand. Near 1, BF16 spacing is 2^-7 = 0.0078125 versus 2^-10 for FP16.",
+      "basis": "fnd-02-04-text-1"
+    },
+    "mis-02-04-b": {
+      "episodeId": "fnd-e02-04",
+      "correction": "Each addition rounds. In binary32, (2^24+1)-2^24 = 0 but 2^24+(1-2^24) = 1.",
+      "basis": "planning/curriculum.json chapter 02 misconception"
+    },
+    "mis-03-01-a": {
+      "episodeId": "fnd-e03-01",
+      "correction": "Training loss measures the defined objective on the training examples only; it says nothing about extrapolation, changed data or unmeasured qualities.",
+      "basis": "planning/curriculum.json chapter 03 misconception"
+    },
+    "mis-03-01-b": {
+      "episodeId": "fnd-e03-01",
+      "correction": "An average can improve while some examples get worse; tail behavior needs its own evaluation.",
+      "basis": "fnd-03-01-text-2"
+    },
+    "mis-03-02-a": {
+      "episodeId": "fnd-e03-02",
+      "correction": "The gradient points toward the greatest local increase; descent subtracts a scaled gradient.",
+      "basis": "planning/curriculum.json chapter 03 misconception"
+    },
+    "mis-03-02-b": {
+      "episodeId": "fnd-e03-02",
+      "correction": "A derivative is a local rate of change, not a step size. The step is chosen separately (learning rate times gradient).",
+      "basis": "fnd-03-02-text-1"
+    },
+    "mis-03-03-a": {
+      "episodeId": "fnd-e03-03",
+      "correction": "With eta 0.3 the weight crosses the optimum 2.5 to 2.8, yet the loss falls from 4.5 to 0.18. Divergence means errors fail to shrink.",
+      "basis": "fnd-03-03-text-1"
+    },
+    "mis-03-03-b": {
+      "episodeId": "fnd-e03-03",
+      "correction": "Scaling the loss scales the gradient; multiplying the loss by 10 needs eta divided by 10 for the same update.",
+      "basis": "fnd-03-03-text-2"
+    },
+    "mis-03-04-a": {
+      "episodeId": "fnd-e03-04",
+      "correction": "Using test scores for selection leaks them into the procedure; selection belongs on validation data, with the test used once after the procedure is fixed.",
+      "basis": "fnd-03-04-text-2"
+    },
+    "mis-03-04-b": {
+      "episodeId": "fnd-e03-04",
+      "correction": "Statistics computed from held-out examples let them influence training. Fit preprocessing on the training portion and apply it frozen.",
+      "basis": "fnd-03-04-text-2"
+    },
+    "mis-04-01-a": {
+      "episodeId": "fnd-e04-01",
+      "correction": "Backward traverses the recorded computation graph in reverse topological order and applies local derivative rules; it does not invert operations or replay source lines.",
+      "basis": "planning/curriculum.json chapter 04 misconception"
+    },
+    "mis-04-01-b": {
+      "episodeId": "fnd-e04-01",
+      "correction": "2*6 and 3*4 both give 12 but have different local derivatives; multiplication needs its operand values from that execution.",
+      "basis": "fnd-04-01-text-2"
+    },
+    "mis-04-02-a": {
+      "episodeId": "fnd-e04-02",
+      "correction": "Backward only computes sensitivities. In the episode, w is still 2 and b still 1 after backward; the optimizer step makes them 2.3 and 1.1.",
+      "basis": "planning/curriculum.json chapter 04 misconception"
+    },
+    "mis-04-02-b": {
+      "episodeId": "fnd-e04-02",
+      "correction": "Contributions add along every path; overwriting silently discards paths. For z = x*x + x at x=3, the gradient is 1+3+3 = 7.",
+      "basis": "fnd-04-02-text-1"
+    },
+    "mis-04-03-a": {
+      "episodeId": "fnd-e04-03",
+      "correction": "Each microbatch mean must be weighted by its example count: (2*3 + 1*(-3))/3 = 1, not (3-3)/2 = 0.",
+      "basis": "fnd-04-03-text-2"
+    },
+    "mis-04-03-b": {
+      "episodeId": "fnd-e04-03",
+      "correction": "Replay must use the original parameters, inputs and random state; otherwise the gradient belongs to a different computation.",
+      "basis": "fnd-04-03-text-1"
+    },
+    "mis-04-04-a": {
+      "episodeId": "fnd-e04-04",
+      "correction": "Scheduling a node once and accumulating through every operand slot are compatible: x*x at x=2 has derivative 4, but a one-slot rule gives 2.",
+      "basis": "fnd-04-04-text-2"
+    },
+    "mis-04-04-b": {
+      "episodeId": "fnd-e04-04",
+      "correction": "Distinct-leaf tests cannot exercise accumulation; replacing += with = breaks shared inputs while those tests still pass. Shared-graph tests and independent finite differences are needed.",
+      "basis": "fnd-04-04-text-2"
+    },
+    "mis-05-01-a": {
+      "episodeId": "ttf-e05-01",
+      "correction": "Affine maps compose into one affine map: W2(W1x+b1)+b2 = (W2W1)x + (W2b1+b2). Only a nonlinearity expands the function class (for example to XOR).",
+      "basis": "ttf-05-01-text-1"
+    },
+    "mis-05-01-b": {
+      "episodeId": "ttf-e05-01",
+      "correction": "A negative preactivation gives ReLU derivative zero; that is expected behavior, not a bug.",
+      "basis": "ttf-05-01-text-2"
+    },
+    "mis-05-02-a": {
+      "episodeId": "ttf-e05-02",
+      "correction": "Symmetric units receive identical gradients and stay duplicates after every identical update; small independent differences are needed to break symmetry.",
+      "basis": "ttf-05-02-text-1"
+    },
+    "mis-05-02-b": {
+      "episodeId": "ttf-e05-02",
+      "correction": "A batch-wide mean makes one example's output depend on other examples; a shape check cannot reveal it.",
+      "basis": "ttf-05-02-text-2"
+    },
+    "mis-05-03-a": {
+      "episodeId": "ttf-e05-03",
+      "correction": "Momentum and Adam keep buffers and a step counter; with m reset, the momentum example goes to 0.9 instead of 0.72.",
+      "basis": "planning/curriculum.json chapter 05 misconception"
+    },
+    "mis-05-03-b": {
+      "episodeId": "ttf-e05-03",
+      "correction": "In Adam the added term enters the moment estimates and adaptive denominator; AdamW decays the parameter separately, giving a different recurrence.",
+      "basis": "ttf-05-03-text-2"
+    },
+    "mis-05-04-a": {
+      "episodeId": "ttf-e05-04",
+      "correction": "Faithful continuation also needs optimizer buffers, step count, scheduler and data position, random state and identities for code, config and data.",
+      "basis": "planning/curriculum.json chapter 05 misconception"
+    },
+    "mis-05-04-b": {
+      "episodeId": "ttf-e05-04",
+      "correction": "A wrong state transition can lower the loss: retaining a stale gradient reaches w=2.04 with smaller loss than the correct 1.64.",
+      "basis": "ttf-05-04-text-1"
+    },
+    "mis-06-01-a": {
+      "episodeId": "ttf-e06-01",
+      "correction": "Tokens can be subword pieces, bytes, characters, spaces or special symbols; measure length with the model's actual tokenizer.",
+      "basis": "planning/curriculum.json chapter 06 misconception"
+    },
+    "mis-06-01-b": {
+      "episodeId": "ttf-e06-01",
+      "correction": "All occurrences of an ID select the same parameter row; their gradients scatter-add into that row.",
+      "basis": "ttf-06-01-text-1"
+    },
+    "mis-06-02-a": {
+      "episodeId": "ttf-e06-02",
+      "correction": "Loss can fall when the target probability rises without changing the top choice, so greedy accuracy can stay the same.",
+      "basis": "planning/curriculum.json chapter 06 misconception"
+    },
+    "mis-06-02-b": {
+      "episodeId": "ttf-e06-02",
+      "correction": "Softmax is not idempotent; the loss applies a second normalization and optimizes a different objective.",
+      "basis": "ttf-06-02-text-2"
+    },
+    "mis-06-03-a": {
+      "episodeId": "ttf-e06-03",
+      "correction": "Shifted labels and the mask are separate contracts. Without the mask, position 0 can read input position 1, which is its own target.",
+      "basis": "planning/curriculum.json chapter 06 misconception"
+    },
+    "mis-06-03-b": {
+      "episodeId": "ttf-e06-03",
+      "correction": "Ignored targets must be removed from both numerator and denominator; 10/6 understates the valid-token mean 10/4 = 2.5.",
+      "basis": "ttf-06-03-text-2"
+    },
+    "mis-06-04-a": {
+      "episodeId": "ttf-e06-04",
+      "correction": "Temperature rescales logits before softmax; it changes sampling, not the model's knowledge or weights, and greedy choice is unchanged for positive T.",
+      "basis": "ttf-06-04-text-1"
+    },
+    "mis-06-04-b": {
+      "episodeId": "ttf-e06-04",
+      "correction": "Cached keys and values depend on the model parameters that produced them; a changed model needs recomputation.",
+      "basis": "ttf-06-04-text-2"
+    },
+    "mis-07-01-a": {
+      "episodeId": "ttf-e07-01",
+      "correction": "Values, the output projection, residual paths and later layers also shape the output; an attention weight is one mixing coefficient, not a causal attribution.",
+      "basis": "planning/curriculum.json chapter 07 misconception"
+    },
+    "mis-07-01-b": {
+      "episodeId": "ttf-e07-01",
+      "correction": "X feeds Q, K and V, so dX must add dQ@Wq.T, dK@Wk.T and dV@Wv.T.",
+      "basis": "ttf-07-01-text-2"
+    },
+    "mis-07-02-a": {
+      "episodeId": "ttf-e07-02",
+      "correction": "The mask must remove blocked keys from the normalization (for example a score of minus infinity). A zero score still receives weight and leaks its value.",
+      "basis": "ttf-07-02-text-1"
+    },
+    "mis-07-02-b": {
+      "episodeId": "ttf-e07-02",
+      "correction": "Row sums are always one and have zero score gradient; they cannot expose derivative or masking bugs. Compare each Q/K/V gradient with central differences of a separate reference.",
+      "basis": "ttf-07-02-text-2"
+    },
+    "mis-07-03-a": {
+      "episodeId": "ttf-e07-03",
+      "correction": "Heads are parallel attention computations within one layer, concatenated and projected; they are not layers, machines or distributed splits.",
+      "basis": "planning/curriculum.json chapter 07 misconception"
+    },
+    "mis-07-03-b": {
+      "episodeId": "ttf-e07-03",
+      "correction": "RMSNorm only divides by the root mean square: [3,4] becomes about [0.849, 1.131], whose mean is not zero.",
+      "basis": "ttf-07-03-text-2"
+    },
+    "mis-07-04-a": {
+      "episodeId": "ttf-e07-04",
+      "correction": "Fitting a simple pattern only shows the loop can reduce that objective; correctness needs gradient checks against central differences and negative controls such as removing the mask.",
+      "basis": "ttf-07-04-text-2"
+    },
+    "mis-07-04-b": {
+      "episodeId": "ttf-e07-04",
+      "correction": "With every matrix zero, the logits are uniform (loss log 3) and every gradient is zero, so nothing learns. Use small asymmetric values.",
+      "basis": "ttf-07-04-text-2"
+    },
+    "mis-08-01-a": {
+      "episodeId": "ttf-e08-01",
+      "correction": "Only registered parameters and modules (for example in a ModuleList) are discovered; layers in a plain Python list run in forward but are not trained or saved.",
+      "basis": "ttf-08-01-text-1"
+    },
+    "mis-08-01-b": {
+      "episodeId": "ttf-e08-01",
+      "correction": "Autograd accumulates into .grad until the caller clears it (unlike the course's toy engine, which resets).",
+      "basis": "ttf-08-01-text-2"
+    },
+    "mis-08-02-a": {
+      "episodeId": "ttf-e08-02",
+      "correction": "The call may only enqueue work; completion latency needs synchronization before the start and a wait for completion before stopping.",
+      "basis": "ttf-08-02-text-1"
+    },
+    "mis-08-02-b": {
+      "episodeId": "ttf-e08-02",
+      "correction": "Swapped or permuted outputs are semantic bugs; tolerances must come from the operation's numerical contract.",
+      "basis": "ttf-08-02-text-1"
+    },
+    "mis-08-03-a": {
+      "episodeId": "ttf-e08-03",
+      "correction": "MLX is a separate array framework with its own API, lazy evaluation, transforms and defaults.",
+      "basis": "planning/curriculum.json chapter 08 misconception"
+    },
+    "mis-08-03-b": {
+      "episodeId": "ttf-e08-03",
+      "correction": "MLX is lazy: work runs when evaluation is requested or a value is needed. The timer must include evaluating the needed results and updated state.",
+      "basis": "ttf-08-03-text-1"
+    },
+    "mis-08-04-a": {
+      "episodeId": "ttf-e08-04",
+      "correction": "Pretraining fits a text distribution; instruction following comes from further fine-tuning or preference stages, and none of these alone guarantees reliability.",
+      "basis": "planning/curriculum.json chapter 08 misconception"
+    },
+    "mis-08-04-b": {
+      "episodeId": "ttf-e08-04",
+      "correction": "Each factor's gradient depends on the other factor; with both zero, both data gradients vanish. Start one factor nonzero.",
+      "basis": "ttf-08-04-text-2"
+    },
+    "mis-09-01-a": {
+      "episodeId": "sys-e09-01",
+      "correction": "A threadgroup barrier only orders threads within one group. Combining partials across groups needs a later dispatch or another device-scope mechanism.",
+      "basis": "sys-09-01-text-2"
+    },
+    "mis-09-01-b": {
+      "episodeId": "sys-e09-01",
+      "correction": "In a uniform cooperative algorithm, edge threads must reach required barriers and contribute the identity value.",
+      "basis": "sys-09-01-text-2"
+    },
+    "mis-09-02-a": {
+      "episodeId": "sys-e09-02",
+      "correction": "Traffic and the roofline give bounds under a model; latency hiding, launch costs and other limits need a completed-work measurement.",
+      "basis": "sys-09-02-text-2"
+    },
+    "mis-09-02-b": {
+      "episodeId": "sys-e09-02",
+      "correction": "Bigger tiles use more live resources, which can reduce resident groups and latency hiding.",
+      "basis": "sys-09-02-text-2"
+    },
+    "mis-09-03-a": {
+      "episodeId": "sys-e09-03",
+      "correction": "MPS dispatch targets the GPU via Metal; the Neural Engine is separate, and an operation name does not show which unit or implementation ran.",
+      "basis": "sys-09-03-text-1"
+    },
+    "mis-09-03-b": {
+      "episodeId": "sys-e09-03",
+      "correction": "API portability is not numerical qualification; each chip, OS and build needs its own layout, boundary and gradient tests.",
+      "basis": "planning/curriculum.json chapter 12 misconception"
+    },
+    "mis-09-04-a": {
+      "episodeId": "sys-e09-04",
+      "correction": "Shared addressability removes some copies; capacity, bandwidth and synchronization still limit the workload.",
+      "basis": "planning/curriculum.json chapter 09 misconception"
+    },
+    "mis-09-04-b": {
+      "episodeId": "sys-e09-04",
+      "correction": "Only the GPU portion speeds up; with 4 s compute and 6 s waiting, doubling GPU speed gives 8 s, a 1.25x gain.",
+      "basis": "planning/curriculum.json chapter 09 misconception"
+    },
+    "mis-10-01-a": {
+      "episodeId": "sys-e10-01",
+      "correction": "Splitting output columns needs concatenation; splitting the input-feature (reduction) dimension gives partial sums that must be added.",
+      "basis": "sys-10-01-text-1"
+    },
+    "mis-10-01-b": {
+      "episodeId": "sys-e10-01",
+      "correction": "Stages are a mathematical partition; one machine can host several roles, and one stage can have several replicas.",
+      "basis": "sys-10-01-text-2"
+    },
+    "mis-10-02-a": {
+      "episodeId": "sys-e10-02",
+      "correction": "Fill and drain bubbles remain; with 3 stages and 4 microbatches the ideal utilization is 4/(4+3-1) = 2/3.",
+      "basis": "sys-10-02-text-1"
+    },
+    "mis-10-02-b": {
+      "episodeId": "sys-e10-02",
+      "correction": "The gradient belongs to its original forward context; after eviction it must follow the stale-work policy, never be attached to a new sample.",
+      "basis": "sys-10-02-text-2"
+    },
+    "mis-10-03-a": {
+      "episodeId": "sys-e10-03",
+      "correction": "IOTA routes work among replicated peers per stage; the course's Macs are a motivating case, not a fixed private pipeline.",
+      "basis": "planning/curriculum.json chapter 10 misconception"
+    },
+    "mis-10-03-b": {
+      "episodeId": "sys-e10-03",
+      "correction": "Attempts are not unique completions; one matching backward evidences one returned activation.",
+      "basis": "sys-10-03-text-2"
+    },
+    "mis-10-04-a": {
+      "episodeId": "sys-e10-04",
+      "correction": "Here an epoch is an orchestrated protocol phase boundary for merging; it need not mean every example was visited exactly once.",
+      "basis": "planning/curriculum.json chapter 10 misconception"
+    },
+    "mis-10-04-b": {
+      "episodeId": "sys-e10-04",
+      "correction": "In the pinned code the count only sets chunk size for processing; the previous-minus-current difference is not divided by it.",
+      "basis": "sys-10-04-text-2"
+    },
+    "mis-11-01-a": {
+      "episodeId": "sys-e11-01",
+      "correction": "The application hosts and controls; a separate Python worker process does the numerical work.",
+      "basis": "planning/curriculum.json chapter 11 misconception"
+    },
+    "mis-11-01-b": {
+      "episodeId": "sys-e11-01",
+      "correction": "Process creation, control binding, handshake, host readiness, admission and training are separate milestones, each needing its own evidence.",
+      "basis": "planning/curriculum.json chapter 11 misconception"
+    },
+    "mis-11-02-a": {
+      "episodeId": "sys-e11-02",
+      "correction": "A split is a collection of model operations, typically several blocks (plus embeddings for the head and the final norm and projection for the tail).",
+      "basis": "sys-11-02-text-1"
+    },
+    "mis-11-02-b": {
+      "episodeId": "sys-e11-02",
+      "correction": "The tail returns logits and the training path computes the loss; with activation quantization the head and body retain original activations in state.",
+      "basis": "sys-11-02-text-2"
+    },
+    "mis-11-03-a": {
+      "episodeId": "sys-e11-03",
+      "correction": "Removing an item from the queue means execution began; its cached input must live until the backward that needs it has used it.",
+      "basis": "sys-11-03-text-1"
+    },
+    "mis-11-03-b": {
+      "episodeId": "sys-e11-03",
+      "correction": "A substituted activation belongs to another computation; use the explicit missing-cache or stale-work path.",
+      "basis": "sys-11-03-text-1"
+    },
+    "mis-11-04-a": {
+      "episodeId": "sys-e11-04",
+      "correction": "The HTTP exchange can succeed while the body reports a semantic failure; admission depends on the body and the current session context.",
+      "basis": "sys-11-04-text-1"
+    },
+    "mis-11-04-b": {
+      "episodeId": "sys-e11-04",
+      "correction": "Late-arriving progress from an earlier session must not revive it; events must be tied to their session, run and ordering.",
+      "basis": "sys-11-04-text-1"
+    },
+    "mis-12-01-a": {
+      "episodeId": "eng-e12-01",
+      "correction": "Finiteness, repeatability and correctness are separate claims; a deterministic wrong layout repeats its error perfectly.",
+      "basis": "eng-12-01-lesson"
+    },
+    "mis-12-01-b": {
+      "episodeId": "eng-e12-01",
+      "correction": "A permutation keeps the sum and norm; only elementwise comparison against an independent reference exposes it.",
+      "basis": "eng-12-01-lesson"
+    },
+    "mis-12-02-a": {
+      "episodeId": "eng-e12-02",
+      "correction": "One matching product P-transpose dO does not identify every element of P; inspect P and the O-to-D dependency directly.",
+      "basis": "eng-12-02-lesson"
+    },
+    "mis-12-02-b": {
+      "episodeId": "eng-e12-02",
+      "correction": "Equal counts can hide different ownership maps; the API's compatibility check (or an explicit conversion) is required.",
+      "basis": "eng-12-02-lesson"
+    },
+    "mis-12-03-a": {
+      "episodeId": "eng-e12-03",
+      "correction": "Dispatch may have selected a fallback; candidate validation needs recorded candidate forward and backward hits and no disable reason.",
+      "basis": "eng-12-03-lesson"
+    },
+    "mis-12-03-b": {
+      "episodeId": "eng-e12-03",
+      "correction": "Calibration or startup guards can select a different batch size or fallback path after a restart, changing the computation without a source change.",
+      "basis": "eng-12-03-lesson"
+    },
+    "mis-12-04-a": {
+      "episodeId": "eng-e12-04",
+      "correction": "Aggregate loss mixes many influences; it can neither prove local equivalence nor dismiss a failed comparison.",
+      "basis": "planning/curriculum.json chapter 12 misconception"
+    },
+    "mis-12-04-b": {
+      "episodeId": "eng-e12-04",
+      "correction": "Different kernels, configurations and gates need separate evidence; a shared label is not a causal link.",
+      "basis": "eng-12-04-lesson"
+    },
+    "mis-13-01-a": {
+      "episodeId": "eng-e13-01",
+      "correction": "Softmax needs the global denominator across all tiles; combine running maxima and scaled sums before taking the log.",
+      "basis": "eng-13-01-lesson"
+    },
+    "mis-13-01-b": {
+      "episodeId": "eng-e13-01",
+      "correction": "The check must cover the current values and be read before the irreversible update; a later read or a stale flag cannot prevent the mutation.",
+      "basis": "eng-13-01-lesson"
+    },
+    "mis-13-02-a": {
+      "episodeId": "eng-e13-02",
+      "correction": "RMSNorm does not subtract the mean: [0,2] becomes [0, 1.414] under RMSNorm but [-1, 1] under LayerNorm.",
+      "basis": "eng-13-02-lesson"
+    },
+    "mis-13-02-b": {
+      "episodeId": "eng-e13-02",
+      "correction": "Omitting the coupling term in the RMSNorm input derivative leaves the forward unchanged but gives wrong gradients.",
+      "basis": "eng-13-02-lesson"
+    },
+    "mis-13-03-a": {
+      "episodeId": "eng-e13-03",
+      "correction": "Qualification describes an exact configuration: source and binary digests, chip, OS build, framework, shapes, dtype and path.",
+      "basis": "planning/curriculum.json chapter 12 misconception"
+    },
+    "mis-13-03-b": {
+      "episodeId": "eng-e13-03",
+      "correction": "Any edit creates a new candidate artifact that must be qualified on its own.",
+      "basis": "planning/curriculum.json chapter 13 misconception"
+    },
+    "mis-13-04-a": {
+      "episodeId": "eng-e13-04",
+      "correction": "Only the kernel's share shrinks: 3 s of a 10 s job made 4x faster gives at best 7.75 s, about 1.29x.",
+      "basis": "planning/curriculum.json chapter 13 misconception"
+    },
+    "mis-13-04-b": {
+      "episodeId": "eng-e13-04",
+      "correction": "Fallback output is reference execution; candidate evidence needs actual candidate hits, and injected faults must fail.",
+      "basis": "eng-13-04-lesson"
+    },
+    "mis-14-01-a": {
+      "episodeId": "eng-e14-01",
+      "correction": "Exact describes the intended computation; a port has its own layout, reduction order and precision and needs its own evidence.",
+      "basis": "eng-14-01-lesson"
+    },
+    "mis-14-01-b": {
+      "episodeId": "eng-e14-01",
+      "correction": "Speedups depend on the evaluated hardware and workload; your system's memory pressure and communication bottlenecks need their own measurement.",
+      "basis": "eng-14-01-lesson"
+    },
+    "mis-14-02-a": {
+      "episodeId": "eng-e14-02",
+      "correction": "Use pass, fail, not run and inconclusive; a missing or unfinished comparison is never a pass.",
+      "basis": "eng-14-02-lesson"
+    },
+    "mis-14-02-b": {
+      "episodeId": "eng-e14-02",
+      "correction": "Code, generator version, preprocessing, data, initial state and binary also determine inputs; a manifest needs digests and versions.",
+      "basis": "eng-14-02-lesson"
+    },
+    "mis-14-03-a": {
+      "episodeId": "eng-e14-03",
+      "correction": "Transport completion is only submission; acceptance, credit and payment need their own receipts.",
+      "basis": "eng-14-03-lesson"
+    },
+    "mis-14-03-b": {
+      "episodeId": "eng-e14-03",
+      "correction": "Deduplicate by logical identity and authoritative outcome; unique useful work is 60.",
+      "basis": "eng-14-03-lesson"
+    },
+    "mis-14-04-a": {
+      "episodeId": "eng-e14-04",
+      "correction": "The gates provide evidence of conceptual understanding only; practical work needs independent review, and qualification needs exact-configuration evidence.",
+      "basis": "planning/curriculum.json chapter 14 misconception"
+    },
+    "mis-14-04-b": {
+      "episodeId": "eng-e14-04",
+      "correction": "Speed and loss are not numerical equivalence; a failed state comparison must be retained and the exact configuration qualified.",
+      "basis": "eng-14-04-lesson"
+    }
+  },
+  "assessments": [
+    {
+      "id": "mis-probe-01-01",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "fnd-o01-01"
+      ],
+      "familyId": "mis-probe-01-01",
+      "prompt": "Misconception probe. A service runs predict(x,(w,b)) = w*x+b with parameters (1.5,-0.5). Yesterday it returned 5.5; today it returns 8.5. The parameter file's digest is unchanged. Which explanation fits?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The input changed from 4 to 6; the same parameters give 1.5*6-0.5 = 8.5."
+        },
+        {
+          "id": "b",
+          "text": "The answer 8.5 was looked up from a training record stored in the parameters, so the parameter file must now hold that record.",
+          "misconceptionId": "mis-01-01-a"
+        },
+        {
+          "id": "c",
+          "text": "The weights must have been updated, because only a weight change can change the output.",
+          "misconceptionId": "mis-01-01-b"
+        },
+        {
+          "id": "d",
+          "text": "The output is a probability, so 8.5 shows the computation overflowed."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "With unchanged parameters (1.5,-0.5), input 4 gives 5.5 and input 6 gives 8.5. Two parameters cannot store records, and an output change alone does not show a weight change."
+      }
+    },
+    {
+      "id": "mis-probe-01-02",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "fnd-o01-02"
+      ],
+      "familyId": "mis-probe-01-02",
+      "prompt": "Misconception probe. A process logs request_received, forward_done, gradient_ready, response_saved. Before it ran, w=2; the logged gradient is -6 and the configured learning rate is 0.1. What is w now?",
+      "options": [
+        {
+          "id": "a",
+          "text": "2.6, because computing the gradient also applies w - 0.1*(-6).",
+          "misconceptionId": "mis-01-02-a"
+        },
+        {
+          "id": "b",
+          "text": "Still 2: a gradient was computed, but no optimizer step was logged."
+        },
+        {
+          "id": "c",
+          "text": "-6, because the gradient is written into the weight."
+        },
+        {
+          "id": "d",
+          "text": "Some new value, because serving and logging the request trains the model on it.",
+          "misconceptionId": "mis-01-02-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "The trace supports a forward pass, a gradient and a saved response. An update to 2.6 would need an optimizer step, and serving a request is not training."
+      }
+    },
+    {
+      "id": "mis-probe-01-03",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "fnd-o01-03"
+      ],
+      "familyId": "mis-probe-01-03",
+      "prompt": "Misconception probe. Vocabulary ['a','b',' '] has IDs 0,1,2 and a next-token table indexed by the last ID: row 0 [0.1,0.7,0.2], row 1 [0.2,0.2,0.6], row 2 [0.8,0.1,0.1]. From context 'ab a' the model greedily emitted 'b'. What happens at the next greedy step?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The space is chosen, and it would still be chosen if a new tokenizer swapped the IDs of 'a' and 'b', because all indices stay in range.",
+          "misconceptionId": "mis-01-03-b"
+        },
+        {
+          "id": "b",
+          "text": "The context now ends in ID 1, so row 1 is read and the space (probability 0.6) is chosen; the table is unchanged."
+        },
+        {
+          "id": "c",
+          "text": "Row 0 was first updated toward 'b' because emitting 'b' is a training step; then the space is chosen.",
+          "misconceptionId": "mis-01-03-a"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "Greedy decoding reads the row of the last ID (1) and picks index 2 (0.6). Emitting a token does not change the table. Swapping IDs would read row 0 instead and choose 'b'."
+      }
+    },
+    {
+      "id": "mis-probe-01-04",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "fnd-o01-04"
+      ],
+      "familyId": "mis-probe-01-04",
+      "prompt": "Misconception probe. Stage A computes h=w*x and stage B computes prediction=v*h, with x=2, w=3, v=4, target 20 and L=(prediction-target)^2/2. After its backward, B sends one number to A and uploads its result. Which statement is correct?",
+      "options": [
+        {
+          "id": "a",
+          "text": "B sends the forward activation h = 6 back unchanged."
+        },
+        {
+          "id": "b",
+          "text": "B sends dL/dh = 16. Once B's backward and upload finished, the work counts as accepted and credited.",
+          "misconceptionId": "mis-01-04-b"
+        },
+        {
+          "id": "c",
+          "text": "B sends its parameter gradient dL/dv = 24, which A multiplies by x. The upload alone does not establish acceptance.",
+          "misconceptionId": "mis-01-04-a"
+        },
+        {
+          "id": "d",
+          "text": "B sends dL/dh = 16; A computes its gradient 16*2 = 32. The upload alone does not establish acceptance or payment."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "d",
+        "explanation": "Forward: h=6, prediction=24, loss 8, dL/dprediction=4. B's parameter gradient is 4*6=24; the message A needs is 4*v=16. Submission is not acceptance."
+      }
+    },
+    {
+      "id": "mis-probe-02-01",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "fnd-o02-01"
+      ],
+      "familyId": "mis-probe-02-01",
+      "prompt": "Misconception probe. X has shape (2,3) and Y has shape (3,2); both are contiguous row-major FP32 tensors of 24 bytes. A kernel written for X is given Y. What does this establish?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Equal payloads say nothing about layout: X[1,0] is at element offset 3 but Y[1,0] is at offset 2, so the kernel reads different logical elements."
+        },
+        {
+          "id": "b",
+          "text": "Nothing is wrong: the 24-byte allocation is large enough, so the layout is correct.",
+          "misconceptionId": "mis-02-01-a"
+        },
+        {
+          "id": "c",
+          "text": "Nothing is wrong: both have two axes, and two axes always mean (rows, columns) of the same data.",
+          "misconceptionId": "mis-02-01-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "Row-major offsets are i*3+j for (2,3) and i*2+j for (3,2). Size and rank checks cannot detect the mismatch."
+      }
+    },
+    {
+      "id": "mis-probe-02-02",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "fnd-o02-02"
+      ],
+      "familyId": "mis-probe-02-02",
+      "prompt": "Misconception probe. Storage [10,20,30,40,50,60] is a (2,3) matrix M with strides (3,1); T is its transpose view with strides (1,3). Code writes T[0,1]=99, then a kernel that assumes T is contiguous (strides (2,1)) reads T[0,1]. Which outcome is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "M is unchanged because the transpose is a separate copy.",
+          "misconceptionId": "mis-02-02-a"
+        },
+        {
+          "id": "b",
+          "text": "M[1,0] becomes 99, since both name offset 3; the faulty kernel reads offset 1 and returns 20, a finite in-bounds wrong value."
+        },
+        {
+          "id": "c",
+          "text": "M[1,0] becomes 99; the kernel's value is finite and in bounds, so its indexing is correct.",
+          "misconceptionId": "mis-02-02-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "T[0,1] addresses 0*1+1*3=3, the same slot as M[1,0]. With strides (2,1) the kernel reads offset 0*2+1*1=1, which holds 20."
+      }
+    },
+    {
+      "id": "mis-probe-02-03",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "fnd-o02-03"
+      ],
+      "familyId": "mis-probe-02-03",
+      "prompt": "Misconception probe. a=[1,2,3], b=[4,-1,2] and A=[[1,2,3],[4,5,6]]. Which pair of results is correct?",
+      "options": [
+        {
+          "id": "a",
+          "text": "a·b = 8; the mean of all elements of A is 10.5, the average of its row sums 6 and 15.",
+          "misconceptionId": "mis-02-03-b"
+        },
+        {
+          "id": "b",
+          "text": "a·b = 8; the mean of all elements of A is 21."
+        },
+        {
+          "id": "c",
+          "text": "a·b = 8; the mean of all elements of A is 3.5."
+        },
+        {
+          "id": "d",
+          "text": "a·b = [4,-2,6]; the mean of all elements of A is 3.5.",
+          "misconceptionId": "mis-02-03-a"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "The dot product reduces products 4, -2 and 6 to 8. A sums to 21 over six elements, so its mean is 3.5; 10.5 averages the row sums, and 21 is the sum."
+      }
+    },
+    {
+      "id": "mis-probe-02-04",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "fnd-o02-04"
+      ],
+      "familyId": "mis-probe-02-04",
+      "prompt": "Misconception probe. Using binary32 with every addition rounded, evaluate (2^24+1)+(-2^24) and 2^24+(1+(-2^24)). Separately, round 1+0.001 once to BF16. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Both sums are 1, since the order of addition cannot change a sum; BF16 gives 1.0.",
+          "misconceptionId": "mis-02-04-b"
+        },
+        {
+          "id": "b",
+          "text": "0 and 1; BF16 keeps about 1.001, because its extra exponent bits make it more precise than FP16.",
+          "misconceptionId": "mis-02-04-a"
+        },
+        {
+          "id": "c",
+          "text": "0 and 1; BF16 gives 1.0, because its spacing near 1 is 2^-7 = 0.0078125."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "At 2^24 the binary32 spacing is 2, so 2^24+1 rounds to 2^24 (ties to even). 1-2^24 is exact, so the other order keeps the 1. 0.001 is less than half of BF16's spacing near 1."
+      }
+    },
+    {
+      "id": "mis-probe-03-01",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "fnd-o03-01"
+      ],
+      "familyId": "mis-probe-03-01",
+      "prompt": "Misconception probe. prediction=w*x with half squared error on two training examples (x=2,y=5) and (x=1,y=1). Changing w from 2 to 2.2 lowers the mean training loss from 0.5 to 0.45. What follows?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The first example improved (0.5 to 0.18) but the second got worse (0.5 to 0.72); per-example errors and held-out data still need checking."
+        },
+        {
+          "id": "b",
+          "text": "The model at w=2.2 is better on future inputs, because lower training loss means a better model.",
+          "misconceptionId": "mis-03-01-a"
+        },
+        {
+          "id": "c",
+          "text": "Both examples improved, because a lower mean loss means each loss fell.",
+          "misconceptionId": "mis-03-01-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "At w=2.2 the losses are (4.4-5)^2/2 = 0.18 and (2.2-1)^2/2 = 0.72, mean 0.45. A lower training mean neither proves every example improved nor proves generalization."
+      }
+    },
+    {
+      "id": "mis-probe-03-02",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "fnd-o03-02"
+      ],
+      "familyId": "mis-probe-03-02",
+      "prompt": "Misconception probe. L(w) = (2w-5)^2/2. At w=1, dL/dw = -6. Which statement is correct?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Adding the gradient lowers the loss, so the next weight is 1+eta*(-6), smaller than 1.",
+          "misconceptionId": "mis-03-02-a"
+        },
+        {
+          "id": "b",
+          "text": "Increasing w by 0.01 lowers L by about 0.06; a descent step subtracts eta*(-6), so w increases by 6*eta."
+        },
+        {
+          "id": "c",
+          "text": "The derivative is the step itself, so the next weight should be 1+6 = 7.",
+          "misconceptionId": "mis-03-02-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "The linear estimate is -6*0.01 = -0.06 (exact change -0.0598). Moving against the gradient decreases L; the size of the move is set by the learning rate."
+      }
+    },
+    {
+      "id": "mis-probe-03-03",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "fnd-o03-03"
+      ],
+      "familyId": "mis-probe-03-03",
+      "prompt": "Misconception probe. L(w) = (2w-5)^2/2 at w=1 has gradient -6. With eta 0.3 the next weight is 2.8, past the optimum 2.5. Afterwards the team multiplies the loss by 10. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The loss falls to 0.18; after scaling the loss by 10, eta 0.3 still gives the same step.",
+          "misconceptionId": "mis-03-03-b"
+        },
+        {
+          "id": "b",
+          "text": "The loss falls from 4.5 to 0.18 despite crossing 2.5; with the loss scaled by 10, eta must become 0.03 for the same step."
+        },
+        {
+          "id": "c",
+          "text": "Crossing 2.5 means the update diverged, so the loss must now be above 4.5; with the scaled loss, eta must become 0.03.",
+          "misconceptionId": "mis-03-03-a"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "At w=2.8, 2w-5 = 0.6 and L = 0.18. Ten times the loss gives ten times the gradient, so keeping eta*gradient fixed needs eta/10."
+      }
+    },
+    {
+      "id": "mis-probe-03-04",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "fnd-o03-04"
+      ],
+      "familyId": "mis-probe-03-04",
+      "prompt": "Misconception probe. A team normalizes features using the mean and variance of all 10,000 records, then splits records randomly, then keeps the learning rate with the best test score after 20 tries. Which assessment is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Choosing on the test set is the problem; normalizing with all records is harmless rescaling.",
+          "misconceptionId": "mis-03-04-b"
+        },
+        {
+          "id": "b",
+          "text": "The test score stays unbiased because the file is labelled test; only the normalization needs fixing.",
+          "misconceptionId": "mis-03-04-a"
+        },
+        {
+          "id": "c",
+          "text": "Both steps leak: fit the statistics on training data only, choose settings on validation data, and use the test set once."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "Held-out data must not inform any training decision: neither preprocessing statistics nor repeated hyperparameter selection."
+      }
+    },
+    {
+      "id": "mis-probe-04-01",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "fnd-o04-01"
+      ],
+      "familyId": "mis-probe-04-01",
+      "prompt": "Misconception probe. Forward computes x=3, s=x*x and z=s+x. Which plan for differentiating z is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Record nodes x, s, z (both operand slots of s point to x) with the operand values, then visit z, s, x in reverse topological order; dz/dx = 7."
+        },
+        {
+          "id": "b",
+          "text": "Run the source lines from last to first as inverse operations (undo z=s+x, then s=x*x) to recover the derivatives.",
+          "misconceptionId": "mis-04-01-a"
+        },
+        {
+          "id": "c",
+          "text": "Save only s=9 and z=12; those outputs determine every local derivative.",
+          "misconceptionId": "mis-04-01-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "dz/dx = 1 (direct) + 3 + 3 (both slots of x*x) = 7 = 2x+1. Backward needs the graph and operand values, not inverted source."
+      }
+    },
+    {
+      "id": "mis-probe-04-02",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "fnd-o04-02"
+      ],
+      "familyId": "mis-probe-04-02",
+      "prompt": "Misconception probe. At x=3, s=x*x and z=s+x; seed dz=1. Separately, parameter w=2 has just had backward run with gradient -3; learning rate 0.1, no optimizer step yet. Which is correct?",
+      "options": [
+        {
+          "id": "a",
+          "text": "dz/dx = 7; w is already 2.3, because backward applies the update.",
+          "misconceptionId": "mis-04-02-a"
+        },
+        {
+          "id": "b",
+          "text": "dz/dx = 7 (1 direct plus 3 from each slot of x*x); w is still 2 and becomes 2.3 only after the step."
+        },
+        {
+          "id": "c",
+          "text": "dz/dx = 3 or 4, because the latest contribution replaces the earlier ones; w is still 2.",
+          "misconceptionId": "mis-04-02-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "Every path adds into the gradient. Backward leaves w unchanged; the step computes 2 - 0.1*(-3) = 2.3."
+      }
+    },
+    {
+      "id": "mis-probe-04-03",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "fnd-o04-03"
+      ],
+      "familyId": "mis-probe-04-03",
+      "prompt": "Misconception probe. Microbatch 1 has two examples with mean gradient 3; microbatch 2 has one example with mean gradient -3. Weight 10, learning rate 0.1, one update after both. A dropout mask was used in forward and its activations are recomputed in backward. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The mean gradient is 1, so w becomes 9.9; recomputation can draw a fresh mask, since replay always reproduces the saved values.",
+          "misconceptionId": "mis-04-03-b"
+        },
+        {
+          "id": "b",
+          "text": "The full mean gradient is 1, so w becomes 9.9; recomputation must reuse the original weights and dropout mask."
+        },
+        {
+          "id": "c",
+          "text": "The mean gradient is (3-3)/2 = 0, so w stays 10; recomputation must reuse the original weights and mask.",
+          "misconceptionId": "mis-04-03-a"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "Weighted by counts: (2*3 + 1*(-3))/3 = 1, and 10 - 0.1*1 = 9.9. A new mask or new weights during replay would differentiate another execution."
+      }
+    },
+    {
+      "id": "mis-probe-04-04",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "fnd-o04-04"
+      ],
+      "familyId": "mis-probe-04-04",
+      "prompt": "Misconception probe. An engine passes tests of a+b and a*b with distinct leaves. On u=x*x; z=u+u at x=2, what should x.grad be, and what does this show?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Whatever the engine returns, since passing the distinct-leaf tests already shows shared graphs work.",
+          "misconceptionId": "mis-04-04-b"
+        },
+        {
+          "id": "b",
+          "text": "4, because the visited set means x's two slots in x*x count once.",
+          "misconceptionId": "mis-04-04-a"
+        },
+        {
+          "id": "c",
+          "text": "8 (both slots of x*x and both uses of u contribute); the distinct-leaf tests could not reveal this, so shared-graph and finite-difference tests are needed."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "z = 2x^2, so dz/dx = 4x = 8. A one-slot rule gives 4. Isolated tests do not exercise accumulation."
+      }
+    },
+    {
+      "id": "mis-probe-05-01",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "ttf-o05-01"
+      ],
+      "familyId": "mis-probe-05-01",
+      "prompt": "Misconception probe. An MLP has x=[1,-2], hidden weight rows [2,1] and [-1,2], hidden biases [1,0], ReLU, output weights [3,-1], output bias 0.5 and target 1. Which statement is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Hidden unit 2 has preactivation -5, so ReLU passes it zero gradient on this example, which is expected; without ReLU the two layers would collapse into one affine map."
+        },
+        {
+          "id": "b",
+          "text": "The zero gradient is expected, and removing ReLU would make the deeper stack more expressive.",
+          "misconceptionId": "mis-05-01-a"
+        },
+        {
+          "id": "c",
+          "text": "Unit 2's zero gradient shows backward is broken and must be fixed.",
+          "misconceptionId": "mis-05-01-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "Preactivations are [1,-5], so h = [1,0] and the prediction is 3.5. ReLU blocks gradient at negative preactivations. Without it, the network is one affine map."
+      }
+    },
+    {
+      "id": "mis-probe-05-02",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "ttf-o05-02"
+      ],
+      "familyId": "mis-probe-05-02",
+      "prompt": "Misconception probe. Hidden units h1 and h2 start with identical incoming weights, biases and outgoing weights. Separately, a layer meant to normalize each token's features computes one mean over the whole batch. Which is correct?",
+      "options": [
+        {
+          "id": "a",
+          "text": "h1 and h2 diverge after the first update, so identical initialization is harmless; the batch-wide mean makes outputs depend on other examples.",
+          "misconceptionId": "mis-05-02-a"
+        },
+        {
+          "id": "b",
+          "text": "h1 and h2 get identical gradients and stay duplicates; the batch-wide mean makes outputs depend on other examples, which a shape check cannot detect."
+        },
+        {
+          "id": "c",
+          "text": "h1 and h2 stay duplicates; the batch-wide mean is harmless because each token's output keeps its shape.",
+          "misconceptionId": "mis-05-02-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "A deterministic symmetric computation gives symmetric gradients. A per-token normalization must not change when other examples in the batch change."
+      }
+    },
+    {
+      "id": "mis-probe-05-03",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "ttf-o05-03"
+      ],
+      "familyId": "mis-probe-05-03",
+      "prompt": "Misconception probe. Momentum uses m_next=0.9*m+g and w_next=w-0.1*m_next. Runs A and B both have w=0.8 and receive g=-1. Run A has m=2; run B's momentum was reset to 0. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Run A reaches 0.72 and run B 0.9; and adding lambda*w to the gradient is identical to AdamW's decay.",
+          "misconceptionId": "mis-05-03-b"
+        },
+        {
+          "id": "b",
+          "text": "Run A reaches 0.72 and run B 0.9; also, adding lambda*w to Adam's gradient is not the same as AdamW's decoupled decay."
+        },
+        {
+          "id": "c",
+          "text": "Both reach 0.72, because their weights and gradients match; and adding lambda*w to Adam's gradient differs from decoupled decay.",
+          "misconceptionId": "mis-05-03-a"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "A: m = 0.9*2-1 = 0.8, w = 0.8-0.08 = 0.72. B: m = -1, w = 0.8+0.1 = 0.9. Optimizer state matters, and the two decay forms are different algorithms."
+      }
+    },
+    {
+      "id": "mis-probe-05-04",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "ttf-o05-04"
+      ],
+      "familyId": "mis-probe-05-04",
+      "prompt": "Misconception probe. prediction=w*x with x=2, target 4, half squared error, rate 0.1 and start w=1. Run A ends at w=1.64 (loss 0.2592). Run B forgot to clear its gradient before step 2 and ends at w=2.04 (loss 0.0032). Run A, which uses momentum, must be resumed from a checkpoint. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "B is the better loop, because 0.0032 is lower than 0.2592; resuming A needs its weights and optimizer state.",
+          "misconceptionId": "mis-05-04-b"
+        },
+        {
+          "id": "b",
+          "text": "B is wrong despite its lower loss; restoring A's weight 1.64 alone into a fresh process continues A exactly.",
+          "misconceptionId": "mis-05-04-a"
+        },
+        {
+          "id": "c",
+          "text": "B's lower loss does not validate it (its second step used -6.4 instead of -2.4); resuming A needs its weights, momentum buffer, step count and data position."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "Step 1: gradient -4, w=1.4. Step 2: the correct gradient is -2.4 (w=1.64); the stale buffer sums to -6.4 (w=2.04). A momentum run cannot continue from weights alone."
+      }
+    },
+    {
+      "id": "mis-probe-06-01",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "ttf-o06-01"
+      ],
+      "familyId": "mis-probe-06-01",
+      "prompt": "Misconception probe. Token IDs [2,0,2] index an embedding table; the two occurrences of ID 2 receive upstream gradients [1,2] and [-0.5,3]. A teammate also estimates that a 1,000-word document needs exactly 1,000 tokens of context. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Row 2's gradient from this lookup is [0.5,5]; the token count must be measured with the model's tokenizer, since tokens need not be words."
+        },
+        {
+          "id": "b",
+          "text": "Row 2's gradient is [0.5,5]; 1,000 words is exactly 1,000 tokens, because each token is a word.",
+          "misconceptionId": "mis-06-01-a"
+        },
+        {
+          "id": "c",
+          "text": "Each occurrence has its own copy, which receives [1,2] or [-0.5,3] separately; the token count must be measured with the tokenizer.",
+          "misconceptionId": "mis-06-01-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "Both lookups read one shared row, so [1,2] + [-0.5,3] = [0.5,5]. Word count does not determine token count."
+      }
+    },
+    {
+      "id": "mis-probe-06-02",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "ttf-o06-02"
+      ],
+      "familyId": "mis-probe-06-02",
+      "prompt": "Misconception probe. Target ID 1. A model's logits change from [log 2, 0, 0] to [log 2, log 1.5, 0]. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Accuracy must have improved because the loss fell; the loss should receive the raw logits.",
+          "misconceptionId": "mis-06-02-a"
+        },
+        {
+          "id": "b",
+          "text": "Loss falls from log 4 (about 1.386) to log 3 (about 1.099), but greedy accuracy stays 0 because ID 0 is still the top choice; the loss must receive these raw logits."
+        },
+        {
+          "id": "c",
+          "text": "Loss falls to about 1.099 with accuracy still 0; passing softmax(logits) to the loss would give the same value because softmax is idempotent.",
+          "misconceptionId": "mis-06-02-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "The probabilities become [2,1.5,1]/4.5, so p(target) = 1/3 and the loss is log 3. ID 0 remains most likely. A second softmax changes the objective."
+      }
+    },
+    {
+      "id": "mis-probe-06-03",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "ttf-o06-03"
+      ],
+      "familyId": "mis-probe-06-03",
+      "prompt": "Misconception probe. Sequence [4,2,7,1] gives inputs [4,2,7] and targets [2,7,1]. In a batch, one sequence has valid target losses [1,2,3]; another has one valid loss [4] plus two padding slots. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Query 0 must not see position 1; the mean is 10/6, about 1.667, because padding slots are part of the batch.",
+          "misconceptionId": "mis-06-03-b"
+        },
+        {
+          "id": "b",
+          "text": "Query 0 must not see input position 1 (token 2, its target) even with shifted labels; the valid-token mean is 10/4 = 2.5."
+        },
+        {
+          "id": "c",
+          "text": "Because targets are shifted, query 0 may attend to position 1 harmlessly; the valid-token mean is 2.5.",
+          "misconceptionId": "mis-06-03-a"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "The mask controls what each query can read; the denominator counts only valid targets (1+2+3+4 = 10 over 4)."
+      }
+    },
+    {
+      "id": "mis-probe-06-04",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "ttf-o06-04"
+      ],
+      "familyId": "mis-probe-06-04",
+      "prompt": "Misconception probe. Logits [log 4, 0] at temperature 1 give probabilities [0.8, 0.2]. The temperature is lowered to 0.5; later the server updates the model weights. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "T=0.5 gives [16/17, 1/17], only a sharper distribution; the old cache stays valid after the weight update because IDs, positions and shapes match.",
+          "misconceptionId": "mis-06-04-b"
+        },
+        {
+          "id": "b",
+          "text": "T=0.5 gives [16/17, 1/17] and makes the answer more likely to be correct; after the weight update the cache must be recomputed.",
+          "misconceptionId": "mis-06-04-a"
+        },
+        {
+          "id": "c",
+          "text": "T=0.5 gives [16/17, 1/17]: the same greedy token with a sharper distribution, and no change to correctness or weights; after the weight update the cached K/V must be recomputed."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "Dividing by 0.5 gives [log 16, 0], so the probabilities are 16/17 and 1/17. Temperature does not make answers true. Cached K/V depend on the weights."
+      }
+    },
+    {
+      "id": "mis-probe-07-01",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "ttf-o07-01"
+      ],
+      "familyId": "mis-probe-07-01",
+      "prompt": "Misconception probe. Self-attention computes Q=X@Wq, K=X@Wk and V=X@Wv. Query 0 puts weight 0.9 on position 1. A reviewer is checking the backward pass and an interpretation note. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "dX must add all three branches (dQ@Wq.T + dK@Wk.T + dV@Wv.T), and the 0.9 weight alone does not show that position 1 caused the prediction."
+        },
+        {
+          "id": "b",
+          "text": "dX must add all three branches; the 0.9 weight proves position 1 caused the prediction.",
+          "misconceptionId": "mis-07-01-a"
+        },
+        {
+          "id": "c",
+          "text": "dX = dV@Wv.T is complete because only values carry content; the 0.9 weight alone does not show causation.",
+          "misconceptionId": "mis-07-01-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "The input feeds three projections, so its gradient sums three contributions. Attention weights are one part of the computation, not a full explanation."
+      }
+    },
+    {
+      "id": "mis-probe-07-02",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "ttf-o07-02"
+      ],
+      "familyId": "mis-probe-07-02",
+      "prompt": "Misconception probe. One query (head width 1, already scaled) has key scores [0, log 3] and scalar values [2, 6]. The causal rule blocks the second key. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Setting the blocked score to 0 is the same as excluding it, so the output is 2 either way.",
+          "misconceptionId": "mis-07-02-a"
+        },
+        {
+          "id": "b",
+          "text": "Excluding the blocked key gives weight 1 and output 2; setting its score to 0 gives weights [0.5, 0.5] and output 4, leaking it. Rows sum to 1 either way, so row sums cannot detect the bug."
+        },
+        {
+          "id": "c",
+          "text": "Excluding gives 2 and the zero score gives 4; since both rows sum to 1, the implementation is validated.",
+          "misconceptionId": "mis-07-02-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "Softmax over [0] alone is [1]; softmax over [0, 0] is [0.5, 0.5], giving 0.5*2+0.5*6 = 4. A row-sum invariant holds for both."
+      }
+    },
+    {
+      "id": "mis-probe-07-03",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "ttf-o07-03"
+      ],
+      "familyId": "mis-probe-07-03",
+      "prompt": "Misconception probe. A layer has model width 8, four query heads of width 2 and two shared KV heads. Its features are then RMS-normalized; for one vector [3,4], unit gain and epsilon 0. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The heads are parallel mixing operations in one layer; RMSNorm subtracts the mean, so [3,4] becomes [-1, 1].",
+          "misconceptionId": "mis-07-03-b"
+        },
+        {
+          "id": "b",
+          "text": "The four heads are parallel mixing operations in one layer (Q, K, V and output projections total 192 weights); RMSNorm gives about [0.849, 1.131], whose mean is not zero."
+        },
+        {
+          "id": "c",
+          "text": "The four heads are four separate layers run one after another; RMSNorm gives about [0.849, 1.131].",
+          "misconceptionId": "mis-07-03-a"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "Q: 8*8 = 64, K and V: 8*4 = 32 each, output: 64; total 192. RMS of [3,4] is sqrt(12.5), about 3.536, so the outputs are about 0.849 and 1.131."
+      }
+    },
+    {
+      "id": "mis-probe-07-04",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "ttf-o07-04"
+      ],
+      "familyId": "mis-probe-07-04",
+      "prompt": "Misconception probe. Two tiny decoders (vocabulary 3) train on the pattern 0,1,2,0,1,2. Version 1 starts with every matrix zero, and its loss stays at log 3, about 1.0986. Version 2 starts from small asymmetric weights, and its loss falls steadily. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Version 1 is a neutral start that only needs more steps; version 2 still needs gradient checks and a mask negative control.",
+          "misconceptionId": "mis-07-04-b"
+        },
+        {
+          "id": "b",
+          "text": "Version 1 is stuck because of zero gradients; version 2's falling loss shows its masks and gradients are correct.",
+          "misconceptionId": "mis-07-04-a"
+        },
+        {
+          "id": "c",
+          "text": "Version 1 is stuck because zero weights give uniform logits and zero gradients; version 2's falling loss only shows it fits this pattern, so gradient checks and a mask-removal negative control are still required."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "With all-zero parameters every activation, logit and gradient is zero, so the loss stays log 3. A falling loss on a toy pattern does not validate the implementation."
+      }
+    },
+    {
+      "id": "mis-probe-08-01",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "ttf-o08-01"
+      ],
+      "familyId": "mis-probe-08-01",
+      "prompt": "Misconception probe. Scalar parameter w=2 receives two forward/backward calls with no clearing and no optimizer step: L=(w*x-y)^2/2 with (x=2,y=1) and then (x=1,y=3). The module also keeps two Linear layers in a plain Python list. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "w.grad is 5 (6 then -1 accumulate); the plain-list layers are not registered, so the optimizer never sees their weights even though forward works."
+        },
+        {
+          "id": "b",
+          "text": "w.grad is 5; the plain-list layers are trained anyway, because forward uses them.",
+          "misconceptionId": "mis-08-01-a"
+        },
+        {
+          "id": "c",
+          "text": "w.grad is -1, because each backward replaces the previous gradient; the plain-list layers are not registered.",
+          "misconceptionId": "mis-08-01-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "The gradients are (4-1)*2 = 6 and (2-3)*1 = -1, and PyTorch sums them to 5. Registration, not use in forward, decides what model.parameters() returns."
+      }
+    },
+    {
+      "id": "mis-probe-08-02",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "ttf-o08-02"
+      ],
+      "familyId": "mis-probe-08-02",
+      "prompt": "Misconception probe. In an invented timeline, timing starts at 0 ms, the Python call returns at 0.2 ms, and the result is ready at 5.2 ms. The kernel computes [[1,2],[3,4]] @ [[2,0],[1,2]] and returns [[4,4],[8,10]]. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Latency is 0.2 ms, when the call returned; [8,10] is a permutation bug.",
+          "misconceptionId": "mis-08-02-a"
+        },
+        {
+          "id": "b",
+          "text": "Completion latency is 5.2 ms; the second row should be [10,8], so [8,10] is a permutation bug, not rounding."
+        },
+        {
+          "id": "c",
+          "text": "Latency is 5.2 ms; [8,10] is rounding error that a wider tolerance should accept.",
+          "misconceptionId": "mis-08-02-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "The product is [[4,4],[10,8]]. Returning from submission is not completion. Exact integer outputs in the wrong positions are not rounding."
+      }
+    },
+    {
+      "id": "mis-probe-08-03",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "ttf-o08-03"
+      ],
+      "familyId": "mis-probe-08-03",
+      "prompt": "Misconception probe. A team ports L=mean((w*x-y)^2)/2 with x=[1,2], y=[2,4], w=1 and one descent step of 0.1, and times the step. Which plan is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Rewrite it in MLX; the timer can stop after the expressions are built, because MLX computes w = 1.25 as soon as that line runs.",
+          "misconceptionId": "mis-08-03-b"
+        },
+        {
+          "id": "b",
+          "text": "Rewrite it with MLX's own API, and include evaluation of the loss and the updated weight (w becomes 1.25) inside the timed region."
+        },
+        {
+          "id": "c",
+          "text": "Set a PyTorch device flag to MLX, and include evaluation of the loss and updated weight (w becomes 1.25) in the timing.",
+          "misconceptionId": "mis-08-03-a"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "The gradient is mean((wx-y)x) = (-1-4)/2 = -2.5, so w becomes 1.25. MLX is its own framework, and its lazy graph runs only when evaluated."
+      }
+    },
+    {
+      "id": "mis-probe-08-04",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "ttf-o08-04"
+      ],
+      "familyId": "mis-probe-08-04",
+      "prompt": "Misconception probe. A team pretrains a model on next-token prediction, then adds LoRA with factors A (1x4) and B (3x1), both initialized to zero, to make it follow instructions. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The zero factors will learn because the base output is nonzero; instruction following needs separate fine-tuning and evaluation.",
+          "misconceptionId": "mis-08-04-b"
+        },
+        {
+          "id": "b",
+          "text": "Start one factor nonzero; the pretrained model already follows instructions, so the adapter only adds a skill.",
+          "misconceptionId": "mis-08-04-a"
+        },
+        {
+          "id": "c",
+          "text": "Both adapter gradients start at zero, so one factor must start nonzero; and next-token pretraining alone does not yield an instruction-following assistant."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "dL/dA depends on B and dL/dB depends on A through B@A, so both are zero at the start. Pretraining and instruction tuning are different objectives."
+      }
+    },
+    {
+      "id": "mis-probe-09-01",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "sys-o09-01"
+      ],
+      "familyId": "mis-probe-09-01",
+      "prompt": "Misconception probe. Values 1 to 10 are reduced with uniform eight-thread groups (two groups, 16 slots). Which design is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Pad slots 11-16 with 0 and let all threads reach the group barrier; the partials 36 and 19 are combined into 55 by a second dispatch."
+        },
+        {
+          "id": "b",
+          "text": "Pad with 0 to get partials 36 and 19; after one threadgroup barrier group 0 reads group 1's partial and finishes 55 in the same dispatch.",
+          "misconceptionId": "mis-09-01-a"
+        },
+        {
+          "id": "c",
+          "text": "Let the six out-of-range threads return before the barrier; the others compute 36 and 19, and a second dispatch gives 55.",
+          "misconceptionId": "mis-09-01-b"
+        },
+        {
+          "id": "d",
+          "text": "Skip the incomplete second group; the total is 36."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "Group partials are 1+...+8 = 36 and 9+10 = 19. Barriers are group-scoped, and early exits before a barrier break the cooperative contract."
+      }
+    },
+    {
+      "id": "mis-probe-09-02",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "sys-o09-02"
+      ],
+      "familyId": "mis-probe-09-02",
+      "prompt": "Misconception probe. A 4x4 FP32 matmul (128 operations) moves 576 counted bytes naively and 320 bytes with 2x2 tiles. A fictional device has a 2 TOPS peak and 200 GB/s. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Traffic falls from 576 to 320 bytes, so runtime falls by the same factor of 1.8.",
+          "misconceptionId": "mis-09-02-a"
+        },
+        {
+          "id": "b",
+          "text": "Intensity rises from about 0.22 to 0.4 ops/byte and the roofline ceiling to 80 GOPS; actual speed needs measurement, since bigger tiles can also lower occupancy."
+        },
+        {
+          "id": "c",
+          "text": "Intensity rises to 0.4 ops/byte; a 4x4 tile would be faster still, since its larger register use cannot affect occupancy.",
+          "misconceptionId": "mis-09-02-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "128/576 is about 0.222 and 128/320 = 0.4; min(2e12, 0.4*2e11) = 8e10 operations per second is a ceiling, not a prediction."
+      }
+    },
+    {
+      "id": "mis-probe-09-03",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "sys-o09-03"
+      ],
+      "familyId": "mis-probe-09-03",
+      "prompt": "Misconception probe. An app calls a tensor operation through PyTorch MPS on chip X, where a custom TensorOps kernel also passed its tests. The team plans to ship to chip Y, which has the same API. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The operation name does not establish the unit; chip X's passing tests qualify chip Y, because the API is the same.",
+          "misconceptionId": "mis-09-03-b"
+        },
+        {
+          "id": "b",
+          "text": "The operation name does not show whether the custom kernel, GPU accelerators or the Neural Engine ran, and chip Y needs its own tests."
+        },
+        {
+          "id": "c",
+          "text": "It ran on the Neural Engine, because it is a tensor operation; chip Y needs its own tests.",
+          "misconceptionId": "mis-09-03-a"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "Hardware attribution needs evidence about the selected implementation. Qualification is per configuration."
+      }
+    },
+    {
+      "id": "mis-probe-09-04",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "sys-o09-04"
+      ],
+      "familyId": "mis-probe-09-04",
+      "prompt": "Misconception probe. A fictional machine has 24 GiB of unified memory with 6 GiB reserved for other activity. A step needs 5 GiB parameters, 5 GiB gradients, 10 GiB optimizer state and 3 GiB activations, and takes 10 s: 4 s GPU compute and 6 s waiting. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The step is 5 GiB short; a twice-faster GPU halves it to 5 s.",
+          "misconceptionId": "mis-09-04-b"
+        },
+        {
+          "id": "b",
+          "text": "Unified memory lets the step use all 24 GiB, so 23 GiB fits; a twice-faster GPU gives 8 s.",
+          "misconceptionId": "mis-09-04-a"
+        },
+        {
+          "id": "c",
+          "text": "The step needs 23 GiB against 18 GiB available (5 GiB short); a twice-faster GPU takes the step from 10 s to 8 s."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "5+5+10+3 = 23 GiB versus 24-6 = 18 GiB. Amdahl: 4/2 + 6 = 8 s."
+      }
+    },
+    {
+      "id": "mis-probe-10-01",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "sys-o10-01"
+      ],
+      "familyId": "mis-probe-10-01",
+      "prompt": "Misconception probe. Two workers compute x@W with x=[1,2] and W rows [1,3] and [2,4] by splitting the input-feature dimension: worker 0 uses row 0 and worker 1 uses row 1. The model's pipeline diagram has three stages. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The partials [1,3] and [4,8] must be summed to [5,11]; the three stages may run on any number of machines, with stages replicated or co-hosted."
+        },
+        {
+          "id": "b",
+          "text": "The partials are concatenated to [1,3,4,8]; the stages may run on any number of machines.",
+          "misconceptionId": "mis-10-01-a"
+        },
+        {
+          "id": "c",
+          "text": "The partials are summed to [5,11]; the diagram means exactly three permanently wired machines.",
+          "misconceptionId": "mis-10-01-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "Splitting the reduction dimension gives partial sums: [1,3] + [4,8] = [5,11]. A stage diagram is not a machine inventory."
+      }
+    },
+    {
+      "id": "mis-probe-10-02",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "sys-o10-02"
+      ],
+      "familyId": "mis-probe-10-02",
+      "prompt": "Misconception probe. An ideal forward-only pipeline has 3 stages, 4 microbatches and 2 time units per stage. Later a cached activation is evicted, and its slot is reused before its gradient arrives. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The last microbatch finishes at 12 with no idle stage time; the late gradient follows the stale-work policy.",
+          "misconceptionId": "mis-10-02-a"
+        },
+        {
+          "id": "b",
+          "text": "The last microbatch finishes at time 12 and each stage is busy only 2/3 of the time; the late gradient follows the stale-work policy."
+        },
+        {
+          "id": "c",
+          "text": "The last microbatch finishes at 12 with 2/3 utilization; the late gradient can be applied to the activation now in the slot, because the shapes match.",
+          "misconceptionId": "mis-10-02-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "(4+3-1)*2 = 12; each stage works 4*2 = 8 of 12 units. Identity, not shape, decides where a gradient belongs."
+      }
+    },
+    {
+      "id": "mis-probe-10-03",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "sys-o10-03"
+      ],
+      "familyId": "mis-probe-10-03",
+      "prompt": "Misconception probe. A teaching trace routes one sample A0 -> B1 -> C2 and another D0 -> E1 -> C2 (letters are peers, digits are stages). One activation was sent three times because acknowledgements were uncertain, and one matching backward came back. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Stages are served by replicated peers; the three send attempts count as three successful activations.",
+          "misconceptionId": "mis-10-03-b"
+        },
+        {
+          "id": "b",
+          "text": "Stages are served by replicated, changing peers (the routes share only C2), and the journal shows one returned activation, not three."
+        },
+        {
+          "id": "c",
+          "text": "Each peer is permanently wired into one fixed private pipeline; the journal shows one returned activation.",
+          "misconceptionId": "mis-10-03-a"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "Different peers served stages 0 and 1 on the two routes. Retries share a logical identity, so they count once."
+      }
+    },
+    {
+      "id": "mis-probe-10-04",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "sys-o10-04"
+      ],
+      "familyId": "mis-probe-10-04",
+      "prompt": "Misconception probe. Old weights are [10,20]; local results are [9,18] and [8,21]. The pseudo-gradient is previous minus current, averaged equally, and pseudo_gradient_batch_count is 3 for a ten-element vector. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The pseudo-gradient is [0.5, 0.1667] after dividing [1.5,0.5] by the count 3; the epoch is a protocol phase boundary.",
+          "misconceptionId": "mis-10-04-b"
+        },
+        {
+          "id": "b",
+          "text": "The average is [1.5,0.5] with chunks 4, 4 and 2; reaching the next epoch means every training example was visited exactly once.",
+          "misconceptionId": "mis-10-04-a"
+        },
+        {
+          "id": "c",
+          "text": "The average pseudo-gradient is [1.5,0.5]; the count only splits ten elements into chunks of 4, 4 and 2, and the epoch is a protocol phase, not proof of one full dataset pass."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "[10,20]-[9,18] = [1,2] and [10,20]-[8,21] = [2,-1], averaging [1.5,0.5]. ceil(10/3) = 4 gives chunks 4, 4 and 2."
+      }
+    },
+    {
+      "id": "mis-probe-11-01",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "sys-o11-01"
+      ],
+      "familyId": "mis-probe-11-01",
+      "prompt": "Misconception probe. An invented trace: host launch 0.0 s, worker launch 1.2 s, control bound 3.5 s, welcome 3.8 s, ready 4.0 s, with a 5 s readiness budget. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The Python worker, not the GUI, does the numerical work; at 1.2 s only the process exists, and readiness at 4.0 s leaves a 1.0 s margin."
+        },
+        {
+          "id": "b",
+          "text": "The GUI performs the tensor computations and the worker only relays; readiness at 4.0 s leaves a 1.0 s margin.",
+          "misconceptionId": "mis-11-01-a"
+        },
+        {
+          "id": "c",
+          "text": "The worker does the numerical work and was ready and training from its launch at 1.2 s, a 3.8 s margin.",
+          "misconceptionId": "mis-11-01-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "5 - 4.0 = 1.0 s. Launch is not readiness, and readiness is not admission or training."
+      }
+    },
+    {
+      "id": "mis-probe-11-02",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "sys-o11-02"
+      ],
+      "familyId": "mis-probe-11-02",
+      "prompt": "Misconception probe. A fictional 12-block model uses head end 4 and body range 4 to 8. The tail sees batch 2, sequence 3 and vocabulary 5. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Head, body and tail are one block each; the tail returns 30 logits and the loss is computed afterwards.",
+          "misconceptionId": "mis-11-02-a"
+        },
+        {
+          "id": "b",
+          "text": "Each split holds four blocks; the tail returns 30 logits for 6 target positions, and the training path computes the loss afterwards."
+        },
+        {
+          "id": "c",
+          "text": "Each split holds four blocks; the tail's forward already returns the training loss, so nothing more is computed.",
+          "misconceptionId": "mis-11-02-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "Blocks 0-3, 4-7 and 8-11. Logits are 2*3*5 = 30 numbers for 2*3 = 6 targets."
+      }
+    },
+    {
+      "id": "mis-probe-11-03",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "sys-o11-03"
+      ],
+      "familyId": "mis-probe-11-03",
+      "prompt": "Misconception probe. Cache capacity is 2. Forwards F(A) and F(B) are cached; backward B(A) is popped from the ready queue and starts executing. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "A's cached input must stay; if it had expired, recompute with B's input, which has the same shape.",
+          "misconceptionId": "mis-11-03-b"
+        },
+        {
+          "id": "b",
+          "text": "A's cached input must stay until its backward has used it; if it had expired, the stale-work path applies."
+        },
+        {
+          "id": "c",
+          "text": "A's cached input can be freed at the pop, since the item is already executing.",
+          "misconceptionId": "mis-11-03-a"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "The recomputed backward needs A's own forward input. Shape equality does not make another sample's input valid."
+      }
+    },
+    {
+      "id": "mis-probe-11-04",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "sys-o11-04"
+      ],
+      "familyId": "mis-probe-11-04",
+      "prompt": "Misconception probe. Monotonic trace: registered at 4 s, first forward at 7 s, first backward at 15 s, reset at 16 s. Later, a progress event stamped 12 s is ingested, and a heartbeat returns HTTP 200 with a failure body. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Registration to backward took 11 s; the late progress event shows the worker is training again after the reset.",
+          "misconceptionId": "mis-11-04-b"
+        },
+        {
+          "id": "b",
+          "text": "Registration to backward took 11 s; the old event is stale, but the HTTP 200 proves the worker is admitted and training.",
+          "misconceptionId": "mis-11-04-a"
+        },
+        {
+          "id": "c",
+          "text": "Registration to first backward took 11 s (not pure GPU time); after the reset, neither the old progress event nor the HTTP 200 with a failure body shows current training."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "15 - 4 = 11 s. Event context and response content, not arrival order or status code, decide state."
+      }
+    },
+    {
+      "id": "mis-probe-12-01",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "eng-o12-01"
+      ],
+      "familyId": "mis-probe-12-01",
+      "prompt": "Misconception probe. The reference output is [1,2,3,4]; a candidate returns [1,3,2,4] on every one of 10,000 runs. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The maximum absolute error is 1: the candidate is finite and repeatable with the same sum and norm, yet wrong; keep it as a negative control."
+        },
+        {
+          "id": "b",
+          "text": "It is finite and repeats exactly, so it is correct.",
+          "misconceptionId": "mis-12-01-a"
+        },
+        {
+          "id": "c",
+          "text": "Its sum (10) and norm match the reference, so it is equivalent.",
+          "misconceptionId": "mis-12-01-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "Coordinates 2 and 3 are swapped, giving |3-2| = 1 at two positions. Aggregates and repeatability cannot see a permutation."
+      }
+    },
+    {
+      "id": "mis-probe-12-02",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "eng-o12-02"
+      ],
+      "familyId": "mis-probe-12-02",
+      "prompt": "Misconception probe. In a teaching analogy, a kernel reinterprets a 2x2 operand in another layout with the same shape. Row 0 of O becomes [2.9,1.55] instead of [3.5,2], and dQ is wrong, but dV matches its oracle. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Equal shapes do not make layouts compatible; the matching dV proves P is correct, so the bug must be in V.",
+          "misconceptionId": "mis-12-02-a"
+        },
+        {
+          "id": "b",
+          "text": "Equal shapes do not make layouts compatible; the matching dV helps localize the damage but cannot prove every element of P correct, so inspect P and the O-to-D path directly."
+        },
+        {
+          "id": "c",
+          "text": "The reinterpretation is safe because shapes and element counts agree; the matching dV helps localize the damage.",
+          "misconceptionId": "mis-12-02-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "dV = P-transpose dO does not use O, so it can match while O, D and dQ are damaged. Layout compatibility is an API contract, not a shape property."
+      }
+    },
+    {
+      "id": "mis-probe-12-03",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "eng-o12-03"
+      ],
+      "familyId": "mis-probe-12-03",
+      "prompt": "Misconception probe. A job logs requested=candidate, resolved=upstream, forward_hits=0 and backward_hits=0, exits 0 and matches the reference. The next day, after a restart with no source change, calibration picks local batch 2 instead of 4. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The job exercised only the fallback; the restart cannot change the path, because the source did not change.",
+          "misconceptionId": "mis-12-03-b"
+        },
+        {
+          "id": "b",
+          "text": "The job exercised only the fallback; after the restart a different path may run, so record the resolved path and hits again."
+        },
+        {
+          "id": "c",
+          "text": "The job validated the candidate kernel; after the restart a different path may run.",
+          "misconceptionId": "mis-12-03-a"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "Zero candidate hits means the candidate was not tested. Path selection is part of the experiment and can change at startup."
+      }
+    },
+    {
+      "id": "mis-probe-12-04",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "eng-o12-04"
+      ],
+      "familyId": "mis-probe-12-04",
+      "prompt": "Misconception probe. An original-kernel coordinate probe failed on one chip model. Later, a different kernel version on a related chip fails an optimizer-state gate while the aggregate run loss stays healthy. Which report is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Both failures come from the same cause because the chip family matches; the healthy loss does not dismiss the failure.",
+          "misconceptionId": "mis-12-04-b"
+        },
+        {
+          "id": "b",
+          "text": "The healthy loss shows the optimizer-state failure does not matter; report the two configurations separately.",
+          "misconceptionId": "mis-12-04-a"
+        },
+        {
+          "id": "c",
+          "text": "Report the two configurations and failed gates separately; the shared chip label does not establish a common cause, and the healthy loss does not dismiss the failure."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "Keep observations, hypotheses and tested configurations distinct. Containment can be proposed before the cause is known."
+      }
+    },
+    {
+      "id": "mis-probe-13-01",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "eng-o13-01"
+      ],
+      "familyId": "mis-probe-13-01",
+      "prompt": "Misconception probe. A row has logits [ln 2, ln 3, ln 5] split into vocabulary tiles [ln 2, ln 3] and [ln 5]; the target is the last class. A finite flag is computed per tile. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The loss is log(2+3+5) - log 5 = log 2, about 0.693, using a running max and sum across tiles; the flags must be read before this step's optimizer update."
+        },
+        {
+          "id": "b",
+          "text": "Normalizing within the last tile alone gives probability 1 and loss 0, which is the objective; read the flags before the update.",
+          "misconceptionId": "mis-13-01-a"
+        },
+        {
+          "id": "c",
+          "text": "The loss is log 2, about 0.693; the flags may be read after the update, since a later rejection still prevents harm.",
+          "misconceptionId": "mis-13-01-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "Global probability of the target is 5/10, so the loss is ln 2. Rejecting after the weights changed is too late."
+      }
+    },
+    {
+      "id": "mis-probe-13-02",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "eng-o13-02"
+      ],
+      "familyId": "mis-probe-13-02",
+      "prompt": "Misconception probe. RMSNorm with x=[0,2], gamma=[1,1], epsilon=0 gives y=[0, 1.414]; the incoming gradient is dy=[0,1]. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "dL/dx = [0,0]; replacing RMSNorm with LayerNorm here would leave y = [0, 1.414] unchanged.",
+          "misconceptionId": "mis-13-02-a"
+        },
+        {
+          "id": "b",
+          "text": "dL/dx = [0,0]: the coupling term cancels the direct term, because y[1] stays sqrt(2) as x[1] changes; LayerNorm would give a different forward, [-1,1]."
+        },
+        {
+          "id": "c",
+          "text": "dL/dx = [0, 0.707]: the forward matches the reference, so the backward without the coupling term is right.",
+          "misconceptionId": "mis-13-02-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "r = sqrt(2) and sum(u*x) = 2, so dx[1] = 1/r - 2*2/(2*r^3) = 0.7071 - 0.7071 = 0. The uncoupled rule returns 1/r = 0.707."
+      }
+    },
+    {
+      "id": "mis-probe-13-03",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "eng-o13-03"
+      ],
+      "familyId": "mis-probe-13-03",
+      "prompt": "Misconception probe. A prespecified gate requires candidate_error <= 1.5*upstream_error + 0.0001. On the proposed binary, upstream error is 0.004 and candidate error 0.0062. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It fails here, but an earlier binary with the same function names passed, and that result covers the rebuilt binary.",
+          "misconceptionId": "mis-13-03-b"
+        },
+        {
+          "id": "b",
+          "text": "0.0062 exceeds 0.0061, so the gate fails for this exact binary, chip and OS build; passes elsewhere or on an earlier binary do not carry over."
+        },
+        {
+          "id": "c",
+          "text": "It fails here, but a pass recorded on a sibling chip with the same API qualifies the kernel for this machine.",
+          "misconceptionId": "mis-13-03-a"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "1.5*0.004 + 0.0001 = 0.0061 < 0.0062. Evidence attaches to the exact configuration and artifact identity."
+      }
+    },
+    {
+      "id": "mis-probe-13-04",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "eng-o13-04"
+      ],
+      "familyId": "mis-probe-13-04",
+      "prompt": "Misconception probe. A job spends 3 s in a target kernel and 7 s elsewhere. A candidate kernel is 4x faster in isolation. In the benchmark harness, the candidate sometimes throws, the reference runs instead, and its output is labelled candidate. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The job goes to 7.75 s at best; equality from the fallback runs still counts as candidate evidence, because both paths implement the same formula.",
+          "misconceptionId": "mis-13-04-b"
+        },
+        {
+          "id": "b",
+          "text": "The job becomes 4x faster (2.5 s); only runs with candidate hits count.",
+          "misconceptionId": "mis-13-04-a"
+        },
+        {
+          "id": "c",
+          "text": "At best the job goes from 10 s to 7.75 s (about 1.29x), and only runs with recorded candidate hits count; fallback output is not candidate evidence."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "7 + 3/4 = 7.75 s and 10/7.75 is about 1.29. A fallback protects the process but does not test the candidate."
+      }
+    },
+    {
+      "id": "mis-probe-14-01",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "eng-o14-01"
+      ],
+      "familyId": "mis-probe-14-01",
+      "prompt": "Misconception probe. A team ports an exact tiled-attention algorithm (with a speedup reported on the authors' hardware) and writes the contract r = sqrt(mean(x^2) + 2/3) for x=[0,3,4]. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "r = 3 and the last output is 4/3; the port still needs its own equation, layout, gradient and platform evidence, and its speedup must be measured on its own workload."
+        },
+        {
+          "id": "b",
+          "text": "r = 3 and the last output is 4/3; because the paper says exact, the port is bitwise identical everywhere, though its speedup must be measured.",
+          "misconceptionId": "mis-14-01-a"
+        },
+        {
+          "id": "c",
+          "text": "r = 3 and the last output is 4/3; the port needs its own correctness evidence, but the paper's speedup gives the system's throughput gain.",
+          "misconceptionId": "mis-14-01-b"
+        },
+        {
+          "id": "d",
+          "text": "r = sqrt(25 + 2/3), about 5.07, because the contract uses the sum of squares."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "a",
+        "explanation": "mean(0,9,16) = 25/3, and 25/3 + 2/3 = 9, so r = 3 and 4/3. A paper is a reference, not evidence about a port."
+      }
+    },
+    {
+      "id": "mis-probe-14-02",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "eng-o14-02"
+      ],
+      "familyId": "mis-probe-14-02",
+      "prompt": "Misconception probe. Paired reference/candidate times are (100,90), (110,99) and (120,108) ms. The manifest records only seed=7 and the label latest, and one numerical comparison timed out. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The median saving is 11 ms; count the timed-out comparison as passed because the others passed, and add digests to the manifest.",
+          "misconceptionId": "mis-14-02-a"
+        },
+        {
+          "id": "b",
+          "text": "The median paired saving is 11 ms; the timed-out comparison is not run or inconclusive, and the manifest needs source and binary digests, versions, inputs and initial state."
+        },
+        {
+          "id": "c",
+          "text": "The median saving is 11 ms and the timeout is inconclusive; seed=7 is enough to reproduce the inputs.",
+          "misconceptionId": "mis-14-02-b"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "The savings are 10, 11 and 12 ms, median 11. Missing evidence is not a pass, and a seed does not pin code or data."
+      }
+    },
+    {
+      "id": "mis-probe-14-03",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "eng-o14-03"
+      ],
+      "familyId": "mis-probe-14-03",
+      "prompt": "Misconception probe. A worker uploads 100 MiB over an ideal 200 Mbit/s payload channel. A dashboard shows 180 operations for 60 logical contributions, each tried three times. No acceptance receipts exist yet. Which is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The transfer takes about 4.19 s; useful work is 180 units, since every attempt counts; without receipts the work is only submitted.",
+          "misconceptionId": "mis-14-03-b"
+        },
+        {
+          "id": "b",
+          "text": "The ideal transfer takes 4.194304 s; useful work is 60 unique contributions, and without receipts they are only submitted."
+        },
+        {
+          "id": "c",
+          "text": "The transfer takes about 4.19 s; useful work is 60 contributions, and the completed uploads show they were accepted.",
+          "misconceptionId": "mis-14-03-a"
+        }
+      ],
+      "grading": {
+        "correctOptionId": "b",
+        "explanation": "100*2^20*8/200e6 = 4.194304 s. Attempts are not unique work, and an upload is not acceptance."
+      }
+    },
+    {
+      "id": "mis-probe-14-04",
+      "type": "choice",
+      "role": "diagnostic_probe",
+      "objectiveIds": [
+        "eng-o14-04"
+      ],
+      "familyId": "mis-probe-14-04",
+      "prompt": "Misconception probe. A portfolio has every short-item gate passed and a toy kernel that is 1.3x faster, but one optimizer-state comparison fails and no practical work has been independently reviewed. Which conclusion is right?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Completion is not certification, but the 1.3x toy kernel shows the change is production-equivalent.",
+          "misconceptionId": "mis-14-04-b"
+        },
+        {
+          "id": "b",
+          "text": "Passing the gates makes the learner professionally certified; keep the failed comparison for later.",
+          "misconceptionId": "mis-14-04-a"
+        },
+        {
+          "id": "c",
+          "text": "Credit the conceptual evidence, keep the failed comparison, and require reviewed practical work and exact-configuration qualification before stronger claims."
+        }
+      ],
+      "grading": {
+        "correctOptionId": "c",
+        "explanation": "The gates are scoped evidence. A speedup is not equivalence, and the failed comparison remains a failed gate."
+      }
+    }
+  ],
+  "probes": [
+    {
+      "id": "probe-01-01",
+      "objectiveId": "fnd-o01-01",
+      "assessmentId": "mis-probe-01-01",
+      "distinguishes": [
+        "mis-01-01-a",
+        "mis-01-01-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-01-01-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-01-01-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-01-02",
+      "objectiveId": "fnd-o01-02",
+      "assessmentId": "mis-probe-01-02",
+      "distinguishes": [
+        "mis-01-02-a",
+        "mis-01-02-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-01-02-a",
+          "optionIds": [
+            "a"
+          ]
+        },
+        {
+          "hypothesisId": "mis-01-02-b",
+          "optionIds": [
+            "d"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-01-03",
+      "objectiveId": "fnd-o01-03",
+      "assessmentId": "mis-probe-01-03",
+      "distinguishes": [
+        "mis-01-03-a",
+        "mis-01-03-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-01-03-a",
+          "optionIds": [
+            "c"
+          ]
+        },
+        {
+          "hypothesisId": "mis-01-03-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-01-04",
+      "objectiveId": "fnd-o01-04",
+      "assessmentId": "mis-probe-01-04",
+      "distinguishes": [
+        "mis-01-04-a",
+        "mis-01-04-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-01-04-a",
+          "optionIds": [
+            "c"
+          ]
+        },
+        {
+          "hypothesisId": "mis-01-04-b",
+          "optionIds": [
+            "b"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-02-01",
+      "objectiveId": "fnd-o02-01",
+      "assessmentId": "mis-probe-02-01",
+      "distinguishes": [
+        "mis-02-01-a",
+        "mis-02-01-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-02-01-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-02-01-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-02-02",
+      "objectiveId": "fnd-o02-02",
+      "assessmentId": "mis-probe-02-02",
+      "distinguishes": [
+        "mis-02-02-a",
+        "mis-02-02-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-02-02-a",
+          "optionIds": [
+            "a"
+          ]
+        },
+        {
+          "hypothesisId": "mis-02-02-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-02-03",
+      "objectiveId": "fnd-o02-03",
+      "assessmentId": "mis-probe-02-03",
+      "distinguishes": [
+        "mis-02-03-a",
+        "mis-02-03-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-02-03-a",
+          "optionIds": [
+            "d"
+          ]
+        },
+        {
+          "hypothesisId": "mis-02-03-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-02-04",
+      "objectiveId": "fnd-o02-04",
+      "assessmentId": "mis-probe-02-04",
+      "distinguishes": [
+        "mis-02-04-a",
+        "mis-02-04-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-02-04-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-02-04-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-03-01",
+      "objectiveId": "fnd-o03-01",
+      "assessmentId": "mis-probe-03-01",
+      "distinguishes": [
+        "mis-03-01-a",
+        "mis-03-01-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-03-01-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-03-01-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-03-02",
+      "objectiveId": "fnd-o03-02",
+      "assessmentId": "mis-probe-03-02",
+      "distinguishes": [
+        "mis-03-02-a",
+        "mis-03-02-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-03-02-a",
+          "optionIds": [
+            "a"
+          ]
+        },
+        {
+          "hypothesisId": "mis-03-02-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-03-03",
+      "objectiveId": "fnd-o03-03",
+      "assessmentId": "mis-probe-03-03",
+      "distinguishes": [
+        "mis-03-03-a",
+        "mis-03-03-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-03-03-a",
+          "optionIds": [
+            "c"
+          ]
+        },
+        {
+          "hypothesisId": "mis-03-03-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-03-04",
+      "objectiveId": "fnd-o03-04",
+      "assessmentId": "mis-probe-03-04",
+      "distinguishes": [
+        "mis-03-04-a",
+        "mis-03-04-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-03-04-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-03-04-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-04-01",
+      "objectiveId": "fnd-o04-01",
+      "assessmentId": "mis-probe-04-01",
+      "distinguishes": [
+        "mis-04-01-a",
+        "mis-04-01-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-04-01-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-04-01-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-04-02",
+      "objectiveId": "fnd-o04-02",
+      "assessmentId": "mis-probe-04-02",
+      "distinguishes": [
+        "mis-04-02-a",
+        "mis-04-02-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-04-02-a",
+          "optionIds": [
+            "a"
+          ]
+        },
+        {
+          "hypothesisId": "mis-04-02-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-04-03",
+      "objectiveId": "fnd-o04-03",
+      "assessmentId": "mis-probe-04-03",
+      "distinguishes": [
+        "mis-04-03-a",
+        "mis-04-03-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-04-03-a",
+          "optionIds": [
+            "c"
+          ]
+        },
+        {
+          "hypothesisId": "mis-04-03-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-04-04",
+      "objectiveId": "fnd-o04-04",
+      "assessmentId": "mis-probe-04-04",
+      "distinguishes": [
+        "mis-04-04-a",
+        "mis-04-04-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-04-04-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-04-04-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-05-01",
+      "objectiveId": "ttf-o05-01",
+      "assessmentId": "mis-probe-05-01",
+      "distinguishes": [
+        "mis-05-01-a",
+        "mis-05-01-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-05-01-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-05-01-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-05-02",
+      "objectiveId": "ttf-o05-02",
+      "assessmentId": "mis-probe-05-02",
+      "distinguishes": [
+        "mis-05-02-a",
+        "mis-05-02-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-05-02-a",
+          "optionIds": [
+            "a"
+          ]
+        },
+        {
+          "hypothesisId": "mis-05-02-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-05-03",
+      "objectiveId": "ttf-o05-03",
+      "assessmentId": "mis-probe-05-03",
+      "distinguishes": [
+        "mis-05-03-a",
+        "mis-05-03-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-05-03-a",
+          "optionIds": [
+            "c"
+          ]
+        },
+        {
+          "hypothesisId": "mis-05-03-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-05-04",
+      "objectiveId": "ttf-o05-04",
+      "assessmentId": "mis-probe-05-04",
+      "distinguishes": [
+        "mis-05-04-a",
+        "mis-05-04-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-05-04-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-05-04-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-06-01",
+      "objectiveId": "ttf-o06-01",
+      "assessmentId": "mis-probe-06-01",
+      "distinguishes": [
+        "mis-06-01-a",
+        "mis-06-01-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-06-01-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-06-01-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-06-02",
+      "objectiveId": "ttf-o06-02",
+      "assessmentId": "mis-probe-06-02",
+      "distinguishes": [
+        "mis-06-02-a",
+        "mis-06-02-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-06-02-a",
+          "optionIds": [
+            "a"
+          ]
+        },
+        {
+          "hypothesisId": "mis-06-02-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-06-03",
+      "objectiveId": "ttf-o06-03",
+      "assessmentId": "mis-probe-06-03",
+      "distinguishes": [
+        "mis-06-03-a",
+        "mis-06-03-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-06-03-a",
+          "optionIds": [
+            "c"
+          ]
+        },
+        {
+          "hypothesisId": "mis-06-03-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-06-04",
+      "objectiveId": "ttf-o06-04",
+      "assessmentId": "mis-probe-06-04",
+      "distinguishes": [
+        "mis-06-04-a",
+        "mis-06-04-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-06-04-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-06-04-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-07-01",
+      "objectiveId": "ttf-o07-01",
+      "assessmentId": "mis-probe-07-01",
+      "distinguishes": [
+        "mis-07-01-a",
+        "mis-07-01-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-07-01-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-07-01-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-07-02",
+      "objectiveId": "ttf-o07-02",
+      "assessmentId": "mis-probe-07-02",
+      "distinguishes": [
+        "mis-07-02-a",
+        "mis-07-02-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-07-02-a",
+          "optionIds": [
+            "a"
+          ]
+        },
+        {
+          "hypothesisId": "mis-07-02-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-07-03",
+      "objectiveId": "ttf-o07-03",
+      "assessmentId": "mis-probe-07-03",
+      "distinguishes": [
+        "mis-07-03-a",
+        "mis-07-03-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-07-03-a",
+          "optionIds": [
+            "c"
+          ]
+        },
+        {
+          "hypothesisId": "mis-07-03-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-07-04",
+      "objectiveId": "ttf-o07-04",
+      "assessmentId": "mis-probe-07-04",
+      "distinguishes": [
+        "mis-07-04-a",
+        "mis-07-04-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-07-04-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-07-04-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-08-01",
+      "objectiveId": "ttf-o08-01",
+      "assessmentId": "mis-probe-08-01",
+      "distinguishes": [
+        "mis-08-01-a",
+        "mis-08-01-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-08-01-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-08-01-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-08-02",
+      "objectiveId": "ttf-o08-02",
+      "assessmentId": "mis-probe-08-02",
+      "distinguishes": [
+        "mis-08-02-a",
+        "mis-08-02-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-08-02-a",
+          "optionIds": [
+            "a"
+          ]
+        },
+        {
+          "hypothesisId": "mis-08-02-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-08-03",
+      "objectiveId": "ttf-o08-03",
+      "assessmentId": "mis-probe-08-03",
+      "distinguishes": [
+        "mis-08-03-a",
+        "mis-08-03-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-08-03-a",
+          "optionIds": [
+            "c"
+          ]
+        },
+        {
+          "hypothesisId": "mis-08-03-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-08-04",
+      "objectiveId": "ttf-o08-04",
+      "assessmentId": "mis-probe-08-04",
+      "distinguishes": [
+        "mis-08-04-a",
+        "mis-08-04-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-08-04-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-08-04-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-09-01",
+      "objectiveId": "sys-o09-01",
+      "assessmentId": "mis-probe-09-01",
+      "distinguishes": [
+        "mis-09-01-a",
+        "mis-09-01-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-09-01-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-09-01-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-09-02",
+      "objectiveId": "sys-o09-02",
+      "assessmentId": "mis-probe-09-02",
+      "distinguishes": [
+        "mis-09-02-a",
+        "mis-09-02-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-09-02-a",
+          "optionIds": [
+            "a"
+          ]
+        },
+        {
+          "hypothesisId": "mis-09-02-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-09-03",
+      "objectiveId": "sys-o09-03",
+      "assessmentId": "mis-probe-09-03",
+      "distinguishes": [
+        "mis-09-03-a",
+        "mis-09-03-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-09-03-a",
+          "optionIds": [
+            "c"
+          ]
+        },
+        {
+          "hypothesisId": "mis-09-03-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-09-04",
+      "objectiveId": "sys-o09-04",
+      "assessmentId": "mis-probe-09-04",
+      "distinguishes": [
+        "mis-09-04-a",
+        "mis-09-04-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-09-04-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-09-04-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-10-01",
+      "objectiveId": "sys-o10-01",
+      "assessmentId": "mis-probe-10-01",
+      "distinguishes": [
+        "mis-10-01-a",
+        "mis-10-01-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-10-01-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-10-01-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-10-02",
+      "objectiveId": "sys-o10-02",
+      "assessmentId": "mis-probe-10-02",
+      "distinguishes": [
+        "mis-10-02-a",
+        "mis-10-02-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-10-02-a",
+          "optionIds": [
+            "a"
+          ]
+        },
+        {
+          "hypothesisId": "mis-10-02-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-10-03",
+      "objectiveId": "sys-o10-03",
+      "assessmentId": "mis-probe-10-03",
+      "distinguishes": [
+        "mis-10-03-a",
+        "mis-10-03-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-10-03-a",
+          "optionIds": [
+            "c"
+          ]
+        },
+        {
+          "hypothesisId": "mis-10-03-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-10-04",
+      "objectiveId": "sys-o10-04",
+      "assessmentId": "mis-probe-10-04",
+      "distinguishes": [
+        "mis-10-04-a",
+        "mis-10-04-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-10-04-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-10-04-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-11-01",
+      "objectiveId": "sys-o11-01",
+      "assessmentId": "mis-probe-11-01",
+      "distinguishes": [
+        "mis-11-01-a",
+        "mis-11-01-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-11-01-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-11-01-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-11-02",
+      "objectiveId": "sys-o11-02",
+      "assessmentId": "mis-probe-11-02",
+      "distinguishes": [
+        "mis-11-02-a",
+        "mis-11-02-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-11-02-a",
+          "optionIds": [
+            "a"
+          ]
+        },
+        {
+          "hypothesisId": "mis-11-02-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-11-03",
+      "objectiveId": "sys-o11-03",
+      "assessmentId": "mis-probe-11-03",
+      "distinguishes": [
+        "mis-11-03-a",
+        "mis-11-03-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-11-03-a",
+          "optionIds": [
+            "c"
+          ]
+        },
+        {
+          "hypothesisId": "mis-11-03-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-11-04",
+      "objectiveId": "sys-o11-04",
+      "assessmentId": "mis-probe-11-04",
+      "distinguishes": [
+        "mis-11-04-a",
+        "mis-11-04-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-11-04-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-11-04-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-12-01",
+      "objectiveId": "eng-o12-01",
+      "assessmentId": "mis-probe-12-01",
+      "distinguishes": [
+        "mis-12-01-a",
+        "mis-12-01-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-12-01-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-12-01-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-12-02",
+      "objectiveId": "eng-o12-02",
+      "assessmentId": "mis-probe-12-02",
+      "distinguishes": [
+        "mis-12-02-a",
+        "mis-12-02-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-12-02-a",
+          "optionIds": [
+            "a"
+          ]
+        },
+        {
+          "hypothesisId": "mis-12-02-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-12-03",
+      "objectiveId": "eng-o12-03",
+      "assessmentId": "mis-probe-12-03",
+      "distinguishes": [
+        "mis-12-03-a",
+        "mis-12-03-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-12-03-a",
+          "optionIds": [
+            "c"
+          ]
+        },
+        {
+          "hypothesisId": "mis-12-03-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-12-04",
+      "objectiveId": "eng-o12-04",
+      "assessmentId": "mis-probe-12-04",
+      "distinguishes": [
+        "mis-12-04-a",
+        "mis-12-04-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-12-04-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-12-04-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-13-01",
+      "objectiveId": "eng-o13-01",
+      "assessmentId": "mis-probe-13-01",
+      "distinguishes": [
+        "mis-13-01-a",
+        "mis-13-01-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-13-01-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-13-01-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-13-02",
+      "objectiveId": "eng-o13-02",
+      "assessmentId": "mis-probe-13-02",
+      "distinguishes": [
+        "mis-13-02-a",
+        "mis-13-02-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-13-02-a",
+          "optionIds": [
+            "a"
+          ]
+        },
+        {
+          "hypothesisId": "mis-13-02-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-13-03",
+      "objectiveId": "eng-o13-03",
+      "assessmentId": "mis-probe-13-03",
+      "distinguishes": [
+        "mis-13-03-a",
+        "mis-13-03-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-13-03-a",
+          "optionIds": [
+            "c"
+          ]
+        },
+        {
+          "hypothesisId": "mis-13-03-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-13-04",
+      "objectiveId": "eng-o13-04",
+      "assessmentId": "mis-probe-13-04",
+      "distinguishes": [
+        "mis-13-04-a",
+        "mis-13-04-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-13-04-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-13-04-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-14-01",
+      "objectiveId": "eng-o14-01",
+      "assessmentId": "mis-probe-14-01",
+      "distinguishes": [
+        "mis-14-01-a",
+        "mis-14-01-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-14-01-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-14-01-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-14-02",
+      "objectiveId": "eng-o14-02",
+      "assessmentId": "mis-probe-14-02",
+      "distinguishes": [
+        "mis-14-02-a",
+        "mis-14-02-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-14-02-a",
+          "optionIds": [
+            "a"
+          ]
+        },
+        {
+          "hypothesisId": "mis-14-02-b",
+          "optionIds": [
+            "c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-14-03",
+      "objectiveId": "eng-o14-03",
+      "assessmentId": "mis-probe-14-03",
+      "distinguishes": [
+        "mis-14-03-a",
+        "mis-14-03-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-14-03-a",
+          "optionIds": [
+            "c"
+          ]
+        },
+        {
+          "hypothesisId": "mis-14-03-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probe-14-04",
+      "objectiveId": "eng-o14-04",
+      "assessmentId": "mis-probe-14-04",
+      "distinguishes": [
+        "mis-14-04-a",
+        "mis-14-04-b"
+      ],
+      "signals": [
+        {
+          "hypothesisId": "mis-14-04-a",
+          "optionIds": [
+            "b"
+          ]
+        },
+        {
+          "hypothesisId": "mis-14-04-b",
+          "optionIds": [
+            "a"
+          ]
+        }
+      ]
+    }
+  ],
+  "chapterProbes": [
+    {
+      "chapterId": "chapter01",
+      "probeIds": [
+        "probe-01-01",
+        "probe-01-02",
+        "probe-01-03",
+        "probe-01-04"
+      ]
+    },
+    {
+      "chapterId": "chapter02",
+      "probeIds": [
+        "probe-02-01",
+        "probe-02-02",
+        "probe-02-03",
+        "probe-02-04"
+      ]
+    },
+    {
+      "chapterId": "chapter03",
+      "probeIds": [
+        "probe-03-01",
+        "probe-03-02",
+        "probe-03-03",
+        "probe-03-04"
+      ]
+    },
+    {
+      "chapterId": "chapter04",
+      "probeIds": [
+        "probe-04-01",
+        "probe-04-02",
+        "probe-04-03",
+        "probe-04-04"
+      ]
+    },
+    {
+      "chapterId": "chapter05",
+      "probeIds": [
+        "probe-05-01",
+        "probe-05-02",
+        "probe-05-03",
+        "probe-05-04"
+      ]
+    },
+    {
+      "chapterId": "chapter06",
+      "probeIds": [
+        "probe-06-01",
+        "probe-06-02",
+        "probe-06-03",
+        "probe-06-04"
+      ]
+    },
+    {
+      "chapterId": "chapter07",
+      "probeIds": [
+        "probe-07-01",
+        "probe-07-02",
+        "probe-07-03",
+        "probe-07-04"
+      ]
+    },
+    {
+      "chapterId": "chapter08",
+      "probeIds": [
+        "probe-08-01",
+        "probe-08-02",
+        "probe-08-03",
+        "probe-08-04"
+      ]
+    },
+    {
+      "chapterId": "chapter09",
+      "probeIds": [
+        "probe-09-01",
+        "probe-09-02",
+        "probe-09-03",
+        "probe-09-04"
+      ]
+    },
+    {
+      "chapterId": "chapter10",
+      "probeIds": [
+        "probe-10-01",
+        "probe-10-02",
+        "probe-10-03",
+        "probe-10-04"
+      ]
+    },
+    {
+      "chapterId": "chapter11",
+      "probeIds": [
+        "probe-11-01",
+        "probe-11-02",
+        "probe-11-03",
+        "probe-11-04"
+      ]
+    },
+    {
+      "chapterId": "chapter12",
+      "probeIds": [
+        "probe-12-01",
+        "probe-12-02",
+        "probe-12-03",
+        "probe-12-04"
+      ]
+    },
+    {
+      "chapterId": "chapter13",
+      "probeIds": [
+        "probe-13-01",
+        "probe-13-02",
+        "probe-13-03",
+        "probe-13-04"
+      ]
+    },
+    {
+      "chapterId": "chapter14",
+      "probeIds": [
+        "probe-14-01",
+        "probe-14-02",
+        "probe-14-03",
+        "probe-14-04"
+      ]
+    }
+  ],
+  "distractorLinks": [
+    {
+      "assessmentId": "fnd-a01-01-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-01-01-b"
+    },
+    {
+      "assessmentId": "fnd-a01-01-transfer",
+      "optionId": "c",
+      "hypothesisId": "mis-01-01-a"
+    },
+    {
+      "assessmentId": "fnd-a01-02-transfer",
+      "optionId": "d",
+      "hypothesisId": "mis-01-02-b"
+    },
+    {
+      "assessmentId": "fnd-a01-03-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-01-03-b"
+    },
+    {
+      "assessmentId": "fnd-a01-04-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-01-04-b"
+    },
+    {
+      "assessmentId": "fnd-a01-04-transfer",
+      "optionId": "d",
+      "hypothesisId": "mis-01-04-b"
+    },
+    {
+      "assessmentId": "fnd-a02-01-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-02-01-a"
+    },
+    {
+      "assessmentId": "fnd-a02-01-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-02-01-b"
+    },
+    {
+      "assessmentId": "fnd-a02-02-transfer",
+      "optionId": "c",
+      "hypothesisId": "mis-02-02-b"
+    },
+    {
+      "assessmentId": "fnd-a02-04-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-02-04-a"
+    },
+    {
+      "assessmentId": "fnd-a03-01-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-03-01-b"
+    },
+    {
+      "assessmentId": "fnd-a03-01-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-03-01-a"
+    },
+    {
+      "assessmentId": "fnd-a03-03-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-03-03-b"
+    },
+    {
+      "assessmentId": "fnd-a04-01-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-04-01-b"
+    },
+    {
+      "assessmentId": "fnd-a04-02-transfer",
+      "optionId": "c",
+      "hypothesisId": "mis-04-02-a"
+    },
+    {
+      "assessmentId": "fnd-a04-03-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-04-03-b"
+    },
+    {
+      "assessmentId": "fnd-a04-04-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-04-04-a"
+    },
+    {
+      "assessmentId": "ttf-a05-01-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-05-01-a"
+    },
+    {
+      "assessmentId": "ttf-a05-02-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-05-02-b"
+    },
+    {
+      "assessmentId": "ttf-a05-03-transfer",
+      "optionId": "c",
+      "hypothesisId": "mis-05-03-a"
+    },
+    {
+      "assessmentId": "ttf-a05-04-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-05-04-a"
+    },
+    {
+      "assessmentId": "ttf-a06-02-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-06-02-b"
+    },
+    {
+      "assessmentId": "ttf-a06-03-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-06-03-a"
+    },
+    {
+      "assessmentId": "ttf-a06-04-transfer",
+      "optionId": "c",
+      "hypothesisId": "mis-06-04-b"
+    },
+    {
+      "assessmentId": "ttf-a07-01-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-07-01-b"
+    },
+    {
+      "assessmentId": "ttf-a07-02-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-07-02-b"
+    },
+    {
+      "assessmentId": "ttf-a08-02-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-08-02-a"
+    },
+    {
+      "assessmentId": "ttf-a08-03-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-08-03-b"
+    },
+    {
+      "assessmentId": "ttf-a08-04-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-08-04-b"
+    },
+    {
+      "assessmentId": "sys-a09-01-transfer",
+      "optionId": "c",
+      "hypothesisId": "mis-09-01-a"
+    },
+    {
+      "assessmentId": "sys-a09-01-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-09-01-b"
+    },
+    {
+      "assessmentId": "sys-a09-02-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-09-02-a"
+    },
+    {
+      "assessmentId": "sys-a09-02-transfer",
+      "optionId": "c",
+      "hypothesisId": "mis-09-02-b"
+    },
+    {
+      "assessmentId": "sys-a09-03-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-09-03-a"
+    },
+    {
+      "assessmentId": "sys-a09-03-transfer",
+      "optionId": "d",
+      "hypothesisId": "mis-09-03-b"
+    },
+    {
+      "assessmentId": "sys-a10-02-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-10-02-b"
+    },
+    {
+      "assessmentId": "sys-a10-03-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-10-03-b"
+    },
+    {
+      "assessmentId": "sys-a10-04-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-10-04-b"
+    },
+    {
+      "assessmentId": "sys-a11-01-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-11-01-b"
+    },
+    {
+      "assessmentId": "sys-a11-01-transfer",
+      "optionId": "d",
+      "hypothesisId": "mis-11-01-a"
+    },
+    {
+      "assessmentId": "sys-a11-02-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-11-02-b"
+    },
+    {
+      "assessmentId": "sys-a11-03-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-11-03-b"
+    },
+    {
+      "assessmentId": "sys-a11-04-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-11-04-a"
+    },
+    {
+      "assessmentId": "sys-a11-04-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-11-04-b"
+    },
+    {
+      "assessmentId": "eng-a12-01-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-12-01-a"
+    },
+    {
+      "assessmentId": "eng-a12-02-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-12-02-a"
+    },
+    {
+      "assessmentId": "eng-a12-03-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-12-03-a"
+    },
+    {
+      "assessmentId": "eng-a12-04-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-12-04-a"
+    },
+    {
+      "assessmentId": "eng-a12-04-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-12-04-b"
+    },
+    {
+      "assessmentId": "eng-a13-01-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-13-01-b"
+    },
+    {
+      "assessmentId": "eng-a13-01-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-13-01-b"
+    },
+    {
+      "assessmentId": "eng-a13-03-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-13-03-b"
+    },
+    {
+      "assessmentId": "eng-a13-04-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-13-04-b"
+    },
+    {
+      "assessmentId": "eng-a14-01-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-14-01-a"
+    },
+    {
+      "assessmentId": "eng-a14-01-transfer",
+      "optionId": "c",
+      "hypothesisId": "mis-14-01-b"
+    },
+    {
+      "assessmentId": "eng-a14-03-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-14-03-a"
+    },
+    {
+      "assessmentId": "eng-a14-04-transfer",
+      "optionId": "a",
+      "hypothesisId": "mis-14-04-a"
+    },
+    {
+      "assessmentId": "eng-a14-04-transfer",
+      "optionId": "b",
+      "hypothesisId": "mis-14-04-b"
+    }
+  ]
+}

@@ -35,5 +35,7 @@ jobs:
         run: npm run verify:recovery
       - name: Verify released renderer arithmetic and altered illustration controls
         run: npm run verify:visuals
+      - name: Verify misconceptions, the worked adaptive episode and the study definition
+        run: npm run verify:content
       # Full authored coverage is separate from practical/live platform acceptance.
       # No private bundles or source evidence are uploaded as public artifacts.
