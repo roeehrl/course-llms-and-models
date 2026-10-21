@@ -169,6 +169,8 @@ try{
   await writeFile(path.join(state,'acceptance.json'),JSON.stringify({observedAt:new Date().toISOString(),coreVersion:manifest.version,releaseReceipt,courseVersion:course.version,courseDigest:compiled.digest,workedExampleCapability:workedCourse,storage:'actual_postgresql',execution:'actual_released_http_and_isolated_python',reports,ownerUnenrolled:true,liveProviderAcceptance:false},null,2)+'\n',{mode:0o600});
   console.log(JSON.stringify({verified:true,coreVersion:manifest.version,releaseReceipt,courseVersion:course.version,reports,ownerUnenrolled:true,liveProviderAcceptance:false}));
 }catch(error){await writeFile(path.join(state,'failure.json'),JSON.stringify({code:error instanceof Failure?error.code:'private_acceptance_failed',type:error?.name,detailCode:error?.code,message:String(error?.message??'').slice(0,2000)})+'\n',{mode:0o600});console.error(error instanceof Failure?error.code:'private_acceptance_failed');process.exitCode=1;
+  // A released API that never came up says why only in its own output; show a bounded tail with local paths removed.
+  if(['released_api_startup_failed','released_api_readiness_timeout'].includes(error?.code))console.error(output.slice(-4000).replaceAll(runtime,'<runtime>').replaceAll(root.replace(/\/$/,''),'<course>'));
 }finally{
   if(!childExit){server.kill('SIGTERM');for(let i=0;i<50&&!childExit;i++)await pause(100);if(!childExit){server.kill('SIGKILL');for(let i=0;i<20&&!childExit;i++)await pause(100);}}
   if(!childExit)throw new Failure('owned_api_shutdown_unconfirmed');
