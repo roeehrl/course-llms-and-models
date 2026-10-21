@@ -21,7 +21,7 @@ export async function releasedDirectories(argv,defaults){
   if(!ok)throw Error(`released_${name}_directory_missing: ${dir} does not exist. Download and verify the release assets and install the runtime there (see RELEASES.md), or pass --runtime-dir and --release-dir.`);}
  return dirs;
 }
-export const releaseCiNames=['Public source and orchestration','Module / policy','Module / providers','Module / adaptation','Module / research','Module / example-courses','Module / supervisor','Sandbox / real Docker Linux','API and connected learner / Postgres 17','Browser / visuals','Browser / learner','Browser / admin'];
+export const releaseCiNames=['Public source and orchestration','Module / policy','Module / providers','Module / adaptation','Module / research','Module / i18n','Module / example-courses','Module / supervisor','Sandbox / real Docker Linux','API and connected learner / Postgres 17','Browser / visuals','Browser / learner','Browser / admin'];
 const check=(v,code)=>{if(!v)throw Error(code);},sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 /** Verify published delivery data and installed files independently of Core
  * implementation imports. No sibling checkout, model call or native mutation. */
@@ -30,7 +30,7 @@ export async function verifyReleasedRuntime(runtime,directory,identity=expectedC
  check(/^[a-f0-9]{64}$/.test(identity.manifestSha256??'')&&sha(manifestBytes)===identity.manifestSha256,'release_manifest_bytes_mismatch');
  const manifest=JSON.parse(manifestBytes.toString('utf8'));
  check(manifest.identity.repository==='roeehrl/course-core'&&manifest.identity.version===identity.version&&manifest.identity.tag===identity.tag&&manifest.identity.commit===identity.commit&&manifest.identity.tagObject===identity.tagObject,'release_identity_mismatch');
- check(manifest.ci.headSha===identity.commit&&manifest.ci.runId===identity.runId&&manifest.ci.jobs.length===12&&manifest.ci.jobs.every(j=>j.conclusion==='success')&&new Set(manifest.ci.jobs.map(j=>j.id)).size===12&&releaseCiNames.every(name=>manifest.ci.jobs.filter(j=>j.name===name||j.name.endsWith(' / '+name)).length===1),'release_ci_mismatch');
+ check(manifest.ci.headSha===identity.commit&&manifest.ci.runId===identity.runId&&manifest.ci.jobs.length===releaseCiNames.length&&manifest.ci.jobs.every(j=>j.conclusion==='success')&&new Set(manifest.ci.jobs.map(j=>j.id)).size===releaseCiNames.length&&releaseCiNames.every(name=>manifest.ci.jobs.filter(j=>j.name===name||j.name.endsWith(' / '+name)).length===1),'release_ci_mismatch');
  check(manifest.verificationScope==='source_ci_and_installed_package_only_no_live_provider_or_deployment','release_scope_mismatch');
  const kinds=new Set(),seen=new Map();let files=0;
  for(const asset of manifest.assets){check(/^[A-Za-z0-9.-]+$/.test(asset.filename)&&!kinds.has(asset.kind),'release_asset_invalid');kinds.add(asset.kind);const bytes=await readFile(path.join(directory,asset.filename));check(bytes.length===asset.size&&sha(bytes)===asset.sha256,'release_asset_bytes_mismatch');
