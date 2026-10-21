@@ -461,6 +461,19 @@ def registry_bytes():
     return (json.dumps(build_registry(), separators=(',', ':'), allow_nan=False) + '\n').encode()
 
 
+
+def same_values(a, b, rel=1e-12, abs_=1e-15):
+    """Structural equality with float tolerance: libm results (exp, log, tanh) may differ in
+    the last bit between platforms, so the committed fixture bytes stay authoritative and a
+    regeneration elsewhere only has to agree to far below the grading tolerance."""
+    if isinstance(a, bool) or isinstance(b, bool) or not isinstance(a, (int, float)) or not isinstance(b, (int, float)):
+        if isinstance(a, dict) and isinstance(b, dict):
+            return a.keys() == b.keys() and all(same_values(a[k], b[k], rel, abs_) for k in a)
+        if isinstance(a, list) and isinstance(b, list):
+            return len(a) == len(b) and all(same_values(x, y, rel, abs_) for x, y in zip(a, b))
+        return a == b and type(a) is type(b)
+    return abs(a - b) <= max(abs_, rel * max(abs(a), abs(b)))
+
 if __name__ == '__main__':
     overlay_file = ROOT / 'content/labs-b.json'
     if sys.argv[1:] == ['--write']:
@@ -470,7 +483,8 @@ if __name__ == '__main__':
         overlay['extensions'][0]['integrity'] = 'sha256-' + hashlib.sha256(FIXTURE_FILE.read_bytes()).hexdigest()
         overlay_file.write_text(json.dumps(overlay, indent=2, ensure_ascii=False) + '\n')
     elif sys.argv[1:] == ['--check']:
-        assert FIXTURE_FILE.read_bytes() == registry_bytes(), 'Fixture file differs from the deterministic generator'
+        committed, data = FIXTURE_FILE.read_bytes(), registry_bytes()
+        assert committed == data or same_values(json.loads(committed), json.loads(data)), 'Fixture file differs from the deterministic generator'
         integrity = json.loads(overlay_file.read_text())['extensions'][0]['integrity']
         assert integrity == 'sha256-' + hashlib.sha256(FIXTURE_FILE.read_bytes()).hexdigest(), 'Declared integrity differs from the fixture bytes'
     else:
