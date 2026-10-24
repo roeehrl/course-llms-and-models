@@ -1,0 +1,452 @@
+{
+  "schemaVersion": 1,
+  "coreVersion": "0.1.56",
+  "coreTag": "v0.1.56",
+  "coreCommit": "3996aa85c54c0ca293143856a57e7bea447f9542",
+  "coreTagObject": "b8b4a89b6adcc7a68a2d400d2e88acbaf9d47107",
+  "coreTree": "4870738b5cb14e03ef8c998e6cb4190dc1e017ff",
+  "coreReleaseRun": 40123058658,
+  "coreReleaseRunAttempt": 1,
+  "coreCandidateArtifact": 12572741135,
+  "coreCandidateArtifactName": "course-core-v0.1.56-3996aa85c54c0ca293143856a57e7bea447f9542-40123058658-1",
+  "coreArtifactDigest": "sha256:e4a06efe6f7da3522b70b6fc3128263d1185aca30912404207e59475400d2d5a",
+  "coreManifestSha256": "fe96611c89fac7cda4701e88aee2958f3cde6d83e1379f20e3cd5306afbcdf37",
+  "sha256sumsFileSha256": "6341b35ce346e203409472ede807fa6c5d49ab71db662e1508bd965433b52289",
+  "assetSha256": {
+    "course-core-admin-web-0.1.56.tar.gz": "99ab2d44eaf8579e27ea271403cd434e11c4d4954cce68e4c309bcfeaf36e2f3",
+    "course-core-learner-web-0.1.56.tar.gz": "74021eb3717d5515ef7c2d88546c1786f6158e85a5b652b3b133af055de2fba2",
+    "course-core-runtime-0.1.56.tar.gz": "2ca7bafefe7f13dc8863de39df103a578f0fae775c62fb2618db5b22e7ed08fe",
+    "course-core-sbom-0.1.56.cdx.json": "20cb0e65362fc3b1f2852bc983fc9dcb1f69ac4a43ee7eddca1f942815dd1ca5",
+    "course-core-source-0.1.56.tar.gz": "c8963a1c285faa8e1b2f460094aa9c9e2b0104e21e80bf82bebe9db5b5b20422",
+    "course-core-visuals-0.5.2.tgz": "7ed63dd1ef00947bd74dc731d2ab37703d2635400747cab98a8b8790e6d55c1b",
+    "release-manifest.json": "fe96611c89fac7cda4701e88aee2958f3cde6d83e1379f20e3cd5306afbcdf37",
+    "SHA256SUMS": "6341b35ce346e203409472ede807fa6c5d49ab71db662e1508bd965433b52289"
+  },
+  "prerelease": true,
+  "published": true,
+  "coreChangesSince": "0.1.52",
+  "contents": "everything in 0.1.54 (wave 1 #202, release retries #206 and #207, live companion fixes #210, save-banner fix #211), plus wave 2 (#209), the 0.1.54 qualification fixes (#215) and the version bump; wave 3 (#213) is not included (planned for 0.1.57)",
+  "skippedVersions": {
+    "deadTag0153": {
+      "tag": "v0.1.53",
+      "releaseRun": 39666773033,
+      "releaseRunResult": "failure (release build failed on a network reset)",
+      "published": false,
+      "deployed": false
+    },
+    "builtNotPublished0154": {
+      "tag": "v0.1.54",
+      "commit": "bb9684e8009d1bd7e3409ccd5d8e52ee4de4bc24",
+      "releaseRun": 40107854027,
+      "releaseRunResult": "success",
+      "published": false,
+      "deployed": false,
+      "note": "built but never published: its qualification found harness and Core bugs; the Core fixes are #215 (in 0.1.56) and the harness fixes are course PR #8"
+    },
+    "deadTag0155": {
+      "tag": "v0.1.55",
+      "commit": "9c6ab730a7ab80497ccca002b1cca22309061f3e",
+      "releaseRun": 40114847340,
+      "releaseRunAttempt": 1,
+      "releaseRunResult": "a job reported success but its steps never completed; the run's artifacts were refused as candidate bytes (the run now reads failure)",
+      "published": false,
+      "deployed": false,
+      "note": "the tag stays as a dead tag; 0.1.56 was cut instead"
+    }
+  },
+  "migrations": {
+    "new": 21,
+    "newNumbers": "090, 092-100, 102-104, 106-113 (091, 101 and 105 do not exist)",
+    "totalAfter": 98
+  },
+  "statusByStage": {
+    "implemented": "see contents",
+    "tested": "Core CI on each PR and on main; release run 13/13 jobs; before publication the course's released-consumer acceptance (course 0.1.4, 0.1.6 and 0.1.7 harnesses), a migration and reconcile rehearsal on a copy of the pilot database, feature checks in a real browser and an upgrade drill, all against the candidate bytes with scripted models, fake keys and local stubs",
+    "released": "v0.1.56 GitHub prerelease (2026-10-24T20:23:43Z); hosted assets byte-identical to the candidate; SHA256SUMS 6/6; gh attestation verify 8/8",
+    "deployed": "the local pilot upgraded 0.1.52 -> 0.1.56 with deploy/local/upgrade.mjs of 0.1.56",
+    "liveVerified": "pilot health, processes, migrations, reconcile settlement, snapshot and restore drill, pilot acceptance (QA learner on phone, tablet, desktop; no answers submitted) and a signed-out tailnet check; no live provider call"
+  },
+  "consumerChecks": {
+    "sha256sumsAllOk": true,
+    "sha256sumsCovers": 6,
+    "attestations": {
+      "filesVerified": 8,
+      "run": "40123058658/attempts/1",
+      "sourceDigest": "3996aa85c54c0ca293143856a57e7bea447f9542"
+    },
+    "sourceMembersComparedToGitTree": 1809,
+    "moduleLocksMatchGit": 12,
+    "ciJobs": 13,
+    "ciAllSuccess": true,
+    "sbom": {
+      "format": "CycloneDX 1.5",
+      "components": 894
+    },
+    "adapterDigestsIdenticalTo0152And0154": true,
+    "temporalCliSha256": "33c298d41f6eefebf01a28a3511f444480e939e21d3518cb0c12a4abad467c4b"
+  },
+  "qualificationBeforePublication": {
+    "summary": "passed; see planning/IMPLEMENTATION_STATUS.md (2026-10-24 entry)",
+    "models": "scripted only",
+    "liveProviderAcceptance": false,
+    "migrationRehearsal": "exactly the 21 new migrations, none on a second run; 662 rows in 148 old tables, pins, 4 role bindings and AI setup rows unchanged; backup and restore drill 149 tables / 739 rows",
+    "reconcileRehearsal": "2 uncertain companion calls settled at 5789 and 5624 micro-USD; a second pass settled nothing; no provider reachable",
+    "upgradeDrill": "forced restore-drill failure restarted 0.1.52; normal upgrade succeeded (98 migrations, 191 tables)",
+    "findings": [
+      "Hebrew learner profile shows one English API sentence (services/api/src/learner-model.ts needs_evidence)"
+    ]
+  },
+  "publishedRelease": {
+    "url": "https://github.com/roeehrl/course-core/releases/tag/v0.1.56",
+    "prerelease": true,
+    "draft": false,
+    "publishedAt": "2026-10-24T20:23:43Z",
+    "assets": 8,
+    "hostedAssetsCmpIdentical": "8 of 8",
+    "sha256sumsAllOk": true,
+    "manifestSha256Matches": true
+  },
+  "ownerBudgetChange": {
+    "what": "per-learner default spending limit changed from $2 to $25 at the owner's request",
+    "how": "direct SQL on the pilot database, 2026-10-24 (supervisor_workspace_budgets.default_enrollment_limit_micro_usd 2000000 -> 25000000, default_enrollment_revision 1 -> 2)",
+    "audit": "no admin audit row was written, because the change did not go through the admin",
+    "keptByUpgrade": true,
+    "afterUpgrade": {
+      "defaultEnrollmentLimitMicroUsd": 25000000,
+      "defaultEnrollmentRevision": 2
+    }
+  },
+  "nativePilotUpgrade": {
+    "from": "0.1.52",
+    "to": "0.1.56",
+    "skipped": "0.1.53 and 0.1.55 (dead tags), 0.1.54 (never published)",
+    "origin": "http://localhost:4310",
+    "runtimeRoot": "<pilot root>/releases/v0.1.56/course-core",
+    "installedFrom": "hosted release assets (byte-identical to the candidate); the release's own orchestrator (install api, install supervisor); published learner/admin web exports laid over; Temporal CLI copied byte-identical from the v0.1.52 root",
+    "installedRuntimeCheck": {
+      "checkedMembers": 4077,
+      "uniqueFiles": 2254,
+      "manifestSha256": "fe96611c89fac7cda4701e88aee2958f3cde6d83e1379f20e3cd5306afbcdf37",
+      "adapterDigestsMatch": true
+    },
+    "tool": "deploy/local/upgrade.mjs of 0.1.56 (--pg-bin PostgreSQL 17)",
+    "at": "2026-10-24T20:30:03Z",
+    "result": {
+      "status": "upgraded",
+      "backup": "backups/backup-20261024203005492-a0ced5",
+      "restoreDrill": {
+        "rows": 739,
+        "tables": 149
+      },
+      "steps": [
+        "stopped",
+        "backed_up",
+        "restore_verified",
+        "started_new_runtime"
+      ],
+      "providerAcceptance": "not_verified"
+    },
+    "health": "ok",
+    "processes": "launcher, API (serving both web apps from the 0.1.56 exports), Temporal, worker and dispatch loop all run from the v0.1.56 root; API environment keeps ALLOW_INSECURE_ORIGINS=true and AUTH_LOGIN_CODES=disabled",
+    "migrations": {
+      "before": {
+        "count": 77,
+        "last": "089_provider_quality_checks.sql"
+      },
+      "after": {
+        "count": 98,
+        "last": "113_conversation_confirmation_setting.sql"
+      }
+    },
+    "publicTables": {
+      "before": 149,
+      "after": 191
+    },
+    "reconcileSettlement": {
+      "what": "the dispatcher's first reconcile pass on 0.1.56 settled the two companion calls left uncertain under 0.1.52 at their reported usage; no provider was contacted",
+      "rows": [
+        {
+          "op": "83270a2e",
+          "chargedMicroUsd": 5789,
+          "releasedMicroUsd": 94211,
+          "usageTokens": 3734
+        },
+        {
+          "op": "df2175b1",
+          "chargedMicroUsd": 5624,
+          "releasedMicroUsd": 94376,
+          "usageTokens": 3514
+        }
+      ],
+      "heldMicroUsd": {
+        "before": 200000,
+        "after": 0
+      },
+      "ledgerChargedSumMicroUsd": {
+        "before": 209666,
+        "after": 21079
+      },
+      "uncertainRows": {
+        "before": 2,
+        "after": 0
+      },
+      "workspaceUsedMicroUsd": {
+        "before": 209666,
+        "after": 21079
+      },
+      "supervisorReconciliations": {
+        "before": 0,
+        "after": 2
+      },
+      "waitingCompanionJobs": "the 2 waiting companion jobs ended as failed (refused reply)",
+      "matchesRehearsal": true
+    },
+    "providerCounters": {
+      "baselineBeforeDeploy": {
+        "migrations": {
+          "count": 77,
+          "last": "089_provider_quality_checks.sql"
+        },
+        "tables": 149,
+        "dispatches": 5,
+        "ledger_rows": {
+          "count": 5,
+          "charged_sum": 209666,
+          "actual_sum": 9666,
+          "uncertain": 2,
+          "held": 200000
+        },
+        "ws_budget": {
+          "limit": 25000000,
+          "used": 209666,
+          "default_enrollment_limit": 25000000,
+          "default_enrollment_revision": 2
+        },
+        "enrollment_budget": {
+          "limit": 0,
+          "used": 209666,
+          "source": "default"
+        },
+        "reconciliations": 0,
+        "enrollments": 1,
+        "memberships": 2,
+        "quality_checks": 0
+      },
+      "afterUpgrade": {
+        "migrations": {
+          "count": 98,
+          "last": "113_conversation_confirmation_setting.sql"
+        },
+        "tables": 191,
+        "dispatches": 5,
+        "ledger_rows": {
+          "count": 5,
+          "charged_sum": 21079,
+          "actual_sum": 21079,
+          "uncertain": 0,
+          "held": 0
+        },
+        "ws_budget": {
+          "limit": 25000000,
+          "used": 21079,
+          "default_enrollment_limit": 25000000,
+          "default_enrollment_revision": 2
+        },
+        "enrollment_budget": {
+          "limit": 0,
+          "used": 21079,
+          "source": "default"
+        },
+        "reconciliations": 2,
+        "enrollments": 1,
+        "memberships": 2,
+        "quality_checks": 0
+      },
+      "beforeAcceptance": {
+        "migrations": {
+          "count": 98,
+          "last": "113_conversation_confirmation_setting.sql"
+        },
+        "tables": 191,
+        "dispatches": 5,
+        "ledger_rows": {
+          "count": 5,
+          "charged_sum": 21079,
+          "actual_sum": 21079,
+          "uncertain": 0,
+          "held": 0
+        },
+        "ws_budget": {
+          "limit": 25000000,
+          "used": 21079,
+          "default_enrollment_limit": 25000000,
+          "default_enrollment_revision": 2
+        },
+        "enrollment_budget": {
+          "limit": 0,
+          "used": 21079,
+          "source": "default"
+        },
+        "reconciliations": 2,
+        "enrollments": 1,
+        "memberships": 2,
+        "quality_checks": 0
+      },
+      "afterAcceptance": {
+        "migrations": {
+          "count": 98,
+          "last": "113_conversation_confirmation_setting.sql"
+        },
+        "tables": 191,
+        "dispatches": 5,
+        "ledger_rows": {
+          "count": 5,
+          "charged_sum": 21079,
+          "actual_sum": 21079,
+          "uncertain": 0,
+          "held": 0
+        },
+        "ws_budget": {
+          "limit": 25000000,
+          "used": 21079,
+          "default_enrollment_limit": 25000000,
+          "default_enrollment_revision": 2
+        },
+        "enrollment_budget": {
+          "limit": 0,
+          "used": 21079,
+          "source": "default"
+        },
+        "reconciliations": 2,
+        "enrollments": 1,
+        "memberships": 2,
+        "quality_checks": 0
+      },
+      "afterTailnetCheck": "unchanged (identical counters and ledger lines)",
+      "newDispatchesOrLedgerRows": 0,
+      "supervisorJobs": "9 before and after (companion: 2 applied, 3 failed; supervisor: 4 cancelled)",
+      "companionMessages": "unchanged",
+      "note": "the only ledger change is the reconcile settlement above"
+    },
+    "aiSetup": {
+      "roleBindings": "identical to the migrated rehearsal copy",
+      "aiSetupRows": "identical to the rehearsal copy by count and digest, except the spend ledger digest (settlement timestamps differ; amounts identical)",
+      "checkedWith": "read-only SQL; sealed_credentials never queried; no values recorded"
+    },
+    "companionCheckStatus": {
+      "expected": "companion 'needs a new check' and keeps running; supervisor, research and reviewer not evaluated and keep running",
+      "verifiedHow": "not opened on the pilot (the AI services page needs the owner's sign-in); the pilot's role bindings and AI setup rows are identical to the rehearsal copy, where the 0.1.56 API reported companion stale and all 4 jobs on",
+      "allFourRolesOn": true
+    },
+    "snapshots": {
+      "config": {
+        "intervalMinutes": 30,
+        "keep": 48,
+        "directory": "an owner-only (0700) folder in the pilot directory"
+      },
+      "configBackup": "the previous config.json was kept as a private copy in the pilot state before the change",
+      "addedAfterUpgrade": "the snapshots key was added right after the upgrade and the pilot was restarted from the 0.1.56 root, because 0.1.52 rejects unknown config keys and a rollback to 0.1.52 would then have failed to start",
+      "firstSnapshot": {
+        "outcome": "succeeded",
+        "tables": 191,
+        "rows": 968
+      },
+      "restoreDrillOfSnapshot": {
+        "status": "restore_verified",
+        "tables": 191,
+        "rows": 968,
+        "reported": true
+      },
+      "platformReports": "platform_backup_reports has one snapshot and one restore_drill row, both succeeded"
+    },
+    "clipTools": {
+      "result": "not set",
+      "reason": "Core 0.1.56's pilot launcher builds the API environment only from config.json keys and has no setting for CLIP_FFMPEG_PATH, CLIP_FFPROBE_PATH or CLIP_RASTERIZER_PATH (providerCredentials only accepts API key names), so there is no supported way to pass them; editing the installed runtime was not done",
+      "effect": "the media page still says the clip tools are not set up; exact clips and frame checks are unavailable on the pilot",
+      "followUp": "Core change needed: a pilot config key for the clip tool paths"
+    },
+    "pilotAcceptance": {
+      "result": "passed",
+      "runs": 1,
+      "exit": 0,
+      "at": "2026-10-24T20:33:49Z",
+      "harness": "verification/pilot-acceptance.mjs from the local 0.1.56 acceptance worktree (course main e6aa1be + local 0.1.56 pin commit a0f8d5e; pilot-acceptance.mjs unchanged since 0.1.47), run as a guarded copy",
+      "noProviderGuard": "AI services are on with the owner's real key, so the run used a copy with two added stops: abort if the QA account has no enrollment (enrolling emits a supervised event) and abort if the first episode is not already completed (answering checks or completing an episode emits supervised events). Neither stop fired. Session-end signals (new in 0.1.56) start supervisor work only with the learner's supervision opt-in, which the QA enrollment does not have, and the session.ended event itself is not supervised",
+      "skippedSteps": [
+        "answering the first episode's checks and completing it (already completed; the guard would have stopped the run)",
+        "admin signed-in checks (no operator password; the admin sign-in page was checked signed out)"
+      ],
+      "package": "the pilot's installed, verified course 0.1.4 package (the QA enrollment's pinned release)",
+      "phone": "signed in; fnd-e01-01 already completed (completedInThisRun false)",
+      "tablet": "resumed fnd-e01-02",
+      "desktop": "resumed fnd-e01-02",
+      "resumedExistingEnrollment": true,
+      "completedInThisRun": false,
+      "operatorEnrolled": false,
+      "adminSignedIn": false,
+      "qaRoleCheck": "verified_read_only_in_database",
+      "knownAxeDefectsObserved": [],
+      "liveProviderAcceptance": false,
+      "writesByDesign": "the harness sets a fresh random password for the dedicated QA account through the runtime's set-password CLI (never printed or stored), signs that account in, and writes its receipt and screenshots to the pilot's acceptance folder"
+    }
+  },
+  "tailnetAccess": {
+    "runs": 1,
+    "at": "2026-10-24T20:34:25Z",
+    "origin": "the pilot host's Tailscale IPv4 address on port 4310 (plain http)",
+    "checks": {
+      "loginFromTailnetOrigin": "401 LOGIN_FAILED for an unknown user (origin accepted)",
+      "browser": {
+        "engine": "installed Chrome via Playwright; phone 390x844, tablet 834x1112, desktop 1280x800 (en-US) and phone he-IL; admin /admin/ and learner /, signed out",
+        "pageStatus": [
+          200
+        ],
+        "pageErrors": 0,
+        "horizontalOverflow": false,
+        "signInFormRendered": true,
+        "isSecureContext": false,
+        "consoleErrors": "the expected signed-out 401 from GET /auth/session on every page, plus one 404 on the first page loaded (admin phone), most likely Chrome's favicon request (same as 0.1.52)",
+        "hebrew": {
+          "admin": {
+            "lang": "he",
+            "dir": "rtl",
+            "hebrewChars": 99
+          },
+          "learner": {
+            "lang": "he",
+            "dir": "rtl",
+            "hebrewChars": 147
+          }
+        },
+        "servedBundles": {
+          "admin": [
+            "/admin/assets/LearnerViewScreen-D_Ow7-tj.js",
+            "/admin/assets/index-C4BfhJjg.js",
+            "/admin/assets/rolldown-runtime-hePW80VL.js"
+          ],
+          "learner": [
+            "/_expo/static/js/web/index-f5ae7bec617fe67d378c0007350cd2a3.js"
+          ],
+          "allByteIdenticalToInstalled0156Exports": true,
+          "identicalTo0152": 0
+        }
+      }
+    }
+  },
+  "liveProviderAcceptance": false,
+  "notVerified": [
+    "live providers and real model quality: no provider call was made during the deploy and acceptance",
+    "the AI services page and the companion's 'needs a new check' notice on the pilot itself (needs the owner's sign-in)",
+    "clip tools and the media page on the pilot (no supported setting, see clipTools)",
+    "Hebrew on the pilot beyond the signed-out sign-in pages",
+    "signed-in saves over the tailnet",
+    "course 0.1.7 on the pilot (still staged, not installed; course releases 0.1.4 and 0.1.5)",
+    "LAN and physical devices"
+  ],
+  "userActions": [
+    "run the quality check from AI services (13 conversations, about $0.09, real key and budget) so the companion's check is current",
+    "review the supervision defaults ('Change personal lessons after checks', every tool family allowed; checkpoints confirmed as authored) before the supervisor runs for real learners",
+    "install course 0.1.7 from the admin (needs the operator's password)",
+    "clip tools need a Core change before they can be set on the pilot"
+  ]
+}

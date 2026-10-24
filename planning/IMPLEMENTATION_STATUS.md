@@ -1,3 +1,65 @@
+# Core 0.1.56 published, qualified and deployed to the pilot (0.1.53 and 0.1.55 dead tags, 0.1.54 never published); reconcile settled; tailnet apps checked — 2026-10-24
+
+- Published: Core 0.1.56 prerelease at 20:23 UTC. Hosted assets are byte-identical to the candidate (8 of 8).
+- Candidate: Core 0.1.56, tag object b8b4a89 on commit 3996aa8, release run 40123058658, attempt 1.
+  - Artifact 12572741135, sha256:e4a06efe…. Manifest fe96611c….
+  - Contents: everything in 0.1.54 (#202, #206, #207, #210, #211), plus wave 2 (#209), #215 and the version bump. Wave 3 (#213) is not included.
+  - Skipped versions:
+    - 0.1.53: dead tag. Its release build failed on a network reset.
+    - 0.1.54: built (run 40107854027), never published. Its qualification found harness and Core bugs. The Core fixes are #215 (in 0.1.56) and the harness fixes are course PR #8.
+    - 0.1.55: dead tag. In run 40114847340 a job reported success, but its steps never completed. Its artifacts were refused as candidate bytes.
+  - Migrations: 21 new (090, 092–100, 102–104, 106–113), 98 in total.
+- Qualification before publication (candidate bytes; scripted models, fake keys, local stubs), passed:
+  - Artifact checks: SHA256SUMS (6/6), `gh attestation verify` for all 8 files, 1809 source members against Git, 12 lockfiles, 13 CI jobs, SBOM (894 components).
+  - Migration rehearsal on a read-only copy of the pilot DB:
+    - Exactly the 21 new migrations applied, then nothing on a second run.
+    - The 662 existing rows, pins, bindings and AI setup rows did not change. The only additions were intended (42 new tables, seeds and backfills, new columns).
+    - Backup and restore drill: 149 tables, 739 rows.
+  - Reconcile on the copy: the 2 uncertain companion calls settled at $0.005789 and $0.005624. Money held went from $0.20 to $0, and total spend from $0.209666 to $0.021079.
+  - The companion shows "stale" (needs a check) and keeps running.
+  - The $25 per-learner default (revision 2) is kept, and the candidate applies it ($25.00 per learner in the run inspector).
+  - Runtime build: adapter digests unchanged, Temporal 33c298d4…, installed-runtime check 4077 members.
+  - Acceptance, run once each:
+    - Course 0.1.7 (e6aa1be): HTTP (11/11 Docker labs), feature flow (eval-gate override) and browser all pass.
+    - Course 0.1.6 and course 0.1.4: HTTP, feature flow (0.1.6 only) and browser all pass, with the PR #8 harness fixes ported as local commits.
+  - Features in a real browser (en/he, desktop/phone):
+    - Upgrade path from a 0.1.52 setup.
+    - Run quality check over all 4 roles: passed 13/13, with 0 "uncertain" rows.
+    - Companion waiting, cancel and cut-short.
+    - Platform, Extensions & accommodations, Answer keys, supervision settings (0 px overflow, including en-XA) and storyboards.
+    - "Course workspace" translated.
+    - Moving the cohort to a newer version, and the learners' "Your course was updated" notice.
+    - Study consent with usability timings, and joining.
+  - Upgrade drill from 0.1.52: a forced failure restarted 0.1.52, and a normal upgrade succeeded.
+- Findings (not blocking): one English API sentence (learner-model.ts `needs_evidence`) shows in the Hebrew learner profile.
+- Owner budget change, recorded here: at the owner's request the per-learner default spending limit went from $2 to $25. It was made by direct SQL on the pilot database on 2026-10-24 (default_enrollment_revision 1 → 2). No admin audit row exists for it, because it did not go through the admin. The upgrade kept it: $25, revision 2.
+- Deployed to the pilot on this Mac, 0.1.52 → 0.1.56, at 20:30 UTC, with the release's upgrade.mjs.
+  - Installed from the hosted assets. Installed-runtime check: 4077 members, 2254 unique files. Adapter digests match, and the Temporal CLI is byte-identical to 0.1.52's (33c298d4…).
+  - Backup backup-20261024203005492-a0ced5. Restore drill: 149 tables, 739 rows. Steps: stopped, backed up, restore verified, started new runtime.
+  - Health ok. 98 migrations (last 113), 191 tables. The launcher, API, Temporal, worker and dispatch loop all run from the 0.1.56 root. Insecure-address checks are still off, as the operator set them.
+  - Reconcile: the dispatcher's first pass settled the two companion calls left "uncertain" under 0.1.52, at $0.005789 and $0.005624. Money held went from $0.20 to $0, total spend from $0.209666 to $0.021079, and the uncertain count from 2 to 0. The two waiting companion jobs ended as failed. No provider was contacted, and the result matches the rehearsal.
+  - Companion check: the role bindings and AI setup rows are identical to the rehearsal copy. On that copy, 0.1.56 showed the companion as "needs a new check" with all 4 jobs on. It was not seen on the pilot's own page, which needs the owner's sign-in.
+  - Snapshots: added to config.json (every 30 minutes, keep 48, an owner-only folder in the pilot directory), and the old config was kept as a private copy first. This was done right after the upgrade, followed by a restart from the 0.1.56 root. 0.1.52 rejects unknown config keys, so adding it before the upgrade would have made a rollback fail to start. The first snapshot succeeded (191 tables, 968 rows), and a restore drill of it passed. The Platform page now has both reports.
+  - Clip tools: NOT set. The 0.1.56 pilot launcher builds the API environment from config.json only. It has no setting for CLIP_FFMPEG_PATH, CLIP_FFPROBE_PATH or CLIP_RASTERIZER_PATH, so there is no supported way to pass them. The media page still says the tools are missing. This needs a Core change (a pilot config key for the clip tool paths).
+  - Provider counters, from before the deploy, after the upgrade, before and after acceptance, and after the tailnet check:
+    - 5 dispatches and 5 ledger rows throughout. 9 supervisor jobs, 0 quality checks, 1 enrollment, 2 memberships.
+    - The only change is the reconcile settlement above. No new dispatch or ledger row appeared.
+  - Pilot acceptance passed, one run. The phone signed in (fnd-e01-01 was already complete), and the tablet and desktop resumed fnd-e01-02. The operator is unenrolled.
+    - It used a guarded copy of the harness (course e6aa1be + 0.1.56 pin). The copy stops before enrolling and before answering checks or completing an episode, because those emit supervised events. Neither stop fired.
+    - 0.1.56's session-end signal starts supervisor work only with the learner's supervision opt-in. The QA enrollment has none.
+    - Skipped: answering checks and completing an episode (already done, and guarded), and the admin signed-in checks (no operator password).
+- Tailnet: checked signed out through the tailnet address, once.
+  - Admin and learner pages load at phone, tablet and desktop sizes, with no page errors and no overflow. The only console lines are the expected signed-out 401, plus one 404 on the first page (likely the favicon).
+  - The served bundles are byte-identical to the installed 0.1.56 exports. None is the same as in 0.1.52.
+  - With a Hebrew phone browser, both sign-in pages show Hebrew, right to left. Sign-in from the tailnet origin is accepted (an unknown user gets 401 LOGIN_FAILED).
+- Not verified: live providers and real model quality, the AI services page on the pilot, clip tools, Hebrew beyond the sign-in pages, signed-in saves over the tailnet, course 0.1.7 on the pilot (still staged).
+- User actions:
+  - Run the quality check from AI services (about $0.09, with the real key).
+  - Review the supervision defaults.
+  - Install course 0.1.7 from the admin.
+  - The clip tools need a Core change first.
+- Evidence: evidence/core-0.1.56-release-and-pilot.json.
+
 # Core 0.1.52 published, accepted and deployed to the pilot (0.1.51 dead tag); course 0.1.7 released; tailnet apps checked — 2026-10-21
 
 - Core 0.1.51 is a dead tag. It was tagged (tag object 3083bef on 563b2d6, #201), but its release run 39633764479 failed in the connected learner browser job. It was never published or deployed.
