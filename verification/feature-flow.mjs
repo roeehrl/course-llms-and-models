@@ -97,10 +97,35 @@ try{
     jobPolicy:{allowance:{microUsd:1,tokens:1},durationMs:1000,timeoutMs:100,maxAttempts:1},credentials:{}});
   check(nonGoogle.status!==200,'non_google_provider_accepted');
   // Provider setup first: saving it cancels pending supervisor jobs.
-  requireOk(await request(owner,'POST',`/api/admin/workspaces/${workspaceId}/provider-setup`,{expectedRevision:0,idempotencyKey:randomUUID(),
+  // Core 0.1.54+ gates every AI role (N07): a supervisor tool-loop revision activates only with a
+  // passing quality check of that exact revision or an owner's recorded, audited override, and is
+  // otherwise refused with 409 PROVIDER_EVAL_REQUIRED naming each role and revision digest. The
+  // stand-in model is scripted, so no check result could say anything about it: the owner records
+  // an override for exactly the refused revisions and saves again. Earlier Core (0.1.52) did not
+  // cover the tool-loop strategy and accepts the first save; no override is recorded there.
+  const setupRoute=`/api/admin/workspaces/${workspaceId}/provider-setup`,evalsRoute=`/api/admin/workspaces/${workspaceId}/provider-evals`;
+  const setupBody=()=>({expectedRevision:0,idempotencyKey:randomUUID(),
     configuration:{registry:{revision:'synthetic-acceptance',models:[{id:'synthetic-planner',providerId:'synthetic-google',remoteModel:'synthetic-planner',providerConfig:{apiVersion:'v1beta',transport:'generate_content',maxResponseBytes:1000000},enabled:true,capabilities:['structured_assessment'],limits:{maxInputCharacters:40000,maxOutputTokens:2000}}]},
       adapters:[{id:'synthetic-google',kind:'google',credentialEnv:'GOOGLE_API_KEY'}],roles:{supervisor:{modelId:'synthetic-planner',maxInputCharacters:30000,maxOutputTokens:1000,maxToolRounds:4}}},
-    jobPolicy:{allowance:{microUsd:100000,tokens:1200000},durationMs:300000,timeoutMs:60000,maxAttempts:3},credentials:{GOOGLE_API_KEY:'synthetic-acceptance-only'}}),'provider_setup');
+    jobPolicy:{allowance:{microUsd:100000,tokens:1200000},durationMs:300000,timeoutMs:60000,maxAttempts:3},credentials:{GOOGLE_API_KEY:'synthetic-acceptance-only'}});
+  let setup=await request(owner,'POST',setupRoute,setupBody());const evalGate={refusedWithoutEvidence:false,overrides:[]};
+  if(setup.status===409&&setup.value?.error==='PROVIDER_EVAL_REQUIRED'){
+    const missing=setup.value.details?.roles;check(Array.isArray(missing)&&missing.length===1&&missing[0].role==='supervisor'&&/^[a-f0-9]{64}$/.test(missing[0].revisionDigest??''),'eval_gate_refusal_unexpected_'+JSON.stringify(missing?.map(m=>m.role)??null));
+    evalGate.refusedWithoutEvidence=true;
+    for(const {role,revisionDigest} of missing){
+      const recorded=requireOk(await request(owner,'POST',evalsRoute+'/overrides',{idempotencyKey:randomUUID(),role,revisionDigest,reason:'Scripted acceptance: the supervisor model is a local scripted stand-in, not a real provider.'}),'eval_override');
+      check(recorded.role===role&&recorded.revisionDigest===revisionDigest,'eval_override_mismatch');evalGate.overrides.push({role,revisionDigest});
+    }
+    setup=await request(owner,'POST',setupRoute,setupBody());
+  }
+  requireOk(setup,'provider_setup');
+  if(evalGate.overrides.length){
+    // The override is audited (who, why, which revision) and the active role reports it.
+    const status=requireOk(await request(owner,'GET',evalsRoute),'eval_status');
+    for(const o of evalGate.overrides){check(status.roles?.some(r=>r.role===o.role&&r.revisionDigest===o.revisionDigest&&r.status==='override'),'eval_override_not_in_force_'+o.role);
+      check(status.overrides?.some(r=>r.role===o.role&&r.revisionDigest===o.revisionDigest&&r.actorId===owner.userId&&/^Scripted acceptance/.test(r.reason)),'eval_override_not_audited_'+o.role);}
+  }
+  reports.evalGate=evalGate;
   // Core 0.1.39+: paid work is refused until the operator prices each bound model (no
   // built-in price list). Check the default refusal rule, then enter a synthetic price.
   const pricingRoute=`/api/admin/workspaces/${workspaceId}/provider-pricing`,unpriced=requireOk(await request(owner,'GET',pricingRoute),'pricing_view');
