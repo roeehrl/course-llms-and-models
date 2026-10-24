@@ -1,3 +1,105 @@
+# Core 0.1.57 published, qualified and deployed to the pilot; ledger unchanged; snapshots running; tailnet apps checked — 2026-10-25
+
+- Published: Core 0.1.57 prerelease at 22:24 UTC on 2026-10-24. Hosted assets are byte-identical to the candidate (8 of 8), and their GitHub digests match.
+- Candidate:
+  - Core 0.1.57: tag object f9f7a45 on commit dc33319, release run 40130117075, attempt 1.
+  - Artifact 12575258169 (sha256:36b1e0b1…). Manifest 0a6b72ea….
+  - Contents: 0.1.56 plus wave 3 (#213) and the version bump. #217 is not included.
+  - Migrations: 4 new (115, 117, 118, 120), 102 in total.
+- Qualification before publication (candidate bytes; scripted models, fake keys, local stubs), passed:
+  - Artifact checks:
+    - SHA256SUMS: 6/6.
+    - `gh attestation verify` passes for all 8 files.
+    - All 1871 source members match Git.
+    - All 12 lockfiles match.
+    - The manifest lists 13 CI jobs.
+    - The SBOM has 894 components.
+  - Migration rehearsal on a read-only copy of the pilot DB (on 0.1.56):
+    - Exactly 115, 117, 118 and 120 applied, then nothing on a second run.
+    - Old rows, pins, bindings and AI setup did not change. The only changes are 4 new tables and 2 new columns.
+    - The $25 per-learner default (revision 2) is kept, and its mode is "limit". The column default is "unset", not "unlimited".
+    - The ledger did not change: 21,079 µUSD charged, 0 uncertain.
+    - Backup and restore drill passed.
+    - With the candidate API on the copy, reconcile settled nothing.
+  - Runtime build:
+    - Adapter digests are unchanged.
+    - The Temporal CLI (33c298d4…) was copied from the v0.1.56 root.
+    - The installed-runtime check passed (4209 members).
+  - Acceptance, run once each:
+    - Course 0.1.7: HTTP (11 Docker labs), feature flow and browser passed.
+    - Course 0.1.6: HTTP, feature flow and browser passed.
+    - Course 0.1.4: HTTP and browser passed.
+  - Features in a real browser (Chromium and WebKit, en/he, desktop and phone):
+    - Streamed companion replies:
+      - The first sentence appears about 0.34 s after Send, before the reply is complete.
+      - Stop while writing works.
+      - Cancelling a waiting question and a queued one works.
+      - A streamed reply cut at the length limit shows the cut-short notice.
+      - A streamed refusal is withdrawn, then settled and priced. 0 uncertain.
+    - AI services:
+      - Every job that needs a check is flagged.
+      - Run check for one job: 9/9.
+      - The full check passed 13/13 over all 4 jobs.
+    - Staff bell: items appear, "Mark all as read" works, and the items clear after the check.
+    - No limit per learner:
+      - Choosing it and switching back both work.
+      - The workspace total is still enforced (budget_exhausted/workspace, no provider call).
+      - "What learners spend" lists the learners.
+    - Admin forms:
+      - An edit stays when the page reloads.
+      - The form names a version saved elsewhere, with no blind overwrite.
+      - Discard and save both work.
+    - Version move:
+      - A byte-identical checkpoint carried over.
+      - Learners with personal changes are offered the move. Accepting works.
+      - An owner can force the move with a reason, and the forced move is audited.
+    - Learner notifications:
+      - Course updated, move offered and moved by staff all appear.
+      - Mark as read works and stays after a reload.
+    - Hebrew:
+      - Glossary: the learner app never shows המפקח, and the admin shows המפקח.
+      - en-XA and he scans are clean.
+      - 0 px overflow on phone.
+  - Upgrade drill from 0.1.56, with a `snapshots` entry in the config:
+    - A forced failure restarted 0.1.56 cleanly with its own config.
+    - A normal upgrade succeeded, with 102 migrations, and kept the snapshots entry.
+- Findings (not blocking):
+  - For up to about 30 s while a reply streams, the learner app shows "Stop waiting/Cancel and ask again" instead of "Stop this reply". Both use the same route.
+  - "Queued" may already be dispatched to the provider (about 70 ms after saving).
+  - When the workspace limit holds a question, the learner sees no notice about the limit.
+  - "Save prices" fails generically (PROVIDER_PRICING_EFFECTIVE_DATE_INVALID) when a later price is already scheduled. This is probably pre-existing.
+- Deployed to the pilot on this Mac, 0.1.56 → 0.1.57, at 22:32 UTC, with the release's upgrade.mjs (about 10 s).
+  - Installed from the hosted assets. Installed-runtime check: 4209 members, 2324 unique files. Adapter digests match, and the Temporal CLI is byte-identical to 0.1.56's (33c298d4…).
+  - Backup backup-20261024223235003-198922. Restore drill: 191 tables, 981 rows. Steps: stopped, backed up, restore verified, started new runtime.
+  - Health ok. 102 migrations (last 120), 195 tables. The launcher, API, Temporal, worker and dispatch loop all run from the 0.1.57 root, and nothing runs from 0.1.56. Insecure-address checks are still off, as the operator set them.
+  - The per-learner default is still $25 (revision 2), and its new mode reads "limit". The budget row is otherwise unchanged.
+  - The ledger did not change: 5 rows, 21,079 µUSD charged, 0 uncertain, nothing held. Role bindings and AI setup rows are unchanged, apart from the new mode column.
+  - Snapshots: the `snapshots` entry was kept as it was, and config.json was not edited. A scheduled snapshot ran on 0.1.56 just before the upgrade. The first 0.1.57 snapshot ran on schedule about 60 s after start, and a restore drill of it passed (195 tables, 987 rows, 102 migrations).
+  - The AI services page, the bells and "What learners spend" were not opened on the pilot, because they need the owner's sign-in. No quality check was run.
+  - Clip tools: still not set. 0.1.57's launcher has no setting for them either.
+  - Provider counters, from before the deploy, after the upgrade, before and after acceptance, and after the tailnet check:
+    - 5 dispatches and 5 ledger rows throughout. 9 supervisor jobs, 7 companion messages, 0 quality checks, 1 enrollment, 2 memberships, 0 notifications.
+    - No new dispatch, ledger row or job appeared. The ledger lines are identical at every point.
+  - Pilot acceptance passed, one run. The phone signed in (fnd-e01-01 was already complete), and the tablet and desktop resumed fnd-e01-02. The operator is unenrolled.
+    - It used a guarded copy of the harness (course e6aa1be + 0.1.57 pin). The copy stops before enrolling and before answering checks or completing an episode, because those emit supervised events. Neither stop fired.
+    - Skipped: answering checks and completing an episode (already done, and guarded), and the admin signed-in checks (no operator password).
+- Tailnet: checked signed out through the tailnet address, once.
+  - Admin and learner pages load at phone, tablet and desktop sizes, with no page errors and no overflow. The only console lines are the expected signed-out 401, plus one 404 on the first page (likely the favicon).
+  - The served bundles are byte-identical to the installed 0.1.57 exports. Only the admin's small runtime chunk is the same as in 0.1.56.
+  - With a Hebrew phone browser, both sign-in pages show Hebrew, right to left. Sign-in from the tailnet origin is accepted (an unknown user gets 401 LOGIN_FAILED).
+- Not verified:
+  - Live providers, real latency and model quality. No provider call was made during the deploy and acceptance.
+  - The AI services page, the bells and the spending panel on the pilot itself, Hebrew beyond the sign-in pages, signed-in saves over the tailnet, and course 0.1.7 on the pilot (not installed).
+  - Anthropic streaming.
+  - Declining an offer, undoing a move, the budget-near-limit notification and the limit suggestion.
+  - Firefox and the native app.
+- User actions:
+  - Run the quality check from AI services (about $0.09, with the real key), or "Run check" for each job, so all four jobs read "Checked".
+  - Review the supervision defaults.
+  - Install course 0.1.7 from the admin.
+  - The clip tools need a Core change first.
+- Evidence: evidence/core-0.1.57-release-and-pilot.json.
+
 # Core 0.1.56 published, qualified and deployed to the pilot (0.1.53 and 0.1.55 dead tags, 0.1.54 never published); reconcile settled; tailnet apps checked — 2026-10-24
 
 - Published: Core 0.1.56 prerelease at 20:23 UTC. Hosted assets are byte-identical to the candidate (8 of 8).

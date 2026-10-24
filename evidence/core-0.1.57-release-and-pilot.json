@@ -1,0 +1,466 @@
+{
+  "schemaVersion": 1,
+  "coreVersion": "0.1.57",
+  "coreTag": "v0.1.57",
+  "coreCommit": "dc33319f0b8f72097e65d012a592a747fabb2375",
+  "coreTagObject": "f9f7a456966d983fe2066dec2ac63b5f03167c39",
+  "coreTree": "7eab8f02ac38d72708314e22696bdf6ab5c42c01",
+  "coreReleaseRun": 40130117075,
+  "coreReleaseRunAttempt": 1,
+  "coreCandidateArtifact": 12575258169,
+  "coreCandidateArtifactName": "course-core-v0.1.57-dc33319f0b8f72097e65d012a592a747fabb2375-40130117075-1",
+  "coreArtifactDigest": "sha256:36b1e0b120de424dffa72a2f25d2d4386b7719487046f50b6021b57dffde5cdf",
+  "coreManifestSha256": "0a6b72eaf20c5ca191b9a00ab985b0a718c8ef1e2329dbba906b9e35a480b6cc",
+  "sha256sumsFileSha256": "7c8b4fc2596d8b46dc22d7022b5a1e5886c7a047debb450a8a87422dc4d5167a",
+  "assetSha256": {
+    "course-core-admin-web-0.1.57.tar.gz": "fa770190d3157e4c3d87705b5a4d0e61aeaf03024bd176dd67310a083ffc8ee1",
+    "course-core-learner-web-0.1.57.tar.gz": "5f1084dbf4ffa41f96704e2468736f51116f927f7dc2e00257ddca0bc86442d0",
+    "course-core-runtime-0.1.57.tar.gz": "3cc664efbd24364efd87af7f3bfebdb78d8df8398bd01940303cea1fb923c5ce",
+    "course-core-sbom-0.1.57.cdx.json": "b8708ea7b4dfeffa8f9634d264a04d7adc559e78f6d0285dfa031045cf9d9fff",
+    "course-core-source-0.1.57.tar.gz": "218ff797c5f78ba427454a80766975b22a08f92290eb05379be531916f0ef602",
+    "course-core-visuals-0.5.2.tgz": "7ed63dd1ef00947bd74dc731d2ab37703d2635400747cab98a8b8790e6d55c1b",
+    "release-manifest.json": "0a6b72eaf20c5ca191b9a00ab985b0a718c8ef1e2329dbba906b9e35a480b6cc",
+    "SHA256SUMS": "7c8b4fc2596d8b46dc22d7022b5a1e5886c7a047debb450a8a87422dc4d5167a"
+  },
+  "prerelease": true,
+  "published": true,
+  "coreChangesSince": "0.1.56",
+  "contents": "0.1.56 plus wave 3 (#213) and the version bump; learner-model codes (#217) are not included",
+  "wave3": [
+    "streamed companion replies: a draft marked 'not checked yet' replaced by the stored reply; 'Stop this reply'; streamed cut-short and refusal handling",
+    "AI services: a 'Run check' button for each job that needs a quality check, also flagged on the course overview; jobs are never turned off automatically",
+    "per-learner spending: a limit per learner or an explicit 'No limit per learner' (the workspace total still applies); a 'What learners spend' panel; budget changes audited",
+    "moving learners to a newer course version: byte-identical checkpoints carry over; learners with personal changes are offered the move; forced moves need a reason, are audited and archive personal changes",
+    "in-app notifications: a staff bell and a learner bell; nothing is sent by email",
+    "admin forms keep edits across reloads and name a version saved elsewhere instead of saving over it",
+    "Hebrew glossary: the tutor is המנחה in the learner app; the staff-facing supervisor is המפקח (admin only)",
+    "courses built with SDK 0.4 are refused when installed as packages"
+  ],
+  "migrations": {
+    "new": 4,
+    "newNumbers": "115, 117, 118, 120 (116 and 119 do not exist)",
+    "totalAfter": 102
+  },
+  "statusByStage": {
+    "implemented": "see contents and wave3",
+    "tested": "Core CI on each PR and on main; release run 13/13 jobs; before publication the course's released-consumer acceptance (course 0.1.4, 0.1.6 and 0.1.7 harnesses), a migration and reconcile rehearsal on a copy of the pilot database, wave 3 feature checks in a real browser (Chromium and WebKit, en/he, desktop and phone) and an upgrade drill with a snapshots entry in the config, all against the candidate bytes with scripted models, fake keys and local stubs",
+    "released": "v0.1.57 GitHub prerelease (2026-10-24T22:24:13Z); hosted assets byte-identical to the candidate (8 of 8); SHA256SUMS 6/6; gh attestation verify 8/8",
+    "deployed": "the local pilot upgraded 0.1.56 -> 0.1.57 with deploy/local/upgrade.mjs of 0.1.57",
+    "liveVerified": "pilot health, processes, migrations, the per-learner default ($25, limit mode), unchanged ledger, scheduled snapshots and a restore drill of the first 0.1.57 snapshot, pilot acceptance (QA learner on phone, tablet, desktop; no answers submitted) and a signed-out tailnet check; no live provider call"
+  },
+  "consumerChecks": {
+    "sha256sumsAllOk": true,
+    "sha256sumsCovers": 6,
+    "attestations": {
+      "filesVerified": 8,
+      "run": "40130117075/attempts/1",
+      "sourceDigest": "dc33319f0b8f72097e65d012a592a747fabb2375"
+    },
+    "sourceMembersComparedToGitTree": 1871,
+    "moduleLocksMatchGit": 12,
+    "ciJobs": 13,
+    "ciAllSuccess": true,
+    "sbom": {
+      "format": "CycloneDX 1.5",
+      "components": 894
+    },
+    "gitLogSince0156": "#213 plus the version bump only",
+    "adapterDigestsIdenticalTo0156": true,
+    "temporalCliSha256": "33c298d41f6eefebf01a28a3511f444480e939e21d3518cb0c12a4abad467c4b"
+  },
+  "qualificationBeforePublication": {
+    "summary": "passed; see planning/IMPLEMENTATION_STATUS.md (2026-10-25 entry)",
+    "models": "scripted only",
+    "liveProviderAcceptance": false,
+    "migrationRehearsal": "exactly 115, 117, 118 and 120, none on a second run; the 98 old migration digests, 880 rows in 190 old tables (except backup reports written by the drill), pins, 4 role bindings and AI setup rows unchanged; additions: 4 tables (carried_checkpoint_attempts, course_version_move_offers, notifications, personal_change_archives) and 2 columns; backup and restore drill 191 tables / 978 rows",
+    "budgetsRehearsal": "per-learner default $25, revision 2, mode 'limit'; the new column's default is 'unset' (never 'unlimited')",
+    "reconcileRehearsal": "two passes settled nothing; ledger unchanged (21,079 micro-USD charged, 0 uncertain, nothing held); no provider reachable",
+    "featureChecks": "streamed replies (first sentence about 0.34 s after Send; stop, cancel, cut-short and withdrawn refusal; ledger reconciled), per-job and full quality checks (9/9 and 13/13), staff and learner bells, no limit per learner with the workspace total still enforced, admin forms across tabs, version move with carry-over, offers and an audited forced move, Hebrew glossary and en-XA scans",
+    "upgradeDrill": "with a snapshots entry in the config: a forced restore-drill failure restarted 0.1.56; a normal upgrade succeeded (102 migrations, 195 tables) and kept the snapshots entry",
+    "findings": [
+      "for up to about 30 s while a reply streams, the learner app shows 'Stop waiting'/'Cancel and ask again' instead of 'Stop this reply' (same cancel route; cosmetic)",
+      "a question shown as 'Queued' may already be with the provider (dispatched about 70 ms after saving)",
+      "a learner held by the workspace limit sees only 'Still working on your last question', with no notice that the limit was reached",
+      "'Save prices' fails with a generic message (PROVIDER_PRICING_EFFECTIVE_DATE_INVALID) when a later price is already scheduled; probably older than wave 3",
+      "staff notification conditions are re-read at most every 30 s per person (by design)"
+    ]
+  },
+  "publishedRelease": {
+    "url": "https://github.com/roeehrl/course-core/releases/tag/v0.1.57",
+    "prerelease": true,
+    "draft": false,
+    "publishedAt": "2026-10-24T22:24:13Z",
+    "assets": 8,
+    "hostedAssetsCmpIdentical": "8 of 8",
+    "hostedDigestsMatchGitHub": "8 of 8",
+    "sha256sumsAllOk": true,
+    "manifestSha256Matches": true
+  },
+  "perLearnerDefault": {
+    "before": {
+      "defaultEnrollmentLimitMicroUsd": 25000000,
+      "defaultEnrollmentRevision": 2,
+      "mode": "no column (0.1.56)"
+    },
+    "after": {
+      "defaultEnrollmentLimitMicroUsd": 25000000,
+      "defaultEnrollmentRevision": 2,
+      "mode": "limit"
+    },
+    "workspaceLimitMicroUsd": 25000000,
+    "note": "migration 120 recorded the existing $25 default as 'limit', the existing behaviour; the budget row is otherwise identical (digest without the new column unchanged)"
+  },
+  "nativePilotUpgrade": {
+    "from": "0.1.56",
+    "to": "0.1.57",
+    "origin": "http://localhost:4310",
+    "runtimeRoot": "<pilot root>/releases/v0.1.57/course-core",
+    "installedFrom": "hosted release assets (byte-identical to the candidate); the release's own orchestrator (install api, install supervisor); published learner/admin web exports laid over; Temporal CLI copied byte-identical from the v0.1.56 root",
+    "installedRuntimeCheck": {
+      "checkedMembers": 4209,
+      "uniqueFiles": 2324,
+      "manifestSha256": "0a6b72eaf20c5ca191b9a00ab985b0a718c8ef1e2329dbba906b9e35a480b6cc",
+      "verifier": "course harness pinned to Core 0.1.57 (local commit 182b08e)",
+      "adapterDigestsMatch": true
+    },
+    "tool": "deploy/local/upgrade.mjs of 0.1.57, run from the new root (--pg-bin PostgreSQL 17)",
+    "at": "2026-10-24T22:32:32Z",
+    "seconds": "about 10",
+    "result": {
+      "status": "upgraded",
+      "backup": "backups/backup-20261024223235003-198922",
+      "restoreDrill": {
+        "rows": 981,
+        "tables": 191
+      },
+      "steps": [
+        "stopped",
+        "backed_up",
+        "restore_verified",
+        "started_new_runtime"
+      ],
+      "providerAcceptance": "not_verified"
+    },
+    "health": "ok",
+    "processes": "launcher, API (serving both web apps from the 0.1.57 exports), Temporal, worker and dispatch loop all run from the v0.1.57 root; none from v0.1.56 remain; API environment keeps ALLOW_INSECURE_ORIGINS=true and AUTH_LOGIN_CODES=disabled",
+    "migrations": {
+      "before": {
+        "count": 98,
+        "last": "113_conversation_confirmation_setting.sql"
+      },
+      "after": {
+        "count": 102,
+        "last": "120_learner_spending_limit_mode.sql"
+      }
+    },
+    "publicTables": {
+      "before": 191,
+      "after": 195
+    },
+    "ledger": {
+      "unchanged": true,
+      "rows": 5,
+      "chargedSumMicroUsd": 21079,
+      "uncertain": 0,
+      "heldMicroUsd": 0,
+      "workspaceUsedMicroUsd": 21079,
+      "supervisorReconciliations": 2,
+      "note": "ledger and dispatch lines identical before the deploy, after the upgrade, after acceptance and after the tailnet check"
+    },
+    "providerCounters": {
+      "baselineBeforeDeploy": {
+        "migrations": {
+          "count": 98,
+          "last": "113_conversation_confirmation_setting.sql"
+        },
+        "tables": 191,
+        "dispatches": 5,
+        "ledger_rows": {
+          "count": 5,
+          "charged_sum": 21079,
+          "actual_sum": 21079,
+          "uncertain": 0,
+          "held": 0
+        },
+        "ws_budget": {
+          "limit": 25000000,
+          "used": 21079,
+          "default_enrollment_limit": 25000000,
+          "default_enrollment_revision": 2,
+          "mode": "(no column)"
+        },
+        "enrollment_budget": {
+          "limit": 0,
+          "used": 21079,
+          "source": "default"
+        },
+        "reconciliations": 2,
+        "supervisor_jobs": 9,
+        "job_spend": 9,
+        "companion_messages": 7,
+        "enrollments": 1,
+        "memberships": 2,
+        "quality_checks": 0,
+        "eval_results": 0,
+        "billed_statements": 0,
+        "outbox": {
+          "count": 11,
+          "undelivered": 2,
+          "quarantined": 0
+        },
+        "notifications": "(no table)"
+      },
+      "afterUpgrade": {
+        "migrations": {
+          "count": 102,
+          "last": "120_learner_spending_limit_mode.sql"
+        },
+        "tables": 195,
+        "dispatches": 5,
+        "ledger_rows": {
+          "count": 5,
+          "charged_sum": 21079,
+          "actual_sum": 21079,
+          "uncertain": 0,
+          "held": 0
+        },
+        "ws_budget": {
+          "limit": 25000000,
+          "used": 21079,
+          "default_enrollment_limit": 25000000,
+          "default_enrollment_revision": 2,
+          "mode": "limit"
+        },
+        "enrollment_budget": {
+          "limit": 0,
+          "used": 21079,
+          "source": "default"
+        },
+        "reconciliations": 2,
+        "supervisor_jobs": 9,
+        "job_spend": 9,
+        "companion_messages": 7,
+        "enrollments": 1,
+        "memberships": 2,
+        "quality_checks": 0,
+        "eval_results": 0,
+        "billed_statements": 0,
+        "outbox": {
+          "count": 11,
+          "undelivered": 2,
+          "quarantined": 0
+        },
+        "notifications": 0
+      },
+      "beforeAcceptance": {
+        "migrations": {
+          "count": 102,
+          "last": "120_learner_spending_limit_mode.sql"
+        },
+        "tables": 195,
+        "dispatches": 5,
+        "ledger_rows": {
+          "count": 5,
+          "charged_sum": 21079,
+          "actual_sum": 21079,
+          "uncertain": 0,
+          "held": 0
+        },
+        "ws_budget": {
+          "limit": 25000000,
+          "used": 21079,
+          "default_enrollment_limit": 25000000,
+          "default_enrollment_revision": 2,
+          "mode": "limit"
+        },
+        "enrollment_budget": {
+          "limit": 0,
+          "used": 21079,
+          "source": "default"
+        },
+        "reconciliations": 2,
+        "supervisor_jobs": 9,
+        "job_spend": 9,
+        "companion_messages": 7,
+        "enrollments": 1,
+        "memberships": 2,
+        "quality_checks": 0,
+        "eval_results": 0,
+        "billed_statements": 0,
+        "outbox": {
+          "count": 11,
+          "undelivered": 2,
+          "quarantined": 0
+        },
+        "notifications": 0
+      },
+      "afterAcceptance": {
+        "migrations": {
+          "count": 102,
+          "last": "120_learner_spending_limit_mode.sql"
+        },
+        "tables": 195,
+        "dispatches": 5,
+        "ledger_rows": {
+          "count": 5,
+          "charged_sum": 21079,
+          "actual_sum": 21079,
+          "uncertain": 0,
+          "held": 0
+        },
+        "ws_budget": {
+          "limit": 25000000,
+          "used": 21079,
+          "default_enrollment_limit": 25000000,
+          "default_enrollment_revision": 2,
+          "mode": "limit"
+        },
+        "enrollment_budget": {
+          "limit": 0,
+          "used": 21079,
+          "source": "default"
+        },
+        "reconciliations": 2,
+        "supervisor_jobs": 9,
+        "job_spend": 9,
+        "companion_messages": 7,
+        "enrollments": 1,
+        "memberships": 2,
+        "quality_checks": 0,
+        "eval_results": 0,
+        "billed_statements": 0,
+        "outbox": {
+          "count": 11,
+          "undelivered": 2,
+          "quarantined": 0
+        },
+        "notifications": 0
+      },
+      "afterTailnetCheck": "identical to afterAcceptance (counters and ledger lines)",
+      "newDispatchesOrLedgerRows": 0,
+      "supervisorJobs": "9 before and after (companion: 2 applied, 3 failed; supervisor: 4 cancelled)",
+      "notifications": "table added by migration 118; 0 rows",
+      "note": "the only differences between the baseline and the end are the schema (migrations, tables) and the new limit-mode column"
+    },
+    "aiSetup": {
+      "roleBindings": "identical before and after (4 roles, active revision 5)",
+      "aiSetupRows": "identical by count and digest, except supervisor_workspace_budgets, whose digest differs only by the new limit-mode column (the digest without it is unchanged)",
+      "checkedWith": "read-only SQL; sealed_credentials never queried; no values recorded"
+    },
+    "qualityCheckStatus": {
+      "expected": "all four jobs flagged on AI services, the overview and the staff bell, each with its own 'Run check'; the tutor 'needs a new check', the other three 'not checked yet'; all keep running",
+      "verifiedHow": "not opened on the pilot (needs the owner's sign-in); the pilot's role bindings and AI setup rows are identical to the rehearsal copy, where the 0.1.57 API reported the tutor stale and the other three not evaluated, all on",
+      "qualityChecksRun": 0
+    },
+    "snapshots": {
+      "config": "the snapshots entry (every 30 minutes, keep 48, an owner-only folder in the pilot directory) was kept unchanged; config.json was not edited",
+      "lastOn0156": "a scheduled snapshot at 22:32:11Z succeeded on 0.1.56 just before the upgrade",
+      "firstOn0157": {
+        "at": "2026-10-24T22:33:41Z",
+        "outcome": "succeeded",
+        "note": "taken on schedule about 60 s after the 0.1.57 services were ready"
+      },
+      "restoreDrillOfSnapshot": {
+        "status": "restore_verified",
+        "tables": 195,
+        "rows": 987,
+        "migrations": 102,
+        "temporal": "integrity_ok",
+        "reported": true
+      },
+      "platformReports": "platform_backup_reports gained the upgrade's restore drill, the 0.1.57 snapshot and its restore drill, all succeeded"
+    },
+    "clipTools": {
+      "result": "not set",
+      "reason": "0.1.57's pilot launcher still has no config key for the clip tool paths",
+      "followUp": "unchanged from 0.1.56: a Core change is needed"
+    },
+    "pilotAcceptance": {
+      "result": "passed",
+      "runs": 1,
+      "exit": 0,
+      "at": "2026-10-24T22:34:19Z",
+      "harness": "verification/pilot-acceptance.mjs from the local 0.1.57 acceptance worktree (course main e6aa1be + local 0.1.57 pin commit 182b08e; pilot-acceptance.mjs unchanged since 0.1.47), run as a guarded copy that was removed afterwards",
+      "noProviderGuard": "AI services are on with the owner's real key, so the run used a copy with the same two added stops as 0.1.56: abort if the QA account has no enrollment (enrolling emits a supervised event) and abort if the first episode is not already completed (answering checks or completing an episode emits supervised events). Neither stop fired. The 0.1.57 supervisor-bridge changes add no trigger on sign-in or resume (the new reply-ready notification only follows a companion answer), and the counters confirm no new job, dispatch or ledger row",
+      "skippedSteps": [
+        "answering the first episode's checks and completing it (already completed; the guard would have stopped the run)",
+        "admin signed-in checks (no operator password; the admin sign-in page was checked signed out)"
+      ],
+      "package": "the pilot's installed, verified course 0.1.4 package (the QA enrollment's pinned release)",
+      "phone": "signed in; fnd-e01-01 already completed (completedInThisRun false)",
+      "tablet": "resumed fnd-e01-02",
+      "desktop": "resumed fnd-e01-02",
+      "resumedExistingEnrollment": true,
+      "completedInThisRun": false,
+      "operatorEnrolled": false,
+      "adminSignedIn": false,
+      "qaRoleCheck": "verified_read_only_in_database",
+      "knownAxeDefectsObserved": [],
+      "liveProviderAcceptance": false,
+      "writesByDesign": "the harness sets a fresh random password for the dedicated QA account through the runtime's set-password CLI (never printed or stored), signs that account in, and writes its receipt and screenshots to the pilot's acceptance folder"
+    }
+  },
+  "tailnetAccess": {
+    "runs": 1,
+    "at": "2026-10-24T22:34:39Z",
+    "origin": "the pilot host's Tailscale IPv4 address on port 4310 (plain http)",
+    "checks": {
+      "loginFromTailnetOrigin": "401 LOGIN_FAILED for an unknown user (origin accepted)",
+      "browser": {
+        "engine": "installed Chrome via Playwright; phone 390x844, tablet 834x1112, desktop 1280x800 (en-US) and phone he-IL; admin /admin/ and learner /, signed out",
+        "pageStatus": [
+          200
+        ],
+        "pageErrors": 0,
+        "horizontalOverflow": false,
+        "signInFormRendered": true,
+        "isSecureContext": false,
+        "consoleErrors": "the expected signed-out 401 from GET /auth/session on every page, plus one 404 on the first page loaded (admin phone), most likely Chrome's favicon request (same as 0.1.52 and 0.1.56)",
+        "hebrew": {
+          "admin": {
+            "lang": "he",
+            "dir": "rtl",
+            "hebrewChars": 99
+          },
+          "learner": {
+            "lang": "he",
+            "dir": "rtl",
+            "hebrewChars": 147
+          }
+        },
+        "servedBundles": {
+          "admin": [
+            "/admin/assets/LearnerViewScreen-B2n74OM1.js",
+            "/admin/assets/index-CRfgrgy7.js",
+            "/admin/assets/rolldown-runtime-hePW80VL.js"
+          ],
+          "learner": [
+            "/_expo/static/js/web/index-a5c876a9949ad0ddb39020d3541b0904.js"
+          ],
+          "allByteIdenticalToInstalled0157Exports": true,
+          "sameBytesAs0156": [
+            "/admin/assets/rolldown-runtime-hePW80VL.js"
+          ]
+        }
+      }
+    }
+  },
+  "liveProviderAcceptance": false,
+  "notVerified": [
+    "live providers, real streaming latency and real model quality: no provider call was made during the deploy and acceptance",
+    "the Anthropic streaming path",
+    "the AI services page, the staff and learner bells and the 'What learners spend' panel on the pilot itself (need the owner's sign-in)",
+    "clip tools on the pilot (no supported setting)",
+    "Hebrew on the pilot beyond the signed-out sign-in pages",
+    "signed-in saves over the tailnet",
+    "course 0.1.7 on the pilot (not installed; course releases 0.1.4 and 0.1.5)",
+    "declining a move offer, undoing a move, the budget-near-limit notification and the per-learner limit suggestion",
+    "Firefox, LAN and physical devices"
+  ],
+  "userActions": [
+    "run the quality check from AI services (13 conversations, about $0.09, real key and budget), or 'Run check' for each job, so all four jobs read 'Checked'",
+    "review the supervision defaults before the supervisor runs for real learners",
+    "install course 0.1.7 from the admin (needs the operator's password)",
+    "clip tools need a Core change before they can be set on the pilot"
+  ]
+}
