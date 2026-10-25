@@ -1,0 +1,625 @@
+{
+  "schemaVersion": 1,
+  "coreVersion": "0.1.58",
+  "coreTag": "v0.1.58",
+  "coreCommit": "a3e93643591c17b16f10adc535d8400fb232b548",
+  "coreTagObject": "273208af83dfff279cc3d0fedb0237ca427cd420",
+  "coreTree": "0d5395af4607fa5bf4d89ee3a2c29ed2ff2d9a3d",
+  "coreReleaseRun": 40164760283,
+  "coreReleaseRunAttempt": 1,
+  "coreCandidateArtifact": 12588498703,
+  "coreCandidateArtifactName": "course-core-v0.1.58-a3e93643591c17b16f10adc535d8400fb232b548-40164760283-1",
+  "coreArtifactDigest": "sha256:0256a641133100abb5cf3471cfd4140676bdd22c25cbd8cd70142f259a1fdf38",
+  "coreManifestSha256": "68076b39b84b91dadf2079c21e5fc6126d89fe06f7556d98dd8da331dbce8016",
+  "sha256sumsFileSha256": "86361a62aadc62898b7a61f0c711a5ea4f5ffc76aab9bdf50b8b497927fc0bc4",
+  "assetSha256": {
+    "course-core-admin-web-0.1.58.tar.gz": "488f4d2214222fb484ec5b36d14a9f3798390518a5f1ef4d3893cfa1ed76e5e3",
+    "course-core-learner-web-0.1.58.tar.gz": "5a46584a2b0693880f005c0fee786666d54643479b90a9c86f72853f3e12bef6",
+    "course-core-runtime-0.1.58.tar.gz": "25d364a0bb01f33a7d9e610b629a3e9326377e1cbf35e64c1a69aad00a710a5e",
+    "course-core-sbom-0.1.58.cdx.json": "c85baec3780e460b419ab75ce7a845b789ff4d76ee0b6e7bce2dcb9c189c6b3e",
+    "course-core-source-0.1.58.tar.gz": "aee80d0fb9868ce9b7aac4cc5a3497dd73edb2d581500197dc8e178d2678fa8d",
+    "course-core-visuals-0.5.2.tgz": "7ed63dd1ef00947bd74dc731d2ab37703d2635400747cab98a8b8790e6d55c1b",
+    "release-manifest.json": "68076b39b84b91dadf2079c21e5fc6126d89fe06f7556d98dd8da331dbce8016",
+    "SHA256SUMS": "86361a62aadc62898b7a61f0c711a5ea4f5ffc76aab9bdf50b8b497927fc0bc4"
+  },
+  "prerelease": true,
+  "published": true,
+  "coreChangesSince": "0.1.57",
+  "contents": "0.1.57 plus #217 to #227 and the version bump (#228); #229 is not included",
+  "changes": [
+    "the tutor (המנחה) never gives the answer to a graded check; a matched reply that states the answer is withheld and replaced by a short coaching message in the question's language (#222); quality-check suite 2.1.0 (tutor 13 conversations, full check 17)",
+    "calls with no reply or a stall part way (#224): at most 20 s to the first part and 20 s between parts; one automatic retry of an unanswered question, then 'Reply unavailable' with 'Ask again'; 'Stop this reply' also stops the provider call; the owner settles calls with an unknown cost (AI services > Spending > 'Calls with an unknown cost'), final and audited (migration 121)",
+    "honest companion states (#221): 'Queued · not sent yet' and 'Sent · a reply is being written'; Stop shown as soon as the call is sent; a 'Help is paused' notice and a staff bell item for the workspace and per-learner limits; 'Context used' as plain text; scheduled price changes shown, changed or removed in a dialog",
+    "learner app (#223, #225): Markdown lists, tables and TeX in replies, drafts and lessons; one card per course with 'New version'; no page taller than the app; the connection status as a snackbar; the policy view of an enrollment created before 0.1.57 no longer fails",
+    "admin (#219, #225, #227): account menu and dialogs; a top app bar and navigation drawer below 1100 px (from the right in Hebrew); search icon no longer covers the text; Hebrew labels not letter-spaced or capitalised",
+    "Hebrew wording (#226): המנחה everywhere and 'השאלה שלך'; מלווה and, in the learner app, מפקח removed, with a lint",
+    "learner-model reasons and answer feedback sent as codes and worded by the app, so they are translated (#217)",
+    "pilot setting mediaTools (#218): absolute paths of ffmpeg, ffprobe and an rsvg-convert rasterizer, given to the API only, for exact clips and the frame check"
+  ],
+  "migrations": {
+    "new": 1,
+    "newNumbers": "121 (provider_spend_resolutions; adds one table)",
+    "totalAfter": 103
+  },
+  "statusByStage": {
+    "implemented": "see contents and changes",
+    "tested": "Core CI on each PR and on main; release run 13/13 jobs; before publication the course's released-consumer acceptance (course 0.1.4, 0.1.6 and 0.1.7 harnesses), a migration rehearsal on a copy of the pilot database (with the unknown-cost settlement and the policy view exercised on the copy), feature checks in a real browser (Chromium and WebKit; en, he and en-XA; desktop, tablet and phone), a media-tools check and an upgrade drill with a snapshots entry in the config, all against the candidate bytes with scripted models, fake keys and local stubs",
+    "released": "v0.1.58 GitHub prerelease (2026-10-25T08:19:39Z); hosted assets byte-identical to the candidate (8 of 8) and to their GitHub digests (8 of 8); SHA256SUMS 6/6; gh attestation verify 8/8",
+    "deployed": "the local pilot upgraded 0.1.57 -> 0.1.58 with deploy/local/upgrade.mjs of 0.1.58; mediaTools added after the upgrade and the pilot restarted from the 0.1.58 root",
+    "liveVerified": "pilot health, processes, migrations, the $25 per-learner and $25 workspace limits, unchanged ledger with the uncertain call still unsettled, the media-tool variables in the API process, the policy view of the QA enrollment (read-only code path and HTTP 200), scheduled snapshots and a restore drill of one, pilot acceptance (QA learner on phone, tablet, desktop; no answers submitted) and a signed-out tailnet check; no live provider call"
+  },
+  "consumerChecks": {
+    "sha256sumsAllOk": true,
+    "sha256sumsCovers": 6,
+    "attestations": {
+      "filesVerified": 8,
+      "run": "40164760283/attempts/1",
+      "sourceDigest": "a3e93643591c17b16f10adc535d8400fb232b548",
+      "visualsPackage": "0.5.2, same bytes as before; also carries the 0.1.56 and 0.1.57 attestations"
+    },
+    "sourceMembersComparedToGitTree": 1934,
+    "moduleLocksMatchGit": 12,
+    "ciJobs": 13,
+    "ciAllSuccess": true,
+    "sbom": {
+      "format": "CycloneDX 1.5",
+      "components": 894
+    },
+    "gitLogSince0157": "35 commits from #217-#227 plus the version bump (#228); #229 absent",
+    "releaseCompatPreviousRelease": "0.1.57",
+    "adapterDigestsIdenticalTo0157": true,
+    "temporalCliSha256": "33c298d41f6eefebf01a28a3511f444480e939e21d3518cb0c12a4abad467c4b"
+  },
+  "qualificationBeforePublication": {
+    "summary": "passed; see planning/IMPLEMENTATION_STATUS.md (2026-10-25 0.1.58 entry)",
+    "models": "scripted only",
+    "liveProviderAcceptance": false,
+    "migrationRehearsal": "exactly 121, none on a second run; the 102 old migration digests, pins (5 lines), 4 role bindings, AI setup rows and the 1059 rows of the 194 old tables unchanged (except platform_backup_reports, 24 -> 26, written by the drill); the only addition is the table provider_spend_resolutions; backup and restore drill 195 tables / 1161 rows / 102 migrations",
+    "limitsRehearsal": "$25 per learner (limit mode, revision 2) and $25 for the workspace, unchanged",
+    "ledgerRehearsal": "unchanged by the migration: 14 rows, 74,325 micro-USD charged, 1 uncertain call holding 31,410; two reconcile passes settled nothing",
+    "unknownCostOnTheCopy": "the pilot's uncertain call was listed as 'no_response' and settled at $0 with a note ON THE COPY ONLY (stale amount 409, short note 400 and a learner 403 refused first; repeat idempotent; a different decision 409); one provider.spend_settled audit event; 31,410 micro-USD released; nothing else changed",
+    "policyView": "0.1.57 code fails on the copy at 'refunds'; 0.1.58 code passes every step; GET /api/enrollments/:id/policy as the QA learner answered 200 on the copy",
+    "acceptance": "run once each and passed: course 0.1.7 (HTTP 56 episodes and 11 labs in real Docker, feature flow, browser phone/desktop/tablet), course 0.1.6 (HTTP, feature flow, browser), course 0.1.4 (HTTP and browser; no feature flow in that tree)",
+    "acceptanceDeviation": "the first acceptance invocation stopped 0-2 s into each harness, at its first database query, because the harness's disposable test database had not been created yet; each harness had passed its static released-runtime check, and no API, worker or flow had started (no candidate code ran). Its logs are kept (acceptance-aborted-setup). The database was then created and the recorded run is the single run after it, which passed",
+    "featureChecks": "companion Markdown/TeX, Stop (provider call closed about 40 ms after the click, settled at reported usage), honest Queued/Sent labels, first-byte stall -> automatic retry -> 'Reply unavailable' with 'Ask again', stall part way settled at reported usage, check-answer leaks withheld and coached in en and he, paused-help notices and staff bells for both limits; AI services: the known-leaky check fails exactly the 4 new dialogues, reference 13/13 and 17/17, the scheduled 2027 price changed and removed, unknown-cost list settled at $0 and kept at the amount held; admin account menu, app bar and drawer (Hebrew from the right), bell, search icon, no letter-spaced Hebrew; learner one card per course with 'New version', no white band, snackbar status; Hebrew glossary and en-XA scans clean",
+    "mediaTools": "mediaTools added after the upgrade gives the API exactly the three CLIP_* variables and the media page no longer says 'Not set up'; npm run test:clip-export passed",
+    "upgradeDrill": "with a snapshots entry in the config: refused before stopping anything when mediaTools was already in the config (media_tools_unsupported_by_previous_runtime); a forced restore-drill failure restarted 0.1.57 cleanly; a normal upgrade succeeded (103 migrations, 196 tables) and kept the snapshots entry",
+    "findings": [
+      "the page jumps up when a dialog or the account menu closes (focus returns to the sticky bar's account button without preventScroll): admin Chromium phone and tablet 428-1124 px, learner desktop 417 px, WebKit 65-81 px",
+      "on a Hebrew phone the offline snackbar covers the lesson's finish button",
+      "a stall part way also says the withdrawn draft 'did not pass the checks'",
+      "'Message saved. Waiting for the companion service to reply.' stays after Stop and after cancelling a queued question",
+      "the companion side panel's top slides under the sticky header near the end of the page (desktop and tablet)",
+      "the learner account dialogs show a visible 'Close Change password' link; Passkeys also has a second Close button",
+      "Hebrew mixed-direction text scrambled in the unknown-cost dates and notes, the 'Context used' quotes and the learner due-date line",
+      "AI services shows a per-job check result twice",
+      "the Hebrew phone scheduled-price dialog is cut at the bottom until scrolled",
+      "minor: WebKit native selects small with clipped text; phone bell badge touches the account button; tablet floating Companion button covers lesson text mid-page; and items older than 0.1.58"
+    ]
+  },
+  "publishedRelease": {
+    "url": "https://github.com/roeehrl/course-core/releases/tag/v0.1.58",
+    "prerelease": true,
+    "draft": false,
+    "publishedAt": "2026-10-25T08:19:39Z",
+    "assets": 8,
+    "hostedAssetsCmpIdentical": "8 of 8",
+    "hostedDigestsMatchGitHub": "8 of 8",
+    "sha256sumsAllOk": true,
+    "manifestSha256Matches": true
+  },
+  "limits": {
+    "perLearnerDefault": {
+      "before": {
+        "defaultEnrollmentLimitMicroUsd": 25000000,
+        "defaultEnrollmentRevision": 2,
+        "mode": "limit"
+      },
+      "after": {
+        "defaultEnrollmentLimitMicroUsd": 25000000,
+        "defaultEnrollmentRevision": 2,
+        "mode": "limit"
+      }
+    },
+    "workspaceLimitMicroUsd": {
+      "before": 25000000,
+      "after": 25000000
+    },
+    "note": "both $25 limits kept; the budget rows are identical by digest before and after"
+  },
+  "nativePilotUpgrade": {
+    "from": "0.1.57",
+    "to": "0.1.58",
+    "origin": "http://localhost:4310",
+    "runtimeRoot": "<pilot root>/releases/v0.1.58/course-core",
+    "installedFrom": "hosted release assets (byte-identical to the candidate); the release's own orchestrator (install api, install supervisor); published learner/admin web exports laid over; Temporal CLI copied byte-identical from the v0.1.57 root",
+    "installedAt": "2026-10-25T08:22:21Z",
+    "installedRuntimeCheck": {
+      "checkedMembers": 4342,
+      "uniqueFiles": 2394,
+      "manifestSha256": "68076b39b84b91dadf2079c21e5fc6126d89fe06f7556d98dd8da331dbce8016",
+      "commit": "a3e93643591c17b16f10adc535d8400fb232b548",
+      "verifier": "course harness pinned to Core 0.1.58 (local commit 2e88d94)",
+      "adapterDigestsMatch": true
+    },
+    "tool": "deploy/local/upgrade.mjs of 0.1.58, run from the new root (--pg-bin PostgreSQL 17)",
+    "at": "2026-10-25T08:28:16Z",
+    "seconds": "about 9",
+    "mediaToolsAbsentDuringUpgrade": true,
+    "result": {
+      "status": "upgraded",
+      "backup": "backups/backup-20261025082818226-780276",
+      "restoreDrill": {
+        "rows": 1166,
+        "tables": 195
+      },
+      "steps": [
+        "stopped",
+        "backed_up",
+        "restore_verified",
+        "started_new_runtime"
+      ],
+      "providerAcceptance": "not_verified"
+    },
+    "health": "ok",
+    "processes": "launcher, API (serving both web apps from the 0.1.58 exports), Temporal, worker and dispatch loop all run from the v0.1.58 root after the upgrade and again after the media-tools restart; none from v0.1.57 or older remain",
+    "migrations": {
+      "before": {
+        "count": 102,
+        "last": "120_learner_spending_limit_mode.sql"
+      },
+      "after": {
+        "count": 103,
+        "last": "121_provider_spend_resolutions.sql"
+      },
+      "oldDigestsUnchanged": true
+    },
+    "publicTables": {
+      "before": 195,
+      "after": 196,
+      "added": [
+        "provider_spend_resolutions"
+      ],
+      "addedColumns": 0
+    },
+    "tableDigests": "per-table row digests (secret-like columns excluded) identical before the deploy and at the end for every old table except app_users, auth_sessions (+3), password_credentials and password_login_failures (the QA account's harness password and sign-ins, and the tailnet check's unknown-user sign-in attempt), platform_backup_reports (+5: the upgrade's backup and restore drill, two snapshots and one restore drill) and platform_capability_snapshots (refreshed at start)",
+    "ledger": {
+      "unchanged": true,
+      "rows": 14,
+      "chargedSumMicroUsd": 74325,
+      "actualSumMicroUsd": 42915,
+      "uncertain": 1,
+      "heldMicroUsd": 31410,
+      "workspaceUsedMicroUsd": 74325,
+      "supervisorReconciliations": 2,
+      "spendResolutions": 0,
+      "note": "ledger and dispatch lines identical at all nine points: baseline, just before the upgrade, after it, before and after the media-tools restart, before and after acceptance, after the tailnet check, and at the end"
+    },
+    "uncertainCall": {
+      "row": {
+        "source": "supervisor",
+        "role": "companion",
+        "state": "uncertain",
+        "reservedMicroUsd": 31410,
+        "chargedMicroUsd": 31410,
+        "releasedMicroUsd": 0,
+        "settled": false,
+        "reservedAt": "2026-10-24T22:52:29Z"
+      },
+      "settledDuringDeploy": false,
+      "note": "left unsettled on purpose: settling it is the owner's decision (check Google's usage page for that time first; if there was no request, choose $0, which returns 31,410 micro-USD to the limits). The new 'Calls with an unknown cost' list (provider_spend_resolutions, 0 rows) is where it is settled"
+    },
+    "providerCounters": {
+      "baselineBeforeDeploy": {
+        "migrations": {
+          "count": 102,
+          "last": "120_learner_spending_limit_mode.sql"
+        },
+        "tables": 195,
+        "dispatches": 14,
+        "ledger_rows": {
+          "count": 14,
+          "charged_sum": 74325,
+          "actual_sum": 42915,
+          "uncertain": 1,
+          "held": 31410
+        },
+        "ws_budget": {
+          "limit": 25000000,
+          "used": 74325,
+          "default_enrollment_limit": 25000000,
+          "default_enrollment_revision": 2,
+          "mode": "limit"
+        },
+        "enrollment_budget": {
+          "limit": 0,
+          "used": 74325,
+          "source": "default"
+        },
+        "reconciliations": 2,
+        "supervisor_jobs": 18,
+        "job_spend": 18,
+        "companion_messages": 23,
+        "enrollments": 1,
+        "memberships": 2,
+        "quality_checks": 0,
+        "eval_results": 0,
+        "billed_statements": 0,
+        "outbox": {
+          "count": 27,
+          "undelivered": 9,
+          "quarantined": 0
+        },
+        "notifications": 0,
+        "spend_resolutions": "(no table)",
+        "learning_events": 52
+      },
+      "afterUpgrade": {
+        "migrations": {
+          "count": 103,
+          "last": "121_provider_spend_resolutions.sql"
+        },
+        "tables": 196,
+        "dispatches": 14,
+        "ledger_rows": {
+          "count": 14,
+          "charged_sum": 74325,
+          "actual_sum": 42915,
+          "uncertain": 1,
+          "held": 31410
+        },
+        "ws_budget": {
+          "limit": 25000000,
+          "used": 74325,
+          "default_enrollment_limit": 25000000,
+          "default_enrollment_revision": 2,
+          "mode": "limit"
+        },
+        "enrollment_budget": {
+          "limit": 0,
+          "used": 74325,
+          "source": "default"
+        },
+        "reconciliations": 2,
+        "supervisor_jobs": 18,
+        "job_spend": 18,
+        "companion_messages": 23,
+        "enrollments": 1,
+        "memberships": 2,
+        "quality_checks": 0,
+        "eval_results": 0,
+        "billed_statements": 0,
+        "outbox": {
+          "count": 27,
+          "undelivered": 9,
+          "quarantined": 0
+        },
+        "notifications": 0,
+        "spend_resolutions": 0,
+        "learning_events": 52
+      },
+      "afterMediaToolsRestart": {
+        "migrations": {
+          "count": 103,
+          "last": "121_provider_spend_resolutions.sql"
+        },
+        "tables": 196,
+        "dispatches": 14,
+        "ledger_rows": {
+          "count": 14,
+          "charged_sum": 74325,
+          "actual_sum": 42915,
+          "uncertain": 1,
+          "held": 31410
+        },
+        "ws_budget": {
+          "limit": 25000000,
+          "used": 74325,
+          "default_enrollment_limit": 25000000,
+          "default_enrollment_revision": 2,
+          "mode": "limit"
+        },
+        "enrollment_budget": {
+          "limit": 0,
+          "used": 74325,
+          "source": "default"
+        },
+        "reconciliations": 2,
+        "supervisor_jobs": 18,
+        "job_spend": 18,
+        "companion_messages": 23,
+        "enrollments": 1,
+        "memberships": 2,
+        "quality_checks": 0,
+        "eval_results": 0,
+        "billed_statements": 0,
+        "outbox": {
+          "count": 27,
+          "undelivered": 9,
+          "quarantined": 0
+        },
+        "notifications": 0,
+        "spend_resolutions": 0,
+        "learning_events": 52
+      },
+      "beforeAcceptance": {
+        "migrations": {
+          "count": 103,
+          "last": "121_provider_spend_resolutions.sql"
+        },
+        "tables": 196,
+        "dispatches": 14,
+        "ledger_rows": {
+          "count": 14,
+          "charged_sum": 74325,
+          "actual_sum": 42915,
+          "uncertain": 1,
+          "held": 31410
+        },
+        "ws_budget": {
+          "limit": 25000000,
+          "used": 74325,
+          "default_enrollment_limit": 25000000,
+          "default_enrollment_revision": 2,
+          "mode": "limit"
+        },
+        "enrollment_budget": {
+          "limit": 0,
+          "used": 74325,
+          "source": "default"
+        },
+        "reconciliations": 2,
+        "supervisor_jobs": 18,
+        "job_spend": 18,
+        "companion_messages": 23,
+        "enrollments": 1,
+        "memberships": 2,
+        "quality_checks": 0,
+        "eval_results": 0,
+        "billed_statements": 0,
+        "outbox": {
+          "count": 27,
+          "undelivered": 9,
+          "quarantined": 0
+        },
+        "notifications": 0,
+        "spend_resolutions": 0,
+        "learning_events": 52
+      },
+      "afterAcceptance": {
+        "migrations": {
+          "count": 103,
+          "last": "121_provider_spend_resolutions.sql"
+        },
+        "tables": 196,
+        "dispatches": 14,
+        "ledger_rows": {
+          "count": 14,
+          "charged_sum": 74325,
+          "actual_sum": 42915,
+          "uncertain": 1,
+          "held": 31410
+        },
+        "ws_budget": {
+          "limit": 25000000,
+          "used": 74325,
+          "default_enrollment_limit": 25000000,
+          "default_enrollment_revision": 2,
+          "mode": "limit"
+        },
+        "enrollment_budget": {
+          "limit": 0,
+          "used": 74325,
+          "source": "default"
+        },
+        "reconciliations": 2,
+        "supervisor_jobs": 18,
+        "job_spend": 18,
+        "companion_messages": 23,
+        "enrollments": 1,
+        "memberships": 2,
+        "quality_checks": 0,
+        "eval_results": 0,
+        "billed_statements": 0,
+        "outbox": {
+          "count": 27,
+          "undelivered": 9,
+          "quarantined": 0
+        },
+        "notifications": 0,
+        "spend_resolutions": 0,
+        "learning_events": 52
+      },
+      "afterTailnetCheck": "identical to afterAcceptance (counters and ledger lines)",
+      "end": "identical to afterAcceptance (counters and ledger lines)",
+      "newDispatchesOrLedgerRows": 0,
+      "supervisorJobs": "18 before and after (companion: 9 applied, 2 cancelled, 3 failed; supervisor: 4 cancelled)",
+      "mediaJobs": 0,
+      "note": "the only differences between the baseline and the end are the schema (migration 121, one table) and the new empty spend-resolutions count"
+    },
+    "aiSetup": {
+      "roleBindings": "identical before and after (4 roles)",
+      "aiSetupRows": "identical by count and digest (connections, prices, versions, settings, eval overrides and results, budgets, setup drafts, ledger)",
+      "checkedWith": "read-only SQL; sealed_credentials never queried; no values recorded"
+    },
+    "qualityCheckStatus": {
+      "expected": "suite 2.1.0: the tutor reads 'Needs a new check' (stale) and the other three jobs 'Not checked yet'; jobs keep working",
+      "verifiedHow": "not opened on the pilot (needs the owner's sign-in); seen on the rehearsal copy",
+      "qualityChecksRun": 0
+    },
+    "policyView": {
+      "readOnlyCodePath": {
+        "before": {
+          "runtime": "0.1.57",
+          "ok": false,
+          "failedAt": "refunds"
+        },
+        "after": {
+          "runtime": "0.1.58",
+          "ok": true,
+          "steps": 8
+        },
+        "how": "the qualification's policy-repro steps run against the pilot database in a read-only session (transaction_read_only on, always rolled back)"
+      },
+      "http": {
+        "route": "GET /api/enrollments/:id/policy",
+        "as": "the QA learner's session inside the guarded acceptance run",
+        "status": 200,
+        "keys": [
+          "balances",
+          "constraints",
+          "coverage",
+          "exceptionalGrants",
+          "grants",
+          "ledgerRevision",
+          "offers",
+          "policyRevision",
+          "refunds",
+          "revision"
+        ]
+      }
+    },
+    "snapshots": {
+      "config": "the snapshots entry (every 30 minutes, keep 48, an owner-only folder in the pilot directory) was kept unchanged",
+      "lastOn0157": "a scheduled snapshot at 08:03:42Z succeeded on 0.1.57",
+      "firstOn0158": {
+        "at": "2026-10-25T08:29:24Z",
+        "outcome": "succeeded",
+        "note": "taken on schedule about 60 s after the upgraded services were ready"
+      },
+      "afterMediaToolsRestart": {
+        "at": "2026-10-25T08:32:06Z",
+        "outcome": "succeeded",
+        "note": "taken on schedule about 60 s after the restart"
+      },
+      "restoreDrillOfSnapshot": {
+        "snapshot": "the 08:32:06Z snapshot",
+        "at": "2026-10-25T08:32:20Z",
+        "status": "restore_verified",
+        "tables": 196,
+        "rows": 1170,
+        "migrations": 103,
+        "temporal": "integrity_ok",
+        "disposableDatabase": "dropped",
+        "reported": true
+      }
+    },
+    "mediaTools": {
+      "result": "set",
+      "configBackup": "config.json backed up first to the state folder (owner-only, mode 0600)",
+      "added": "mediaTools with the absolute paths of Homebrew's ffmpeg, ffprobe and rsvg-convert, each checked to exist and be executable first; added AFTER the upgrade; all other config keys and values unchanged",
+      "restart": "pilot.mjs stop (status not_running, ports free after 2 s), then pilot.mjs start from the 0.1.58 root, detached as upgrade.mjs launches it; running and healthy after 5 s",
+      "apiEnvironment": {
+        "api": [
+          "CLIP_FFMPEG_PATH",
+          "CLIP_FFPROBE_PATH",
+          "CLIP_RASTERIZER_PATH"
+        ],
+        "launcherTemporalWorkerDispatcher": [],
+        "how": "variable names read from each running process's environment (names only), plus the 0.1.58 launcher's own service plan for the pilot config; the API's values equal the configured paths"
+      },
+      "mediaPage": {
+        "opened": false,
+        "reason": "the media status route and page need staff sign-in (no operator password)",
+        "derived": "the 0.1.58 API builds its clip toolchain and frame inspection from exactly these variables at start; with the running API's values the same functions give clipRendering 'ready' and the frame check available, so the page's 'Not set up on this server' state no longer applies",
+        "expectedOnPage": "'This release has no course visuals to render' or a ready state, depending on the course release (as in the drill)"
+      }
+    },
+    "pilotAcceptance": {
+      "result": "passed",
+      "runs": 1,
+      "exit": 0,
+      "at": "2026-10-25T08:32:39Z",
+      "harness": "verification/pilot-acceptance.mjs from the local 0.1.58 acceptance worktree (course main e6aa1be + local 0.1.58 pin commit 2e88d94; pilot-acceptance.mjs unchanged since 0.1.47), run as a guarded copy that was removed afterwards",
+      "noProviderGuard": "AI services are on with the owner's real key, so the run used a copy with the same two added stops as 0.1.57: abort if the QA account has no enrollment (enrolling emits a supervised event) and abort if the first episode is not already completed (answering checks or completing an episode emits supervised events). Neither stop fired; the counters confirm no new job, dispatch or ledger row",
+      "addedReadOnlyCheck": "one GET of the QA enrollment's policy view in the signed-in QA session (status and key names recorded): 200",
+      "skippedSteps": [
+        "answering the first episode's checks and completing it (already completed; the guard would have stopped the run)",
+        "admin signed-in checks (no operator password; the admin sign-in page was checked signed out)"
+      ],
+      "package": "the pilot's installed, verified course 0.1.4 package (the QA enrollment's pinned release)",
+      "phone": "signed in; fnd-e01-01 already completed (completedInThisRun false)",
+      "tablet": "resumed fnd-e01-02",
+      "desktop": "resumed fnd-e01-02",
+      "resumedExistingEnrollment": true,
+      "completedInThisRun": false,
+      "operatorEnrolled": false,
+      "adminSignedIn": false,
+      "qaRoleCheck": "verified_read_only_in_database",
+      "knownAxeDefectsObserved": [],
+      "liveProviderAcceptance": false,
+      "writesByDesign": "the harness sets a fresh random password for the dedicated QA account through the runtime's set-password CLI (never printed or stored), signs that account in, and writes its receipt and screenshots to the pilot's acceptance folder"
+    }
+  },
+  "tailnetAccess": {
+    "runs": 1,
+    "at": "2026-10-25T08:33:04Z",
+    "origin": "the pilot host's Tailscale IPv4 address on port 4310 (plain http)",
+    "checks": {
+      "loginFromTailnetOrigin": "401 LOGIN_FAILED for an unknown user (origin accepted)",
+      "browser": {
+        "engine": "installed Chrome via Playwright; phone 390x844, tablet 834x1112, desktop 1280x800 (en-US) and phone he-IL; admin /admin/ and learner /, signed out",
+        "pageStatus": [
+          200
+        ],
+        "pageErrors": 0,
+        "horizontalOverflow": false,
+        "signInFormRendered": true,
+        "isSecureContext": false,
+        "consoleErrors": "the expected signed-out 401 from GET /auth/session on every page, plus one 404 on the first page loaded (admin phone), most likely Chrome's favicon request (same as 0.1.52-0.1.57)",
+        "hebrew": {
+          "admin": {
+            "lang": "he",
+            "dir": "rtl",
+            "hebrewChars": 99
+          },
+          "learner": {
+            "lang": "he",
+            "dir": "rtl",
+            "hebrewChars": 147
+          }
+        },
+        "servedBundles": {
+          "admin": [
+            "/admin/assets/LearnerViewScreen-5VWCa-0u.css",
+            "/admin/assets/LearnerViewScreen-qmgihCjM.js",
+            "/admin/assets/index-CgjI_yR-.css",
+            "/admin/assets/index-D6tTeinm.js",
+            "/admin/assets/rolldown-runtime-hePW80VL.js"
+          ],
+          "learner": [
+            "/_expo/static/css/connected-0e02fb71a936d2b61b5b6c5f56110450.css",
+            "/_expo/static/css/styles-4d329e24cda30e66a04dc865e68a5508.css",
+            "/_expo/static/js/web/index-793ba859745168932a7ae0e021babc4d.js"
+          ],
+          "checked": "JavaScript and CSS",
+          "allByteIdenticalToInstalled0158Exports": true,
+          "sameBytesAs0157": [
+            "/_expo/static/css/styles-4d329e24cda30e66a04dc865e68a5508.css",
+            "/admin/assets/LearnerViewScreen-5VWCa-0u.css",
+            "/admin/assets/rolldown-runtime-hePW80VL.js"
+          ]
+        },
+        "adminSignInPhoneScreenshotReviewed": "English and Hebrew phone sign-in pages looked at: the form fits the width with no overlap or overflow, the language control sits in the top corner (right in English, left in Hebrew), the Hebrew page reads right to left and its labels are not letter-spaced or capitalised; no visual problem seen"
+      }
+    }
+  },
+  "liveProviderAcceptance": false,
+  "notVerified": [
+    "live providers, real stall and stop billing, and real model quality: no provider call was made during the deploy and acceptance",
+    "the Anthropic streaming path",
+    "the AI services page (quality-check status, the unknown-cost list), the bells and the 'Generated media' page on the pilot itself (need the owner's sign-in)",
+    "settling the uncertain call on the pilot (owner's decision; settled only on the rehearsal copy)",
+    "an exact-clip 'Ready' render on the pilot",
+    "Hebrew on the pilot beyond the signed-out sign-in pages; signed-in saves over the tailnet",
+    "course 0.1.7 on the pilot (not installed)",
+    "Firefox, the native app, LAN and physical devices"
+  ],
+  "userActions": [
+    "check Google's usage page for 2026-10-24 22:52 UTC, then settle the $0.031410 call in AI services > Spending > 'Calls with an unknown cost' ($0 if there was no request, which returns it to the limits)",
+    "run the quality check again from AI services (suite 2.1.0: 17 conversations, about $0.11; or the tutor's own check, 13 conversations, about $0.06)",
+    "open 'Generated media' signed in and confirm it no longer says 'Not set up on this server'",
+    "decide on the visual findings (fixing 1-6 is recommended)",
+    "install course 0.1.7 from the admin (needs the operator's password)"
+  ]
+}

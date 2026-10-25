@@ -1,3 +1,120 @@
+# Core 0.1.58 published, qualified and deployed to the pilot; media tools set; ledger unchanged, unknown-cost call left for the owner; tailnet apps checked — 2026-10-25
+
+- Published: Core 0.1.58 prerelease at 08:19 UTC. Hosted assets are byte-identical to the candidate (8 of 8), and their GitHub digests match.
+- Candidate:
+  - Core 0.1.58: tag object 273208a on commit a3e9364, release run 40164760283, attempt 1.
+  - Artifact 12588498703 (sha256:0256a641…). Manifest 68076b39….
+  - Contents: 0.1.57 plus #217–#227 and the version bump (#228). #229 is not included.
+  - Migrations: 1 new (121, provider_spend_resolutions), 103 in total.
+- Qualification before publication (candidate bytes; scripted models, fake keys, local stubs), passed:
+  - Artifact checks:
+    - SHA256SUMS: 6/6.
+    - `gh attestation verify` passes for all 8 files.
+    - All 1934 source members match Git, and so do all 12 lockfiles.
+    - The manifest lists 13 CI jobs. The SBOM has 894 components.
+    - The git log matches the planned contents, and the release-compat previous release is 0.1.57.
+  - Migration rehearsal on a read-only copy of the pilot DB (on 0.1.57):
+    - Exactly 121 applied, then nothing on a second run.
+    - Old rows, digests, pins, bindings and AI setup did not change. The $25 per-learner and $25 workspace limits are kept.
+    - The pilot's uncertain call ($0.031410, no reply) is listed as "no_response". It was settled at $0 with a note ON THE COPY ONLY: the ledger row was closed, 31,410 µUSD were released, and one audit event was written. A repeat is idempotent; other decisions, stale amounts and learners are refused.
+    - The QA enrollment's policy view: 0.1.57 code fails, 0.1.58 code passes, and HTTP answers 200.
+    - Backup and restore drill passed.
+  - Runtime build:
+    - The adapter digests are unchanged from 0.1.57.
+    - The Temporal CLI (33c298d4…) was copied from the v0.1.57 root.
+    - The installed-runtime check passed: 4342 members.
+  - Acceptance, run once each:
+    - Course 0.1.7: HTTP (11 Docker labs), feature flow and browser passed.
+    - Course 0.1.6: HTTP, feature flow and browser passed.
+    - Course 0.1.4: HTTP and browser passed.
+    - Deviation: the first acceptance invocation stopped 0–2 s into each harness, at its first database query, because the harness's disposable test database had not been created yet. Each harness had passed its static released-runtime check; no API, worker or flow had started, so no candidate code ran. Its logs are kept (acceptance-aborted-setup). The database was then created, and the recorded run above is the single run after that.
+  - Features in a real browser (Chromium and WebKit; en, he and en-XA; desktop, tablet and phone):
+    - Companion:
+      - Markdown, tables and TeX render in drafts and replies, and "Context used" is plain text.
+      - "Stop this reply" shows within 2 ms of the first text and closes the provider call within about 40 ms. The call is settled at its reported usage.
+      - Labels are honest: "Queued · not sent yet" (no request made), "Cancelled before it was sent", "Stopped after it was sent".
+      - First-byte stall: 20 s, then one automatic retry, then 20 s again, then "Reply unavailable" with "Ask again".
+      - A stall part way is settled at reported usage.
+      - Check-answer leaks were withheld and coached in en and he, including "is it 3?".
+      - Paused-help notices for the workspace limit and a learner's limit, plus the staff bell.
+    - AI services:
+      - The known-leaky check fails exactly the 4 new dialogues (hint leakage).
+      - Reference: the tutor passes 13/13, and the full check 17/17.
+      - The scheduled 2027 price was changed and removed in its dialogs.
+      - Unknown-cost list: settled at $0 and kept at the amount held.
+    - Admin shell:
+      - The account menu and dialogs open one at a time.
+      - App bar and drawer: Hebrew from the right.
+      - Bell and search icon are fine. No letter-spaced Hebrew labels.
+    - Learner:
+      - One card per course with "New version".
+      - No white band.
+      - The finish button and floating button do not overlap.
+      - The status is a fixed snackbar.
+      - The needs_evidence reason shows in Hebrew.
+    - Glossary: המנחה everywhere and "השאלה שלך"; no מלווה; no מפקח in the learner app. en-XA is clean.
+  - Media tools: `mediaTools` added after the upgrade gives the API the 3 CLIP_* variables, and the media page no longer says "Not set up". `npm run test:clip-export` passed.
+  - Upgrade drill from 0.1.57, with `snapshots`:
+    - Refused before stopping anything when `mediaTools` was already in config (media_tools_unsupported_by_previous_runtime).
+    - A forced failure restarted 0.1.57 cleanly.
+    - A normal upgrade succeeded: 103 migrations, `snapshots` kept.
+- Findings (visual; none stopped a functional check; not fixed in 0.1.58):
+  1. The page jumps up when a dialog or the account menu closes: admin Chromium phone and tablet 428–1124 px, learner desktop 417 px, WebKit 65–81 px.
+  2. On a Hebrew phone, the offline snackbar covers the lesson's finish button.
+  3. A stall part way also says the reply "did not pass the checks".
+  4. "Message saved. Waiting for the companion…" stays after Stop and after a cancel.
+  5. The companion side panel's top slides under the sticky header near the page end.
+  6. The learner dialogs show a "Close Change password" link.
+  7. Hebrew bidi: unknown-cost dates and notes, the "Context used" quotes, and the due-date line.
+  8. A per-job check result is shown twice on AI services.
+  9. The Hebrew phone price dialog is cut at the bottom.
+  Plus minor items (WebKit native selects, the phone bell badge, the tablet floating button, and items older than 0.1.58).
+- Deployed to the pilot on this Mac, 0.1.57 → 0.1.58, at 08:28 UTC, with the release's upgrade.mjs (about 9 s). `mediaTools` was not in the config during the upgrade.
+  - Installed from the hosted assets. Installed-runtime check: 4342 members, 2394 unique files. Adapter digests match, and the Temporal CLI is byte-identical to 0.1.57's (33c298d4…).
+  - Backup backup-20261025082818226-780276. Restore drill: 195 tables, 1166 rows. Steps: stopped, backed up, restore verified, started new runtime.
+  - Health ok. 103 migrations (last 121), 196 tables. The 102 older migration digests are unchanged, and the only new table is provider_spend_resolutions (empty). The launcher, API, Temporal, worker and dispatch loop all run from the 0.1.58 root, and nothing runs from 0.1.57.
+  - Limits: $25 per learner (revision 2, limit mode) and $25 for the workspace, unchanged.
+  - The ledger did not change: 14 rows, 74,325 µUSD charged (42,915 actual), 1 uncertain call holding 31,410 µUSD. Role bindings and AI setup rows are unchanged.
+  - The uncertain call ($0.031410, 24 Oct 22:52 UTC) is still there, unsettled. Settling it is the owner's decision.
+  - Media tools, after the upgrade:
+    - config.json was backed up first (owner-only).
+    - `mediaTools` was added with Homebrew's ffmpeg, ffprobe and rsvg-convert, each checked to exist and be executable. All other keys are unchanged.
+    - The pilot was stopped (`pilot.mjs stop`) and started again from the 0.1.58 root. It was running and healthy after 5 s.
+    - The running API process has CLIP_FFMPEG_PATH, CLIP_FFPROBE_PATH and CLIP_RASTERIZER_PATH, with the configured values. The launcher, Temporal, worker and dispatch loop have none.
+    - The "Generated media" page was not opened: it needs the owner's sign-in. With the API's values, the API's own code gives "ready" for clips and the frame check, so the "Not set up on this server" state no longer applies.
+  - The policy view of the QA enrollment no longer fails:
+    - The qualification's step-by-step check, run against the pilot DB in a read-only session that is always rolled back: the 0.1.57 code failed at "refunds" before the upgrade, and the 0.1.58 code passes all 8 steps.
+    - Over HTTP, as the QA learner inside the acceptance run, GET /api/enrollments/:id/policy answered 200.
+  - Snapshots: the `snapshots` entry was kept as it was.
+    - The first 0.1.58 snapshot ran on schedule at 08:29:24, about 60 s after the upgrade. Another ran about 60 s after the media-tools restart (08:32:06).
+    - A restore drill of the 08:32 snapshot passed: 196 tables, 1170 rows, 103 migrations, Temporal integrity ok.
+  - Provider counters, at nine points from before the deploy to the end (including after the upgrade, around the restart, around acceptance and after the tailnet check):
+    - 14 dispatches and 14 ledger rows throughout. 18 supervisor jobs, 23 companion messages, 0 quality checks, 1 enrollment, 2 memberships, 0 notifications, 0 media jobs.
+    - No new dispatch, ledger row or job appeared. The ledger lines are identical at every point.
+    - Per-table digests are unchanged for every old table except the QA account's sign-in and password rows, the tailnet check's unknown-user sign-in attempt, backup reports and the capability snapshot refreshed at start.
+  - Pilot acceptance passed, one run. The phone signed in (fnd-e01-01 was already complete), and the tablet and desktop resumed fnd-e01-02. The operator is unenrolled.
+    - It used a guarded copy of the harness (course e6aa1be + 0.1.58 pin). The copy stops before enrolling and before answering checks or completing an episode, because those emit supervised events. Neither stop fired. The copy also made one read-only GET of the policy view.
+    - Skipped: answering checks and completing an episode (already done, and guarded), and the admin signed-in checks (no operator password).
+  - The AI services page, the bells and the media page were not opened on the pilot, because they need the owner's sign-in. No quality check was run.
+- Tailnet: checked signed out through the tailnet address, once.
+  - Admin and learner pages load at phone, tablet and desktop sizes, with no page errors and no overflow. The only console lines are the expected signed-out 401, plus one 404 on the first page (likely the favicon).
+  - The served JavaScript and CSS are byte-identical to the installed 0.1.58 exports. Three of these files (two stylesheets and the admin runtime chunk) are unchanged from 0.1.57.
+  - With a Hebrew phone browser, both sign-in pages show Hebrew, right to left. Sign-in from the tailnet origin is accepted (an unknown user gets 401 LOGIN_FAILED).
+  - The admin sign-in page at phone size (English and Hebrew) was looked at: the form fits, nothing overlaps, and the Hebrew labels are not letter-spaced.
+- Not verified:
+  - Live providers, real stall and stop billing, and model quality. No provider call was made during the deploy and acceptance.
+  - Anthropic streams.
+  - The AI services page, the unknown-cost list, the bells and the "Generated media" page on the pilot itself.
+  - Settling the uncertain call on the pilot (done on the copy only), and an exact-clip "Ready" render.
+  - Hebrew beyond the sign-in pages, signed-in saves over the tailnet, course 0.1.7 on the pilot (not installed), Firefox and the native app.
+- User actions:
+  1. Check Google's usage page for 24 Oct 22:52 UTC, then settle the $0.031410 call in AI services > Spending > "Calls with an unknown cost". If there was no request, choose $0; the amount then goes back to the limits.
+  2. Run the quality check again from AI services. The suite is now 2.1.0: 17 conversations, about $0.11 (the tutor's own check is 13, about $0.06).
+  3. Open "Generated media" signed in and confirm it no longer says "Not set up on this server".
+  4. Decide on the findings above. Fixing 1–6 is recommended.
+  5. Install course 0.1.7 from the admin.
+- Evidence: evidence/core-0.1.58-release-and-pilot.json.
+
 # Core 0.1.57 published, qualified and deployed to the pilot; ledger unchanged; snapshots running; tailnet apps checked — 2026-10-25
 
 - Published: Core 0.1.57 prerelease at 22:24 UTC on 2026-10-24. Hosted assets are byte-identical to the candidate (8 of 8), and their GitHub digests match.
