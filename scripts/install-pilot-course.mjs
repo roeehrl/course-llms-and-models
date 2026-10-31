@@ -12,7 +12,9 @@ import {fileURLToPath} from 'node:url';
 import {verifyWorkedPackage} from './package-worked-course.mjs';
 
 const args=Object.fromEntries(process.argv.slice(2).reduce((pairs,value,index,all)=>index%2?pairs:[...pairs,[value,all[index+1]]],[]));
-assert(args['--origin']&&args['--package']&&args['--bootstrap'],'Usage: install-pilot-course.mjs --origin <http://localhost:port> --package <verified dir> --bootstrap <bootstrap.json> [--login <operator username>]');
+assert(args['--origin']&&args['--package']&&args['--bootstrap'],'Usage: install-pilot-course.mjs --origin <http://localhost:port> --package <verified dir> --bootstrap <bootstrap.json> [--login <operator username>] [--timeout-seconds <n>]');
+// A busy host can take well over 30 s to sign in or import; each request gets this limit (default 180 s).
+const timeoutMs=Number(args['--timeout-seconds']??180)*1000;assert(Number.isInteger(timeoutMs)&&timeoutMs>=1000&&timeoutMs<=1800000,'--timeout-seconds must be 1-1800');
 const origin=new URL(args['--origin']).origin;assert(['127.0.0.1','localhost'].includes(new URL(origin).hostname),'Loopback pilot origin required');
 const directory=path.resolve(args['--package']),manifest=await verifyWorkedPackage(directory);
 const read=async name=>JSON.parse(await readFile(path.join(directory,name),'utf8'));
@@ -33,9 +35,11 @@ async function readPassword(){
 
 let session;
 async function call(method,route,body,headers={}){
-  const response=await fetch(origin+route,{method,redirect:'error',signal:AbortSignal.timeout(30000),headers:{origin,'content-type':'application/json',...(session?{cookie:session.cookie,'x-csrf-token':session.csrf}:{}),...headers},...(body===undefined?{}:{body:JSON.stringify(body)})});
+  const label=`${method} ${route.replace(/[0-9a-f-]{36}/g,':id')}`,started=Date.now();process.stderr.write(`${label} … `);
+  const response=await fetch(origin+route,{method,redirect:'error',signal:AbortSignal.timeout(timeoutMs),headers:{origin,'content-type':'application/json',...(session?{cookie:session.cookie,'x-csrf-token':session.csrf}:{}),...headers},...(body===undefined?{}:{body:JSON.stringify(body)})});
   const value=await response.json().catch(()=>null);
-  if(!response.ok)throw new Error(`${method} ${route.replace(/[0-9a-f-]{36}/g,':id')} failed: ${response.status} ${value?.error??''}`);
+  process.stderr.write(`${response.status} (${((Date.now()-started)/1000).toFixed(1)} s)\n`);
+  if(!response.ok)throw new Error(`${label} failed: ${response.status} ${value?.error??''}`);
   return {value,cookies:response.headers.getSetCookie()};
 }
 let signed;
