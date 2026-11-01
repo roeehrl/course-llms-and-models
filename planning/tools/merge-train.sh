@@ -13,7 +13,7 @@ for n in "$@"; do
     if [[ $s == *fail* ]]; then echo "$(date +%T) PR $n FAILED: $s"; exit 1; fi
     # Pull requests skip the slow API suites (releases run them), so "skipping" counts as done.
     s=$(sed -E 's/ [0-9]+ skipping,//' <<<"$s")
-    if [[ $s =~ ^\ ([0-9]+)\ pass,$ ]] && (( BASH_REMATCH[1] >= 12 )); then gh pr merge $n -R $R --rebase --match-head-commit $h && echo "$(date +%T) MERGED PR $n ($h)"; break; fi
+    if [[ $s =~ ^\ ([0-9]+)\ pass,$ ]] && (( BASH_REMATCH[1] >= 12 )); then gh pr merge $n -R $R --rebase --match-head-commit $h || { echo "PR $n merge refused"; exit 3; }; echo "$(date +%T) MERGED PR $n ($h)"; break; fi
     sleep 120
   done
 done
