@@ -16,7 +16,7 @@ Counts below use whitespace-separated words in lesson text only; assessment prom
 
 | Episode | Lesson words | Prose excluding code | Trace family | Transfer family |
 | --- | ---: | ---: | --- | --- |
-| 01-01 | 482 | 453 | coefficient-trace | artifact-boundary |
+| 01-01 | 570 | 541 | coefficient-trace | artifact-boundary |
 | 01-02 | 466 | 466 | training-state-ledger | frozen-stage-transfer |
 | 01-03 | 491 | 436 | token-pipeline | tokenizer-abi |
 | 01-04 | 490 | 490 | partition-payload | distributed-evidence |

@@ -10,8 +10,10 @@ export const ROOT=new URL('../',import.meta.url);
 /** 0.1.7 moves to SDK 0.5.0 and adds misconception hypotheses with diagnostic probes,
  * chapter labs with hidden tests, the graded final portfolio, the worked adaptive
  * episode, public research topics and the study instruments to the 0.1.6 course.
+ * 0.1.8 defines dataset, target, error and objective at their first use in episode
+ * fnd-e01-01; nothing else changes.
  * Staged here only; tagging and releasing a course version is a separate step. */
-export const COURSE_VERSION='0.1.7';
+export const COURSE_VERSION='0.1.8';
 export {VISUAL_OVERLAYS};
 /** SDK 0.5 hypotheses, probes, item roles and research tasks are enforced from Core 0.1.40;
  * the study tooling the instruments are written for is first released in 0.1.48. */

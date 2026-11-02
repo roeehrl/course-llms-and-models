@@ -12,7 +12,7 @@ const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 test('deployment rejects altered bytes, replaced private files and unrecognized members; packages are immutable',async()=>{
   const temporary=await mkdtemp(path.join(tmpdir(),'course-worked-package-')),directory=path.join(temporary,'release');
   try {
-    const manifest=await packageWorkedCourse(directory,{sourceCommit:'1'.repeat(40)});assert.equal(manifest.courseVersion,'0.1.7');assert.equal(manifest.sdkVersion,'0.5.0');assert.equal(manifest.minimumCoreVersion,'0.1.48');assert.equal(manifest.members.length,11);
+    const manifest=await packageWorkedCourse(directory,{sourceCommit:'1'.repeat(40)});assert.equal(manifest.courseVersion,'0.1.8');assert.equal(manifest.sdkVersion,'0.5.0');assert.equal(manifest.minimumCoreVersion,'0.1.48');assert.equal(manifest.members.length,11);
     await assert.rejects(packageWorkedCourse(directory,{sourceCommit:'1'.repeat(40)}),{code:'EEXIST'});
     const target=path.join(directory,'course.learner.json'),original=await readFile(target);
     await writeFile(target,Buffer.concat([original,Buffer.from(' ')]));await assert.rejects(verifyWorkedPackage(directory),/integrity/);

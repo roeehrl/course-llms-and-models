@@ -16,8 +16,11 @@ export const SDK_VERSION=JSON.parse(readFileSync(new URL('node_modules/@course-c
 /** 0.1.7 adds one reviewed remedial episode (the worked adaptive episode's personal detour). */
 const PROFILES_0_1_7=159,REMEDIAL_0_1_7=5;
 const MEMBERS_0_1_6=['course.compiled.json','course.manifest.json','course.learner.json','adaptation-registry.json','worked-example-verifier.json','practical-registries.json','code-fixtures-autodiff-qualified.json','code-fixtures-decoder-qualified.json','code-fixtures-qualification-qualified.json'];
+const MEMBERS_0_1_7=[...MEMBERS_0_1_6,'code-fixtures-labs-a.json','code-fixtures-labs-b.json'];
+/** 0.1.8 changes lesson text only (plain-language terms in episode fnd-e01-01); its contract equals 0.1.7's. */
 const CONTRACTS={'0.1.4':{sdkVersion:'0.2.0',minimumCoreVersion:'0.1.17',members:MEMBERS_0_1_6},'0.1.5':{sdkVersion:'0.2.0',minimumCoreVersion:'0.1.17',members:MEMBERS_0_1_6},'0.1.6':{sdkVersion:'0.4.0',minimumCoreVersion:'0.1.34',profiles:158,remedialEpisodes:4,members:MEMBERS_0_1_6},
-  '0.1.7':{sdkVersion:'0.5.0',minimumCoreVersion:'0.1.48',profiles:PROFILES_0_1_7,remedialEpisodes:REMEDIAL_0_1_7,members:[...MEMBERS_0_1_6,'code-fixtures-labs-a.json','code-fixtures-labs-b.json']}};
+  '0.1.7':{sdkVersion:'0.5.0',minimumCoreVersion:'0.1.48',profiles:PROFILES_0_1_7,remedialEpisodes:REMEDIAL_0_1_7,members:MEMBERS_0_1_7},
+  '0.1.8':{sdkVersion:'0.5.0',minimumCoreVersion:'0.1.48',profiles:PROFILES_0_1_7,remedialEpisodes:REMEDIAL_0_1_7,members:MEMBERS_0_1_7}};
 
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const json=value=>Buffer.from(JSON.stringify(value,null,2)+'\n');
