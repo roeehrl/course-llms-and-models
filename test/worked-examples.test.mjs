@@ -9,7 +9,7 @@ test('staged worked examples use released SDK contracts and preserve the complet
   assert.equal(staged.proposedRegistry.profiles.length,159);assert.equal(staged.proposedRegistry.profiles.filter(p=>p.operation==='insert_episode').length,5);
   assert.equal(staged.compiled.server.chapters.length,14);
   assert.equal(staged.compiled.server.chapters.flatMap(c=>c.episodes).length,56);
-  assert.equal(staged.compiled.server.version,'0.1.7');
+  assert.equal(staged.compiled.server.version,'0.1.8');
   assert.equal(staged.minimumCoreVersion,'0.1.48');assert.equal(staged.publishedAuthority,false);
   assert(staged.profiles.every(p=>p.classification==='optional'&&p.plannedMinutes===3&&p.additionalEpisodes===0&&p.generationBrief.length<=3000));
   assert(!('adaptation' in staged.compiled.learner));
