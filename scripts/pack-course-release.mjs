@@ -4,6 +4,11 @@
 // time, and a gzip header without a name or time. The same package bytes and the same Node
 // major therefore give the same archive digest on any machine.
 //   node scripts/pack-course-release.mjs --package <verified dir> --output <new .tgz>
+// Next to course-v<version>.tgz and its .sha256 it also writes the same package in Course
+// Core's install format, <courseId>-<version>.course.tgz and its .sha256
+// (scripts/pack-core-package.mjs), which administration installs by upload or from the
+// GitHub release. course-v<version>.tgz is unchanged: it is what install-pilot-course.mjs
+// and the release checks extract.
 import assert from 'node:assert/strict';
 import {readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
@@ -13,6 +18,7 @@ import {fileURLToPath} from 'node:url';
 import {gzipSync,constants} from 'node:zlib';
 import path from 'node:path';
 import {verifyWorkedPackage} from './package-worked-course.mjs';
+import {writeCorePackage} from './pack-core-package.mjs';
 
 const BLOCK=512;
 function header(name,{size,mode,mtime,type}){
@@ -46,6 +52,8 @@ async function main(){
   assert.equal(path.basename(output),`course-v${manifest.courseVersion}.tgz`,'Archive name must be course-v<version>.tgz');
   await writeFile(output,archive,{mode:0o600,flag:'wx'});
   await writeFile(output.replace(/\.tgz$/,'.sha256'),`${sha256}  ${path.basename(output)}\n`,{mode:0o600,flag:'wx'});
-  console.log(JSON.stringify({packed:true,version:manifest.courseVersion,courseDigest:manifest.courseDigest,sourceCommit:manifest.sourceCommit,bytes:archive.length,sha256,node:process.versions.node}));
+  const core=await writeCorePackage(path.resolve(args[1]),path.dirname(output));
+  console.log(JSON.stringify({packed:true,version:manifest.courseVersion,courseDigest:manifest.courseDigest,sourceCommit:manifest.sourceCommit,bytes:archive.length,sha256,
+    corePackage:{file:core.name,bytes:core.archive.length,sha256:core.sha256},node:process.versions.node}));
 }
 if(process.argv[1]===fileURLToPath(import.meta.url))await main();
