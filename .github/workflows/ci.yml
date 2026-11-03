@@ -78,6 +78,8 @@ jobs:
         run: node scripts/install-released-core.mjs --pull-sandbox-image
       - name: Run the worked course through the released Core CLI and HTTP surface with scripted models
         run: node verification/learner-flow.mjs --runtime-dir .local/released-core-v* --release-dir .local/released-core-assets-v* --worked-course
+      - name: Install the Core-format course package through the released admin install API (configured and course-supplied hosts)
+        run: node verification/admin-install-flow.mjs --runtime-dir .local/released-core-v*
 
   # Accessibility: the same released runtime and course, walked in Chromium at phone,
   # tablet and desktop sizes with axe checks on each learner screen.

@@ -34,3 +34,36 @@ public release assets by `node scripts/install-released-core.mjs`, Postgres 17,
 Docker code sandbox, scripted models); and an accessibility walk of that released
 learner app at phone, tablet and desktop sizes with axe (WCAG 2.1 A/AA rules). None of
 these call a live model provider or prove deployment.
+
+## Release assets
+
+`npm run package:worked -- --output <dir>/course-v<version>` builds the verified package
+directory; `npm run package:release -- --package <dir>/course-v<version> --output
+<dir>/course-v<version>.tgz` then writes, reproducibly, two archives of the same files:
+
+- `llms-and-models-<version>.course.tgz` and its `.sha256`: Course Core's install format
+  (course-package v1: flat regular files plus `course-package.json`;
+  `scripts/pack-core-package.mjs`). Administration's **Install a new version** accepts it
+  by upload or from the GitHub release link; it is the only `*.course.tgz` asset, so Core
+  picks it without asking and checks the `.sha256`.
+- `course-v<version>.tgz` and its `.sha256`: one `course-v<version>/` directory, the form
+  `scripts/install-pilot-course.mjs` and the release checks extract. Core does not accept
+  this file as a package.
+
+Before installing through administration, the host needs the teaching verifier
+(`worked-example-verifier.json`) in its teaching verifier files and the four adaptation
+adapters enabled, as for the script install; host files must be owner-only (0600). The five
+code-fixture registries can either be configured on the host as before (the preview then
+lists them as identical) or, with Core's `COURSE_SUPPLIED_CODE_FIXTURES=on`, approved from
+the package during the install. In that second case the preview reports the recovery
+registry as not yet approvable (`EVALUATOR_NOT_CONFIGURED`) because the graders are installed
+only by that approval; the installation's registry step then approves it right after.
+`verification/admin-install-flow.mjs` (CI, released Core job) checks both hosts.
+
+`scripts/install-pilot-course.mjs` installs the extracted `course-v<version>/` directory
+through Core's review and publish APIs instead. Before publishing it prints Core's publish
+impact (learners on the live release, learners part-way through changed lessons, what
+changes) and publishes only after the operator types the exact version, sending that
+impact's digest as administration does. It resumes a release that is already in the
+workspace from its state (in review, approved, published), so a run stopped at the prompt
+is finished by running it again; on a complete install it changes nothing.

@@ -1,7 +1,9 @@
 // Released-surface check of scripts/install-pilot-course.mjs against a disposable
-// Core runtime: password sign-in (piped on standard input), wrong password refused,
-// first install publishes and selects the package, a second install of the same
-// release is refused. Disposable schema only; never touches the pilot.
+// Core runtime: password sign-in (piped on standard input), wrong password refused;
+// a first run that is not given the exact version at the publish prompt stops before
+// publishing (the release is left approved, the impact was shown); a second run resumes
+// that release and publishes it with the impact digest; a third run changes nothing.
+// Disposable schema only; never touches the pilot.
 import assert from 'node:assert/strict';
 import {mkdir,mkdtemp,readFile,writeFile} from 'node:fs/promises';
 import {spawn} from 'node:child_process';
@@ -38,9 +40,14 @@ try{
   await mkdir(path.join(state,'vault'),{mode:0o700});
   for(let n=0;;n++){assert(n<300&&server.exitCode===null,'api_startup_failed '+log.slice(-2000));try{const r=await fetch(`http://127.0.0.1:${port}/health`);if(r.ok&&(await r.json()).instanceId===instanceId)break;}catch{}await new Promise(r=>setTimeout(r,100));}
   const wrong=await install('not-the-password-'+randomUUID());assert(wrong.code!==0&&/\/auth\/login failed: 401 LOGIN_FAILED/.test(wrong.err)&&!wrong.err.includes(password),'wrong password must be refused');reports.push('wrong_password_refused');
-  const first=await install(password);assert.equal(first.code,0,first.err.slice(-2000));const result=JSON.parse(first.out);
-  assert(result.installed&&result.courseVersion===manifest.courseVersion&&result.courseDigest===manifest.courseDigest&&result.operatorEnrolled===false);reports.push('installed_and_selected');
-  const again=await install(password);assert(again.code!==0&&/already installed/.test(again.err),'duplicate install must be refused');reports.push('duplicate_refused');
-  assert(!(first.out+first.err+wrong.err+again.err).includes(password),'password must never be printed');reports.push('password_never_printed');
+  const declined=await install(`${password}\nyes`);
+  assert(declined.code!==0&&/Publication not confirmed; the release stays approved/.test(declined.err),declined.err.slice(-2000));
+  assert(/publish-impact … 200/.test(declined.err)&&/New learners get /.test(declined.err)&&!/\/transitions … 200[\s\S]*\/transitions … 200[\s\S]*\/transitions … 200/.test(declined.err),'impact shown, publication not sent');reports.push('publish_needs_typed_version');
+  const first=await install(`${password}\n${manifest.courseVersion}`);assert.equal(first.code,0,first.err.slice(-2000));const result=JSON.parse(first.out);
+  assert(result.installed&&result.resumed&&result.transitions.join()==='publish'&&result.registryApproved&&result.courseVersion===manifest.courseVersion&&result.courseDigest===manifest.courseDigest&&result.operatorEnrolled===false,first.out);
+  reports.push('resumed_published_and_selected');
+  const again=await install(password);assert.equal(again.code,0,again.err.slice(-2000));const repeat=JSON.parse(again.out);
+  assert(repeat.alreadyInstalled&&!repeat.transitions.length&&!repeat.registryApproved&&repeat.releaseId===result.releaseId,again.out);reports.push('repeat_run_changes_nothing');
+  assert(!(first.out+first.err+wrong.err+declined.err+again.err+again.out).includes(password),'password must never be printed');reports.push('password_never_printed');
   console.log(JSON.stringify({installFlow:'pass',courseVersion:manifest.courseVersion,courseDigest:manifest.courseDigest,profiles:result.profiles,reports,liveProviderAcceptance:false}));
 }finally{server.kill('SIGTERM');await admin.query(`DROP SCHEMA ${schema} CASCADE`);await admin.end();}
