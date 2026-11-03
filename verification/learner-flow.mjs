@@ -43,8 +43,14 @@ const childEnv={PATH:process.env.PATH,DATABASE_URL:url.href,PUBLIC_ORIGIN:origin
 const server=spawn(process.execPath,['--max-old-space-size=512','services/api/dist/main.js'],{cwd:runtime,env:childEnv,stdio:['ignore','pipe','pipe']});let childExit=false,output='';server.once('exit',()=>{childExit=true;});server.once('error',()=>{childExit=true;});for(const pipe of [server.stdout,server.stderr])pipe.on('data',b=>{output=(output+b.toString()).slice(-65536);});
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 async function ready(){for(let n=0;n<120;n++){check(!childExit,'released_api_startup_failed');try{const r=await fetch(origin+'/health',{signal:AbortSignal.timeout(1000)});if(r.ok&&(await r.json()).instanceId===instanceId)return;}catch{}await pause(100);}throw new Failure('released_api_readiness_timeout');}
+// Core runs every visual check of the course before it answers the admin course view and a
+// review transition (prepareCourseRunnable). The first view after an import checks all of them
+// cold, in one worker thread on a 2-vCPU runner: about 11 s for this course's 57 scenes on two
+// fast cores, more on a CI runner. Those routes get the 180 s that install-pilot-course.mjs gives
+// every call; learner routes keep 15 s.
+const releaseCheckRoute=/^\/api\/admin\/courses\/[0-9a-f-]{36}(\/releases\/[0-9a-f-]{36}\/(transitions|check))?$/;
 async function request(session,method,route,body,extra={}){
-  const response=await fetch(origin+route,{method,headers:{origin,cookie:session?.cookie??'','x-csrf-token':session?.csrf??'','content-type':'application/json',...extra},...(body===undefined?{}:{body:JSON.stringify(body)}),signal:AbortSignal.timeout(15000)}).catch(error=>{throw new Error(`${method} ${route.replace(/[0-9a-f-]{36}/g,':id')}: ${error?.name}: ${error?.message}`,{cause:error});});let value;try{value=await response.json();}catch{throw new Failure('invalid_api_response');}
+  const response=await fetch(origin+route,{method,headers:{origin,cookie:session?.cookie??'','x-csrf-token':session?.csrf??'','content-type':'application/json',...extra},...(body===undefined?{}:{body:JSON.stringify(body)}),signal:AbortSignal.timeout(releaseCheckRoute.test(route)?180000:15000)}).catch(error=>{throw new Error(`${method} ${route.replace(/[0-9a-f-]{36}/g,':id')}: ${error?.name}: ${error?.message}`,{cause:error});});let value;try{value=await response.json();}catch{throw new Failure('invalid_api_response');}
   return {status:response.status,value,cookies:response.headers.getSetCookie()};
 }
 const requireOk=(r,code)=>{check(r.status===200,`${code}_${r.status}_${r.value?.error??'failed'}`);return r.value;};
@@ -76,7 +82,8 @@ try{
   releaseId=requireOk(await request(teacher,'POST',`/api/workspaces/${teacher.workspaceId}/releases`,course),'course_import').id;
   const catalog=requireOk(await request(teacher,'GET','/api/admin/session'),'admin_session').courses[0];check(catalog,'catalog_missing');
   for(const action of ['submit-review','approve','publish']){
-    const view=requireOk(await request(teacher,'GET',`/api/admin/courses/${catalog.id}`),'course_review');
+    const viewStarted=performance.now(),view=requireOk(await request(teacher,'GET',`/api/admin/courses/${catalog.id}`),'course_review');
+    console.log(JSON.stringify({courseReviewTiming:action,visuals:course.visuals.length,ms:Math.round(performance.now()-viewStarted)}));
     requireOk(await request(teacher,'POST',`/api/admin/courses/${catalog.id}/releases/${releaseId}/transitions`,{action},{'if-match':view.revision,'idempotency-key':randomUUID()}),'review_transition');
   }
   requireOk(await request(teacher,'POST',`/api/admin/releases/${releaseId}/adaptation-registry`,{expectedRegistryRevision:0,configuration}),'approve_recovery');
