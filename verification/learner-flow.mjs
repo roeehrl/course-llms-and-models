@@ -42,7 +42,11 @@ await admin.query(`CREATE SCHEMA ${schema}`);url.searchParams.set('options',`-cs
 const childEnv={PATH:process.env.PATH,DATABASE_URL:url.href,PUBLIC_ORIGIN:origin,API_HOST:'127.0.0.1',PORT:String(port),CORE_INSTANCE_ID:instanceId,LEARNER_WEB_DIR:path.join(runtime,'apps/learner/dist'),CODE_FIXTURE_FILES:JSON.stringify(registryMetadata.registries.map(r=>path.join(root,r.file))),ADAPTATION_ADAPTERS:JSON.stringify(['bounded-numeric-v1','authored-bank-v1','authored-code-bank-v1','authored-teaching-bank-v1']),SANDBOX_STORAGE_DIR:path.join(state,'sandbox'),...(verifierFile?{TEACHING_VERIFIER_FILES:JSON.stringify([verifierFile])}:{})};
 const server=spawn(process.execPath,['--max-old-space-size=512','services/api/dist/main.js'],{cwd:runtime,env:childEnv,stdio:['ignore','pipe','pipe']});let childExit=false,output='';server.once('exit',()=>{childExit=true;});server.once('error',()=>{childExit=true;});for(const pipe of [server.stdout,server.stderr])pipe.on('data',b=>{output=(output+b.toString()).slice(-65536);});
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
-async function ready(){for(let n=0;n<120;n++){check(!childExit,'released_api_startup_failed');try{const r=await fetch(origin+'/health',{signal:AbortSignal.timeout(1000)});if(r.ok&&(await r.json()).instanceId===instanceId)return;}catch{}await pause(100);}throw new Failure('released_api_readiness_timeout');}
+// A start that fails exits with Core's one-line startup diagnostic (childExit); this deadline only
+// bounds a start that hangs. Core starts in about 2 s on two fast cores, but a fresh 2-vCPU runner,
+// right after the Playwright and apt installs, has taken longer than the former 120 polls (~13 s).
+const startedAt=performance.now();
+async function ready(){while(performance.now()-startedAt<90000){check(!childExit,'released_api_startup_failed');try{const r=await fetch(origin+'/health',{signal:AbortSignal.timeout(1000)});if(r.ok&&(await r.json()).instanceId===instanceId){console.log(JSON.stringify({apiReadyMs:Math.round(performance.now()-startedAt)}));return;}}catch{}await pause(100);}throw new Failure('released_api_readiness_timeout');}
 // Core runs every visual check of the course before it answers the admin course view and a
 // review transition (prepareCourseRunnable). The first view after an import checks all of them
 // cold, in one worker thread on a 2-vCPU runner: about 11 s for this course's 57 scenes on two
