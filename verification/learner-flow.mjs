@@ -9,6 +9,7 @@ import path from 'node:path';
 import {createServer} from 'node:net';
 import pg from 'pg';
 import {verifyReleasedRuntime,expectedCoreRelease} from './released-runtime.mjs';
+import {warmSandbox,sandboxState} from './sandbox-warmup.mjs';
 import {stageWorkedExamples} from '../scripts/stage-worked-examples.mjs';
 import {writtenAnswers} from './written-answers.mjs';
 import {enablePlacement} from './placement-settings.mjs';
@@ -39,14 +40,19 @@ const port=await new Promise(resolve=>{const s=createServer();s.listen(0,'127.0.
 const origin=`http://127.0.0.1:${port}`,instanceId=randomUUID();
 await mkdir(path.join(root,'.local/learner-flow'),{recursive:true,mode:0o700});const state=await mkdtemp(path.join(root,'.local/learner-flow/run-'));
 await admin.query(`CREATE SCHEMA ${schema}`);url.searchParams.set('options',`-csearch_path=${schema}`);const db=new pg.Pool({connectionString:url.href,max:2});
-const childEnv={PATH:process.env.PATH,DATABASE_URL:url.href,PUBLIC_ORIGIN:origin,API_HOST:'127.0.0.1',PORT:String(port),CORE_INSTANCE_ID:instanceId,LEARNER_WEB_DIR:path.join(runtime,'apps/learner/dist'),CODE_FIXTURE_FILES:JSON.stringify(registryMetadata.registries.map(r=>path.join(root,r.file))),ADAPTATION_ADAPTERS:JSON.stringify(['bounded-numeric-v1','authored-bank-v1','authored-code-bank-v1','authored-teaching-bank-v1']),SANDBOX_STORAGE_DIR:path.join(state,'sandbox'),...(verifierFile?{TEACHING_VERIFIER_FILES:JSON.stringify([verifierFile])}:{})};
-const server=spawn(process.execPath,['--max-old-space-size=512','services/api/dist/main.js'],{cwd:runtime,env:childEnv,stdio:['ignore','pipe','pipe']});let childExit=false,output='';server.once('exit',()=>{childExit=true;});server.once('error',()=>{childExit=true;});for(const pipe of [server.stdout,server.stderr])pipe.on('data',b=>{output=(output+b.toString()).slice(-65536);});
+const childEnv={PATH:process.env.PATH,DATABASE_URL:url.href,PUBLIC_ORIGIN:origin,API_HOST:'127.0.0.1',PORT:String(port),CORE_INSTANCE_ID:instanceId,LEARNER_WEB_DIR:path.join(runtime,'apps/learner/dist'),CODE_FIXTURE_FILES:JSON.stringify(registryMetadata.registries.map(r=>path.join(root,r.file))),ADAPTATION_ADAPTERS:JSON.stringify(['bounded-numeric-v1','authored-bank-v1','authored-code-bank-v1','authored-teaching-bank-v1']),SANDBOX_STORAGE_DIR:path.join(state,'sandbox'),SANDBOX_STARTUP_TIMEOUT_MS:'60000',LOG_LEVEL:'debug',...(verifierFile?{TEACHING_VERIFIER_FILES:JSON.stringify([verifierFile])}:{})};
+// Warm Docker first: Core 0.1.58 quarantines its sandbox for the whole process when its first
+// container create outlasts the 5 s grade budget, then waits silently (sandbox-warmup.mjs).
+const warmup=await warmSandbox(runtime);console.log(JSON.stringify({sandboxWarmup:{warm:warmup.warm,cyclesMs:warmup.cyclesMs,...(warmup.reason?{reason:warmup.reason}:{})}}));
+const server=spawn(process.execPath,['--max-old-space-size=512','services/api/dist/main.js'],{cwd:runtime,env:childEnv,stdio:['ignore','pipe','pipe']});let childExit=false,exitStatus=null,output='';server.once('exit',(code,signal)=>{exitStatus={code,signal};});server.once('close',()=>{childExit=true;});server.once('error',error=>{exitStatus={spawnError:error?.code??'UNKNOWN'};childExit=true;});for(const pipe of [server.stdout,server.stderr])pipe.on('data',b=>{output=(output+b.toString()).slice(-65536);});
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 // A start that fails exits with Core's one-line startup diagnostic (childExit); this deadline only
 // bounds a start that hangs. Core starts in about 2 s on two fast cores, but a fresh 2-vCPU runner,
 // right after the Playwright and apt installs, has taken longer than the former 120 polls (~13 s).
+// Core's own Docker and qualification deadline (SANDBOX_STARTUP_TIMEOUT_MS, 60 s) ends first.
 const startedAt=performance.now();
-async function ready(){while(performance.now()-startedAt<90000){check(!childExit,'released_api_startup_failed');try{const r=await fetch(origin+'/health',{signal:AbortSignal.timeout(1000)});if(r.ok&&(await r.json()).instanceId===instanceId){console.log(JSON.stringify({apiReadyMs:Math.round(performance.now()-startedAt)}));return;}}catch{}await pause(100);}throw new Failure('released_api_readiness_timeout');}
+const startupSteps=()=>{for(const line of output.split('\n').reverse()){try{const v=JSON.parse(line);if(v?.startup==='ready')return v.steps;}catch{}}return undefined;};
+async function ready(){while(performance.now()-startedAt<90000){check(!childExit,'released_api_startup_failed');try{const r=await fetch(origin+'/health',{signal:AbortSignal.timeout(1000)});if(r.ok&&(await r.json()).instanceId===instanceId){console.log(JSON.stringify({apiReadyMs:Math.round(performance.now()-startedAt),startupStepsMs:startupSteps()}));return;}}catch{}await pause(100);}throw new Failure('released_api_readiness_timeout');}
 // Core runs every visual check of the course before it answers the admin course view and a
 // review transition (prepareCourseRunnable). The first view after an import checks all of them
 // cold, in one worker thread on a 2-vCPU runner: about 11 s for this course's 57 scenes on two
@@ -181,7 +187,11 @@ try{
   console.log(JSON.stringify({verified:true,coreVersion:manifest.version,releaseReceipt,courseVersion:course.version,reports,ownerUnenrolled:true,liveProviderAcceptance:false}));
 }catch(error){await writeFile(path.join(state,'failure.json'),JSON.stringify({code:error instanceof Failure?error.code:'private_acceptance_failed',type:error?.name,detailCode:error?.code,message:String(error?.message??'').slice(0,2000)})+'\n',{mode:0o600});console.error(error instanceof Failure?error.code:'private_acceptance_failed');process.exitCode=1;
   // A released API that never came up says why only in its own output; show a bounded tail with local paths removed.
-  if(['released_api_startup_failed','released_api_readiness_timeout'].includes(error?.code))console.error(output.slice(-4000).replaceAll(runtime,'<runtime>').replaceAll(root.replace(/\/$/,''),'<course>'));
+  // Also say whether the process was still running (and how it ended) and what its sandbox broker held.
+  if(['released_api_startup_failed','released_api_readiness_timeout'].includes(error?.code)){
+    console.error(JSON.stringify({apiStartup:{elapsedMs:Math.round(performance.now()-startedAt),running:!childExit,pid:server.pid,exit:exitStatus,outputBytes:output.length,sandbox:await sandboxState(childEnv.SANDBOX_STORAGE_DIR)}}).replaceAll(runtime,'<runtime>').replaceAll(root.replace(/\/$/,''),'<course>'));
+    console.error(output?output.slice(-4000).replaceAll(runtime,'<runtime>').replaceAll(root.replace(/\/$/,''),'<course>'):'(the released API wrote nothing to stdout or stderr)');
+  }
   // An unexpected error (a request that timed out, a database error) is otherwise only in the gitignored
   // failure.json, which CI never shows; print its type and a bounded message with local paths removed.
   else if(!(error instanceof Failure))console.error(JSON.stringify({type:error?.name,detailCode:error?.code,message:String(error?.message??'').slice(0,500).replaceAll(runtime,'<runtime>').replaceAll(root.replace(/\/$/,''),'<course>')}));
