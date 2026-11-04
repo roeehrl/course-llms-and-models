@@ -1,0 +1,70 @@
+{
+ "schemaVersion": 1,
+ "courseVersion": "0.1.8",
+ "status": "released_and_installed_on_pilot",
+ "sourceCommit": "4bdae20699cbf2dabd4d532e83c26590c943d6cd",
+ "courseDigest": "2f56f3ad1a62e8fb533763be24c55416db379dabcf080b4c99f5aa1e446163f7",
+ "sdkVersion": "0.5.0",
+ "minimumCoreVersion": "0.1.48",
+ "adaptationProfiles": 159,
+ "visuals": 57,
+ "change": "Lesson 1.1 defines dataset, target, error and objective in plain language where each first appears; nothing else changed (adaptation registry, worked-example verifier and the five code-fixture registries are byte-identical to 0.1.7's).",
+ "release": {
+  "tag": "course-v0.1.8",
+  "url": "https://github.com/roeehrl/course-llms-and-models/releases/tag/course-v0.1.8",
+  "publishedAt": "2026-11-03T12:42:49Z",
+  "prerelease": false,
+  "targetCommit": "4bdae20699cbf2dabd4d532e83c26590c943d6cd",
+  "package": "course-v0.1.8.tgz",
+  "packageBytes": 797882,
+  "packageSha256": "e739496cbf6b1a2d6788eb4ed0e7e52ff241a52f82eebba995b863dd251ec1fd",
+  "hostedDigestMatchesLocalBuild": true,
+  "reproducible": "two independent package builds were byte-identical"
+ },
+ "acceptanceBeforeRelease": {
+  "core": {
+   "version": "0.1.58",
+   "commit": "a3e93643591c17b16f10adc535d8400fb232b548",
+   "releaseManifestSha256": "68076b39b84b91dadf2079c21e5fc6126d89fe06f7556d98dd8da331dbce8016",
+   "installedMembersChecked": 4342,
+   "uniqueFiles": 2394
+  },
+  "harness": "scripted models, disposable Postgres 17, real Docker sandbox, no timeout increases",
+  "http": { "verified": true, "episodes": 56, "practicalFamiliesRecovered": 3, "chapterLabs": 11, "labsStarterAndWrongRejectedReferencePassed": true, "transferRevisitScheduled": true, "wallSeconds": 195 },
+  "browser": { "verified": true, "episodesByViewport": { "phone": 56, "desktop": 16, "tablet": 4 }, "worked16SceneAllViewports": true, "keyboard": true, "accessibilityViolations": 0, "pageErrors": 0, "horizontalOverflow": false, "wallSeconds": 340 },
+  "featureFlow": { "verified": true, "flows": ["evalGate", "operatorModelPrice", "placementAccepted", "placementDeclined", "placementSettings", "remedialEpisode", "retention", "setup", "writtenExplanation"], "wallSeconds": 78 },
+  "installFlow": { "result": ["wrong_password_refused", "installed_and_selected", "duplicate_refused", "password_never_printed"], "wallSeconds": 11 }
+ },
+ "pilot": {
+  "origin": "http://localhost:4310",
+  "coreBuild": "course-core main 133445ba",
+  "installer": "scripts/install-pilot-course.mjs",
+  "releaseChecks": {
+   "coursePackageChecked": "recorded",
+   "runsOnThisServer": "recorded",
+   "tutorProviderQualityCheck": { "passed": 23, "total": 23, "note": "passed after the Core judge fix (course-core #284)" }
+  },
+  "publish": {
+   "date": "2026-11-04",
+   "via": "admin, with impact confirmation",
+   "serverReceipt": "b7fcfd4f-aadf-4342-b653-6b6869eaad8d",
+   "impact": { "newLearnersStartOn": "0.1.8", "lessonsChanged": 1, "lessonsAdded": 0, "lessonsRemoved": 0 }
+  },
+  "ownerEnrollmentMove": {
+   "from": "0.1.7",
+   "to": "0.1.8",
+   "at": "2026-11-04T11:02+02:00",
+   "moved": 1,
+   "waiting": 0,
+   "notMoved": 0,
+   "reasonRecordedInAuditLog": true
+  }
+ },
+ "notVerified": [
+  "a live-provider run of the course itself (only the tutor provider quality check used a live provider)",
+  "learning effectiveness",
+  "Hebrew phase labels inside a running course (SDK 0.5.0 courses have one locale)",
+  "an independent human review of the new lesson 1.1 text"
+ ],
+ "liveProviderAcceptance": false
+}

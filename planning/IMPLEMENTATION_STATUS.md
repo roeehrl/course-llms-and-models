@@ -1,3 +1,24 @@
+# Course 0.1.8 released, installed on the pilot and published to new learners; owner enrollment moved — 2026-11-04
+
+- Published: course-v0.1.8 release on GitHub (https://github.com/roeehrl/course-llms-and-models/releases/tag/course-v0.1.8), from 4bdae20, at 12:42 UTC on 2026-11-03.
+  - Package course-v0.1.8.tgz, sha256 e739496c…. The hosted digest matches the local build, and two independent builds were byte-identical.
+  - Course digest 2f56f3ad…. SDK 0.5.0, minimum Core 0.1.48, 159 adaptation profiles, 57 visuals.
+  - Change: lesson 1.1 defines dataset, target, error and objective in plain language where each first appears. Nothing else changed, and the five code-fixture registries are the same files as 0.1.7's.
+- Accepted before release against these bytes on published Core 0.1.58 (scripted models, disposable Postgres 17, real Docker sandbox):
+  - HTTP: 56 episodes, 3 practical families recovered, all 11 labs, transfer revisit scheduled.
+  - Browser: phone 56, desktop 16, tablet 4 episodes; 0 axe violations, no page errors or overflow.
+  - Feature flow: all 9 flows. Install flow: wrong password refused, installed, duplicate refused, password never printed.
+- Installed on the pilot (localhost:4310, Core main 133445ba) with scripts/install-pilot-course.mjs.
+  - Release checks: course package checked and runs on this server, both recorded.
+  - Tutor provider quality check: 23/23 passed, after the Core judge fix (#284).
+- Published in the admin on 2026-11-04 with impact confirmation (server receipt b7fcfd4f-aadf-4342-b653-6b6869eaad8d).
+  - Impact: new learners start on 0.1.8; 1 lesson changed, 0 added, 0 removed.
+- Owner enrollment moved 0.1.7 → 0.1.8 at 11:02 GMT+2 on 2026-11-04: 1 moved, 0 waiting, 0 not moved. The reason is in the audit log.
+- Not verified:
+  - A live-provider run of the course itself (only the tutor quality check used a live provider), and learning effect.
+  - Hebrew phase labels in a running course, and an independent human review of the new lesson 1.1 text.
+- Evidence: evidence/course-0.1.8-acceptance.json.
+
 # Core 0.1.58 published, qualified and deployed to the pilot; media tools set; ledger unchanged, unknown-cost call left for the owner; tailnet apps checked — 2026-10-25
 
 - Published: Core 0.1.58 prerelease at 08:19 UTC. Hosted assets are byte-identical to the candidate (8 of 8), and their GitHub digests match.
