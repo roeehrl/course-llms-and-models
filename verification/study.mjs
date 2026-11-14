@@ -1,8 +1,11 @@
 // Independent check of the course study definition against the rules Core applies when
 // staff create or open a study. Core's own module is not a dependency of this repository,
 // so the rules are restated here from Course Core v0.1.48 services/api/src/study.ts
-// (definitionSchema and validateDefinition; unchanged on main at 3e248daa). Every
-// instrument answer is recomputed with independent arithmetic.
+// (definitionSchema and validateDefinition; unchanged on main at 3e248daa). Rechecked
+// against v0.1.67 (the same file as v0.1.58): the refusal codes are unchanged, the
+// definition gained an optional usabilityMeasures boolean (default false; this course does
+// not ask for usability timing), and warnings became codes, which this check does not
+// compare. Every instrument answer is recomputed with independent arithmetic.
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -19,7 +22,9 @@ export function schemaErrors(d) {
     for (const key of Object.keys(value)) if (!keys.includes(key)) errors.push(`${path}: unknown key ${key}`);
     for (const key of keys) if (!(key in value)) errors.push(`${path}: missing ${key}`);
   };
-  strict(d, ['title', 'purpose', 'arms', 'instruments', 'minCellSize'], 'definition');
+  const { usabilityMeasures, ...required } = d ?? {};
+  strict(required, ['title', 'purpose', 'arms', 'instruments', 'minCellSize'], 'definition');
+  if (usabilityMeasures !== undefined && typeof usabilityMeasures !== 'boolean') errors.push('usabilityMeasures');
   const trimmed = s => typeof s === 'string' ? s.trim().length : -1;
   if (!(trimmed(d.title) >= 3 && trimmed(d.title) <= 120)) errors.push('title length');
   if (!(trimmed(d.purpose) >= 20 && trimmed(d.purpose) <= 2000)) errors.push('purpose length');
@@ -126,6 +131,7 @@ export async function checkStudy() {
   };
   for (const [code, errors] of Object.entries(negatives)) assert(errors.includes(code), `negative control ${code} not refused`);
   assert(schemaErrors({ ...study.definition, extra: 1 }).length > 0 && schemaErrors({ ...study.definition, minCellSize: 2 }).length > 0);
+  assert(schemaErrors({ ...study.definition, usabilityMeasures: 'yes' }).length > 0 && schemaErrors({ ...study.definition, usabilityMeasures: false }).length === 0);
   return { valid: true, warnings: result.warnings, arms: study.definition.arms.map(a => a.behaviour), instruments: Object.fromEntries(SETS.map(s => [s, study.definition.instruments[s].length])),
     recomputed: Object.keys(recomputed).length, gated: instruments.filter(id => course.gates.some(g => g.assessmentIds.includes(id))).length, negativeControlsRefused: Object.keys(negatives).length, run: 'not_run_no_participants' };
 }
