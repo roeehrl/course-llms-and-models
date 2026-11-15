@@ -1,0 +1,155 @@
+{
+ "schemaVersion": 1,
+ "coreVersion": "0.1.67",
+ "coreTag": "v0.1.67",
+ "coreCommit": "f70270f3886887512b7d5dba7a2dd3b37b7e2c84",
+ "coreTagObject": "af548d5ddd38f5d76b6878115de8a599ffda02c6",
+ "coreTree": "f7d306dd1460da8d23ffd13ba755368fa63112c7",
+ "coreReleaseRun": 43598283602,
+ "coreReleaseRunAttempt": 1,
+ "coreCandidateArtifact": 14120481795,
+ "coreCandidateArtifactName": "course-core-v0.1.67-f70270f3886887512b7d5dba7a2dd3b37b7e2c84-43598283602-1",
+ "coreArtifactDigest": "sha256:980d1c9a88c53caa9ed4b1d80d216ed2c02fecc8f287098e0dabf10d80db0d09",
+ "coreManifestSha256": "73fa1e11267df5cf89fe680fce63c0ab63f64c911f6a34c71eceb881ccb6ef81",
+ "sha256sumsFileSha256": "68f1b80ed278ccec7a232b7e3e2f47a218e62a3f4f7309d01e06e4c4ab1f86ca",
+ "assetSha256": {
+  "course-core-admin-web-0.1.67.tar.gz": "bb02155b0e605eff0d1fa12b1fcc8751b8ba6c72bf44a4f658b3b9574e850a72",
+  "course-core-learner-web-0.1.67.tar.gz": "fca9c63dca350cb6640a3ffd7a88ad8da5e871a52f747bd31ab86ae83121eb6f",
+  "course-core-runtime-0.1.67.tar.gz": "7708f115faa65af24a57e77af907a2d4bfa4bf3141aa52bb6ae0f10c81cdb137",
+  "course-core-sbom-0.1.67.cdx.json": "8a7f4ab67396293ffcc91e809bc5d5eed634fe86199f5c014a56d43aee50f64c",
+  "course-core-source-0.1.67.tar.gz": "e1dfd28812a79a8f0d1e917cc178f7b9a91947b56d07c5638a5eca0eb6afca1b",
+  "course-core-visuals-0.5.5.tgz": "d840fd0ed8f45a6c12301e6b19085c0b903989b79f778cff2b282e6d64cead5e",
+  "release-manifest.json": "73fa1e11267df5cf89fe680fce63c0ab63f64c911f6a34c71eceb881ccb6ef81",
+  "SHA256SUMS": "68f1b80ed278ccec7a232b7e3e2f47a218e62a3f4f7309d01e06e4c4ab1f86ca"
+ },
+ "prerelease": true,
+ "published": true,
+ "coreChangesSince": "0.1.58",
+ "contents": "0.1.58 plus everything merged up to #303 (153 commits in the GitHub compare v0.1.58...v0.1.67); the release candidates 0.1.59 to 0.1.66 were never published",
+ "changes": "see the v0.1.67 release notes; for this course the visible change is the learner AI redesign (#281 and follow-ups), which renamed the learner controls the browser harness drives",
+ "migrations": {
+  "new": 9,
+  "newNumbers": "122-126 and 128-131 (127 does not exist)",
+  "totalAfter": 112,
+  "last": "131_companion_reply_feedback.sql",
+  "source": "release-manifest.json compatibility.migrations and the release notes"
+ },
+ "compatibility": {
+  "sdkCoursePackages": "0.5.0 <= sdk < 0.6.0; this course is SDK 0.5.0",
+  "node": ">=26 <27",
+  "postgresMajor": 17
+ },
+ "visualsPackage": {
+  "inRelease": "course-core-visuals-0.5.5.tgz (0.1.58 had 0.5.2)",
+  "courseDevDependency": "@course-core/visuals 0.1.0, unchanged: it is the renderer the course's own visual checks use, separate from the renderer inside Core; the feature flow published the course with all 57 illustrations on 0.1.67"
+ },
+ "statusByStage": {
+  "implemented": "branch core-0.1.67-pin: expectedCoreRelease moved to 0.1.67 (0.1.58 kept as expectedCoreRelease58); verification/learner-browser.mjs follows the 0.1.67 learner controls; verification/study.mjs restates the 0.1.67 study definition schema",
+  "tested": "locally against the published 0.1.67 assets: npm test, verify:content, learner flow over HTTP and in the browser, feature flow, install flow and admin install flow (scripted models, disposable Postgres 17, real Docker sandbox); the pull request's CI runs the released-Core jobs again",
+  "merged": "no (pull request open, not merged)",
+  "deployed": "not by this change. The pilot is reported to run Core commit f70270f3 (0.1.67) built from source on Docker Compose; it was not upgraded from these release tarballs with deploy/local/upgrade.mjs, and nothing on the pilot was checked here"
+ },
+ "consumerChecks": {
+  "tagResolves": "git ls-remote: refs/tags/v0.1.67 is tag object af548d5d, which peels to commit f70270f3",
+  "sha256sumsAllOk": true,
+  "sha256sumsCovers": 6,
+  "hostedDigestsMatchGitHub": "8 of 8",
+  "manifestSha256Matches": true,
+  "attestations": {
+   "filesVerified": 8,
+   "tool": "gh attestation verify -R roeehrl/course-core"
+  },
+  "manifestIdentity": "roeehrl/course-core 0.1.67, tag v0.1.67, commit f70270f3, tag object af548d5d, workflow release.yml at refs/tags/v0.1.67; state verified_candidate",
+  "ciJobs": 13,
+  "ciAllSuccess": true,
+  "ciJobNames": "the 13 required jobs, each once, as 'Full CI / <job>'",
+  "verificationScope": "source_ci_and_installed_package_only_no_live_provider_or_deployment",
+  "sbom": {
+   "format": "CycloneDX 1.5",
+   "components": 898
+  },
+  "installedRuntimeCheck": {
+   "checkedMembers": 5355,
+   "uniqueFiles": 2911,
+   "serverModulesInstalled": 9
+  },
+  "notChecked": "source members against the Git tree, module locks against Git, and a migration rehearsal on a copy of the pilot database"
+ },
+ "publishedRelease": {
+  "url": "https://github.com/roeehrl/course-core/releases/tag/v0.1.67",
+  "prerelease": true,
+  "publishedAt": "2026-11-14T23:36:02Z",
+  "assets": 8
+ },
+ "courseAcceptance": {
+  "date": "2026-11-15",
+  "course": {
+   "version": "0.1.8",
+   "digest": "2f56f3ad1a62e8fb533763be24c55416db379dabcf080b4c99f5aa1e446163f7",
+   "note": "the same course digest as the released course 0.1.8; no course content changed"
+  },
+  "harness": "scripted models only; disposable Postgres 17 (the CI postgres:17 image digest) in a local Docker container, removed afterwards; real Docker sandbox (Python image pulled by digest); no timeout increases",
+  "runtime": "installed with scripts/install-released-core.mjs --pull-sandbox-image from the hosted release assets",
+  "http": {
+   "command": "node verification/learner-flow.mjs --runtime-dir .local/released-core-v0.1.67 --release-dir .local/released-core-assets-v0.1.67 --worked-course",
+   "verified": true,
+   "episodes": 56,
+   "practicalFamiliesRecovered": 3,
+   "chapterLabs": 11,
+   "labsStarterAndWrongRejectedReferencePassed": true,
+   "transferRevisitScheduled": true,
+   "failedFiniteBank": "2 replacements, gate unchanged, no further charge",
+   "wallSeconds": 296,
+   "runs": 1
+  },
+  "browser": {
+   "command": "node verification/learner-flow.mjs --runtime-dir .local/released-core-v0.1.67 --release-dir .local/released-core-assets-v0.1.67 --worked-course --browser",
+   "verified": true,
+   "episodesByViewport": { "phone": 56, "desktop": 16, "tablet": 4 },
+   "placement": { "phone": "ignored", "desktop": "declined", "tablet": "accepted, 12 placed" },
+   "worked16SceneAllViewports": true,
+   "keyboard": true,
+   "accessibilityViolations": 0,
+   "pageErrors": 0,
+   "horizontalOverflow": false,
+   "reloadPreservedCode": true,
+   "wallSeconds": 492,
+   "harnessChange": "the first run stopped at the course page after 44 s: 0.1.67 no longer shows 'Continue learning →' there (learner AI redesign). verification/learner-browser.mjs now uses the 0.1.67 controls: 'Start the course →', 'Start lesson N →' or 'Continue lesson N →' on the course page; 'Check' for every check (was 'Check answer' and 'Run code & check'); 'Finish this lesson →' (was 'Complete episode →'); 'Get a fresh check · 45 min' (no arrow). The recorded run is the one run after that change. No Core defect was involved"
+  },
+  "featureFlow": {
+   "verified": true,
+   "flows": ["evalGate", "operatorModelPrice", "placementAccepted", "placementDeclined", "placementSettings", "remedialEpisode", "retention", "setup", "writtenExplanation"],
+   "wallSeconds": 123
+  },
+  "installFlow": {
+   "verified": true,
+   "result": ["wrong_password_refused", "publish_needs_typed_version", "resumed_published_and_selected", "repeat_run_changes_nothing", "password_never_printed"],
+   "wallSeconds": 11
+  },
+  "adminInstallFlow": {
+   "verified": true,
+   "hosts": {
+    "configured": "every host requirement identical; published, selected, repeat install returns the same release",
+    "course-supplied": "the 5 course-supplied fixture files approved; published, selected, repeat install returns the same release"
+   },
+   "registryProfiles": 159,
+   "wallSeconds": 21
+  },
+  "unitTests": "npm test: 64 of 64",
+  "studyDefinition": "verify:content passes. Core 0.1.67 services/api/src/study.ts (identical to 0.1.58's) keeps the 0.1.48 refusal codes, adds an optional usabilityMeasures boolean (default false) and returns warnings as codes; content/study.json coreVersion stays 0.1.48"
+ },
+ "pilot": {
+  "reported": "the pilot runs Core commit f70270f3 (0.1.67), built from source on Docker Compose (stated by the operator and in the v0.1.67 release notes)",
+  "upgradedFromReleaseTarballs": false,
+  "verifiedHere": "nothing: no pilot health, migration, ledger, limits, acceptance or tailnet check was run, and the pilot and its database were not touched"
+ },
+ "liveProviderAcceptance": false,
+ "notVerified": [
+  "anything on the pilot (see pilot)",
+  "a migration rehearsal of 122-131 on a copy of the pilot database",
+  "live providers and model quality: no provider call was made",
+  "the learner app in WebKit or in Hebrew, and the admin app beyond its install API",
+  "verification/pilot-acceptance.mjs: it still uses the 0.1.58 learner labels and the native pilot layout; it was not updated or run",
+  "learning effectiveness"
+ ]
+}
