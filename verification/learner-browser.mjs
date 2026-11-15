@@ -6,6 +6,13 @@ import {writtenAnswers} from './written-answers.mjs';
 import {expectResponse} from './browser-responses.mjs';
 import {checkWorkedScene} from './worked-scene-browser.mjs';
 
+// Core 0.1.67's learner app (the learner AI redesign): the course page offers the next lesson as
+// "Start the course →", "Start lesson N →" or "Continue lesson N →"; finishing a lesson returns
+// there. The library card keeps "Continue learning →". Every check, code included, is answered
+// with "Check", a lesson ends with "Finish this lesson →", and a fresh check is
+// "Get a fresh check · 45 min" (in the check card, and on a practice question's kind line).
+const nextLesson=page=>page.getByRole('button',{name:/^(Start the course|Start lesson \d+|Continue lesson \d+) →$/});
+const checkButton=page=>page.getByRole('button',{name:'Check',exact:true});
 /** Actual private learner UI. Author keys live only in this test driver. */
 export async function browserAcceptance({origin,bootstrap,request,requireOk,course,candidate,check,state}){
   const browser=await chromium.launch({channel:process.env.CI==='true'?undefined:'chrome'}),reports=[];
@@ -59,13 +66,13 @@ export async function browserAcceptance({origin,bootstrap,request,requireOk,cour
           // The overview refreshes after acceptance; continue only from the refreshed path.
           await page.getByRole('heading',{name:'Your placement result',exact:true}).waitFor({state:'detached'});
         }
-        await page.getByRole('button',{name:'Continue learning →',exact:true}).click();
+        await nextLesson(page).click();
         const snapshot=async()=>requireOk(await request(session,'GET',`/api/enrollments/${enrollmentId}`),'browser_snapshot');
         let completed=0,recovery=false,written=0,scene=null;
         for(const episode of episodes.slice(placed)){
           const episodeStarted=performance.now();
           await page.getByRole('heading',{name:episode.title,exact:true}).waitFor();
-          check(await page.getByRole('button',{name:'Complete episode →',exact:true}).isDisabled(),'browser_completion_not_gated');
+          check(await page.getByRole('button',{name:'Finish this lesson →',exact:true}).isDisabled(),'browser_completion_not_gated');
           // Each part is marked inside its own numbered card, after the previous read has been
           // saved: the card advances only when the refreshed progress arrives, so an unscoped
           // second click can land on the part just read and be ignored, leaving a part unread.
@@ -83,7 +90,7 @@ export async function browserAcceptance({origin,bootstrap,request,requireOk,cour
           const wrongFirst=hasCode&&!recovery;let codeFailures=0;
           for(let step=0;step<10;step++){
             const s=await snapshot();if(s.lessons.find(l=>l.id===episode.id).gate.passed)break;
-            const fresh=page.getByRole('button',{name:'Get a fresh check · 45 min →',exact:true}),isFresh=await fresh.count()>0;
+            const fresh=page.getByRole('button',{name:'Get a fresh check · 45 min',exact:true}).first(),isFresh=await fresh.count()>0;
             const endpointSuffix=isFresh?'/adaptation/fresh-question':'/challenges';
             const issued=expectResponse(page,r=>new URL(r.url()).pathname.endsWith(endpointSuffix)&&r.request().method()==='POST');
             await (isFresh?fresh:page.getByRole('button',{name:'Start the next check →',exact:true})).click();
@@ -99,29 +106,29 @@ export async function browserAcceptance({origin,bootstrap,request,requireOk,cour
               const failed=wrongFirst&&!isFresh;await page.getByRole('textbox',{name:'Your code',exact:true}).fill(failed?'def solve(data): return None':candidate);
               if(isFresh){
                 check(codeFailures===1,'browser_did_not_use_existing_code_variants');
-                check(await page.getByRole('button',{name:'Complete episode →',exact:true}).isDisabled(),'browser_fresh_question_granted_credit');
+                check(await page.getByRole('button',{name:'Finish this lesson →',exact:true}).isDisabled(),'browser_fresh_question_granted_credit');
                 check(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth),'browser_code_horizontal_overflow');
                 const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();check(axe.violations.length===0,'browser_code_accessibility');
                 await page.screenshot({path:path.join(state,`private-recovery-${name}.png`),fullPage:true});
-                await page.reload();await page.getByRole('button',{name:'Continue learning →',exact:true}).click();await page.getByRole('button',{name:'Continue learning →',exact:true}).click();
+                await page.reload();await page.getByRole('button',{name:'Continue learning →',exact:true}).click();await nextLesson(page).click();
                 check(await page.getByRole('textbox',{name:'Your code',exact:true}).inputValue()===candidate,'browser_code_draft_lost');recovery=true;
               }
-              await page.getByRole('button',{name:'Run code & check',exact:true}).click();if(failed)codeFailures++;
+              await checkButton(page).click();if(failed)codeFailures++;
             }else{
               const a=course.assessments.find(a=>a.id===c.question.id);check(a,'browser_unknown_baseline');
               if(c.question.type==='choice')await page.getByRole('radio',{name:a.options.find(o=>o.id===a.grading.correctOptionId).text,exact:true}).click();
               else await page.getByRole('textbox',{name:'Your numeric answer',exact:true}).fill(String(a.grading.expected));
-              await page.getByRole('button',{name:'Check answer',exact:true}).click();
+              await checkButton(page).click();
             }
-            await page.getByRole('button',{name:'Start the next check →',exact:true}).or(page.getByRole('button',{name:'Get a fresh check · 45 min →',exact:true})).or(page.getByText('Your independent checks are complete.',{exact:true})).first().waitFor();
+            await page.getByRole('button',{name:'Start the next check →',exact:true}).or(page.getByRole('button',{name:'Get a fresh check · 45 min',exact:true})).or(page.getByText('Your independent checks are complete.',{exact:true})).first().waitFor();
           }
           check((await snapshot()).lessons.find(l=>l.id===episode.id).gate.passed,'browser_gate_not_passed');
           const saved=expectResponse(page,r=>new URL(r.url()).pathname.endsWith('/complete')&&r.request().method()==='POST');
-          await page.getByRole('button',{name:'Complete episode →',exact:true}).click();check((await saved).ok(),'browser_completion_save_failed');completed++;
+          await page.getByRole('button',{name:'Finish this lesson →',exact:true}).click();check((await saved).ok(),'browser_completion_save_failed');completed++;
           console.log(JSON.stringify({episodeTiming:'private_browser',viewport:name,episode:completed,episodeId:episode.id,ms:Math.round(performance.now()-episodeStarted)}));
           if(completed%14===0)console.log(JSON.stringify({checkpoint:'private_browser_progress',viewport:name,completedEpisodes:completed}));
           if(!full&&recovery)break;
-          if(completed<episodes.length)await page.getByRole('button',{name:'Continue learning →',exact:true}).click();
+          if(completed<episodes.length)await nextLesson(page).click();
         }
         const end=await snapshot();check(recovery&&errors.length===0,'private_browser_recovery_failed');
         if(full)check(completed===56&&end.complete&&end.nextEpisodeId===null&&written===course.assessments.filter(a=>a.type==='rubric').length,'browser_full_course_incomplete');

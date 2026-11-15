@@ -1,3 +1,30 @@
+# Course pinned to published Core 0.1.67 and accepted on it; learner browser harness follows the redesigned learner app — 2026-11-15
+
+- Status: implemented and tested on branch core-0.1.67-pin (pull request open). Not merged. Not deployed by this change.
+- Release: Core 0.1.67 prerelease, published 2026-11-14 23:36 UTC. Tag object af548d5 on commit f70270f, release run 43598283602, attempt 1.
+  - Artifact 14120481795 (sha256:980d1c9a…). Manifest 73fa1e11….
+  - Contents: 0.1.58 plus everything merged up to #303 (153 commits). The candidates 0.1.59–0.1.66 were never published.
+  - Migrations: 9 new (122–126 and 128–131; 127 does not exist), 112 in total. Visuals 0.5.5 (0.1.58 had 0.5.2).
+- Consumer checks (hosted assets):
+  - SHA256SUMS: 6/6. GitHub digests match for all 8 files, and `gh attestation verify` passes for all 8.
+  - The manifest names this tag, commit and tag object, and lists the 13 required CI jobs, all successful. The SBOM has 898 components.
+  - Installed-runtime check: 5355 members, 2911 files.
+- Pin: `expectedCoreRelease` in verification/released-runtime.mjs is now 0.1.67; 0.1.58 stays as `expectedCoreRelease58`. CI installs whatever that pin names, so nothing else pins the version.
+  - Unchanged on purpose: the course still declares minimum Core 0.1.48 and SDK 0.5.0 (0.1.67 accepts SDK 0.5.x), and the `@course-core/visuals` 0.1.0 dev dependency is the course's own renderer check, not Core's renderer.
+  - `coreVersion` in content/study.json stays 0.1.48. It records which Core's study rules the definition was written against, the same as the minimum Core. Core 0.1.67's study.ts keeps those refusal codes, adds an optional `usabilityMeasures` (default off) and words warnings as codes. verification/study.mjs now restates that schema.
+- Accepted on published Core 0.1.67, course 0.1.8 (digest 2f56f3ad…, unchanged), scripted models, disposable Postgres 17, real Docker sandbox, one run each:
+  - `npm test`: 64/64. `npm run verify:content` passed.
+  - HTTP: 56 episodes, 3 practical families recovered, all 11 labs, transfer revisit scheduled (296 s).
+  - Browser: phone 56, desktop 16, tablet 4 episodes; 0 axe violations, no page errors or overflow; the worked scene checked at all three sizes (492 s).
+  - Feature flow: all 9 flows. Install flow and admin install flow (configured and course-supplied hosts) passed.
+- Harness change: the first browser run stopped on the course page, because the redesigned learner app (#281) has no "Continue learning →" there. verification/learner-browser.mjs now uses the 0.1.67 controls ("Start lesson N →" / "Continue lesson N →", "Check", "Finish this lesson →", "Get a fresh check · 45 min"). The recorded run is the one after that change. No Core defect was found.
+- Pilot: reported to run Core commit f70270f3 (0.1.67), built from source on Docker Compose. It was not upgraded from the release tarballs with deploy/local/upgrade.mjs, and nothing on the pilot was checked or touched here.
+- Not verified:
+  - Anything on the pilot, and a migration rehearsal of 122–131 on a copy of its database.
+  - Live providers, WebKit, Hebrew, and the admin app beyond its install API.
+  - verification/pilot-acceptance.mjs still uses the 0.1.58 labels and the native pilot layout; not updated or run.
+- Evidence: evidence/core-0.1.67-release-and-pilot.json.
+
 # Course 0.1.8 released, installed on the pilot and published to new learners; owner enrollment moved — 2026-11-04
 
 - Published: course-v0.1.8 release on GitHub (https://github.com/roeehrl/course-llms-and-models/releases/tag/course-v0.1.8), from 4bdae20, at 12:42 UTC on 2026-11-03.
