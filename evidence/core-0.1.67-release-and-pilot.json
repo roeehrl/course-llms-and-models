@@ -143,13 +143,73 @@
   "upgradedFromReleaseTarballs": false,
   "verifiedHere": "nothing: no pilot health, migration, ledger, limits, acceptance or tailnet check was run, and the pilot and its database were not touched"
  },
+ "pilotAcceptanceHarness": {
+  "status": "implemented and tested against a disposable Docker Compose stack only; NOT run against the real pilot",
+  "harness": "verification/compose-pilot-acceptance.mjs (rules in verification/compose-pilot-acceptance-rules.mjs, unit tests in test/compose-pilot-acceptance.test.mjs, npm run accept:pilot); replaces verification/pilot-acceptance.mjs, which targeted the native pilot layout and the Core 0.1.58 learner labels and was removed (git history keeps it)",
+  "checks": [
+   "/health, and platform readiness: Core version equals the pinned release (0.1.67), migrations current, database, Temporal and sandbox ok",
+   "the selected published release equals the verified course package (version and digest) and administration shows it published and available to new learners",
+   "learner walk in Chrome at phone, tablet and desktop through the 0.1.67 learner app: axe WCAG 2.1 AA, no page errors, no horizontal overflow",
+   "administration signed in: Courses, Course & releases, People & roles, Platform (axe, installed version, acceptance learner listed)",
+   "the operator's enrollment count is unchanged"
+  ],
+  "credentials": "the operator password is read at runtime from an owner-only file, COURSE_OPERATOR_PASSWORD or a no-echo prompt; the harness never reads deploy/docker/.env, bootstrap.json or the supervisor token. It invites one learner through the People API (login acceptance-learner, display name 'Acceptance learner (automated pilot check)'), resets its password through the same API on later runs, and replaces the temporary password with a random one held only in memory. No password, cookie or CSRF token is printed or written; no Playwright trace is recorded",
+  "providerGuard": "the browser may send only allowlisted writes (sign-in/out; in the full walk also enroll, read, challenges, answers, complete, presence, platform-capabilities); everything else is aborted and recorded. With any provider connection or configured AI role the walk is read-only unless --allow-provider-calls is passed (off by default); --read-only forces it",
+  "leavesOnTarget": "one acceptance learner (reused), at most one enrollment of it (resumed), its first-lesson progress (full walk only) and the audit entries of the invite or password reset",
+  "disposableStack": {
+   "source": "course-core v0.1.67 (f70270f3) started with deploy/docker/ops.mjs up under its own Compose project, an env file with generated secrets (never printed), its own loopback ports and subnet, and an image built locally under its own tag",
+   "providers": "none configured (no provider connection, every AI role absent), so no provider call was possible",
+   "course": "course-v0.1.8.tgz from the course-v0.1.8 GitHub release (sha256 e739496c..., matches the release's .sha256) installed with scripts/install-pilot-course.mjs; digest 2f56f3ad...",
+   "runs": [
+    {
+     "name": "read-only (forced), learner never enrolled",
+     "result": "passed",
+     "learner": "invited",
+     "screens": 10,
+     "blockedWrites": 0
+    },
+    {
+     "name": "full",
+     "result": "passed",
+     "learner": "password reset",
+     "enrolledInThisRun": true,
+     "completedFirstLesson": true,
+     "resumed": "fnd-e01-02 on tablet and desktop",
+     "screens": 14,
+     "blockedWrites": 0
+    },
+    {
+     "name": "full again (idempotency)",
+     "result": "passed",
+     "learner": "password reset",
+     "enrolledInThisRun": false,
+     "completedFirstLesson": false,
+     "resumed": "fnd-e01-02 on all three sizes",
+     "screens": 13,
+     "blockedWrites": 0
+    },
+    {
+     "name": "read-only (forced), learner enrolled",
+     "result": "passed",
+     "openedLesson": true,
+     "screens": 13,
+     "blockedWrites": 3
+    }
+   ],
+   "afterRuns": "database counts on the disposable stack: 1 acceptance user, 2 memberships, 1 enrollment, 3 platform-capability snapshots, 4 supervisor jobs (all from the first full run), 0 provider ledger rows; the second full run and both read-only runs added only their people-command receipt (and the first read-only run the invited learner)",
+   "axeViolations": 0,
+   "pageErrors": 0,
+   "secretScan": "the owner password and the env file's two secrets appear in none of the 4 run logs or 7 receipts",
+   "removed": "containers, volumes, network and the locally built image of the disposable stack; the real pilot's containers and image were not touched"
+  }
+ },
  "liveProviderAcceptance": false,
  "notVerified": [
   "anything on the pilot (see pilot)",
   "a migration rehearsal of 122-131 on a copy of the pilot database",
   "live providers and model quality: no provider call was made",
   "the learner app in WebKit or in Hebrew, and the admin app beyond its install API",
-  "verification/pilot-acceptance.mjs: it still uses the 0.1.58 learner labels and the native pilot layout; it was not updated or run",
+  "the new Compose pilot acceptance harness (verification/compose-pilot-acceptance.mjs) on the real pilot: it passed only on a disposable Compose stack of v0.1.67",
   "learning effectiveness"
  ]
 }

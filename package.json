@@ -24,7 +24,8 @@
     "verify:worked:browser": "node verification/worked-example-flow.mjs --browser",
     "verify:evidence": "python3 -B verification/evidence-features.py",
     "retention:create": "node scripts/create-retention-checks.mjs",
-    "verify:content": "python3 -B verification/misconceptions.py && python3 -B verification/worked-adaptive-episode.py && node verification/study.mjs"
+    "verify:content": "python3 -B verification/misconceptions.py && python3 -B verification/worked-adaptive-episode.py && node verification/study.mjs",
+    "accept:pilot": "node verification/compose-pilot-acceptance.mjs"
   },
   "dependencies": {
     "@course-core/sdk": "https://github.com/roeehrl/course-sdk/releases/download/v0.5.0/course-core-sdk-0.5.0.tgz",

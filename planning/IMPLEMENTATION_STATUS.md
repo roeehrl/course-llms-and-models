@@ -1,6 +1,7 @@
-# Course pinned to published Core 0.1.67 and accepted on it; learner browser harness follows the redesigned learner app — 2026-11-15
+# Course pinned to published Core 0.1.67 and accepted on it; learner browser harness follows the redesigned learner app; new pilot acceptance harness for the Compose pilot — 2026-11-15
 
-- Status: implemented and tested on branch core-0.1.67-pin (pull request open). Not merged. Not deployed by this change.
+- Status: the pin and the learner browser change were implemented and tested on branch core-0.1.67-pin and merged (#17).
+  The Compose pilot acceptance harness is on branch compose-pilot-acceptance (see below). Not deployed by either change.
 - Release: Core 0.1.67 prerelease, published 2026-11-14 23:36 UTC. Tag object af548d5 on commit f70270f, release run 43598283602, attempt 1.
   - Artifact 14120481795 (sha256:980d1c9a…). Manifest 73fa1e11….
   - Contents: 0.1.58 plus everything merged up to #303 (153 commits). The candidates 0.1.59–0.1.66 were never published.
@@ -22,7 +23,48 @@
 - Not verified:
   - Anything on the pilot, and a migration rehearsal of 122–131 on a copy of its database.
   - Live providers, WebKit, Hebrew, and the admin app beyond its install API.
-  - verification/pilot-acceptance.mjs still uses the 0.1.58 labels and the native pilot layout; not updated or run.
+  - The new Compose pilot acceptance harness (below) on the real pilot: it has passed only on a disposable Compose stack.
+- Pilot acceptance harness for the Docker Compose pilot (branch compose-pilot-acceptance, pull request open, not merged):
+  - verification/compose-pilot-acceptance.mjs replaces verification/pilot-acceptance.mjs, which targeted the native pilot layout
+    (config.json, bootstrap.json, the runtime's set-password CLI, direct database reads) and the 0.1.58 learner labels. The old
+    file is removed; git history keeps it. Pure rules are in verification/compose-pilot-acceptance-rules.mjs, with unit tests in
+    test/compose-pilot-acceptance.test.mjs (`npm test`: 72/72).
+  - Checks, by origin only: /health; platform readiness (Core version is the pinned 0.1.67, migrations current, database,
+    Temporal and sandbox ok); the selected published release is the verified course package (version and digest) and is
+    available to new learners in administration; a learner walk in Chrome at phone, tablet and desktop through the 0.1.67
+    learner app (axe WCAG 2.1 AA, no page errors, no horizontal overflow); administration signed in (Courses, Course &
+    releases, People & roles, Platform); the operator's enrollment count unchanged.
+  - Credentials: the operator's password is read at runtime from an owner-only file (`--operator-password-file`),
+    `COURSE_OPERATOR_PASSWORD`, or a no-echo prompt. Nothing reads deploy/docker/.env, bootstrap.json or the supervisor token.
+    The harness invites one learner through the People API (login `acceptance-learner`, "Acceptance learner (automated pilot
+    check)"), resets its password through the same API on later runs, and swaps the temporary password for a random one held
+    in memory only. No password, cookie or CSRF token is printed or written; no Playwright trace is recorded.
+  - Provider calls: the browser may send only allowlisted writes; companion, research, media and review-assist requests are
+    always aborted and recorded. Learning writes raise supervised events, so with any provider connection or configured AI
+    role the walk is read-only (sign in and read only) unless `--allow-provider-calls` is passed. `--read-only` forces it.
+  - Left on the target, reused on every run: the acceptance learner, at most one enrollment of it, its first-lesson progress
+    (full walk only), and the audit entries of the invite or password reset. Receipt and screenshots go to `--out`
+    (default .local/pilot-acceptance/<time>), never to the target.
+  - Tested on a disposable Compose stack built from Core v0.1.67 (own project, ports, subnet and generated secrets; no provider
+    configured) with course 0.1.8 installed from the course-v0.1.8 release by scripts/install-pilot-course.mjs. Four runs,
+    all passed: read-only before any enrollment, full (enrolled, first lesson completed, resumed on tablet and desktop), full
+    again (no new enrollment, resumed on all sizes), read-only while enrolled. 0 axe violations, 0 page errors. Afterwards the
+    stack held 1 acceptance learner and 1 enrollment, and no secret appeared in any log or receipt. The stack, its volumes and
+    its image were removed. NOT run against the real pilot.
+  - To run it against the pilot (from a checkout of this repository, on the pilot host):
+
+    ```sh
+    # Course package: the release asset, or an extracted course-v<version> directory.
+    gh release download course-v0.1.8 -R roeehrl/course-llms-and-models -p course-v0.1.8.tgz -D .local/release
+    # The owner's password in an owner-only file (typed, not echoed), removed afterwards.
+    (umask 077; read -rs PW; printf '%s\n' "$PW" > .local/operator.password; unset PW)
+    npm run accept:pilot -- --origin http://localhost:4310 --package .local/release/course-v0.1.8.tgz \
+      --operator-login <owner login> --operator-password-file .local/operator.password
+    rm .local/operator.password
+    ```
+
+    With live providers configured this runs the read-only walk. The full walk on the pilot needs `--allow-provider-calls`
+    and the owner's agreement to the provider cost of the acceptance learner's supervised events.
 - Evidence: evidence/core-0.1.67-release-and-pilot.json.
 
 # Course 0.1.8 released, installed on the pilot and published to new learners; owner enrollment moved — 2026-11-04
