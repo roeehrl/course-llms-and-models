@@ -1,13 +1,15 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {ACCEPTANCE_LEARNER,allowedWrite,checkInstalledRelease,checkReadiness,learnerAction,liveProvidersConfigured,parseArguments,redact,walkMode} from '../verification/compose-pilot-acceptance-rules.mjs';
+import {ACCEPTANCE_LEARNER,allowedWrite,checkInstalledRelease,checkReadiness,learnerAction,liveProvidersConfigured,parseArguments,redact,selectWorkspace,walkMode} from '../verification/compose-pilot-acceptance-rules.mjs';
 
 const required = ['--origin', 'http://localhost:4310', '--package', 'course-v0.1.8.tgz', '--operator-login', 'owner'];
 
 test('arguments: required flags, bare origins, no unknown or valueless flags', () => {
   const options = parseArguments(required);
   assert.equal(options.origin, 'http://localhost:4310');
-  assert.equal(options.workspace, 'llms-and-models');
+  assert.equal(options.workspace, null);
+  assert.equal(parseArguments([...required, '--workspace', 'team-a']).workspace, 'team-a');
+  assert.throws(() => parseArguments([...required, '--workspace', 'Team A']), /workspace slug/);
   assert.equal(options.learnerLogin, ACCEPTANCE_LEARNER.loginName);
   assert.equal(options.allowProviderCalls, false);
   assert.equal(options.readOnly, false);
@@ -20,6 +22,23 @@ test('arguments: required flags, bare origins, no unknown or valueless flags', (
   assert.throws(() => parseArguments([...required, '--read-only', '--allow-provider-calls']), /contradict/);
   assert.throws(() => parseArguments([...required, '--learner-login', 'A B']), /login name/);
   assert.equal(parseArguments(['--help']).help, true);
+});
+
+test('workspace: explicit slug must be managed; otherwise exactly one owner/admin workspace', () => {
+  const a = {id: 'w1', slug: 'team-a', title: 'A', role: 'owner'};
+  const b = {id: 'w2', slug: 'team-b', title: 'B', role: 'admin'};
+  const c = {id: 'w3', slug: 'team-c', title: 'C', role: 'learner'};
+  assert.deepEqual(selectWorkspace([a, c], null), {ok: true, workspace: a, discovered: true});
+  assert.deepEqual(selectWorkspace([c, b], undefined), {ok: true, workspace: b, discovered: true});
+  const several = selectWorkspace([b, c, a], null);
+  assert.equal(several.ok, false);
+  assert.match(several.problem, /2 workspaces \(team-a, team-b\); pass --workspace <slug>/);
+  assert.doesNotMatch(several.problem, /team-c/);
+  assert.match(selectWorkspace([c], null).problem, /not an owner or admin of any workspace/);
+  assert.equal(selectWorkspace(null, null).ok, false);
+  assert.deepEqual(selectWorkspace([a, b, c], 'team-b'), {ok: true, workspace: b, discovered: false});
+  assert.equal(selectWorkspace([a, b, c], 'team-c').problem, 'The operator is not an owner or admin of workspace team-c');
+  assert.equal(selectWorkspace([a], 'llms-and-models').ok, false);
 });
 
 test('provider calls: any connection or configured role counts as live; unknown shapes count as live', () => {

@@ -141,10 +141,11 @@
  "pilot": {
   "reported": "the pilot runs Core commit f70270f3 (0.1.67), built from source on Docker Compose (stated by the operator and in the v0.1.67 release notes)",
   "upgradedFromReleaseTarballs": false,
-  "verifiedHere": "nothing: no pilot health, migration, ledger, limits, acceptance or tailnet check was run, and the pilot and its database were not touched"
+  "verifiedHere": "nothing: no pilot health, migration, ledger, limits, acceptance or tailnet check was run, and the pilot and its database were not touched",
+  "laterVerified": "2026-11-22: the read-only pilot acceptance passed on the real pilot (see pilotAcceptance)"
  },
  "pilotAcceptanceHarness": {
-  "status": "implemented and tested against a disposable Docker Compose stack only; NOT run against the real pilot",
+  "status": "implemented and tested against a disposable Docker Compose stack (merged in #18); the read-only walk then passed on the real pilot on 2026-11-22 (see pilotAcceptance); the full walk has not been run on the real pilot",
   "harness": "verification/compose-pilot-acceptance.mjs (rules in verification/compose-pilot-acceptance-rules.mjs, unit tests in test/compose-pilot-acceptance.test.mjs, npm run accept:pilot); replaces verification/pilot-acceptance.mjs, which targeted the native pilot layout and the Core 0.1.58 learner labels and was removed (git history keeps it)",
   "checks": [
    "/health, and platform readiness: Core version equals the pinned release (0.1.67), migrations current, database, Temporal and sandbox ok",
@@ -155,6 +156,7 @@
   ],
   "credentials": "the operator password is read at runtime from an owner-only file, COURSE_OPERATOR_PASSWORD or a no-echo prompt; the harness never reads deploy/docker/.env, bootstrap.json or the supervisor token. It invites one learner through the People API (login acceptance-learner, display name 'Acceptance learner (automated pilot check)'), resets its password through the same API on later runs, and replaces the temporary password with a random one held only in memory. No password, cookie or CSRF token is printed or written; no Playwright trace is recorded",
   "providerGuard": "the browser may send only allowlisted writes (sign-in/out; in the full walk also enroll, read, challenges, answers, complete, presence, platform-capabilities); everything else is aborted and recorded. With any provider connection or configured AI role the walk is read-only unless --allow-provider-calls is passed (off by default); --read-only forces it",
+  "workspaceSelection": "--workspace <slug> when given (the operator must be its owner or admin); otherwise, after operator sign-in, the one workspace where the operator is owner or admin, from GET /api/workspaces (Core 0.1.67: the signed-in user's memberships with id, slug, title and role). None or several stop the run before anything else, listing the candidate slugs. Before this change the default was the course id, which is not the workspace slug on the real pilot",
   "leavesOnTarget": "one acceptance learner (reused), at most one enrollment of it (resumed), its first-lesson progress (full walk only) and the audit entries of the invite or password reset",
   "disposableStack": {
    "source": "course-core v0.1.67 (f70270f3) started with deploy/docker/ops.mjs up under its own Compose project, an env file with generated secrets (never printed), its own loopback ports and subnet, and an image built locally under its own tag",
@@ -203,13 +205,32 @@
    "removed": "containers, volumes, network and the locally built image of the disposable stack; the real pilot's containers and image were not touched"
   }
  },
+ "pilotAcceptance": {
+  "date": "2026-11-22",
+  "target": "the real Docker Compose pilot",
+  "command": "npm run accept:pilot with --read-only and an explicit --workspace",
+  "result": "passed",
+  "firstAttempt": "a run without --workspace failed with 'The operator is not an owner or admin of workspace llms-and-models': the harness defaulted the workspace to the course id. Fixed by workspace discovery (see pilotAcceptanceHarness.workspaceSelection)",
+  "coreVersion": "0.1.67",
+  "migrations": 112,
+  "latestMigration": "131_companion_reply_feedback.sql",
+  "installedCourse": { "version": "0.1.8", "digest": "2f56f3ad1a62e8fb533763be24c55416db379dabcf080b4c99f5aa1e446163f7" },
+  "learnerWalk": "read-only, phone, tablet and desktop; library and course-start screens; 0 page errors",
+  "adminViews": ["courses", "course-releases", "people", "platform"],
+  "operatorEnrollments": { "before": 1, "after": 1 },
+  "acceptanceLearner": "invited (not enrolled)",
+  "providerCalls": 0,
+  "blockedWrites": 0,
+  "readinessOverall": "failing, only because backups are not set up, by the owner's choice; the harness records backups and does not require them"
+ },
  "liveProviderAcceptance": false,
  "notVerified": [
-  "anything on the pilot (see pilot)",
+  "anything on the pilot beyond the read-only acceptance of 2026-11-22 (see pilotAcceptance)",
   "a migration rehearsal of 122-131 on a copy of the pilot database",
   "live providers and model quality: no provider call was made",
   "the learner app in WebKit or in Hebrew, and the admin app beyond its install API",
-  "the new Compose pilot acceptance harness (verification/compose-pilot-acceptance.mjs) on the real pilot: it passed only on a disposable Compose stack of v0.1.67",
+  "the full (enrolling) walk of the Compose pilot acceptance harness on the real pilot: only the read-only walk was run there",
+  "pilot backups: not set up, by the owner's choice",
   "learning effectiveness"
  ]
 }

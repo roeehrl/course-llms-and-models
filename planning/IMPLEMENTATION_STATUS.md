@@ -23,8 +23,8 @@
 - Not verified:
   - Anything on the pilot, and a migration rehearsal of 122–131 on a copy of its database.
   - Live providers, WebKit, Hebrew, and the admin app beyond its install API.
-  - The new Compose pilot acceptance harness (below) on the real pilot: it has passed only on a disposable Compose stack.
-- Pilot acceptance harness for the Docker Compose pilot (branch compose-pilot-acceptance, pull request open, not merged):
+  - The full (enrolling) walk of the Compose pilot acceptance harness on the real pilot; only its read-only walk was run there (below).
+- Pilot acceptance harness for the Docker Compose pilot (branch compose-pilot-acceptance, merged in #18):
   - verification/compose-pilot-acceptance.mjs replaces verification/pilot-acceptance.mjs, which targeted the native pilot layout
     (config.json, bootstrap.json, the runtime's set-password CLI, direct database reads) and the 0.1.58 learner labels. The old
     file is removed; git history keeps it. Pure rules are in verification/compose-pilot-acceptance-rules.mjs, with unit tests in
@@ -50,7 +50,20 @@
     all passed: read-only before any enrollment, full (enrolled, first lesson completed, resumed on tablet and desktop), full
     again (no new enrollment, resumed on all sizes), read-only while enrolled. 0 axe violations, 0 page errors. Afterwards the
     stack held 1 acceptance learner and 1 enrollment, and no secret appeared in any log or receipt. The stack, its volumes and
-    its image were removed. NOT run against the real pilot.
+    its image were removed.
+  - Workspace (branch acceptance-workspace-discovery): `--workspace` used to default to the course id `llms-and-models`,
+    which is not the owner's workspace slug on the real pilot. Now, without `--workspace`, the harness signs the operator in
+    and reads GET /api/workspaces (Core 0.1.67: the signed-in user's memberships with id, slug, title and role). It uses
+    the one workspace where the operator is owner or admin; with none or several it stops before anything else and lists
+    the candidate slugs. An explicit `--workspace <slug>` works as before. The rule is `selectWorkspace` in the rules file,
+    with unit tests (`npm test`: 73/73). Not run end to end after this change.
+  - Real pilot, 2026-11-22, read-only (`--read-only`, explicit `--workspace`): passed. Core 0.1.67, 112 migrations (latest
+    131_companion_reply_feedback.sql), installed course 0.1.8 digest 2f56f3ad…; learner walk at phone, tablet and desktop
+    with 0 page errors (library and course-start screens); 4 admin views (Courses, Course & releases, People & roles,
+    Platform); operator enrollments 1 before and 1 after; the acceptance learner was invited, not enrolled; no provider
+    calls and no blocked writes. Readiness overall was "failing" only because backups are not set up, by the owner's
+    choice (the harness records backups and does not require them). The first attempt, without `--workspace`, failed on
+    the default-workspace bug fixed above. The full walk has not been run on the real pilot.
   - To run it against the pilot (from a checkout of this repository, on the pilot host):
 
     ```sh
@@ -62,6 +75,9 @@
       --operator-login <owner login> --operator-password-file .local/operator.password
     rm .local/operator.password
     ```
+
+    Without `--workspace` the harness uses the one workspace the operator owns or administers. If the operator manages
+    several, it stops and lists their slugs; rerun with `--workspace <slug>`.
 
     With live providers configured this runs the read-only walk. The full walk on the pilot needs `--allow-provider-calls`
     and the owner's agreement to the provider cost of the acceptance learner's supervised events.
