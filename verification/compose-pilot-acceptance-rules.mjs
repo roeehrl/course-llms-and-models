@@ -12,12 +12,14 @@ export const USAGE=`Usage: node verification/compose-pilot-acceptance.mjs --orig
   [--workspace <slug>] [--out <dir>] [--expect-core <version>] [--learner-login <name>]
   [--read-only] [--allow-provider-calls] [--timeout-seconds <n>]
 The operator password comes from --operator-password-file (a file only its owner can read), else
-COURSE_OPERATOR_PASSWORD, else a no-echo prompt on a terminal. It is never printed or written.`;
+COURSE_OPERATOR_PASSWORD, else a no-echo prompt on a terminal. It is never printed or written.
+Without --workspace the harness uses the one workspace where the operator is owner or admin
+(from GET /api/workspaces after sign-in); with several it stops and lists their slugs.`;
 
 /** Parses the command line. Unknown flags and flags missing their value are refused, so a
  * mistyped option never silently changes what runs against a live deployment. */
 export function parseArguments(argv){
-  const options={allowProviderCalls:false,readOnly:false,help:false,workspace:'llms-and-models',learnerLogin:ACCEPTANCE_LEARNER.loginName,timeoutSeconds:60};
+  const options={allowProviderCalls:false,readOnly:false,help:false,workspace:null,learnerLogin:ACCEPTANCE_LEARNER.loginName,timeoutSeconds:60};
   for(let i=0;i<argv.length;i++){
     const flag=argv[i];
     if(SWITCHES.includes(flag)){options[{'--allow-provider-calls':'allowProviderCalls','--read-only':'readOnly','--help':'help'}[flag]]=true;continue;}
@@ -30,11 +32,28 @@ export function parseArguments(argv){
   const url=new URL(options.origin);
   if(!['http:','https:'].includes(url.protocol)||url.username||url.password||url.pathname!=='/'||url.search||url.hash)throw new Error('--origin must be a bare http(s) origin such as http://localhost:4310');
   options.origin=url.origin;
-  if(!/^[a-z][a-z0-9-]{0,99}$/.test(options.workspace))throw new Error('--workspace must be a workspace slug');
+  if(options.workspace!==null&&!/^[a-z][a-z0-9-]{0,99}$/.test(options.workspace))throw new Error('--workspace must be a workspace slug');
   if(!/^[a-z0-9][a-z0-9._@+:-]{1,126}[a-z0-9]$/.test(options.learnerLogin))throw new Error('--learner-login must be a valid Core login name');
   if(!Number.isInteger(options.timeoutSeconds)||options.timeoutSeconds<5||options.timeoutSeconds>1800)throw new Error('--timeout-seconds must be 5-1800');
   if(options.readOnly&&options.allowProviderCalls)throw new Error('--read-only and --allow-provider-calls contradict each other');
   return options;
+}
+
+/** The workspace to accept, from the operator's memberships (GET /api/workspaces: id, slug,
+ * title, role). An explicit --workspace must be one the operator owns or administers. Without
+ * it, the one workspace where the operator is owner or admin is used; none or several stop the
+ * run with the candidate slugs, so the harness never guesses which workspace to write to. */
+export function selectWorkspace(workspaces,requested){
+  const manageable=(Array.isArray(workspaces)?workspaces:[]).filter(w=>w&&['owner','admin'].includes(w.role)&&typeof w.slug==='string'&&w.id);
+  if(requested){
+    const found=manageable.find(w=>w.slug===requested);
+    if(!found)return {ok:false,problem:`The operator is not an owner or admin of workspace ${requested}`};
+    return {ok:true,workspace:found,discovered:false};
+  }
+  if(manageable.length===1)return {ok:true,workspace:manageable[0],discovered:true};
+  if(manageable.length===0)return {ok:false,problem:'The operator is not an owner or admin of any workspace; sign in as a workspace owner or admin'};
+  const slugs=manageable.map(w=>w.slug).sort();
+  return {ok:false,problem:`The operator is an owner or admin of ${slugs.length} workspaces (${slugs.join(', ')}); pass --workspace <slug> to choose one`};
 }
 
 /** True when the workspace can reach a live model provider: any provider connection, or any

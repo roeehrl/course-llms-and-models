@@ -4,6 +4,10 @@
 //   npm run accept:pilot -- --origin http://localhost:4310 --package <course dir or course-v0.1.8.tgz> \
 //     --operator-login <owner or admin login> --operator-password-file <owner-only file>
 //
+// The workspace is --workspace <slug> when given; otherwise, after the operator signs in, the
+// one workspace where the operator is owner or admin (GET /api/workspaces). With none or
+// several the run stops before anything else and lists the candidate slugs.
+//
 // What it checks:
 //   1. /health answers; platform readiness shows the expected Core version (the pinned release,
 //      expectedCoreRelease in released-runtime.mjs, unless --expect-core), current migrations, and
@@ -59,7 +63,7 @@ import {verifyWorkedPackage} from '../scripts/package-worked-course.mjs';
 import {harnessPassword} from './password-login.mjs';
 import {expectResponse} from './browser-responses.mjs';
 import {expectedCoreRelease} from './released-runtime.mjs';
-import {ACCEPTANCE_LEARNER,USAGE,allowedWrite,checkInstalledRelease,checkReadiness,learnerAction,liveProvidersConfigured,parseArguments,redact,walkMode} from './compose-pilot-acceptance-rules.mjs';
+import {ACCEPTANCE_LEARNER,USAGE,allowedWrite,checkInstalledRelease,checkReadiness,learnerAction,liveProvidersConfigured,parseArguments,redact,selectWorkspace,walkMode} from './compose-pilot-acceptance-rules.mjs';
 
 const nextLesson=page=>page.getByRole('button',{name:/^(Start the course|Start lesson \d+|Continue lesson \d+) →$/});
 const checkButton=page=>page.getByRole('button',{name:'Check',exact:true});
@@ -139,8 +143,10 @@ async function main(){
   const password=await operatorPassword(options);secrets.add(password);
   try{
     await operator.signIn(options.operatorLogin,password).catch(error=>{throw new Error(error.code==='PASSWORD_CHANGE_REQUIRED'?'The operator must change the password in administration first':`Operator sign-in failed (${error.status??error.message})`);});
-    const workspace=(await operator.call('GET','/api/workspaces')).value.find(w=>w.slug===options.workspace);
-    assert(workspace&&['owner','admin'].includes(workspace.role),`The operator is not an owner or admin of workspace ${options.workspace}`);
+    const choice=selectWorkspace((await operator.call('GET','/api/workspaces')).value,options.workspace);
+    assert(choice.ok,choice.problem);
+    const workspace=choice.workspace;report.workspace={slug:workspace.slug,role:workspace.role,discovered:choice.discovered};
+    step('workspace',`${workspace.slug} (${workspace.role}${choice.discovered?', the only workspace the operator manages':''})`);
     const ws=workspace.id,wsPath=`/api/admin/workspaces/${ws}`;
     const readiness=checkReadiness((await operator.call('GET',`${wsPath}/platform-readiness`,undefined,'/api/admin/workspaces/:id/platform-readiness')).value,expectCore);
     report.readiness=readiness;assert(readiness.ok,`Platform readiness: ${readiness.problems.join('; ')}`);step('readiness',`Core ${readiness.coreVersion}, ${readiness.migrations} migrations`);
